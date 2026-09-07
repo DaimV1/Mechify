@@ -2,15 +2,16 @@
 
 export type BeamType = "opgelegd" | "uitkraging";
 
-export const BEAM_TYPES: { id: BeamType; label: string }[] = [
-  { id: "opgelegd", label: "Vrij opgelegd" },
-  { id: "uitkraging", label: "Uitkraging (ingeklemd)" },
+export const BEAM_TYPES: { id: BeamType; label: string; labelEn: string }[] = [
+  { id: "opgelegd", label: "Vrij opgelegd", labelEn: "Simply supported" },
+  { id: "uitkraging", label: "Uitkraging (ingeklemd)", labelEn: "Cantilever (fixed)" },
 ];
 
 export type BeamResult = {
   deflection: number;
   momentMax: number;
-  atLabel: string;
+  /** Locale-neutral key — translate in the component, not here. */
+  at: "load" | "tip";
 };
 
 /**
@@ -24,7 +25,7 @@ function simplySupported(F: number, L: number, a: number, E: number, I: number):
   const b = L - a;
   const deflection = (F * a ** 2 * b ** 2) / (3 * E * I * L);
   const momentMax = (F * a * b) / L;
-  return { deflection, momentMax, atLabel: "onder de last" };
+  return { deflection, momentMax, at: "load" };
 }
 
 /**
@@ -38,7 +39,7 @@ function cantilever(F: number, L: number, a: number, E: number, I: number): Beam
   if (!(a > 0) || !(a <= L)) return null;
   const deflection = (F * a ** 2 * (3 * L - a)) / (6 * E * I);
   const momentMax = F * a;
-  return { deflection, momentMax, atLabel: "bij de tip" };
+  return { deflection, momentMax, at: "tip" };
 }
 
 export function computeBeam({
@@ -66,11 +67,11 @@ export function computeBeam({
  * (Eurocode 3 voor staalconstructies, VDI 2230/machinerichtlijnen voor
  * machinebouw, FEM 1.001 voor kraanbanen).
  */
-export const DEFLECTION_GUIDELINES: { label: string; ratio: number; use: string }[] = [
-  { label: "L / 180", ratio: 180, use: "Lichte, niet-kritische constructies" },
-  { label: "L / 250", ratio: 250, use: "Algemene bouwconstructies (richtwaarde EN 1993)" },
-  { label: "L / 360", ratio: 360, use: "Vloeren onder puntlast, trillingsgevoelig" },
-  { label: "L / 750", ratio: 750, use: "Kraanbanen, precisiemachines" },
+export const DEFLECTION_GUIDELINES: { label: string; ratio: number; use: string; useEn: string }[] = [
+  { label: "L / 180", ratio: 180, use: "Lichte, niet-kritische constructies", useEn: "Light, non-critical structures" },
+  { label: "L / 250", ratio: 250, use: "Algemene bouwconstructies (richtwaarde EN 1993)", useEn: "General building structures (EN 1993 guideline)" },
+  { label: "L / 360", ratio: 360, use: "Vloeren onder puntlast, trillingsgevoelig", useEn: "Floors under point load, vibration-sensitive" },
+  { label: "L / 750", ratio: 750, use: "Kraanbanen, precisiemachines", useEn: "Crane runways, precision machinery" },
 ];
 
 export function fmtBeamNum(n: number, digits: number): string {

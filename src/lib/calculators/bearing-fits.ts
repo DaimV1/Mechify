@@ -14,17 +14,17 @@ import { bandIndex, holeDeviationAt, pairRange, shaftDeviationAt } from "@/lib/c
  */
 export type LoadClass = "licht" | "normaal" | "zwaar";
 
-export const LOAD_CLASSES: { id: LoadClass; label: string; hint: string }[] = [
-  { id: "licht", label: "Licht (P ≤ 0,06 C)", hint: "Lichte of wisselende belasting" },
-  { id: "normaal", label: "Normaal (0,06 C < P ≤ 0,12 C)", hint: "Normale bedrijfsbelasting" },
-  { id: "zwaar", label: "Zwaar (P > 0,12 C)", hint: "Zware of schokbelasting" },
+export const LOAD_CLASSES: { id: LoadClass; label: string; labelEn: string; hint: string; hintEn: string }[] = [
+  { id: "licht", label: "Licht (P ≤ 0,06 C)", labelEn: "Light (P ≤ 0.06 C)", hint: "Lichte of wisselende belasting", hintEn: "Light or variable load" },
+  { id: "normaal", label: "Normaal (0,06 C < P ≤ 0,12 C)", labelEn: "Normal (0.06 C < P ≤ 0.12 C)", hint: "Normale bedrijfsbelasting", hintEn: "Normal operating load" },
+  { id: "zwaar", label: "Zwaar (P > 0,12 C)", labelEn: "Heavy (P > 0.12 C)", hint: "Zware of schokbelasting", hintEn: "Heavy or shock load" },
 ];
 
 export type BearingSide = "vast" | "los";
 
-export const BEARING_SIDES: { id: BearingSide; label: string; hint: string }[] = [
-  { id: "vast", label: "Vaste zijde", hint: "Positioneert de as axiaal" },
-  { id: "los", label: "Losse zijde", hint: "Moet axiaal kunnen verschuiven" },
+export const BEARING_SIDES: { id: BearingSide; label: string; labelEn: string; hint: string; hintEn: string }[] = [
+  { id: "vast", label: "Vaste zijde", labelEn: "Fixed side", hint: "Positioneert de as axiaal", hintEn: "Positions the shaft axially" },
+  { id: "los", label: "Losse zijde", labelEn: "Floating side", hint: "Moet axiaal kunnen verschuiven", hintEn: "Must be able to slide axially" },
 ];
 
 /** As-tolerantieklasse per belastingsklasse (roterende binnenring — het gangbare geval). */

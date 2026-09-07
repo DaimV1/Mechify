@@ -12,6 +12,7 @@ import {
   type BearingSide,
   type LoadClass,
 } from "@/lib/calculators/bearing-fits";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import {
   CalcEyebrow,
@@ -27,7 +28,58 @@ import {
   WholeMmInput,
 } from "@/components/calculators/calc-ui";
 
+const T = {
+  nl: {
+    heading: "Lagerpassing bij as-Ø",
+    intro:
+      "Groefkogellagers, cilindrische boring, tot Ø50 mm. Uitgangspunt: roterende binnenring, stilstaande buitenring met puntbelasting — het gangbare geval. Algemene richtlijn; de volledige selectietabel van de lagerfabrikant houdt ook rekening met asmateriaal, warmteontwikkeling en meeroterende buitenring.",
+    diameter: "As-Ø (mm)",
+    load: "Belasting",
+    position: "Lagerpositie",
+    fillDiameter: "Vul een as-Ø in.",
+    noData: (d: number) => `Geen gegevens voor Ø${d} mm — het bereik is 0 t/m 50 mm.`,
+    shaft: "As",
+    housing: "Behuizing",
+    guideTitle: "Selectiegids (vereenvoudigd)",
+    thLoad: "Belasting",
+    thShaftClass: "As-klasse",
+    thHousingFixed: "Behuizing — vast",
+    thHousingFloating: "Behuizing — los",
+    thBounds: "Bovenmaat / ondermaat",
+    thHousingClass: "Behuizing-klasse",
+    sourceBadge:
+      "Vereenvoudigde richtlijn op basis van de algemene selectiecriteria die lagerfabrikanten (o.a. SKF) publiceren. Numerieke afwijkingen via de ISO 286-tabellen van de passingen-tool. Raadpleeg de lagercatalogus voor de volledige selectietabel.",
+    copy: (d: number, load: string, side: string, shaftClass: string, shaftRange: string, housingClass: string, housingRange: string) =>
+      [`As Ø${d} mm, ${load} belasting, ${side} zijde`, `As: ${shaftClass} → ${shaftRange} mm`, `Behuizing: ${housingClass} → ${housingRange} mm`].join("\n"),
+  },
+  en: {
+    heading: "Bearing fit at shaft Ø",
+    intro:
+      "Deep groove ball bearings, cylindrical bore, up to Ø50 mm. Assumption: rotating inner ring, stationary outer ring with point load — the common case. General guideline; the bearing manufacturer's full selection table also accounts for shaft material, heat build-up and a co-rotating outer ring.",
+    diameter: "Shaft Ø (mm)",
+    load: "Load",
+    position: "Bearing position",
+    fillDiameter: "Enter a shaft Ø.",
+    noData: (d: number) => `No data for Ø${d} mm — the range is 0 to 50 mm.`,
+    shaft: "Shaft",
+    housing: "Housing",
+    guideTitle: "Selection guide (simplified)",
+    thLoad: "Load",
+    thShaftClass: "Shaft class",
+    thHousingFixed: "Housing — fixed",
+    thHousingFloating: "Housing — floating",
+    thBounds: "Upper / lower deviation",
+    thHousingClass: "Housing class",
+    sourceBadge:
+      "Simplified guideline based on the general selection criteria published by bearing manufacturers (SKF, among others). Numeric deviations via the fits tool's ISO 286 tables. Consult the bearing catalog for the full selection table.",
+    copy: (d: number, load: string, side: string, shaftClass: string, shaftRange: string, housingClass: string, housingRange: string) =>
+      [`Shaft Ø${d} mm, ${load} load, ${side} side`, `Shaft: ${shaftClass} → ${shaftRange} mm`, `Housing: ${housingClass} → ${housingRange} mm`].join("\n"),
+  },
+};
+
 export function BearingFitsCalc() {
+  const { locale } = useLocale();
+  const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [diameter, setDiameter] = useState(() => search.get("d") ?? readStoredDiameter({ min: 1, max: 50 }));
   const [load, setLoad] = useState<LoadClass>((search.get("load") as LoadClass) ?? "normaal");
@@ -56,44 +108,41 @@ export function BearingFitsCalc() {
   const housingClass = housingClassFor(load, side);
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
   const housingFit = Number.isFinite(d) ? housingFitAt(d, housingClass) : null;
+  const loadLabel = (l: { label: string; labelEn: string }) => (locale === "nl" ? l.label : l.labelEn);
+  const sideLabel = (s: { label: string; labelEn: string }) => (locale === "nl" ? s.label : s.labelEn);
 
   const copy = useMemo(() => {
     if (!shaftClass || !shaftFit || !housingFit) return "";
-    return [
-      `As Ø${d} mm, ${load} belasting, ${side} zijde`,
-      `As: ${shaftClass} → ${shaftFit.range} mm`,
-      `Behuizing: ${housingClass} → ${housingFit.range} mm`,
-    ].join("\n");
-  }, [shaftClass, shaftFit, housingFit, d, load, side, housingClass]);
+    const loadObj = LOAD_CLASSES.find((l) => l.id === load);
+    const sideObj = BEARING_SIDES.find((s) => s.id === side);
+    return t.copy(d, loadObj ? loadLabel(loadObj) : load, sideObj ? sideLabel(sideObj) : side, shaftClass, shaftFit.range, housingClass, housingFit.range);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shaftClass, shaftFit, housingFit, d, load, side, housingClass, locale]);
 
   return (
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">Lagerpassing bij as-Ø</h2>
-        <Note>
-          Groefkogellagers, cilindrische boring, tot Ø50 mm. Uitgangspunt: roterende binnenring, stilstaande
-          buitenring met puntbelasting — het gangbare geval. Algemene richtlijn; de volledige selectietabel van de
-          lagerfabrikant houdt ook rekening met asmateriaal, warmteontwikkeling en meeroterende buitenring.
-        </Note>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Field label="As-Ø (mm)">
+          <Field label={t.diameter}>
             <WholeMmInput id="bearing-diameter" value={diameter} onChange={onDia} />
           </Field>
-          <Field label="Belasting">
+          <Field label={t.load}>
             <SelectInput value={load} onChange={(v) => setLoad(v as LoadClass)}>
               {LOAD_CLASSES.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.label}
+                  {loadLabel(l)}
                 </option>
               ))}
             </SelectInput>
           </Field>
-          <Field label="Lagerpositie">
+          <Field label={t.position}>
             <SelectInput value={side} onChange={(v) => setSide(v as BearingSide)}>
               {BEARING_SIDES.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.label}
+                  {sideLabel(s)}
                 </option>
               ))}
             </SelectInput>
@@ -101,15 +150,15 @@ export function BearingFitsCalc() {
         </div>
 
         {parsed.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted">Vul een as-Ø in.</p>
+          <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
         ) : !shaftFit || !housingFit ? (
-          <p className="mt-5 text-sm text-muted">Geen gegevens voor Ø{d} mm — het bereik is 0 t/m 50 mm.</p>
+          <p className="mt-5 text-sm text-muted">{t.noData(d)}</p>
         ) : (
           <>
             <ResultGrid
               items={[
-                { label: `As — ${shaftClass}`, value: `${shaftFit.range} mm` },
-                { label: `Behuizing — ${housingClass}`, value: `${housingFit.range} mm` },
+                { label: `${t.shaft} — ${shaftClass}`, value: `${shaftFit.range} mm` },
+                { label: `${t.housing} — ${housingClass}`, value: `${housingFit.range} mm` },
               ]}
             />
             <div className="flex flex-wrap gap-2">
@@ -121,22 +170,22 @@ export function BearingFitsCalc() {
       </CalcPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">Selectiegids (vereenvoudigd)</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.guideTitle}</h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Belasting</th>
-                <th>As-klasse</th>
-                <th>Behuizing — vast</th>
-                <th>Behuizing — los</th>
+                <th>{t.thLoad}</th>
+                <th>{t.thShaftClass}</th>
+                <th>{t.thHousingFixed}</th>
+                <th>{t.thHousingFloating}</th>
               </tr>
             </thead>
             <tbody>
               {LOAD_CLASSES.map((l) => (
                 <tr key={l.id} className={l.id === load ? "is-active" : ""}>
                   <th scope="row" className="normal-case">
-                    {l.label}
+                    {loadLabel(l)}
                   </th>
                   <td>{Number.isFinite(d) ? shaftClassFor(l.id, d) : shaftClassFor(l.id, 20)}</td>
                   <td>{housingClassFor(l.id, "vast")}</td>
@@ -152,8 +201,8 @@ export function BearingFitsCalc() {
             <table className="ref-table">
               <thead>
                 <tr>
-                  <th>As-klasse</th>
-                  <th>Bovenmaat / ondermaat</th>
+                  <th>{t.thShaftClass}</th>
+                  <th>{t.thBounds}</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,8 +224,8 @@ export function BearingFitsCalc() {
             <table className="ref-table">
               <thead>
                 <tr>
-                  <th>Behuizing-klasse</th>
-                  <th>Bovenmaat / ondermaat</th>
+                  <th>{t.thHousingClass}</th>
+                  <th>{t.thBounds}</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,11 +244,7 @@ export function BearingFitsCalc() {
             </table>
           </div>
         </div>
-        <SourceBadge>
-          Vereenvoudigde richtlijn op basis van de algemene selectiecriteria die lagerfabrikanten (o.a. SKF)
-          publiceren. Numerieke afwijkingen via de ISO 286-tabellen van de passingen-tool. Raadpleeg de
-          lagercatalogus voor de volledige selectietabel.
-        </SourceBadge>
+        <SourceBadge>{t.sourceBadge}</SourceBadge>
       </section>
     </>
   );

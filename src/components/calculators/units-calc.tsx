@@ -1,10 +1,56 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { convert, findCategory, fmtConverted, UNIT_CATEGORIES } from "@/lib/calculators/units";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { parseNum } from "@/components/calculators/calc-ui";
 import { CalcEyebrow, CalcPanel, CopyLink, CopyResult, Field, NumInput, Note, SelectInput } from "@/components/calculators/calc-ui";
 
+const T = {
+  nl: {
+    heading: "Eenheden omrekenen",
+    baseNote: (base: string) => `Alle omrekeningen via de SI-basiseenheid van de categorie (${base}).`,
+    category: "Categorie",
+    from: "Van",
+    to: "Naar",
+    value: "Waarde",
+    fillValue: "Vul een waarde in.",
+    allUnitsTitle: (value: string, fromLabel: string, categoryLabel: string) =>
+      `${value} ${fromLabel} in alle eenheden van ${categoryLabel.toLowerCase()}`,
+    thUnit: "Eenheid",
+    thValue: "Waarde",
+    footnote:
+      "Exacte definities (inch, lbf, bar, atm) of de standaard afgeleide constanten (psi, mmHg) volgens NIST SP 811 en ISO 80000 — geen afgeronde vuistregels.",
+  },
+  en: {
+    heading: "Convert units",
+    baseNote: (base: string) => `All conversions go through the category's SI base unit (${base}).`,
+    category: "Category",
+    from: "From",
+    to: "To",
+    value: "Value",
+    fillValue: "Enter a value.",
+    allUnitsTitle: (value: string, fromLabel: string, categoryLabel: string) =>
+      `${value} ${fromLabel} in every unit of ${categoryLabel.toLowerCase()}`,
+    thUnit: "Unit",
+    thValue: "Value",
+    footnote:
+      "Exact definitions (inch, lbf, bar, atm) or the standard derived constants (psi, mmHg) per NIST SP 811 and ISO 80000 — no rounded rules of thumb.",
+  },
+};
+
+const CATEGORY_LABELS: Record<string, { nl: string; en: string }> = {
+  length: { nl: "Lengte", en: "Length" },
+  temperature: { nl: "Temperatuur", en: "Temperature" },
+  volume: { nl: "Volume", en: "Volume" },
+  force: { nl: "Kracht", en: "Force" },
+  pressure: { nl: "Druk", en: "Pressure" },
+  torque: { nl: "Koppel", en: "Torque" },
+  mass: { nl: "Massa", en: "Mass" },
+};
+
 export function UnitsCalc() {
+  const { locale } = useLocale();
+  const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [categoryId, setCategoryId] = useState(search.get("cat") ?? "length");
   const category = findCategory(categoryId);
@@ -30,6 +76,8 @@ export function UnitsCalc() {
     setToId(cat.units[1]?.id ?? cat.units[0].id);
   }
 
+  const categoryLabel = (id: string) => CATEGORY_LABELS[id]?.[locale] ?? id;
+
   const v = parseNum(value);
   const result = v != null ? convert(v, category, fromId, toId) : null;
 
@@ -44,19 +92,19 @@ export function UnitsCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">Eenheden omrekenen</h2>
-        <Note>Alle omrekeningen via de SI-basiseenheid van de categorie ({category.baseLabel}).</Note>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <Note>{t.baseNote(category.baseLabel)}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Field label="Categorie">
+          <Field label={t.category}>
             <SelectInput value={categoryId} onChange={onCategory}>
               {UNIT_CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.label}
+                  {categoryLabel(c.id)}
                 </option>
               ))}
             </SelectInput>
           </Field>
-          <Field label="Van">
+          <Field label={t.from}>
             <SelectInput value={fromId} onChange={setFromId}>
               {category.units.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -65,7 +113,7 @@ export function UnitsCalc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label="Naar">
+          <Field label={t.to}>
             <SelectInput value={toId} onChange={setToId}>
               {category.units.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -76,7 +124,7 @@ export function UnitsCalc() {
           </Field>
         </div>
         <div className="mt-4 max-w-xs">
-          <Field label="Waarde">
+          <Field label={t.value}>
             <NumInput id="units-value" value={value} onChange={setValue} />
           </Field>
         </div>
@@ -92,20 +140,20 @@ export function UnitsCalc() {
             </div>
           </>
         ) : (
-          <p className="mt-5 text-sm text-muted">Vul een waarde in.</p>
+          <p className="mt-5 text-sm text-muted">{t.fillValue}</p>
         )}
       </CalcPanel>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {value || "1"} {category.units.find((u) => u.id === fromId)?.label} in alle eenheden van {category.label.toLowerCase()}
+          {t.allUnitsTitle(value || "1", category.units.find((u) => u.id === fromId)?.label ?? "", categoryLabel(category.id))}
         </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Eenheid</th>
-                <th>Waarde</th>
+                <th>{t.thUnit}</th>
+                <th>{t.thValue}</th>
               </tr>
             </thead>
             <tbody>
@@ -123,10 +171,7 @@ export function UnitsCalc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">
-          Exacte definities (inch, lbf, bar, atm) of de standaard afgeleide constanten (psi, mmHg) volgens NIST SP 811 en ISO 80000 —
-          geen afgeronde vuistregels.
-        </p>
+        <p className="mt-2 text-xs text-subtle">{t.footnote}</p>
       </section>
     </>
   );

@@ -21,6 +21,7 @@ import {
   type GeoClass,
   type LinearClass,
 } from "@/lib/calculators/iso2768";
+import { useLocale } from "@/lib/i18n/locale-context";
 import {
   CalcEyebrow,
   CalcPanel,
@@ -35,7 +36,80 @@ import {
   SourceBadge,
 } from "@/components/calculators/calc-ui";
 
+const T = {
+  nl: {
+    heading: "Lineaire en hoekmaten (ISO 2768-1)",
+    intro: "Titelblok-tolerantieklasse voor maten zonder individuele toleranties. Kies de klasse en vul een maat in.",
+    toleranceClass: "Tolerantieklasse",
+    nominalSize: "Nominale maat (mm)",
+    legLength: "Lengte kortste been (mm, voor hoek)",
+    linearSize: "Lineaire maat",
+    radiusChamfer: "Radius / afschuining",
+    angularSize: "Hoekmaat",
+    thSize: "Maat (mm)",
+    table1Note: (cls: string) => `ISO 2768-1 Tabel 1, toegestane afwijking lineaire maten (mm). Klasse actief: ${cls}.`,
+    thRadiusChamfer: "Radius / afschuining (mm)",
+    table2Note: "ISO 2768-1 Tabel 2.",
+    thLeg: "Been (mm)",
+    table3Note: "ISO 2768-1 Tabel 3, o.b.v. lengte kortste been van de hoek.",
+    geoHeading: "Geometrische toleranties (ISO 2768-2)",
+    geoIntro: "Rechtheid/vlakheid, loodrechtheid, symmetrie en rondloop zonder individuele aanduiding — klassen H, K, L.",
+    classLabel: "Klasse",
+    nominalLength: "Nominale lengte (mm)",
+    straightnessFlatness: "Rechtheid / vlakheid",
+    perpendicularity: "Loodrechtheid",
+    symmetry: "Symmetrie",
+    runout: "Rondloop (onafh. van lengte)",
+    thStraightness: "Rechtheid/vlakheid (mm)",
+    thPerpendicularity: "Loodrechtheid (mm)",
+    thSymmetry: "Symmetrie (mm)",
+    tables47Note: "ISO 2768-2, Tabellen 4-7. Rondloop heeft één waarde per klasse, onafhankelijk van lengte.",
+    sourceBadge:
+      "Tabelwaarden getranscribeerd van veelgebruikte, publiek gepubliceerde samenvattingen van ISO 2768-1/-2. Verifieer tegen de originele norm voor contractueel bindende tekeningen.",
+    copyLinear: (size: string, cls: string, dev: string) => `Ø/L ${size} mm, klasse ${cls}: lineair ${dev} mm`,
+    copyRadius: (dev: string) => `Radius/afschuining: ${dev} mm`,
+    copyAngle: (leg: string, cls: string, angle: string) => `Hoek (been ${leg} mm), klasse ${cls}: ${angle}`,
+    copyStraight: (len: string, cls: string, dev: string) => `Rechtheid/vlakheid (${len} mm), klasse ${cls}: ${dev} mm`,
+  },
+  en: {
+    heading: "Linear and angular dimensions (ISO 2768-1)",
+    intro: "Title-block tolerance class for dimensions without individual tolerances. Choose the class and enter a dimension.",
+    toleranceClass: "Tolerance class",
+    nominalSize: "Nominal size (mm)",
+    legLength: "Shorter leg length (mm, for angle)",
+    linearSize: "Linear size",
+    radiusChamfer: "Radius / chamfer",
+    angularSize: "Angular size",
+    thSize: "Size (mm)",
+    table1Note: (cls: string) => `ISO 2768-1 Table 1, permissible deviation of linear sizes (mm). Active class: ${cls}.`,
+    thRadiusChamfer: "Radius / chamfer (mm)",
+    table2Note: "ISO 2768-1 Table 2.",
+    thLeg: "Leg (mm)",
+    table3Note: "ISO 2768-1 Table 3, based on the length of the shorter leg of the angle.",
+    geoHeading: "Geometric tolerances (ISO 2768-2)",
+    geoIntro: "Straightness/flatness, perpendicularity, symmetry and circular run-out without individual indication — classes H, K, L.",
+    classLabel: "Class",
+    nominalLength: "Nominal length (mm)",
+    straightnessFlatness: "Straightness / flatness",
+    perpendicularity: "Perpendicularity",
+    symmetry: "Symmetry",
+    runout: "Circular run-out (length-independent)",
+    thStraightness: "Straightness/flatness (mm)",
+    thPerpendicularity: "Perpendicularity (mm)",
+    thSymmetry: "Symmetry (mm)",
+    tables47Note: "ISO 2768-2, Tables 4-7. Circular run-out has one value per class, independent of length.",
+    sourceBadge:
+      "Table values transcribed from commonly used, publicly published summaries of ISO 2768-1/-2. Verify against the original standard for contractually binding drawings.",
+    copyLinear: (size: string, cls: string, dev: string) => `Ø/L ${size} mm, class ${cls}: linear ${dev} mm`,
+    copyRadius: (dev: string) => `Radius/chamfer: ${dev} mm`,
+    copyAngle: (leg: string, cls: string, angle: string) => `Angle (leg ${leg} mm), class ${cls}: ${angle}`,
+    copyStraight: (len: string, cls: string, dev: string) => `Straightness/flatness (${len} mm), class ${cls}: ${dev} mm`,
+  },
+};
+
 export function Iso2768Calc() {
+  const { locale } = useLocale();
+  const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [linearClass, setLinearClass] = useState<LinearClass>((search.get("lc") as LinearClass) ?? "m");
   const [size, setSize] = useState(search.get("d") ?? "50");
@@ -72,42 +146,43 @@ export function Iso2768Calc() {
 
   const copy = useMemo(() => {
     const lines: string[] = [];
-    if (linearRow) lines.push(`Ø/L ${size} mm, klasse ${linearClass}: lineair ${fmtIso2768(linearDev)} mm`);
-    if (radiusRow) lines.push(`Radius/afschuining: ${fmtIso2768(radiusDev)} mm`);
-    if (angularRow) lines.push(`Hoek (been ${legLength} mm), klasse ${linearClass}: ${fmtAngle(angularDev ?? 0)}`);
-    if (straightRow) lines.push(`Rechtheid/vlakheid (${geoLength} mm), klasse ${geoClass}: ${fmtIso2768(straightRow[geoClass])} mm`);
+    if (linearRow) lines.push(t.copyLinear(size, linearClass, fmtIso2768(linearDev)));
+    if (radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
+    if (angularRow) lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
+    if (straightRow) lines.push(t.copyStraight(geoLength, geoClass, fmtIso2768(straightRow[geoClass])));
     return lines.join("\n");
-  }, [linearRow, radiusRow, angularRow, straightRow, size, legLength, geoLength, linearClass, geoClass, linearDev, radiusDev, angularDev]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linearRow, radiusRow, angularRow, straightRow, size, legLength, geoLength, linearClass, geoClass, linearDev, radiusDev, angularDev, locale]);
 
   return (
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">Lineaire en hoekmaten (ISO 2768-1)</h2>
-        <Note>Titelblok-tolerantieklasse voor maten zonder individuele toleranties. Kies de klasse en vul een maat in.</Note>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Field label="Tolerantieklasse">
+          <Field label={t.toleranceClass}>
             <SelectInput value={linearClass} onChange={(v) => setLinearClass(v as LinearClass)}>
               {LINEAR_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.label}
+                  {locale === "nl" ? c.label : c.labelEn}
                 </option>
               ))}
             </SelectInput>
           </Field>
-          <Field label="Nominale maat (mm)">
+          <Field label={t.nominalSize}>
             <NumInput id="iso2768-size" value={size} onChange={setSize} />
           </Field>
-          <Field label="Lengte kortste been (mm, voor hoek)">
+          <Field label={t.legLength}>
             <NumInput id="iso2768-leg" value={legLength} onChange={setLegLength} />
           </Field>
         </div>
 
         <ResultGrid
           items={[
-            { label: "Lineaire maat", value: linearRow ? `${fmtIso2768(linearDev)} mm` : "—" },
-            { label: "Radius / afschuining", value: radiusRow ? `${fmtIso2768(radiusDev)} mm` : "—" },
-            { label: "Hoekmaat", value: angularRow ? fmtAngle(angularDev ?? 0) : "—" },
+            { label: t.linearSize, value: linearRow ? `${fmtIso2768(linearDev)} mm` : "—" },
+            { label: t.radiusChamfer, value: radiusRow ? `${fmtIso2768(radiusDev)} mm` : "—" },
+            { label: t.angularSize, value: angularRow ? fmtAngle(angularDev ?? 0) : "—" },
           ]}
         />
         <div className="flex flex-wrap gap-2">
@@ -119,7 +194,7 @@ export function Iso2768Calc() {
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Maat (mm)</th>
+                <th>{t.thSize}</th>
                 <th>f</th>
                 <th>m</th>
                 <th>c</th>
@@ -141,13 +216,13 @@ export function Iso2768Calc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">ISO 2768-1 Tabel 1, toegestane afwijking lineaire maten (mm). Klasse actief: {linearClass}.</p>
+        <p className="mt-2 text-xs text-subtle">{t.table1Note(linearClass)}</p>
 
         <div className="table-scroll mt-6">
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Radius / afschuining (mm)</th>
+                <th>{t.thRadiusChamfer}</th>
                 <th>f</th>
                 <th>m</th>
                 <th>c</th>
@@ -169,13 +244,13 @@ export function Iso2768Calc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">ISO 2768-1 Tabel 2.</p>
+        <p className="mt-2 text-xs text-subtle">{t.table2Note}</p>
 
         <div className="table-scroll mt-6">
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Been (mm)</th>
+                <th>{t.thLeg}</th>
                 <th>f</th>
                 <th>m</th>
                 <th>c</th>
@@ -197,14 +272,14 @@ export function Iso2768Calc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">ISO 2768-1 Tabel 3, o.b.v. lengte kortste been van de hoek.</p>
+        <p className="mt-2 text-xs text-subtle">{t.table3Note}</p>
       </CalcPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">Geometrische toleranties (ISO 2768-2)</h2>
-        <Note>Rechtheid/vlakheid, loodrechtheid, symmetrie en rondloop zonder individuele aanduiding — klassen H, K, L.</Note>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.geoHeading}</h2>
+        <Note>{t.geoIntro}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Klasse">
+          <Field label={t.classLabel}>
             <SelectInput value={geoClass} onChange={(v) => setGeoClass(v as GeoClass)}>
               {GEO_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -213,16 +288,16 @@ export function Iso2768Calc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label="Nominale lengte (mm)">
+          <Field label={t.nominalLength}>
             <NumInput id="iso2768-geo-length" value={geoLength} onChange={setGeoLength} />
           </Field>
         </div>
         <ResultGrid
           items={[
-            { label: "Rechtheid / vlakheid", value: straightRow ? `${fmtIso2768(straightRow[geoClass])} mm` : "—" },
-            { label: "Loodrechtheid", value: perpRow ? `${fmtIso2768(perpRow[geoClass])} mm` : "—" },
-            { label: "Symmetrie", value: symRow ? `${fmtIso2768(symRow[geoClass])} mm` : "—" },
-            { label: "Rondloop (onafh. van lengte)", value: `${fmtIso2768(RUNOUT[geoClass])} mm` },
+            { label: t.straightnessFlatness, value: straightRow ? `${fmtIso2768(straightRow[geoClass])} mm` : "—" },
+            { label: t.perpendicularity, value: perpRow ? `${fmtIso2768(perpRow[geoClass])} mm` : "—" },
+            { label: t.symmetry, value: symRow ? `${fmtIso2768(symRow[geoClass])} mm` : "—" },
+            { label: t.runout, value: `${fmtIso2768(RUNOUT[geoClass])} mm` },
           ]}
         />
 
@@ -230,7 +305,7 @@ export function Iso2768Calc() {
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Rechtheid/vlakheid (mm)</th>
+                <th>{t.thStraightness}</th>
                 <th>H</th>
                 <th>K</th>
                 <th>L</th>
@@ -255,7 +330,7 @@ export function Iso2768Calc() {
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Loodrechtheid (mm)</th>
+                <th>{t.thPerpendicularity}</th>
                 <th>H</th>
                 <th>K</th>
                 <th>L</th>
@@ -280,7 +355,7 @@ export function Iso2768Calc() {
           <table className="ref-table">
             <thead>
               <tr>
-                <th>Symmetrie (mm)</th>
+                <th>{t.thSymmetry}</th>
                 <th>H</th>
                 <th>K</th>
                 <th>L</th>
@@ -300,12 +375,9 @@ export function Iso2768Calc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">ISO 2768-2, Tabellen 4-7. Rondloop heeft één waarde per klasse, onafhankelijk van lengte.</p>
+        <p className="mt-2 text-xs text-subtle">{t.tables47Note}</p>
 
-        <SourceBadge>
-          Tabelwaarden getranscribeerd van veelgebruikte, publiek gepubliceerde samenvattingen van ISO 2768-1/-2.
-          Verifieer tegen de originele norm voor contractueel bindende tekeningen.
-        </SourceBadge>
+        <SourceBadge>{t.sourceBadge}</SourceBadge>
       </section>
     </>
   );

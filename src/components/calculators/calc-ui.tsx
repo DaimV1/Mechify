@@ -1,6 +1,8 @@
 import { Check, Copy, Info, Link2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { COMMON } from "@/lib/i18n/common";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 
 export function CalcPanel({ children, className }: { children: ReactNode; className?: string }) {
@@ -149,6 +151,8 @@ export function ResultGrid({ items }: { items: { label: ReactNode; value: string
 }
 
 export function CopyResult({ text }: { text: string }) {
+  const { locale } = useLocale();
+  const t = COMMON[locale];
   const [done, setDone] = useState(false);
   return (
     <Button
@@ -166,13 +170,15 @@ export function CopyResult({ text }: { text: string }) {
       }}
     >
       {done ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {done ? "Gekopieerd" : "Kopieer resultaat"}
+      {done ? t.copied : t.copyResult}
     </Button>
   );
 }
 
 /** Copies the current page URL (with its query-string state) so a result can be pasted into a mail or a ticket. */
 export function CopyLink() {
+  const { locale } = useLocale();
+  const t = COMMON[locale];
   const [done, setDone] = useState(false);
   return (
     <Button
@@ -190,7 +196,7 @@ export function CopyLink() {
       }}
     >
       {done ? <Check className="size-4" /> : <Link2 className="size-4" />}
-      {done ? "Gekopieerd" : "Kopieer link"}
+      {done ? t.copied : t.copyLink}
     </Button>
   );
 }
@@ -210,8 +216,9 @@ export function KindDot({ kind }: { kind: "los" | "overgang" | "lijn" | "vast" }
   );
 }
 
-export function CalcEyebrow({ children = "Rekenhulp" }: { children?: ReactNode }) {
-  return <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">{children}</p>;
+export function CalcEyebrow({ children }: { children?: ReactNode }) {
+  const { locale } = useLocale();
+  return <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">{children ?? COMMON[locale].calcHelper}</p>;
 }
 
 export function Note({ children }: { children: ReactNode }) {
@@ -229,9 +236,10 @@ export function SourceBadge({ children }: { children: ReactNode }) {
 }
 
 export function SourceLink({ href, children }: { href: string; children: ReactNode }) {
+  const { locale } = useLocale();
   return (
     <p className="mt-4 text-xs leading-relaxed text-subtle">
-      Bron:{" "}
+      {COMMON[locale].source}{" "}
       <a href={href} className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">
         {children}
       </a>

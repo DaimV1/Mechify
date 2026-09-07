@@ -30,7 +30,7 @@ export function flatLength(legs: number[], BD: number): number {
   return legs.reduce((a, b) => a + b, 0) - BD;
 }
 
-export type MaterialClass = { id: string; label: string; rminFactor: number };
+export type MaterialClass = { id: string; label: string; labelEn: string; rminFactor: number };
 
 /**
  * Minimale binnenstraal als veelvoud van de plaatdikte — algemene DFM-
@@ -39,10 +39,10 @@ export type MaterialClass = { id: string; label: string; rminFactor: number };
  * plaatleverancier of het zetbedrijf voor kritieke onderdelen.
  */
 export const MATERIAL_CLASSES: MaterialClass[] = [
-  { id: "zacht", label: "Zacht (aluminium, koper, gegloeid rvs)", rminFactor: 1 },
-  { id: "staal", label: "Staal (warmgewalst / zacht koudgewalst)", rminFactor: 1 },
-  { id: "rvs", label: "RVS (roestvast staal, hard)", rminFactor: 1.5 },
-  { id: "veer", label: "Veerstaal / hard gewalst", rminFactor: 3 },
+  { id: "zacht", label: "Zacht (aluminium, koper, gegloeid rvs)", labelEn: "Soft (aluminium, copper, annealed stainless)", rminFactor: 1 },
+  { id: "staal", label: "Staal (warmgewalst / zacht koudgewalst)", labelEn: "Steel (hot-rolled / soft cold-rolled)", rminFactor: 1 },
+  { id: "rvs", label: "RVS (roestvast staal, hard)", labelEn: "Stainless steel (hard)", rminFactor: 1.5 },
+  { id: "veer", label: "Veerstaal / hard gewalst", labelEn: "Spring steel / hard-rolled", rminFactor: 3 },
 ];
 
 export function rminFor(materialId: string, T: number): number {

@@ -2,17 +2,22 @@ import { Menu, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Logo } from "@/components/layout/logo";
+import { LocaleToggle } from "@/components/layout/locale-toggle";
 import { Container } from "@/components/layout/container";
+import { COMMON, type CommonStrings } from "@/lib/i18n/common";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "/tools", label: "Tools" },
-  { href: "/calculators", label: "Rekenmodules" },
-  { href: "/tables", label: "Tabellen" },
-  { href: "/materials", label: "Materialen" },
-  { href: "/cad", label: "CAD" },
-  { href: "/about", label: "Over Mechify" },
-];
+function navLinks(t: CommonStrings) {
+  return [
+    { href: "/tools", label: t.navTools },
+    { href: "/calculators", label: t.navCalculators },
+    { href: "/tables", label: t.navTables },
+    { href: "/materials", label: t.navMaterials },
+    { href: "/cad", label: t.navCad },
+    { href: "/about", label: t.navAbout },
+  ];
+}
 
 function navLinkClass(isActive: boolean) {
   return cn(
@@ -24,6 +29,9 @@ function navLinkClass(isActive: boolean) {
 export function Header() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const t = COMMON[locale];
+  const NAV_LINKS = navLinks(t);
 
   useEffect(() => {
     setOpen(false);
@@ -34,7 +42,7 @@ export function Header() {
       <Container wide className="flex h-16 items-center justify-between gap-4">
         <Logo />
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Hoofdnavigatie">
+        <nav className="hidden items-center gap-1 md:flex" aria-label={t.mainNav}>
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} to={link.href} className={({ isActive }) => navLinkClass(isActive)}>
               {link.label}
@@ -43,19 +51,20 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LocaleToggle />
           <NavLink
             to="/tools"
             className="hidden items-center gap-2 rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-muted transition-colors hover:text-ink sm:flex"
           >
             <Search className="size-4" aria-hidden="true" />
-            Zoek een tool
+            {t.searchTool}
           </NavLink>
           <button
             type="button"
             className="inline-flex size-10 items-center justify-center rounded-md border border-border-strong text-ink md:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
-            aria-label={open ? "Sluit menu" : "Open menu"}
+            aria-label={open ? t.closeMenu : t.openMenu}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -64,7 +73,7 @@ export function Header() {
       </Container>
 
       {open ? (
-        <nav id="mobile-nav" aria-label="Mobiele navigatie" className="border-t border-border bg-bg md:hidden">
+        <nav id="mobile-nav" aria-label={t.mobileNav} className="border-t border-border bg-bg md:hidden">
           <Container className="flex flex-col gap-1 py-3" wide>
             {NAV_LINKS.map((link) => (
               <NavLink

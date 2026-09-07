@@ -2,11 +2,11 @@
 
 export type Application = "rollenbaan" | "band" | "helling" | "hijsen";
 
-export const APPLICATIONS: { id: Application; label: string }[] = [
-  { id: "rollenbaan", label: "Rollenbaan (horizontaal)" },
-  { id: "band", label: "Transportband (horizontaal)" },
-  { id: "helling", label: "Hellingbaan" },
-  { id: "hijsen", label: "Hijsen (verticaal)" },
+export const APPLICATIONS: { id: Application; label: string; labelEn: string }[] = [
+  { id: "rollenbaan", label: "Rollenbaan (horizontaal)", labelEn: "Roller conveyor (horizontal)" },
+  { id: "band", label: "Transportband (horizontaal)", labelEn: "Belt conveyor (horizontal)" },
+  { id: "helling", label: "Hellingbaan", labelEn: "Incline conveyor" },
+  { id: "hijsen", label: "Hijsen (verticaal)", labelEn: "Hoisting (vertical)" },
 ];
 
 const G = 9.81;

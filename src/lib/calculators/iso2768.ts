@@ -16,11 +16,11 @@
 export type LinearClass = "f" | "m" | "c" | "v";
 export type GeoClass = "H" | "K" | "L";
 
-export const LINEAR_CLASSES: { id: LinearClass; label: string }[] = [
-  { id: "f", label: "f — fijn" },
-  { id: "m", label: "m — middel" },
-  { id: "c", label: "c — grof" },
-  { id: "v", label: "v — zeer grof" },
+export const LINEAR_CLASSES: { id: LinearClass; label: string; labelEn: string }[] = [
+  { id: "f", label: "f — fijn", labelEn: "f — fine" },
+  { id: "m", label: "m — middel", labelEn: "m — medium" },
+  { id: "c", label: "c — grof", labelEn: "c — coarse" },
+  { id: "v", label: "v — zeer grof", labelEn: "v — very coarse" },
 ];
 
 export const GEO_CLASSES: { id: GeoClass; label: string }[] = [

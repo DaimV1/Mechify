@@ -15,9 +15,9 @@
 
 export type CirclipKind = "as" | "boring";
 
-export const CIRCLIP_KINDS: { id: CirclipKind; label: string; standard: string }[] = [
-  { id: "as", label: "As (buitenring)", standard: "DIN 471" },
-  { id: "boring", label: "Boring (binnenring)", standard: "DIN 472" },
+export const CIRCLIP_KINDS: { id: CirclipKind; label: string; labelEn: string; standard: string }[] = [
+  { id: "as", label: "As (buitenring)", labelEn: "Shaft (external ring)", standard: "DIN 471" },
+  { id: "boring", label: "Boring (binnenring)", labelEn: "Bore (internal ring)", standard: "DIN 472" },
 ];
 
 const STANDARD_WIDTHS = [0.4, 0.6, 0.8, 1.0, 1.2, 1.5, 1.75, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0];
