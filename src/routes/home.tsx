@@ -2,6 +2,7 @@ import { ArrowRight, BookOpen, Compass, Layers, Ruler, ShieldCheck, Sigma } from
 import { Link } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Container } from "@/components/layout/container";
+import { Logo } from "@/components/layout/logo";
 import { ToolCard } from "@/components/tools/tool-card";
 import { SECTIONS, TOOLS } from "@/lib/tools";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -43,6 +44,7 @@ export function Home() {
       <section className="relative overflow-hidden border-b border-border bg-blueprint-grid">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg" />
         <Container wide className="relative py-20 sm:py-28">
+          <Logo size="lg" className="mb-8" />
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Engineering toolkit</p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
             Ontwerp sneller en nauwkeuriger.
