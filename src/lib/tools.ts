@@ -53,7 +53,7 @@ export const TOOLS: Tool[] = [
     standard: "ISO 2768",
     blurb: "Titelblok-default voor lineaire en hoektoleranties: f/m/c/v en H/K/L.",
     tags: ["titelblok", "algemeen", "maat", "iso 2768", "mk"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "keyways",
@@ -73,7 +73,7 @@ export const TOOLS: Tool[] = [
     standard: "SKF · ISO 286",
     blurb: "Groefkogellagers: vast/losse zijde, SKF-klassen tot Ø 50 mm.",
     tags: ["kogel", "vast", "los", "lager", "j6", "k5", "skf"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "seeger-grooves",
@@ -83,7 +83,7 @@ export const TOOLS: Tool[] = [
     standard: "DIN 471 / 472",
     blurb: "Groefdiameter, breedte en diepte op as of in boring, tot Ø 100 mm.",
     tags: ["borgveer", "circlip", "as", "boring", "din 471", "din 472"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "fasteners",
@@ -93,7 +93,7 @@ export const TOOLS: Tool[] = [
     standard: "ISO 273 · VDI 2230",
     blurb: "M3–M24: doorlaatmaten, sleutelmaten en aandraaimoment 8.8 / 10.9 / 12.9.",
     tags: ["bout", "moer", "moment", "inbus", "m8", "vdi 2230", "iso 273"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "o-ring-grooves",
@@ -103,7 +103,7 @@ export const TOOLS: Tool[] = [
     standard: "ISO 3601-1",
     blurb: "ISO-koorden 1,80–7,00 mm: groefdiepte en -breedte, radiaal en axiaal.",
     tags: ["afdichting", "koord", "radiaal", "axiaal", "iso 3601"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "edges",
@@ -113,7 +113,7 @@ export const TOOLS: Tool[] = [
     standard: "Plaatwerk",
     blurb: "Buigradius, minimale beenlengte, groefwijdte en Z-buiging voor zetwerk.",
     tags: ["buigen", "plaat", "zetwerk", "k-factor", "bend allowance"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "units",
@@ -123,7 +123,7 @@ export const TOOLS: Tool[] = [
     standard: "SI · imperial",
     blurb: "Inch ↔ mm, °C ↔ K, dm³ ↔ L, lbf ↔ N, psi ↔ bar.",
     tags: ["omrekenen", "inch", "kelvin", "newton", "liter", "psi", "bar"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "motor-specification",
@@ -133,7 +133,7 @@ export const TOOLS: Tool[] = [
     standard: "P = F·v",
     blurb: "Rollenbaan, band, helling of hijsen: toerental, kracht, koppel, vermogen en IEC-stap.",
     tags: ["kw", "koppel", "iec", "aandrijving"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "pneumatic-cylinder",
@@ -143,7 +143,7 @@ export const TOOLS: Tool[] = [
     standard: "ISO 15552 · 6432",
     blurb: "F = p·A, dubbelwerkend. ISO-boring bepalen bij een last en 6 bar.",
     tags: ["pneumatiek", "festo", "smc", "bar", "zuiger", "kracht"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "buckling",
@@ -163,7 +163,7 @@ export const TOOLS: Tool[] = [
     standard: "Puntlast",
     blurb: "Doorbuiging van een balk onder een puntlast: vrij opgelegd of uitkraging.",
     tags: ["puntlast", "buiging", "doorbuiging", "balk"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "cad-resources",
@@ -173,7 +173,7 @@ export const TOOLS: Tool[] = [
     standard: "Bronnen",
     blurb: "3D-modellen, componenten, plaatwerk en naslagwerken.",
     tags: ["grabcad", "mcmaster", "model"],
-    status: "soon",
+    status: "live",
   },
   {
     id: "macros",
@@ -181,9 +181,9 @@ export const TOOLS: Tool[] = [
     slug: "macros",
     title: "Macro-bibliotheek",
     standard: "SolidWorks · Inventor",
-    blurb: "Downloadbare VBA-macro's: STEP-export, batch opslaan, eigenschappen tonen.",
+    blurb: "Kopieerbare VBA-macro's: STEP-export, batch opslaan, eigenschappen tonen.",
     tags: ["vba", "macro", "solidworks", "inventor", "step", "export"],
-    status: "soon",
+    status: "live",
   },
 ];
 

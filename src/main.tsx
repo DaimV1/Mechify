@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { App } from "@/app";
 import "@/styles/index.css";
 
@@ -12,5 +13,6 @@ createRoot(container).render(
     <BrowserRouter>
       <App />
     </BrowserRouter>
+    <Analytics />
   </StrictMode>,
 );
