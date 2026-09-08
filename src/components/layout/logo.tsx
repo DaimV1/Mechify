@@ -1,29 +1,21 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-/** Dimension-line accent under the wordmark — a nod to the tolerance/measurement tables Mechify is built on. */
-function DimensionTick({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 6" preserveAspectRatio="none" className={cn("w-full text-accent", className)} aria-hidden="true">
-      <line x1="2" y1="3" x2="98" y2="3" stroke="currentColor" strokeWidth="1.5" />
-      <line x1="2" y1="0.5" x2="2" y2="5.5" stroke="currentColor" strokeWidth="1.5" />
-      <line x1="98" y1="0.5" x2="98" y2="5.5" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
 export function Logo({ className, size = "sm" }: { className?: string; size?: "sm" | "lg" }) {
   return (
-    <Link to="/" className={cn("inline-flex flex-col", className)}>
-      <span
-        className={cn(
-          "font-display font-bold tracking-tight text-ink",
-          size === "lg" ? "text-4xl sm:text-5xl" : "text-lg",
-        )}
+    <Link
+      to="/"
+      aria-label="Mechify"
+      className={cn("inline-flex shrink-0 rounded-md bg-white px-2 py-1.5", className)}
+    >
+      <svg
+        viewBox="160 200 1650 400"
+        className={size === "lg" ? "h-14 w-auto sm:h-16" : "h-8 w-auto"}
+        aria-hidden="true"
+        focusable="false"
       >
-        Mechify
-      </span>
-      <DimensionTick className={size === "lg" ? "mt-1.5 h-2" : "mt-1 h-1"} />
+        <image href={`${import.meta.env.BASE_URL}mechify-logo.png`} width="1942" height="809" />
+      </svg>
     </Link>
   );
 }
