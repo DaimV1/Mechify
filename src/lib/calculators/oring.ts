@@ -15,9 +15,30 @@ export const STANDARD_CORDS = [1.8, 2.65, 3.55, 5.3, 7.0];
 
 export type SealType = "statisch" | "dynamisch";
 
-export const SEAL_TYPES: { id: SealType; label: string; labelEn: string; squeezeMin: number; squeezeMax: number; default: number }[] = [
-  { id: "statisch", label: "Statisch", labelEn: "Static", squeezeMin: 15, squeezeMax: 30, default: 20 },
-  { id: "dynamisch", label: "Dynamisch (glijdend/roterend)", labelEn: "Dynamic (sliding/rotating)", squeezeMin: 10, squeezeMax: 16, default: 12 },
+export const SEAL_TYPES: {
+  id: SealType;
+  label: string;
+  labelEn: string;
+  squeezeMin: number;
+  squeezeMax: number;
+  default: number;
+}[] = [
+  {
+    id: "statisch",
+    label: "Statisch",
+    labelEn: "Static",
+    squeezeMin: 15,
+    squeezeMax: 30,
+    default: 20,
+  },
+  {
+    id: "dynamisch",
+    label: "Dynamisch (glijdend/roterend)",
+    labelEn: "Dynamic (sliding/rotating)",
+    squeezeMin: 10,
+    squeezeMax: 16,
+    default: 12,
+  },
 ];
 
 export type GrooveDirection = "radiaal" | "axiaal";
@@ -33,8 +54,13 @@ export type OringGroove = {
  * ruimte voor het volumeoverschot bij samendrukking en thermische
  * uitzetting, typisch 1,3–1,5× de koorddiameter.
  */
-export function computeOringGroove(cord: number, squeezePercent: number, widthFactor = 1.4): OringGroove | null {
-  if (!(cord > 0) || !(squeezePercent >= 0) || !(squeezePercent < 100) || !(widthFactor > 1)) return null;
+export function computeOringGroove(
+  cord: number,
+  squeezePercent: number,
+  widthFactor = 1.4,
+): OringGroove | null {
+  if (!(cord > 0) || !(squeezePercent >= 0) || !(squeezePercent < 100) || !(widthFactor > 1))
+    return null;
   return {
     depth: cord * (1 - squeezePercent / 100),
     width: cord * widthFactor,

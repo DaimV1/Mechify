@@ -39,11 +39,12 @@ const T = {
     heading: "Nominale passing",
     intro: (
       <>
-        Nominale Ø in hele millimeters, boven 0 t/m 3150 mm (de volledige ISO 286-reeks). H/h, JS/js, G/g, F/f en
-        D/d zijn berekend uit de ISO 286-1-formules en gelden over de hele reeks. c11, k6, n6, p6 en s6 hebben
-        geen eenvoudige formule en blijven beperkt tot t/m 50 mm — zie hieronder. In de kleinste band (&gt;0–≤3
-        mm) zijn alleen H6–H11, JS7, h6, h7 en p6 geverifieerd; de overige klassen tonen daar "—" (nog geen bron
-        gecontroleerd) in plaats van een gok.
+        Nominale Ø in hele millimeters, boven 0 t/m 3150 mm (de volledige ISO 286-reeks). H/h,
+        JS/js, G/g, F/f en D/d zijn berekend uit de ISO 286-1-formules en gelden over de hele reeks.
+        c11, k6, n6, p6 en s6 hebben geen eenvoudige formule en blijven beperkt tot t/m 50 mm — zie
+        hieronder. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11, JS7, h6, h7 en p6
+        geverifieerd; de overige klassen tonen daar "—" (nog geen bron gecontroleerd) in plaats van
+        een gok.
       </>
     ),
     diameterLabel: "Nominale Ø (mm)",
@@ -52,14 +53,15 @@ const T = {
     fillDiameter: "Vul een nominale Ø in.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
-        {fitId} heeft geen formule voor c, k, n, p of s en is alleen beschikbaar t/m 50 mm. Ø {d} mm valt in band{" "}
-        {bandLabel} mm. Kies H7/h6, H7/g6, H8/f7 of H9/d9 voor de volledige reeks, of blijf onder 50 mm.
+        {fitId} heeft geen formule voor c, k, n, p of s en is alleen beschikbaar t/m 50 mm. Ø {d} mm
+        valt in band {bandLabel} mm. Kies H7/h6, H7/g6, H8/f7 of H9/d9 voor de volledige reeks, of
+        blijf onder 50 mm.
       </>
     ),
     noBand: (fitId: string, d: number) => (
       <>
-        Geen ISO-band voor Ø {d} mm, of {fitId} heeft nog geen geverifieerde waarde in die band (zie de kleinste
-        band hierboven). Tabellen: boven 0 t/m 3150 mm.
+        Geen ISO-band voor Ø {d} mm, of {fitId} heeft nog geen geverifieerde waarde in die band (zie
+        de kleinste band hierboven). Tabellen: boven 0 t/m 3150 mm.
       </>
     ),
     band: "band",
@@ -68,7 +70,8 @@ const T = {
     clearanceMinMax: "Speling min … max",
     extendedNote:
       "Boven 50 mm: de IT-breedte komt uit de ISO 286-1-tabel (exact), de fundamentele afwijking van G/F/D en g/f/d uit de formule — boven Ø400 kan die 1 µm van de tabelwaarde verschillen.",
-    copyLine: (d: number, fitId: string, bandLabel: string) => `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
+    copyLine: (d: number, fitId: string, bandLabel: string) =>
+      `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Voorkeurpassingen",
     sec1Note:
       "Minimum … maximum speling in mm. Negatief = overmaat. H7/p6 tot 18 mm: max. 0 µm (lijnpassing mogelijk).",
@@ -91,11 +94,11 @@ const T = {
     heading: "Nominal fit",
     intro: (
       <>
-        Nominal Ø in whole millimeters, above 0 up to 3150 mm (the full ISO 286 range). H/h, JS/js, G/g, F/f and
-        D/d are computed from the ISO 286-1 formulas and apply across the whole range. c11, k6, n6, p6 and s6
-        have no simple formula and stay limited to 50 mm and below — see below. In the smallest band (&gt;0–≤3
-        mm) only H6–H11, JS7, h6, h7 and p6 are verified; the other classes show "—" there (not yet checked
-        against a source) instead of a guess.
+        Nominal Ø in whole millimeters, above 0 up to 3150 mm (the full ISO 286 range). H/h, JS/js,
+        G/g, F/f and D/d are computed from the ISO 286-1 formulas and apply across the whole range.
+        c11, k6, n6, p6 and s6 have no simple formula and stay limited to 50 mm and below — see
+        below. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7, h6, h7 and p6 are verified; the
+        other classes show "—" there (not yet checked against a source) instead of a guess.
       </>
     ),
     diameterLabel: "Nominal Ø (mm)",
@@ -104,14 +107,15 @@ const T = {
     fillDiameter: "Enter a nominal Ø.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
-        {fitId} has no formula for c, k, n, p or s and is only available up to 50 mm. Ø {d} mm falls in band{" "}
-        {bandLabel} mm. Choose H7/h6, H7/g6, H8/f7 or H9/d9 for the full range, or stay under 50 mm.
+        {fitId} has no formula for c, k, n, p or s and is only available up to 50 mm. Ø {d} mm falls
+        in band {bandLabel} mm. Choose H7/h6, H7/g6, H8/f7 or H9/d9 for the full range, or stay
+        under 50 mm.
       </>
     ),
     noBand: (fitId: string, d: number) => (
       <>
-        No ISO band for Ø {d} mm, or {fitId} has no verified value yet in that band (see the smallest band
-        above). Tables: above 0 up to 3150 mm.
+        No ISO band for Ø {d} mm, or {fitId} has no verified value yet in that band (see the
+        smallest band above). Tables: above 0 up to 3150 mm.
       </>
     ),
     band: "band",
@@ -120,9 +124,11 @@ const T = {
     clearanceMinMax: "Clearance min … max",
     extendedNote:
       "Above 50 mm: the IT width comes from the ISO 286-1 table (exact), the fundamental deviation of G/F/D and g/f/d from the formula — above Ø400 it can differ by 1 µm from the table value.",
-    copyLine: (d: number, fitId: string, bandLabel: string) => `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
+    copyLine: (d: number, fitId: string, bandLabel: string) =>
+      `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Preferred fits",
-    sec1Note: "Minimum … maximum clearance in mm. Negative = interference. H7/p6 up to 18 mm: max. 0 µm (line fit possible).",
+    sec1Note:
+      "Minimum … maximum clearance in mm. Negative = interference. H7/p6 up to 18 mm: max. 0 µm (line fit possible).",
     thDiameter: "Ø (mm)",
     onlyTo50: "* only up to 50 mm (no formula for c, k, n, p or s).",
     whenWhichFit: "Which fit, when",
@@ -144,7 +150,9 @@ export function FitTolerancesCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [diameter, setDiameter] = useState(() => search.get("d") ?? readStoredDiameter({ min: 4, max: 3150 }));
+  const [diameter, setDiameter] = useState(
+    () => search.get("d") ?? readStoredDiameter({ min: 4, max: 3150 }),
+  );
   const [fitId, setFitId] = useState(() => {
     const fromUrl = search.get("fit");
     return fromUrl && FITS.some((f) => f.id === fromUrl) ? fromUrl : "H7/h6";
@@ -167,14 +175,16 @@ export function FitTolerancesCalc() {
 
   const bandLabel = (band: (typeof BANDS)[number]) => (locale === "nl" ? band.label : band.labelEn);
   const fitUse = (f: (typeof FITS)[number]) => (locale === "nl" ? f.use : f.useEn);
-  const kindText = (kind: { text: string; textEn: string }) => (locale === "nl" ? kind.text : kind.textEn);
+  const kindText = (kind: { text: string; textEn: string }) =>
+    locale === "nl" ? kind.text : kind.textEn;
 
   const parsed = parseWholeMm(diameter);
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
   const result = parsed.status === "ok" ? computeFit(d, fitId) : null;
   const activeBand = parsed.status === "ok" ? bandIndex(d) : -1;
   const activeBandExtended = activeBand >= 0 && isExtendedBand(activeBand);
-  const fitOutOfBandRange = parsed.status === "ok" && activeBand >= 0 && activeBandExtended && !fitExtendable(fitId);
+  const fitOutOfBandRange =
+    parsed.status === "ok" && activeBand >= 0 && activeBandExtended && !fitExtendable(fitId);
 
   const copy = useMemo(() => {
     if (!result) return "";
@@ -191,7 +201,9 @@ export function FitTolerancesCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.diameterLabel}>
@@ -212,7 +224,9 @@ export function FitTolerancesCalc() {
         {parsed.status === "empty" ? (
           <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
         ) : fitOutOfBandRange ? (
-          <p className="mt-5 text-sm text-muted">{t.noFormula(fitId, d, BANDS[activeBand] ? bandLabel(BANDS[activeBand]) : "")}</p>
+          <p className="mt-5 text-sm text-muted">
+            {t.noFormula(fitId, d, BANDS[activeBand] ? bandLabel(BANDS[activeBand]) : "")}
+          </p>
         ) : !result ? (
           <p className="mt-5 text-sm text-muted">{t.noBand(fitId, d)}</p>
         ) : (
@@ -223,7 +237,10 @@ export function FitTolerancesCalc() {
             </p>
             <ResultGrid
               items={[
-                { label: `${t.hole} ${result.fit.hole}`, value: `${mmFromUm(result.ES)} / ${mmFromUm(result.EI)} mm` },
+                {
+                  label: `${t.hole} ${result.fit.hole}`,
+                  value: `${mmFromUm(result.ES)} / ${mmFromUm(result.EI)} mm`,
+                },
                 {
                   label: (
                     <>
@@ -232,7 +249,10 @@ export function FitTolerancesCalc() {
                   ),
                   value: `${mmFromUm(result.es)} / ${mmFromUm(result.ei)} mm`,
                 },
-                { label: t.clearanceMinMax, value: `${clearanceRange(result.minC, result.maxC)} mm` },
+                {
+                  label: t.clearanceMinMax,
+                  value: `${clearanceRange(result.minC, result.maxC)} mm`,
+                },
               ]}
             />
             <p className="mt-4 text-sm leading-relaxed text-muted">{fitUse(result.fit)}</p>
@@ -246,7 +266,9 @@ export function FitTolerancesCalc() {
       </CalcPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.sec1Title}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.sec1Title}
+        </h2>
         <Note>{t.sec1Note}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -274,12 +296,16 @@ export function FitTolerancesCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2H.html">{t.sourceMain}</SourceLink>
+        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2H.html">
+          {t.sourceMain}
+        </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">{t.onlyTo50}</p>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.whenWhichFit}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.whenWhichFit}
+        </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {FITS.map((f) => {
             const live = parsed.status === "ok" ? computeFit(d, f.id) : null;
@@ -289,7 +315,9 @@ export function FitTolerancesCalc() {
                 <p className="flex items-center gap-2 font-mono text-sm text-ink">
                   <KindDot kind={kind} />
                   {f.id}
-                  {live ? <span className="font-sans text-muted">· {kindText(live.kind)}</span> : null}
+                  {live ? (
+                    <span className="font-sans text-muted">· {kindText(live.kind)}</span>
+                  ) : null}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{fitUse(f)}</p>
               </article>
@@ -299,7 +327,9 @@ export function FitTolerancesCalc() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.sec2Title}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.sec2Title}
+        </h2>
         <Note>{t.sec2Note}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -327,12 +357,16 @@ export function FitTolerancesCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2H.html">{t.sourceHole}</SourceLink>
+        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2H.html">
+          {t.sourceHole}
+        </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">{t.sec2Footnote}</p>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.sec3Title}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.sec3Title}
+        </h2>
         <Note>{t.sec3Note}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -360,7 +394,9 @@ export function FitTolerancesCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2s.html">{t.sourceShaft}</SourceLink>
+        <SourceLink href="https://www.roymech.co.uk/Useful_Tables/ISO_Tolerances/ISO_286_2s.html">
+          {t.sourceShaft}
+        </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">{t.sec3Footnote}</p>
       </section>
     </>

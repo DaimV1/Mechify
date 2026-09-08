@@ -50,12 +50,20 @@ const T = {
     thPower: "Vermogen (kW)",
     sourceBadge:
       "Meest gangbare deel van de IEC 60072-voorkeursreeks tot 355 kW, zoals gebruikt in fabrikantcatalogi (ABB, Siemens). Grotere vermogens en de exacte beschikbaarheid per polentaal/frame verschillen per fabrikant.",
-    copy: (appLabel: string, mass: string, speed: string, diameter: string, result: NonNullable<ReturnType<typeof computeMotor>>) =>
+    copy: (
+      appLabel: string,
+      mass: string,
+      speed: string,
+      diameter: string,
+      result: NonNullable<ReturnType<typeof computeMotor>>,
+    ) =>
       [
         `${appLabel}: m=${mass} kg, v=${speed} m/s, D=${diameter} mm`,
         `F=${fmtRound(result.force)} N, n=${fmtRound(result.rpm, 1)} rpm, T=${fmtRound(result.torque, 1)} Nm`,
         `P_as=${fmtKw(result.shaftPowerW)} kW, P_ontwerp=${fmtKw(result.designPowerW)} kW`,
-        result.iecPower != null ? `IEC-vermogen: ${result.iecPower} kW` : "Geen IEC-stap tot 355 kW",
+        result.iecPower != null
+          ? `IEC-vermogen: ${result.iecPower} kW`
+          : "Geen IEC-stap tot 355 kW",
       ].join("\n"),
   },
   en: {
@@ -83,7 +91,13 @@ const T = {
     thPower: "Power (kW)",
     sourceBadge:
       "Most common part of the IEC 60072 preferred power series up to 355 kW, as used in manufacturer catalogs (ABB, Siemens). Larger powers and exact availability per pole count/frame vary by manufacturer.",
-    copy: (appLabel: string, mass: string, speed: string, diameter: string, result: NonNullable<ReturnType<typeof computeMotor>>) =>
+    copy: (
+      appLabel: string,
+      mass: string,
+      speed: string,
+      diameter: string,
+      result: NonNullable<ReturnType<typeof computeMotor>>,
+    ) =>
       [
         `${appLabel}: m=${mass} kg, v=${speed} m/s, D=${diameter} mm`,
         `F=${fmtRound(result.force)} N, n=${fmtRound(result.rpm, 1)} rpm, T=${fmtRound(result.torque, 1)} Nm`,
@@ -148,7 +162,9 @@ export function MotorSpecificationCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.application}>
@@ -196,7 +212,10 @@ export function MotorSpecificationCalc() {
                 { label: t.resultTorque, value: `${fmtRound(result.torque, 1)} Nm` },
                 { label: t.resultShaftPower, value: `${fmtKw(result.shaftPowerW)} kW` },
                 { label: t.resultDesignPower, value: `${fmtKw(result.designPowerW)} kW` },
-                { label: t.resultIec, value: result.iecPower != null ? `${result.iecPower} kW` : t.outOfRange },
+                {
+                  label: t.resultIec,
+                  value: result.iecPower != null ? `${result.iecPower} kW` : t.outOfRange,
+                },
               ]}
             />
             <div className="flex flex-wrap gap-2">
@@ -210,7 +229,9 @@ export function MotorSpecificationCalc() {
       </CalcPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.iecSeriesTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.iecSeriesTitle}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>

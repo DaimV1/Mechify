@@ -2,7 +2,13 @@ import type { ReactNode } from "react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 
-export function StandardBadge({ children, className }: { children: ReactNode; className?: string }) {
+export function StandardBadge({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <span
       className={cn(

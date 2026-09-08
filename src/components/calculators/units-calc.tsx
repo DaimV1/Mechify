@@ -3,12 +3,21 @@ import { useSearchParams } from "react-router-dom";
 import { convert, findCategory, fmtConverted, UNIT_CATEGORIES } from "@/lib/calculators/units";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { parseNum } from "@/components/calculators/calc-ui";
-import { CalcEyebrow, CalcPanel, CopyLink, CopyResult, Field, NumInput, Note, SelectInput } from "@/components/calculators/calc-ui";
+import {
+  CalcEyebrow,
+  CalcPanel,
+  CopyLink,
+  CopyResult,
+  Field,
+  Note,
+  SelectInput,
+} from "@/components/calculators/calc-ui";
 
 const T = {
   nl: {
     heading: "Eenheden omrekenen",
-    baseNote: (base: string) => `Alle omrekeningen via de SI-basiseenheid van de categorie (${base}).`,
+    baseNote: (base: string) =>
+      `Alle omrekeningen via de SI-basiseenheid van de categorie (${base}).`,
     category: "Categorie",
     from: "Van",
     to: "Naar",
@@ -45,6 +54,7 @@ const CATEGORY_LABELS: Record<string, { nl: string; en: string }> = {
   force: { nl: "Kracht", en: "Force" },
   pressure: { nl: "Druk", en: "Pressure" },
   torque: { nl: "Koppel", en: "Torque" },
+  power: { nl: "Vermogen", en: "Power" },
   mass: { nl: "Massa", en: "Mass" },
 };
 
@@ -55,7 +65,9 @@ export function UnitsCalc() {
   const [categoryId, setCategoryId] = useState(search.get("cat") ?? "length");
   const category = findCategory(categoryId);
   const [fromId, setFromId] = useState(search.get("from") ?? category.units[0].id);
-  const [toId, setToId] = useState(search.get("to") ?? category.units[1]?.id ?? category.units[0].id);
+  const [toId, setToId] = useState(
+    search.get("to") ?? category.units[1]?.id ?? category.units[0].id,
+  );
   const [value, setValue] = useState(search.get("v") ?? "1");
 
   useEffect(() => {
@@ -92,7 +104,9 @@ export function UnitsCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.baseNote(category.baseLabel)}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.category}>
@@ -125,14 +139,23 @@ export function UnitsCalc() {
         </div>
         <div className="mt-4 max-w-xs">
           <Field label={t.value}>
-            <NumInput id="units-value" value={value} onChange={setValue} />
+            <input
+              id="units-value"
+              inputMode="decimal"
+              className="w-full rounded border border-line bg-surface px-3 py-2 font-mono text-ink"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
           </Field>
         </div>
 
         {result != null ? (
           <>
             <p className="mt-5 font-mono text-2xl tabular-nums text-ink">
-              {fmtConverted(result)} <span className="text-base text-muted">{category.units.find((u) => u.id === toId)?.label}</span>
+              {fmtConverted(result)}{" "}
+              <span className="text-base text-muted">
+                {category.units.find((u) => u.id === toId)?.label}
+              </span>
             </p>
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
@@ -146,7 +169,11 @@ export function UnitsCalc() {
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {t.allUnitsTitle(value || "1", category.units.find((u) => u.id === fromId)?.label ?? "", categoryLabel(category.id))}
+          {t.allUnitsTitle(
+            value || "1",
+            category.units.find((u) => u.id === fromId)?.label ?? "",
+            categoryLabel(category.id),
+          )}
         </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">

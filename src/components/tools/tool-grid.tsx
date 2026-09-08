@@ -14,7 +14,10 @@ export function ToolGrid({ tools }: { tools: Tool[] }) {
   return (
     <div>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-subtle" aria-hidden="true" />
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-subtle"
+          aria-hidden="true"
+        />
         <input
           type="search"
           value={query}

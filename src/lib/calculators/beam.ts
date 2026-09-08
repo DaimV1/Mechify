@@ -67,12 +67,33 @@ export function computeBeam({
  * (Eurocode 3 voor staalconstructies, VDI 2230/machinerichtlijnen voor
  * machinebouw, FEM 1.001 voor kraanbanen).
  */
-export const DEFLECTION_GUIDELINES: { label: string; ratio: number; use: string; useEn: string }[] = [
-  { label: "L / 180", ratio: 180, use: "Lichte, niet-kritische constructies", useEn: "Light, non-critical structures" },
-  { label: "L / 250", ratio: 250, use: "Algemene bouwconstructies (richtwaarde EN 1993)", useEn: "General building structures (EN 1993 guideline)" },
-  { label: "L / 360", ratio: 360, use: "Vloeren onder puntlast, trillingsgevoelig", useEn: "Floors under point load, vibration-sensitive" },
-  { label: "L / 750", ratio: 750, use: "Kraanbanen, precisiemachines", useEn: "Crane runways, precision machinery" },
-];
+export const DEFLECTION_GUIDELINES: { label: string; ratio: number; use: string; useEn: string }[] =
+  [
+    {
+      label: "L / 180",
+      ratio: 180,
+      use: "Lichte, niet-kritische constructies",
+      useEn: "Light, non-critical structures",
+    },
+    {
+      label: "L / 250",
+      ratio: 250,
+      use: "Algemene bouwconstructies (richtwaarde EN 1993)",
+      useEn: "General building structures (EN 1993 guideline)",
+    },
+    {
+      label: "L / 360",
+      ratio: 360,
+      use: "Vloeren onder puntlast, trillingsgevoelig",
+      useEn: "Floors under point load, vibration-sensitive",
+    },
+    {
+      label: "L / 750",
+      ratio: 750,
+      use: "Kraanbanen, precisiemachines",
+      useEn: "Crane runways, precision machinery",
+    },
+  ];
 
 export function fmtBeamNum(n: number, digits: number): string {
   return n.toLocaleString("nl-NL", { maximumFractionDigits: digits });

@@ -1,3 +1,4 @@
+import { BucklingModes, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -62,12 +63,18 @@ const T = {
     resultSigmaCr: "σ_cr",
     resultS: "S",
     unsafeNote: "F ≥ F_cr — bij deze last knikt de staaf volgens Euler. S < 1.",
-    lowLambdaNote: (lambda: string, limit: string, material: string, squash: string, euler: string) => (
+    lowLambdaNote: (
+      lambda: string,
+      limit: string,
+      material: string,
+      squash: string,
+      euler: string,
+    ) => (
       <>
-        λ = {lambda} ligt onder λ_grens = {limit} voor {material} (π√(E/Rp0,2)). Euler geldt hier niet: de staaf
-        plooit/vloeit voordat hij knikt. F_cr hierboven is daarom de plooilast A·Rp0,2 = {squash} N, niet de
-        Euler-last ({euler} N — fors hoger, en niet haalbaar). Tussen beide regimes is Tetmajer of de
-        Johnson-parabool nauwkeuriger dan deze harde overgang.
+        λ = {lambda} ligt onder λ_grens = {limit} voor {material} (π√(E/Rp0,2)). Euler geldt hier
+        niet: de staaf plooit/vloeit voordat hij knikt. F_cr hierboven is daarom de plooilast
+        A·Rp0,2 = {squash} N, niet de Euler-last ({euler} N — fors hoger, en niet haalbaar). Tussen
+        beide regimes is Tetmajer of de Johnson-parabool nauwkeuriger dan deze harde overgang.
       </>
     ),
     casesTitle: "Knikgevallen (Euler)",
@@ -114,12 +121,19 @@ const T = {
     resultSigmaCr: "σ_cr",
     resultS: "S",
     unsafeNote: "F ≥ F_cr — at this load the bar buckles per Euler. S < 1.",
-    lowLambdaNote: (lambda: string, limit: string, material: string, squash: string, euler: string) => (
+    lowLambdaNote: (
+      lambda: string,
+      limit: string,
+      material: string,
+      squash: string,
+      euler: string,
+    ) => (
       <>
-        λ = {lambda} is below λ_limit = {limit} for {material} (π√(E/Rp0.2)). Euler doesn't apply here: the bar
-        squashes/yields before it buckles. F_cr above is therefore the squash load A·Rp0.2 = {squash} N, not the
-        Euler load ({euler} N — far higher, and not achievable). Between the two regimes, Tetmajer or the Johnson
-        parabola is more accurate than this hard transition.
+        λ = {lambda} is below λ_limit = {limit} for {material} (π√(E/Rp0.2)). Euler doesn't apply
+        here: the bar squashes/yields before it buckles. F_cr above is therefore the squash load
+        A·Rp0.2 = {squash} N, not the Euler load ({euler} N — far higher, and not achievable).
+        Between the two regimes, Tetmajer or the Johnson parabola is more accurate than this hard
+        transition.
       </>
     ),
     casesTitle: "Buckling cases (Euler)",
@@ -142,7 +156,9 @@ export function BucklingCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [sectionKind, setSectionKind] = useState<SectionKind>((search.get("section") as SectionKind) ?? "rond");
+  const [sectionKind, setSectionKind] = useState<SectionKind>(
+    (search.get("section") as SectionKind) ?? "rond",
+  );
   const [D, setD] = useState(search.get("D") ?? "20");
   const [dIn, setDIn] = useState(search.get("dIn") ?? "14");
   const [b, setB] = useState(search.get("b") ?? "40");
@@ -150,7 +166,9 @@ export function BucklingCalc() {
   const [a, setA] = useState(search.get("a") ?? "10");
   const [t2, setT2] = useState(search.get("t") ?? "3");
   const [L, setL] = useState(search.get("L") ?? "1000");
-  const [endCondition, setEndCondition] = useState<EndConditionId>((search.get("end") as EndConditionId) ?? "hh");
+  const [endCondition, setEndCondition] = useState<EndConditionId>(
+    (search.get("end") as EndConditionId) ?? "hh",
+  );
   const [materialId, setMaterialId] = useState(search.get("material") ?? "rvs");
   const [F, setF] = useState(search.get("F") ?? "");
 
@@ -183,7 +201,11 @@ export function BucklingCalc() {
       case "vierkant":
         return { a: parseNum(a) ?? undefined };
       case "koker":
-        return { b: parseNum(b) ?? undefined, h: parseNum(h) ?? undefined, t: parseNum(t2) ?? undefined };
+        return {
+          b: parseNum(b) ?? undefined,
+          h: parseNum(h) ?? undefined,
+          t: parseNum(t2) ?? undefined,
+        };
     }
   }, [sectionKind, D, dIn, b, h, a, t2]);
 
@@ -198,7 +220,15 @@ export function BucklingCalc() {
 
   const result =
     section && Lraw != null
-      ? columnCapacity({ L: Lraw, k, E, I: section.I, A: section.A, F: Fraw, rp02: rp02For(materialId) })
+      ? columnCapacity({
+          L: Lraw,
+          k,
+          E,
+          I: section.I,
+          A: section.A,
+          F: Fraw,
+          rp02: rp02For(materialId),
+        })
       : null;
 
   const copy = useMemo(
@@ -215,14 +245,19 @@ export function BucklingCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.lengthLabel}>
             <NumInput id="knik-length" value={L} onChange={setL} />
           </Field>
           <Field label={t.endConditionLabel}>
-            <SelectInput value={endCondition} onChange={(v) => setEndCondition(v as EndConditionId)}>
+            <SelectInput
+              value={endCondition}
+              onChange={(v) => setEndCondition(v as EndConditionId)}
+            >
               {END_CONDITIONS.map((c) => (
                 <option key={c.id} value={c.id}>
                   {label(c)} (k={fmtDotComma(c.kDesign, 3).replace(/,?0+$/, "")})
@@ -295,7 +330,9 @@ export function BucklingCalc() {
         </div>
 
         <details className="mt-6">
-          <summary className="cursor-pointer text-sm font-medium text-ink">{t.optionalAxial}</summary>
+          <summary className="cursor-pointer text-sm font-medium text-ink">
+            {t.optionalAxial}
+          </summary>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label={t.axialForce}>
               <NumInput id="knik-force" value={F} onChange={setF} />
@@ -311,19 +348,23 @@ export function BucklingCalc() {
                 {endLabel ? label(endLabel) : ""} · {label(material)} · E = {fmtN(E)} N/mm²
               </p>
               <ResultGrid
-                items={[
-                  { label: t.resultI, value: `${fmtN(result.I)} mm⁴` },
-                  { label: t.resultA, value: `${fmtN(result.A)} mm²` },
-                  { label: t.resultI2, value: `${fmtDotComma(result.i, 1)} mm` },
-                  { label: t.resultLeff, value: `${fmtN(result.Leff)} mm` },
-                  { label: t.resultLambda, value: fmtDotComma(result.lambda, 1) },
-                  {
-                    label: result.governing === "plooien" ? t.resultFcrBuckle : t.resultFcrEuler,
-                    value: `${fmtN(result.Fcr)} N`,
-                  },
-                  { label: t.resultSigmaCr, value: `${fmtDotComma(result.sigmaCr, 1)} N/mm²` },
-                  result.safety != null ? { label: t.resultS, value: fmtDotComma(result.safety, 2) } : null,
-                ].filter(Boolean) as { label: string; value: string }[]}
+                items={
+                  [
+                    { label: t.resultI, value: `${fmtN(result.I)} mm⁴` },
+                    { label: t.resultA, value: `${fmtN(result.A)} mm²` },
+                    { label: t.resultI2, value: `${fmtDotComma(result.i, 1)} mm` },
+                    { label: t.resultLeff, value: `${fmtN(result.Leff)} mm` },
+                    { label: t.resultLambda, value: fmtDotComma(result.lambda, 1) },
+                    {
+                      label: result.governing === "plooien" ? t.resultFcrBuckle : t.resultFcrEuler,
+                      value: `${fmtN(result.Fcr)} N`,
+                    },
+                    { label: t.resultSigmaCr, value: `${fmtDotComma(result.sigmaCr, 1)} N/mm²` },
+                    result.safety != null
+                      ? { label: t.resultS, value: fmtDotComma(result.safety, 2) }
+                      : null,
+                  ].filter(Boolean) as { label: string; value: string }[]
+                }
               />
               {unsafe ? (
                 <Note>{t.unsafeNote}</Note>
@@ -350,9 +391,14 @@ export function BucklingCalc() {
           <p className="mt-5 text-sm text-muted">{t.fillValidDims}</p>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <BucklingModes active={endCondition} />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.casesTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.casesTitle}
+        </h2>
         <Note>{t.casesNote}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -376,11 +422,15 @@ export function BucklingCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.engineeringtoolbox.com/euler-column-formula-d_1813.html">{t.sourceEuler}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/euler-column-formula-d_1813.html">
+          {t.sourceEuler}
+        </SourceLink>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.modulusTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.modulusTitle}
+        </h2>
         <Note>{t.modulusNote}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -400,7 +450,9 @@ export function BucklingCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.engineeringtoolbox.com/young-modulus-d_417.html">{t.sourceModulus}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/young-modulus-d_417.html">
+          {t.sourceModulus}
+        </SourceLink>
       </section>
     </>
   );

@@ -93,8 +93,18 @@ const CATEGORIES: Category[] = [
 ];
 
 const T = {
-  nl: { eyebrow: "Bronnen", heading: "CAD-bibliotheken", intro: "Externe bronnen voor 3D-modellen, componenten, materialen en fabricage-richtlijnen. Mechify beheert deze sites niet — controleer licentievoorwaarden per bron." },
-  en: { eyebrow: "Resources", heading: "CAD libraries", intro: "External resources for 3D models, components, materials and manufacturing guidelines. Mechify does not manage these sites — check the license terms for each source." },
+  nl: {
+    eyebrow: "Bronnen",
+    heading: "CAD-bibliotheken",
+    intro:
+      "Externe bronnen voor 3D-modellen, componenten, materialen en fabricage-richtlijnen. Mechify beheert deze sites niet — controleer licentievoorwaarden per bron.",
+  },
+  en: {
+    eyebrow: "Resources",
+    heading: "CAD libraries",
+    intro:
+      "External resources for 3D models, components, materials and manufacturing guidelines. Mechify does not manage these sites — check the license terms for each source.",
+  },
 };
 
 export function CadResourcesCalc() {
@@ -103,13 +113,17 @@ export function CadResourcesCalc() {
   return (
     <CalcPanel>
       <CalcEyebrow>{t.eyebrow}</CalcEyebrow>
-      <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+      <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+        {t.heading}
+      </h2>
       <Note>{t.intro}</Note>
 
       <div className="mt-8 space-y-8">
         {CATEGORIES.map((cat) => (
           <div key={cat.title.nl}>
-            <h3 className="font-display text-lg font-semibold tracking-tight text-ink">{cat.title[locale]}</h3>
+            <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
+              {cat.title[locale]}
+            </h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {cat.resources.map((r) => (
                 <a
@@ -121,9 +135,14 @@ export function CadResourcesCalc() {
                 >
                   <p className="flex items-center gap-1.5 font-medium text-ink">
                     {r.name}
-                    <ExternalLink className="size-3.5 text-subtle transition-colors group-hover:text-ink" aria-hidden="true" />
+                    <ExternalLink
+                      className="size-3.5 text-subtle transition-colors group-hover:text-ink"
+                      aria-hidden="true"
+                    />
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted">{r.description[locale]}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                    {r.description[locale]}
+                  </p>
                 </a>
               ))}
             </div>

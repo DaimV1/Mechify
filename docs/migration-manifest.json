@@ -1,0 +1,278 @@
+{
+  "sources": {
+    "mechify": "66202ef52a7fef05b516d1dae62ed6eed2189efe",
+    "damianvink": "762da5cc73045755ef51944a3adcddf1623aa863"
+  },
+  "tools": [
+    {
+      "name": "Passingen",
+      "route": "/tools/fit-tolerances",
+      "visual": "Geen losse bronvisual",
+      "functionality": "ISO-passing, diameter, band, speling/overmaat; tabellen en kopiëren",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [diameter, setDiameter] = useState(() => search.get(\"d\") ?? readStoredDiameter({ min: 4, max: 3150 }));",
+        "const [fitId, setFitId] = useState(() => {",
+        "const fromUrl = search.get(\"fit\");"
+      ]
+    },
+    {
+      "name": "Algemene toleranties",
+      "route": "/tools/iso-2768",
+      "visual": "Geen losse bronvisual",
+      "functionality": "Lineair, hoek en geometrie; bron-URL len/linear/form vertaald naar d/leg/gl/lc/gc",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [linearClass, setLinearClass] = useState<LinearClass>((search.get(\"lc\") as LinearClass) ?? \"m\");",
+        "const [size, setSize] = useState(search.get(\"d\") ?? \"50\");",
+        "const [legLength, setLegLength] = useState(search.get(\"leg\") ?? \"50\");",
+        "const [geoClass, setGeoClass] = useState<GeoClass>((search.get(\"gc\") as GeoClass) ?? \"K\");",
+        "const [geoLength, setGeoLength] = useState(search.get(\"gl\") ?? \"100\");"
+      ]
+    },
+    {
+      "name": "Spiebaan",
+      "route": "/tools/keyways",
+      "visual": "KeywaySection",
+      "functionality": "Diameter, spiemaat, groefdiepte en breedtetoleranties",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [diameter, setDiameter] = useState(() => search.get(\"d\") ?? readStoredDiameter({ min: 7, max: 110 }));"
+      ]
+    },
+    {
+      "name": "Lagerpassingen",
+      "route": "/tools/bearing-fits",
+      "visual": "BearingFitChart",
+      "functionality": "Vast/los behouden; roterende ring als aanvullend model",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [diameter, setDiameter] = useState(() => search.get(\"d\") ?? readStoredDiameter({ min: 1, max: 50 }));",
+        "const [load, setLoad] = useState<LoadClass>((search.get(\"load\") as LoadClass) ?? \"normaal\");",
+        "const [side, setSide] = useState<BearingSide>((search.get(\"side\") as BearingSide) ?? \"vast\");"
+      ]
+    },
+    {
+      "name": "Seegerringgroef",
+      "route": "/tools/seeger-grooves",
+      "visual": "CirclipSection",
+      "functionality": "Ontwerpschatting behouden; originele groeftabel als aanvullend model",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [kind, setKind] = useState<CirclipKind>((search.get(\"kind\") as CirclipKind) ?? \"as\");",
+        "const [diameter, setDiameter] = useState(() => search.get(\"d\") ?? readStoredDiameter({ min: 3, max: 100 }));"
+      ]
+    },
+    {
+      "name": "Bevestigingsmateriaal",
+      "route": "/tools/fasteners",
+      "visual": "BoltSection",
+      "functionality": "Moerfactor behouden; groef-/bouttabel en wrijving als aanvullend model",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [size, setSize] = useState<ThreadSize>(((search.get(\"m\") && search.get(\"m\")! in CLEARANCE_HOLES ? search.get(\"m\") : \"M8\") as ThreadSize));",
+        "const [classId, setClassId] = useState(search.get(\"c\") ?? \"8.8\");",
+        "const [k, setK] = useState(search.get(\"k\") ?? \"0.2\");"
+      ]
+    },
+    {
+      "name": "O-ringgroef",
+      "route": "/tools/o-ring-grooves",
+      "visual": "OringGroove",
+      "functionality": "Vrije compressie/breedtefactor behouden; originele groeftabel als aanvullend model",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [cord, setCord] = useState(search.get(\"cord\") ?? \"3.55\");",
+        "const [direction, setDirection] = useState<GrooveDirection>((search.get(\"dir\") as GrooveDirection) ?? \"radiaal\");",
+        "const [sealType, setSealType] = useState<SealType>((search.get(\"seal\") as SealType) ?? \"statisch\");",
+        "const [squeeze, setSqueeze] = useState(search.get(\"sq\") ?? String(seal.default));",
+        "const [widthFactor, setWidthFactor] = useState(search.get(\"wf\") ?? \"1.4\");"
+      ]
+    },
+    {
+      "name": "Kanten",
+      "route": "/tools/edges",
+      "visual": "BendSection",
+      "functionality": "Vrije buigberekening behouden; materiaal/haaks/scherp-richtlijnen als aanvullend model",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [thickness, setThickness] = useState(search.get(\"t\") ?? \"2\");",
+        "const [radius, setRadius] = useState(search.get(\"r\") ?? \"2\");",
+        "const [angle, setAngle] = useState(search.get(\"a\") ?? \"90\");",
+        "const [leg1, setLeg1] = useState(search.get(\"l1\") ?? \"30\");",
+        "const [leg2, setLeg2] = useState(search.get(\"l2\") ?? \"30\");",
+        "const [materialId, setMaterialId] = useState(search.get(\"mat\") ?? \"staal\");",
+        "const [zOffset, setZOffset] = useState(search.get(\"z\") ?? \"6\");"
+      ]
+    },
+    {
+      "name": "Eenheden",
+      "route": "/calculators/units",
+      "visual": "Geen losse bronvisual",
+      "functionality": "Alle oude categorieën, tweerichtingsconverter als aanvullend model, vermogen toegevoegd",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [categoryId, setCategoryId] = useState(search.get(\"cat\") ?? \"length\");",
+        "const [fromId, setFromId] = useState(search.get(\"from\") ?? category.units[0].id);",
+        "const [toId, setToId] = useState(search.get(\"to\") ?? category.units[1]?.id ?? category.units[0].id);",
+        "const [value, setValue] = useState(search.get(\"v\") ?? \"1\");"
+      ]
+    },
+    {
+      "name": "Motorspecificatie",
+      "route": "/calculators/motor-specification",
+      "visual": "Geen losse bronvisual",
+      "functionality": "Stationair model behouden; versnelling, rollenmassa en uitgebreid werkpunt toegevoegd",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [app, setApp] = useState<Application>((search.get(\"app\") as Application) ?? \"band\");",
+        "const [mass, setMass] = useState(search.get(\"m\") ?? \"500\");",
+        "const [speed, setSpeed] = useState(search.get(\"v\") ?? \"0.5\");",
+        "const [diameter, setDiameter] = useState(search.get(\"d\") ?? \"150\");",
+        "const [mu, setMu] = useState(search.get(\"mu\") ?? \"0.05\");",
+        "const [angle, setAngle] = useState(search.get(\"a\") ?? \"10\");",
+        "const [efficiency, setEfficiency] = useState(search.get(\"eta\") ?? \"0.9\");",
+        "const [safety, setSafety] = useState(search.get(\"s\") ?? \"1.15\");"
+      ]
+    },
+    {
+      "name": "Pneumatische cilinder",
+      "route": "/calculators/pneumatic-cylinder",
+      "visual": "Eigen SVG bij gegeven diameter",
+      "functionality": "Boring/knik behouden; lastfactor, duwen/trekken, luchtverbruik; extra krachtmodel",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [force, setForce] = useState(search.get(\"f\") ?? \"1000\");",
+        "const [pressure, setPressure] = useState(search.get(\"p\") ?? \"6\");",
+        "const [stroke, setStroke] = useState(search.get(\"l\") ?? \"300\");",
+        "const [endCondition, setEndCondition] = useState<EndConditionId>((search.get(\"end\") as EndConditionId) ?? \"fc\");",
+        "const [materialId, setMaterialId] = useState(search.get(\"material\") ?? \"staal\");",
+        "const [showBuckling, setShowBuckling] = useState(false);"
+      ]
+    },
+    {
+      "name": "Knikberekening",
+      "route": "/calculators/buckling",
+      "visual": "BucklingModes",
+      "functionality": "Alle doorsneden, inklemmingen, materialen, last en grensslankheid behouden",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [sectionKind, setSectionKind] = useState<SectionKind>((search.get(\"section\") as SectionKind) ?? \"rond\");",
+        "const [D, setD] = useState(search.get(\"D\") ?? \"20\");",
+        "const [dIn, setDIn] = useState(search.get(\"dIn\") ?? \"14\");",
+        "const [b, setB] = useState(search.get(\"b\") ?? \"40\");",
+        "const [h, setH] = useState(search.get(\"h\") ?? \"10\");",
+        "const [a, setA] = useState(search.get(\"a\") ?? \"10\");",
+        "const [t2, setT2] = useState(search.get(\"t\") ?? \"3\");",
+        "const [L, setL] = useState(search.get(\"L\") ?? \"1000\");",
+        "const [endCondition, setEndCondition] = useState<EndConditionId>((search.get(\"end\") as EndConditionId) ?? \"hh\");",
+        "const [materialId, setMaterialId] = useState(search.get(\"material\") ?? \"rvs\");",
+        "const [F, setF] = useState(search.get(\"F\") ?? \"\");"
+      ]
+    },
+    {
+      "name": "Doorbuiging balk",
+      "route": "/calculators/beam-deflection",
+      "visual": "BeamDeflection",
+      "functionality": "Oplegging/uitkraging behouden; maximale doorbuiging, locatie en spanning toegevoegd",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [search, setSearch] = useSearchParams();",
+        "const [beamType, setBeamType] = useState<BeamType>((search.get(\"type\") as BeamType) ?? \"opgelegd\");",
+        "const [sectionKind, setSectionKind] = useState<SectionKind>((search.get(\"section\") as SectionKind) ?? \"rechthoek\");",
+        "const [D, setD] = useState(search.get(\"D\") ?? \"20\");",
+        "const [dIn, setDIn] = useState(search.get(\"dIn\") ?? \"14\");",
+        "const [b, setB] = useState(search.get(\"b\") ?? \"40\");",
+        "const [h, setH] = useState(search.get(\"h\") ?? \"10\");",
+        "const [a, setA] = useState(search.get(\"a\") ?? \"10\");",
+        "const [t2, setT2] = useState(search.get(\"t\") ?? \"3\");",
+        "const [L, setL] = useState(search.get(\"L\") ?? \"1000\");",
+        "const [posA, setPosA] = useState(search.get(\"posA\") ?? \"500\");",
+        "const [force, setForce] = useState(search.get(\"f\") ?? \"500\");",
+        "const [materialId, setMaterialId] = useState(search.get(\"material\") ?? \"staal\");"
+      ]
+    },
+    {
+      "name": "CAD-bibliotheken",
+      "route": "/cad/resources",
+      "visual": "Geen bronvisual",
+      "functionality": "Bestaande links plus originele broncategorieën",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": []
+    },
+    {
+      "name": "Macro-bibliotheek",
+      "route": "/cad/macros",
+      "visual": "Geen bronvisual",
+      "functionality": "3 bestaande codevoorbeelden en 10 originele .bas-downloads",
+      "status": "migrated",
+      "defaultsAndStateDeclarations": [
+        "const [done, setDone] = useState(false);"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "file": "inventor-batch-pdf.bas",
+      "sha256": "306f037ef95c1d43c900e03f01f2bac0ab130e6e2a834a122240ef24e444111d",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "inventor-export-step.bas",
+      "sha256": "a4f121619db031e01c05dc990b5bd02347cf2a820b1554efc6b05f4d5abf3908",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "inventor-flat-pattern-dxf.bas",
+      "sha256": "7f5f20d96aee1e8535cc2d2be217d0682783c5864425b7d808d9335a451d528f",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "inventor-save-all.bas",
+      "sha256": "938208670afd799502cdcf8704ed2afd1770daff6c762cdd2baed32cd3d89d27",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "inventor-show-iproperties.bas",
+      "sha256": "e4e1fdc25a2977691feab6d40ad1195101bf1c87d62ab2a45b1665aaa30ec2ff",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "solidworks-batch-pdf.bas",
+      "sha256": "2005782d3624cb64204cff0cbd2c96b6af58eed83d76fea621b4644211836b7d",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "solidworks-export-step.bas",
+      "sha256": "1437e6f8ca117d173d5b820ffdd66aa012eed5d4acf02aaa33d06a20283c7147",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "solidworks-flat-pattern-dxf.bas",
+      "sha256": "c56e5f0cd1b4dd8b54ad86cad8f0d2a5c82288485956529909f13adb8476e45a",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "solidworks-save-all.bas",
+      "sha256": "e753893d386e511d8a6322d2f9a2d4193a8a469f8d7a067031bdfc6c5ddd5d73",
+      "identicalToOriginal": true
+    },
+    {
+      "file": "solidworks-show-properties.bas",
+      "sha256": "d682c60ab34abe0e2cc7f0645ea3e08d8d0840d592d63459b3ebb77eae9bbd7b",
+      "identicalToOriginal": true
+    }
+  ]
+}

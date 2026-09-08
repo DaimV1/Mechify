@@ -29,8 +29,22 @@ export const BANDS: Band[] = [
   { over: 6, to: 10, label: rangeLabel(6, 10), labelEn: rangeLabel(6, 10) },
   { over: 10, to: 18, label: rangeLabel(10, 18), labelEn: rangeLabel(10, 18) },
   { over: 18, to: 30, label: rangeLabel(18, 30), labelEn: rangeLabel(18, 30) },
-  { over: 30, to: 40, label: rangeLabel(30, 40), labelEn: rangeLabel(30, 40), calcOver: 30, calcTo: 50 },
-  { over: 40, to: 50, label: rangeLabel(40, 50), labelEn: rangeLabel(40, 50), calcOver: 30, calcTo: 50 },
+  {
+    over: 30,
+    to: 40,
+    label: rangeLabel(30, 40),
+    labelEn: rangeLabel(30, 40),
+    calcOver: 30,
+    calcTo: 50,
+  },
+  {
+    over: 40,
+    to: 50,
+    label: rangeLabel(40, 50),
+    labelEn: rangeLabel(40, 50),
+    calcOver: 30,
+    calcTo: 50,
+  },
   { over: 50, to: 80, label: rangeLabel(50, 80), labelEn: rangeLabel(50, 80) },
   { over: 80, to: 120, label: rangeLabel(80, 120), labelEn: rangeLabel(80, 120) },
   { over: 120, to: 180, label: rangeLabel(120, 180), labelEn: rangeLabel(120, 180) },
@@ -95,7 +109,10 @@ export const HOLE: Record<string, { ES: (number | null)[]; EI: (number | null)[]
 };
 
 export const SHAFT: Record<string, { es: (number | null)[]; ei: (number | null)[] }> = {
-  c11: { es: [null, -70, -80, -95, -110, -120, -130], ei: [null, -145, -170, -205, -240, -280, -290] },
+  c11: {
+    es: [null, -70, -80, -95, -110, -120, -130],
+    ei: [null, -145, -170, -205, -240, -280, -290],
+  },
   d9: { es: [null, -30, -40, -50, -65, -80, -80], ei: [null, -60, -76, -93, -117, -142, -142] },
   f7: { es: [null, -10, -13, -16, -20, -25, -25], ei: [null, -22, -28, -34, -41, -50, -50] },
   g6: { es: [null, -4, -5, -6, -7, -9, -9], ei: [null, -12, -14, -17, -20, -25, -25] },
@@ -173,7 +190,11 @@ function parseClassId(id: string): { letter: string; grade: number } | null {
   return { letter: m[1], grade: Number(m[2]) };
 }
 
-function computeHoleDeviation(id: string, band: Band, bandIdx: number): { ES: number; EI: number } | null {
+function computeHoleDeviation(
+  id: string,
+  band: Band,
+  bandIdx: number,
+): { ES: number; EI: number } | null {
   const parsed = parseClassId(id);
   if (!parsed) return null;
   const { letter, grade } = parsed;
@@ -185,11 +206,16 @@ function computeHoleDeviation(id: string, band: Band, bandIdx: number): { ES: nu
   if (!FORMULA_HOLE_LETTERS.has(letter)) return null;
   const IT = itWidth(bandIdx, D, grade);
   if (IT == null) return null;
-  const EI = letter === "H" ? 0 : Math.round(deviationMagnitude(letter.toLowerCase() as "g" | "f" | "d", D));
+  const EI =
+    letter === "H" ? 0 : Math.round(deviationMagnitude(letter.toLowerCase() as "g" | "f" | "d", D));
   return { ES: EI + Math.round(IT), EI };
 }
 
-function computeShaftDeviation(id: string, band: Band, bandIdx: number): { es: number; ei: number } | null {
+function computeShaftDeviation(
+  id: string,
+  band: Band,
+  bandIdx: number,
+): { es: number; ei: number } | null {
   const parsed = parseClassId(id);
   if (!parsed) return null;
   const { letter, grade } = parsed;
@@ -282,7 +308,8 @@ export const FITS = [
     shaft: "k6",
     kind: "overgang" as FitKind,
     use: "Overgang. Tikken met hamer; centreren waar speling of lichte klemming mag.",
-    useEn: "Transition. Tapped in with a hammer; centering where clearance or light clamping is acceptable.",
+    useEn:
+      "Transition. Tapped in with a hammer; centering where clearance or light clamping is acceptable.",
   },
   {
     id: "H7/n6",
@@ -298,7 +325,8 @@ export const FITS = [
     shaft: "p6",
     kind: "lijn" as FitKind,
     use: "Lichte perspassing. Tot 18 mm max. speling 0 µm (lijnpassing mogelijk). Daarboven altijd overmaat.",
-    useEn: "Light press fit. Up to 18 mm max. clearance 0 µm (line fit possible). Above that, always interference.",
+    useEn:
+      "Light press fit. Up to 18 mm max. clearance 0 µm (line fit possible). Above that, always interference.",
   },
   {
     id: "H7/s6",
@@ -345,7 +373,11 @@ export function kindLabel(
   if (minC >= 0 && maxC >= 0)
     return { kind: "los", text: "Los — altijd speling", textEn: "Clearance — always clearance" };
   if (maxC < 0)
-    return { kind: "vast", text: "Vast — altijd overmaat", textEn: "Interference — always interference" };
+    return {
+      kind: "vast",
+      text: "Vast — altijd overmaat",
+      textEn: "Interference — always interference",
+    };
   if (maxC === 0 && minC < 0)
     return {
       kind: "lijn",

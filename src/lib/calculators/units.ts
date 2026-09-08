@@ -30,6 +30,17 @@ const linear = (id: string, label: string, factor: number): UnitDef => ({
  */
 export const UNIT_CATEGORIES: UnitCategory[] = [
   {
+    id: "power",
+    label: "Vermogen",
+    baseLabel: "W",
+    units: [
+      linear("w", "W", 1),
+      linear("kw", "kW", 1000),
+      linear("mw", "MW", 1000000),
+      linear("hp", "hp (mechanisch)", 745.6998715822702),
+    ],
+  },
+  {
     id: "length",
     label: "Lengte",
     baseLabel: "mm",
@@ -48,7 +59,12 @@ export const UNIT_CATEGORIES: UnitCategory[] = [
     units: [
       { id: "c", label: "°C", toBase: (v) => v + 273.15, fromBase: (v) => v - 273.15 },
       { id: "k", label: "K", toBase: (v) => v, fromBase: (v) => v },
-      { id: "f", label: "°F", toBase: (v) => ((v - 32) * 5) / 9 + 273.15, fromBase: (v) => ((v - 273.15) * 9) / 5 + 32 },
+      {
+        id: "f",
+        label: "°F",
+        toBase: (v) => ((v - 32) * 5) / 9 + 273.15,
+        fromBase: (v) => ((v - 273.15) * 9) / 5 + 32,
+      },
     ],
   },
   {
@@ -67,7 +83,12 @@ export const UNIT_CATEGORIES: UnitCategory[] = [
     id: "force",
     label: "Kracht",
     baseLabel: "N",
-    units: [linear("n", "N", 1), linear("kn", "kN", 1000), linear("lbf", "lbf", 4.4482216152605), linear("kgf", "kgf", 9.80665)],
+    units: [
+      linear("n", "N", 1),
+      linear("kn", "kN", 1000),
+      linear("lbf", "lbf", 4.4482216152605),
+      linear("kgf", "kgf", 9.80665),
+    ],
   },
   {
     id: "pressure",
@@ -87,25 +108,42 @@ export const UNIT_CATEGORIES: UnitCategory[] = [
     id: "torque",
     label: "Koppel",
     baseLabel: "N·m",
-    units: [linear("nm", "N·m", 1), linear("nmm", "N·mm", 0.001), linear("lbfft", "lbf·ft", 1.3558179483314), linear("lbfin", "lbf·in", 0.1129848290276)],
+    units: [
+      linear("nm", "N·m", 1),
+      linear("nmm", "N·mm", 0.001),
+      linear("lbfft", "lbf·ft", 1.3558179483314),
+      linear("lbfin", "lbf·in", 0.1129848290276),
+    ],
   },
   {
     id: "mass",
     label: "Massa",
     baseLabel: "kg",
-    units: [linear("g", "g", 0.001), linear("kg", "kg", 1), linear("lb", "lb", 0.45359237), linear("oz", "oz", 0.028349523125)],
+    units: [
+      linear("g", "g", 0.001),
+      linear("kg", "kg", 1),
+      linear("lb", "lb", 0.45359237),
+      linear("oz", "oz", 0.028349523125),
+    ],
   },
 ];
 
 export function findCategory(id: string): UnitCategory {
-  return UNIT_CATEGORIES.find((c) => c.id === id) ?? UNIT_CATEGORIES[0];
+  return (
+    UNIT_CATEGORIES.find((c) => c.id === id) ?? UNIT_CATEGORIES.find((c) => c.id === "length")!
+  );
 }
 
 export function findUnit(category: UnitCategory, id: string): UnitDef {
   return category.units.find((u) => u.id === id) ?? category.units[0];
 }
 
-export function convert(value: number, category: UnitCategory, fromId: string, toId: string): number {
+export function convert(
+  value: number,
+  category: UnitCategory,
+  fromId: string,
+  toId: string,
+): number {
   const from = findUnit(category, fromId);
   const to = findUnit(category, toId);
   return to.fromBase(from.toBase(value));

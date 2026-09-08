@@ -1,6 +1,12 @@
+import { CirclipSection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CIRCLIP_KINDS, computeGroove, fmtCirclip, type CirclipKind } from "@/lib/calculators/circlip";
+import {
+  CIRCLIP_KINDS,
+  computeGroove,
+  fmtCirclip,
+  type CirclipKind,
+} from "@/lib/calculators/circlip";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import {
@@ -61,7 +67,9 @@ export function SeegerGroovesCalc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [kind, setKind] = useState<CirclipKind>((search.get("kind") as CirclipKind) ?? "as");
-  const [diameter, setDiameter] = useState(() => search.get("d") ?? readStoredDiameter({ min: 3, max: 100 }));
+  const [diameter, setDiameter] = useState(
+    () => search.get("d") ?? readStoredDiameter({ min: 3, max: 100 }),
+  );
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -98,7 +106,9 @@ export function SeegerGroovesCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.type}>
@@ -135,9 +145,20 @@ export function SeegerGroovesCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <CirclipSection
+          kind={kind}
+          d1={Number.isFinite(d) ? d : undefined}
+          d2={result?.grooveDiameter}
+          b={result?.grooveWidth}
+          t={result?.grooveDepth}
+        />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.estimateTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.estimateTitle}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
@@ -149,19 +170,21 @@ export function SeegerGroovesCalc() {
               </tr>
             </thead>
             <tbody>
-              {[8, 10, 12, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100].map((dia) => {
-                const r = computeGroove(kind, dia);
-                return (
-                  <tr key={dia} className={dia === d ? "is-active" : ""}>
-                    <th scope="row" className="normal-case">
-                      {dia}
-                    </th>
-                    <td>{r ? `Ø${fmtCirclip(r.grooveDiameter)}` : "—"}</td>
-                    <td>{r ? fmtCirclip(r.grooveWidth) : "—"}</td>
-                    <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
-                  </tr>
-                );
-              })}
+              {[8, 10, 12, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100].map(
+                (dia) => {
+                  const r = computeGroove(kind, dia);
+                  return (
+                    <tr key={dia} className={dia === d ? "is-active" : ""}>
+                      <th scope="row" className="normal-case">
+                        {dia}
+                      </th>
+                      <td>{r ? `Ø${fmtCirclip(r.grooveDiameter)}` : "—"}</td>
+                      <td>{r ? fmtCirclip(r.grooveWidth) : "—"}</td>
+                      <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
+                    </tr>
+                  );
+                },
+              )}
             </tbody>
           </table>
         </div>

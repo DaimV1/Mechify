@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { CalcEyebrow, CalcPanel, Note } from "@/components/calculators/calc-ui";
 import { useLocale, type Locale } from "@/lib/i18n/locale-context";
 
-type Macro = { title: Record<Locale, string>; description: Record<Locale, string>; code: Record<Locale, string> };
+type Macro = {
+  title: Record<Locale, string>;
+  description: Record<Locale, string>;
+  code: Record<Locale, string>;
+};
 
 const MACROS: Macro[] = [
   {
@@ -216,7 +220,9 @@ function MacroBlock({ macro, locale }: { macro: Macro; locale: Locale }) {
     <div className="rounded-lg border border-border bg-surface p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="font-display text-base font-semibold tracking-tight text-ink">{macro.title[locale]}</h3>
+          <h3 className="font-display text-base font-semibold tracking-tight text-ink">
+            {macro.title[locale]}
+          </h3>
           <p className="mt-1 text-sm leading-relaxed text-muted">{macro.description[locale]}</p>
         </div>
         <Button
@@ -250,7 +256,9 @@ export function MacrosCalc() {
   return (
     <CalcPanel>
       <CalcEyebrow>{t.eyebrow}</CalcEyebrow>
-      <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+      <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+        {t.heading}
+      </h2>
       <Note>{t.intro}</Note>
 
       <div className="mt-6 space-y-4">

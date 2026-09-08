@@ -20,7 +20,9 @@ export function ToolCard({ tool }: { tool: Tool }) {
     >
       <div>
         <div className="flex items-start justify-between gap-3">
-          <p className="font-mono text-xs uppercase tracking-[0.1em] text-subtle">{tool.standard}</p>
+          <p className="font-mono text-xs uppercase tracking-[0.1em] text-subtle">
+            {tool.standard}
+          </p>
           <StatusBadge status={tool.status} />
         </div>
         <h3 className="mt-3 font-display text-lg font-semibold tracking-tight text-ink">{title}</h3>

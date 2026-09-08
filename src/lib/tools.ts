@@ -19,7 +19,12 @@ export function getToolText(tool: Tool, locale: Locale) {
   return { title: tool.title[locale], blurb: tool.blurb[locale] };
 }
 
-export const SECTIONS: { id: ToolSection; label: Localized; href: string; description: Localized }[] = [
+export const SECTIONS: {
+  id: ToolSection;
+  label: Localized;
+  href: string;
+  description: Localized;
+}[] = [
   {
     id: "tools",
     label: { nl: "Tools", en: "Tools" },
@@ -55,6 +60,32 @@ export function getSectionText(section: (typeof SECTIONS)[number], locale: Local
 
 export const TOOLS: Tool[] = [
   {
+    id: "drive-power",
+    section: "calculators",
+    slug: "drive-power",
+    title: { nl: "Koppel, vermogen & toerental", en: "Torque, power & speed" },
+    standard: "P = T · ω",
+    blurb: {
+      nl: "Bereken één onbekende uit twee waarden, met expliciete eenheden.",
+      en: "Calculate one unknown from two values, with explicit units.",
+    },
+    tags: ["kw", "motor", "rpm", "koppel", "vermogen"],
+    status: "live",
+  },
+  {
+    id: "transmission",
+    section: "calculators",
+    slug: "transmission",
+    title: { nl: "Overbrengingsverhouding", en: "Transmission ratio" },
+    standard: "i = n₁ / n₂",
+    blurb: {
+      nl: "Uitgaand toerental en koppel, met een instelbaar rendement.",
+      en: "Output speed and torque with adjustable efficiency.",
+    },
+    tags: ["reductie", "aandrijving", "koppel", "toerental"],
+    status: "live",
+  },
+  {
     id: "fit-tolerances",
     section: "tools",
     slug: "fit-tolerances",
@@ -64,7 +95,28 @@ export const TOOLS: Tool[] = [
       nl: "Voorkeurpassingen H/JS/G/F/D tot Ø 3150 mm, met speling en overmaat per band.",
       en: "Preferred fits H/JS/G/F/D up to Ø 3150 mm, with clearance and interference per band.",
     },
-    tags: ["h7", "g6", "h6", "js7", "f7", "d9", "k6", "n6", "p6", "s6", "c11", "speling", "overmaat", "boring", "as", "clearance", "interference", "fit", "bore", "shaft"],
+    tags: [
+      "h7",
+      "g6",
+      "h6",
+      "js7",
+      "f7",
+      "d9",
+      "k6",
+      "n6",
+      "p6",
+      "s6",
+      "c11",
+      "speling",
+      "overmaat",
+      "boring",
+      "as",
+      "clearance",
+      "interference",
+      "fit",
+      "bore",
+      "shaft",
+    ],
     status: "live",
   },
   {
@@ -103,7 +155,19 @@ export const TOOLS: Tool[] = [
       nl: "Groefkogellagers: vast/losse zijde, SKF-klassen tot Ø 50 mm.",
       en: "Deep groove ball bearings: fixed/floating side, SKF classes up to Ø 50 mm.",
     },
-    tags: ["kogel", "vast", "los", "lager", "j6", "k5", "skf", "bearing", "ball", "fixed", "floating"],
+    tags: [
+      "kogel",
+      "vast",
+      "los",
+      "lager",
+      "j6",
+      "k5",
+      "skf",
+      "bearing",
+      "ball",
+      "fixed",
+      "floating",
+    ],
     status: "live",
   },
   {
@@ -116,7 +180,17 @@ export const TOOLS: Tool[] = [
       nl: "Groefdiameter, breedte en diepte op as of in boring, tot Ø 100 mm.",
       en: "Groove diameter, width and depth on shaft or in bore, up to Ø 100 mm.",
     },
-    tags: ["borgveer", "circlip", "as", "boring", "din 471", "din 472", "retaining ring", "shaft", "bore"],
+    tags: [
+      "borgveer",
+      "circlip",
+      "as",
+      "boring",
+      "din 471",
+      "din 472",
+      "retaining ring",
+      "shaft",
+      "bore",
+    ],
     status: "live",
   },
   {
@@ -129,7 +203,19 @@ export const TOOLS: Tool[] = [
       nl: "M3–M24: doorlaatmaten, sleutelmaten en aandraaimoment 8.8 / 10.9 / 12.9.",
       en: "M3–M24: clearance holes, wrench sizes and tightening torque 8.8 / 10.9 / 12.9.",
     },
-    tags: ["bout", "moer", "moment", "inbus", "m8", "vdi 2230", "iso 273", "bolt", "nut", "torque", "hex socket"],
+    tags: [
+      "bout",
+      "moer",
+      "moment",
+      "inbus",
+      "m8",
+      "vdi 2230",
+      "iso 273",
+      "bolt",
+      "nut",
+      "torque",
+      "hex socket",
+    ],
     status: "live",
   },
   {
@@ -142,7 +228,17 @@ export const TOOLS: Tool[] = [
       nl: "ISO-koorden 1,80–7,00 mm: groefdiepte en -breedte, radiaal en axiaal.",
       en: "ISO cords 1.80–7.00 mm: groove depth and width, radial and axial.",
     },
-    tags: ["afdichting", "koord", "radiaal", "axiaal", "iso 3601", "seal", "cord", "radial", "axial"],
+    tags: [
+      "afdichting",
+      "koord",
+      "radiaal",
+      "axiaal",
+      "iso 3601",
+      "seal",
+      "cord",
+      "radial",
+      "axial",
+    ],
     status: "live",
   },
   {
@@ -155,7 +251,16 @@ export const TOOLS: Tool[] = [
       nl: "Buigradius, minimale beenlengte, groefwijdte en Z-buiging voor zetwerk.",
       en: "Bend radius, minimum flange length, die width and Z-bend for sheet metal.",
     },
-    tags: ["buigen", "plaat", "zetwerk", "k-factor", "bend allowance", "sheet metal", "bending", "flange"],
+    tags: [
+      "buigen",
+      "plaat",
+      "zetwerk",
+      "k-factor",
+      "bend allowance",
+      "sheet metal",
+      "bending",
+      "flange",
+    ],
     status: "live",
   },
   {
@@ -194,7 +299,18 @@ export const TOOLS: Tool[] = [
       nl: "F = p·A, dubbelwerkend. ISO-boring bepalen bij een last en 6 bar.",
       en: "F = p·A, double-acting. Determine the ISO bore for a load at 6 bar.",
     },
-    tags: ["pneumatiek", "festo", "smc", "bar", "zuiger", "kracht", "pneumatic", "piston", "force", "bore"],
+    tags: [
+      "pneumatiek",
+      "festo",
+      "smc",
+      "bar",
+      "zuiger",
+      "kracht",
+      "pneumatic",
+      "piston",
+      "force",
+      "bore",
+    ],
     status: "live",
   },
   {
@@ -207,7 +323,17 @@ export const TOOLS: Tool[] = [
       nl: "Euler-knik van een slanke staaf: F_cr, kritieke spanning en slankheid λ.",
       en: "Euler buckling of a slender column: F_cr, critical stress and slenderness λ.",
     },
-    tags: ["euler", "kritieke last", "slankheid", "staaf", "kolom", "buckling", "critical load", "slenderness", "column"],
+    tags: [
+      "euler",
+      "kritieke last",
+      "slankheid",
+      "staaf",
+      "kolom",
+      "buckling",
+      "critical load",
+      "slenderness",
+      "column",
+    ],
     status: "live",
   },
   {
@@ -220,7 +346,17 @@ export const TOOLS: Tool[] = [
       nl: "Doorbuiging van een balk onder een puntlast: vrij opgelegd of uitkraging.",
       en: "Deflection of a beam under a point load: simply supported or cantilever.",
     },
-    tags: ["puntlast", "buiging", "doorbuiging", "balk", "point load", "bending", "deflection", "beam", "cantilever"],
+    tags: [
+      "puntlast",
+      "buiging",
+      "doorbuiging",
+      "balk",
+      "point load",
+      "bending",
+      "deflection",
+      "beam",
+      "cantilever",
+    ],
     status: "live",
   },
   {
@@ -313,7 +449,15 @@ export function matchTools(query: string, tools: Tool[] = TOOLS): Tool[] {
   if (tokens.length === 0) return tools;
   return tools.filter((tool) => {
     const hay = foldQuery(
-      [tool.title.nl, tool.title.en, tool.standard, tool.blurb.nl, tool.blurb.en, tool.id, ...tool.tags].join(" "),
+      [
+        tool.title.nl,
+        tool.title.en,
+        tool.standard,
+        tool.blurb.nl,
+        tool.blurb.en,
+        tool.id,
+        ...tool.tags,
+      ].join(" "),
     );
     return tokens.every((token) => hay.includes(token));
   });

@@ -1,3 +1,4 @@
+import { BendSection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -38,7 +39,7 @@ const TXT = {
     material: "Materiaal",
     leg1: "Been 1, buitenmaat (mm, optioneel)",
     leg2: "Been 2, buitenmaat (mm, optioneel)",
-    fillValid: "Vul plaatdikte, straal (≥0) en een hoek tussen 0 en 180° in.",
+    fillValid: "Vul plaatdikte, straal (≥0) en een hoek groter dan 0 en kleiner dan 180° in.",
     kFactor: "K-factor",
     ba: "Buigtoeslag (BA)",
     bd: "Buigaftrek (BD)",
@@ -75,7 +76,8 @@ const TXT = {
     bd: "Bend deduction (BD)",
     flatLength: "Flat length",
     minTitle: "Minimum radius, flange length and die opening",
-    minNote: "Generic DFM guidelines for sheet metal, not a standard value — check with the sheet supplier or bending shop for critical parts.",
+    minNote:
+      "Generic DFM guidelines for sheet metal, not a standard value — check with the sheet supplier or bending shop for critical parts.",
     minRadius: (material: string) => `Min. inside radius (${material})`,
     minFlange: "Min. flange length (4×T)",
     typicalDie: "Typical V-die opening (8×T)",
@@ -129,7 +131,15 @@ export function EdgesCalc() {
   };
 
   const K = T != null && Ri != null && T > 0 ? kFactorFor(Ri / T) : null;
-  const valid = T != null && T > 0 && Ri != null && Ri >= 0 && angleDeg != null && angleDeg > 0 && angleDeg <= 180 && K != null;
+  const valid =
+    T != null &&
+    T > 0 &&
+    Ri != null &&
+    Ri >= 0 &&
+    angleDeg != null &&
+    angleDeg > 0 &&
+    angleDeg < 180 &&
+    K != null;
 
   const BA = valid ? bendAllowance(angleDeg!, Ri!, T!, K!) : null;
   const BD = valid ? bendDeduction(angleDeg!, Ri!, T!, K!) : null;
@@ -146,7 +156,8 @@ export function EdgesCalc() {
       `${t.ba} = ${fmtBendNum(BA, 2)} mm`,
       `${t.bd} = ${fmtBendNum(BD, 2)} mm`,
     ];
-    if (flat != null && (L1 > 0 || L2 > 0)) lines.push(`${t.flatLength} = ${fmtBendNum(flat, 2)} mm`);
+    if (flat != null && (L1 > 0 || L2 > 0))
+      lines.push(`${t.flatLength} = ${fmtBendNum(flat, 2)} mm`);
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valid, BA, BD, flat, K, thickness, radius, angle, L1, L2, locale]);
@@ -155,7 +166,9 @@ export function EdgesCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.thickness}>
@@ -189,12 +202,16 @@ export function EdgesCalc() {
         ) : (
           <>
             <ResultGrid
-              items={[
-                { label: t.kFactor, value: fmtBendNum(K!, 2) },
-                { label: t.ba, value: `${fmtBendNum(BA!, 2)} mm` },
-                { label: t.bd, value: `${fmtBendNum(BD!, 2)} mm` },
-                flat != null && (L1 > 0 || L2 > 0) ? { label: t.flatLength, value: `${fmtBendNum(flat, 2)} mm` } : null,
-              ].filter(Boolean) as { label: string; value: string }[]}
+              items={
+                [
+                  { label: t.kFactor, value: fmtBendNum(K!, 2) },
+                  { label: t.ba, value: `${fmtBendNum(BA!, 2)} mm` },
+                  { label: t.bd, value: `${fmtBendNum(BD!, 2)} mm` },
+                  flat != null && (L1 > 0 || L2 > 0)
+                    ? { label: t.flatLength, value: `${fmtBendNum(flat, 2)} mm` }
+                    : null,
+                ].filter(Boolean) as { label: string; value: string }[]
+              }
             />
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
@@ -203,20 +220,38 @@ export function EdgesCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Referentiedoorsnede van een haakse buiging · vrije buighoek staat in de berekening · maten in mm">
+        <BendSection kind="haaks" ri={Ri} s={flangeMin} w={dieOpening?.v ?? null} t={T} />
+      </SchemaPanel>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.minTitle}</h2>
         <Note>{t.minNote}</Note>
         <ResultGrid
-          items={[
-            rmin != null ? { label: t.minRadius(materialLabel(materialId)), value: `${fmtBendNum(rmin, 2)} mm` } : null,
-            flangeMin != null ? { label: t.minFlange, value: `${fmtBendNum(flangeMin, 2)} mm` } : null,
-            dieOpening != null ? { label: t.typicalDie, value: `${fmtBendNum(dieOpening.v, 1)} mm` } : null,
-            dieOpening != null ? { label: t.punchRadius, value: `${fmtBendNum(dieOpening.punchRadius, 2)} mm` } : null,
-          ].filter(Boolean) as { label: string; value: string }[]}
+          items={
+            [
+              rmin != null
+                ? {
+                    label: t.minRadius(materialLabel(materialId)),
+                    value: `${fmtBendNum(rmin, 2)} mm`,
+                  }
+                : null,
+              flangeMin != null
+                ? { label: t.minFlange, value: `${fmtBendNum(flangeMin, 2)} mm` }
+                : null,
+              dieOpening != null
+                ? { label: t.typicalDie, value: `${fmtBendNum(dieOpening.v, 1)} mm` }
+                : null,
+              dieOpening != null
+                ? { label: t.punchRadius, value: `${fmtBendNum(dieOpening.punchRadius, 2)} mm` }
+                : null,
+            ].filter(Boolean) as { label: string; value: string }[]
+          }
         />
 
-        <h3 className="mt-8 font-display text-lg font-semibold tracking-tight text-ink">{t.zTitle}</h3>
+        <h3 className="mt-8 font-display text-lg font-semibold tracking-tight text-ink">
+          {t.zTitle}
+        </h3>
         <Note>{t.zNote}</Note>
         <div className="mt-4 max-w-xs">
           <Field label={t.zOffsetLabel}>
@@ -226,11 +261,15 @@ export function EdgesCalc() {
         {zMin != null ? (
           <>
             <ResultGrid items={[{ label: t.zMinLabel, value: `${fmtBendNum(zMin, 2)} mm` }]} />
-            {zVal != null && zVal < zMin ? <Note>{t.zTooSmall(fmtBendNum(zVal, 2), fmtBendNum(zMin, 2))}</Note> : null}
+            {zVal != null && zVal < zMin ? (
+              <Note>{t.zTooSmall(fmtBendNum(zVal, 2), fmtBendNum(zMin, 2))}</Note>
+            ) : null}
           </>
         ) : null}
 
-        <SourceLink href="https://www.engineeringtoolbox.com/bend-allowance-d_1904.html">{t.source}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/bend-allowance-d_1904.html">
+          {t.source}
+        </SourceLink>
       </section>
     </>
   );

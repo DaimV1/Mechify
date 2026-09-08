@@ -22,8 +22,12 @@ export function SectionOverview({ section }: { section: ToolSection }) {
     <PageShell>
       <PageWrap wide>
         <Breadcrumbs items={[{ href: "/", label: "Mechify" }, { label }]} />
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">Mechify · {label}</p>
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">{label}</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">
+          Mechify · {label}
+        </p>
+        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          {label}
+        </h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{description}</p>
 
         <div className="mt-10">

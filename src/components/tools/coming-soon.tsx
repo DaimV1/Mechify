@@ -13,7 +13,8 @@ export function ComingSoon({ tool }: { tool: Tool }) {
           body: (
             <>
               Deze rekenhulp staat op de planning voor Mechify en is nog niet live. De onderliggende{" "}
-              {tool.standard}-data en rekenlogica volgen de architectuur die hiernaast al functioneert.
+              {tool.standard}-data en rekenlogica volgen de architectuur die hiernaast al
+              functioneert.
             </>
           ),
           cta: "Bekijk beschikbare tools",
@@ -22,8 +23,9 @@ export function ComingSoon({ tool }: { tool: Tool }) {
           heading: `${title} is being migrated`,
           body: (
             <>
-              This calculation aid is planned for Mechify and isn't live yet. The underlying {tool.standard} data
-              and calculation logic follow the same architecture already working elsewhere on the site.
+              This calculation aid is planned for Mechify and isn't live yet. The underlying{" "}
+              {tool.standard} data and calculation logic follow the same architecture already
+              working elsewhere on the site.
             </>
           ),
           cta: "View available tools",
@@ -34,7 +36,9 @@ export function ComingSoon({ tool }: { tool: Tool }) {
       <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-surface-2">
         <Construction className="size-6 text-accent" aria-hidden="true" />
       </div>
-      <h2 className="mt-4 font-display text-xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+      <h2 className="mt-4 font-display text-xl font-semibold tracking-tight text-ink">
+        {t.heading}
+      </h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">{t.body}</p>
       <Link
         to="/tools"

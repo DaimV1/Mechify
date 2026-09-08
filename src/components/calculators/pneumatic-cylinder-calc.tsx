@@ -42,7 +42,8 @@ const T = {
     forceLabel: "Benodigde kracht F (N)",
     pressureLabel: "Werkdruk p (bar)",
     fillForcePressure: "Vul een kracht en druk groter dan 0 in.",
-    noBore: (p: string) => `Geen standaard boring tot Ø320 mm haalt deze kracht bij ${p} bar. Verhoog de druk of gebruik een meercilinder-opstelling.`,
+    noBore: (p: string) =>
+      `Geen standaard boring tot Ø320 mm haalt deze kracht bij ${p} bar. Verhoog de druk of gebruik een meercilinder-opstelling.`,
     rodLabel: (rod?: number) => `zuigerstang Ø${rod} mm`,
     recommendedBore: "Aanbevolen boring",
     rod: "Zuigerstang",
@@ -56,7 +57,8 @@ const T = {
     endConditionLabel: "Inklemming",
     rodMaterialLabel: "Materiaal zuigerstang",
     safetyRatio: "S = F_cr / F",
-    lowSafetyNote: (s: string) => `S = ${s} ligt onder de gangbare fabrikant-marge van 3,5–5× voor pneumatische zuigerstangen. Kies een dikkere stang, een kortere slag, of een grotere boring.`,
+    lowSafetyNote: (s: string) =>
+      `S = ${s} ligt onder de gangbare fabrikant-marge van 3,5–5× voor pneumatische zuigerstangen. Kies een dikkere stang, een kortere slag, of een grotere boring.`,
     fillLength: "Vul een lengte groter dan 0 in.",
     standardBores: "Standaard boringen",
     thSeries: "Reeks",
@@ -79,7 +81,8 @@ const T = {
     forceLabel: "Required force F (N)",
     pressureLabel: "Working pressure p (bar)",
     fillForcePressure: "Enter a force and pressure greater than 0.",
-    noBore: (p: string) => `No standard bore up to Ø320 mm reaches this force at ${p} bar. Increase the pressure or use a multi-cylinder setup.`,
+    noBore: (p: string) =>
+      `No standard bore up to Ø320 mm reaches this force at ${p} bar. Increase the pressure or use a multi-cylinder setup.`,
     rodLabel: (rod?: number) => `rod Ø${rod} mm`,
     recommendedBore: "Recommended bore",
     rod: "Rod",
@@ -93,7 +96,8 @@ const T = {
     endConditionLabel: "End condition",
     rodMaterialLabel: "Rod material",
     safetyRatio: "S = F_cr / F",
-    lowSafetyNote: (s: string) => `S = ${s} is below the typical manufacturer margin of 3.5–5× for pneumatic rods. Choose a thicker rod, a shorter stroke, or a larger bore.`,
+    lowSafetyNote: (s: string) =>
+      `S = ${s} is below the typical manufacturer margin of 3.5–5× for pneumatic rods. Choose a thicker rod, a shorter stroke, or a larger bore.`,
     fillLength: "Enter a length greater than 0.",
     standardBores: "Standard bores",
     thSeries: "Series",
@@ -118,7 +122,9 @@ export function PneumaticCylinderCalc() {
   const [force, setForce] = useState(search.get("f") ?? "1000");
   const [pressure, setPressure] = useState(search.get("p") ?? "6");
   const [stroke, setStroke] = useState(search.get("l") ?? "300");
-  const [endCondition, setEndCondition] = useState<EndConditionId>((search.get("end") as EndConditionId) ?? "fc");
+  const [endCondition, setEndCondition] = useState<EndConditionId>(
+    (search.get("end") as EndConditionId) ?? "fc",
+  );
   const [materialId, setMaterialId] = useState(search.get("material") ?? "staal");
   const [showBuckling, setShowBuckling] = useState(false);
 
@@ -166,7 +172,8 @@ export function PneumaticCylinderCalc() {
       t.copyRod(rod),
       t.copyExtend(fmtN0(extend)),
     ];
-    if (buckling) lines.push(t.copyBuckling(fmtN0(buckling.Fcr), fmtDotComma(buckling.safety ?? 0, 2)));
+    if (buckling)
+      lines.push(t.copyBuckling(fmtN0(buckling.Fcr), fmtDotComma(buckling.safety ?? 0, 2)));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommended, F, p, rod, buckling, locale]);
@@ -175,7 +182,9 @@ export function PneumaticCylinderCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.forceLabel}>
@@ -196,12 +205,19 @@ export function PneumaticCylinderCalc() {
               {recommended.series} · Ø{recommended.bore} mm · {t.rodLabel(rod)}
             </p>
             <ResultGrid
-              items={[
-                { label: t.recommendedBore, value: `Ø${recommended.bore} mm` },
-                { label: t.rod, value: `Ø${rod} mm` },
-                { label: t.extendForce, value: `${fmtN0(extendForce(recommended.bore, p))} N` },
-                rod != null ? { label: t.retractForce, value: `${fmtN0(retractForce(recommended.bore, rod, p))} N` } : null,
-              ].filter(Boolean) as { label: string; value: string }[]}
+              items={
+                [
+                  { label: t.recommendedBore, value: `Ø${recommended.bore} mm` },
+                  { label: t.rod, value: `Ø${rod} mm` },
+                  { label: t.extendForce, value: `${fmtN0(extendForce(recommended.bore, p))} N` },
+                  rod != null
+                    ? {
+                        label: t.retractForce,
+                        value: `${fmtN0(retractForce(recommended.bore, rod, p))} N`,
+                      }
+                    : null,
+                ].filter(Boolean) as { label: string; value: string }[]
+              }
             />
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
@@ -223,7 +239,10 @@ export function PneumaticCylinderCalc() {
                     <NumInput id="pneu-stroke" value={stroke} onChange={setStroke} />
                   </Field>
                   <Field label={t.endConditionLabel}>
-                    <SelectInput value={endCondition} onChange={(v) => setEndCondition(v as EndConditionId)}>
+                    <SelectInput
+                      value={endCondition}
+                      onChange={(v) => setEndCondition(v as EndConditionId)}
+                    >
                       {END_CONDITIONS.map((c) => (
                         <option key={c.id} value={c.id}>
                           {label(c)}
@@ -264,7 +283,9 @@ export function PneumaticCylinderCalc() {
       </CalcPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.standardBores}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.standardBores}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
@@ -278,7 +299,8 @@ export function PneumaticCylinderCalc() {
             <tbody>
               {ALL_BORES.map((row) => {
                 const pVal = parseNum(pressure) ?? 6;
-                const isActive = recommended?.bore === row.bore && recommended.series === row.series;
+                const isActive =
+                  recommended?.bore === row.bore && recommended.series === row.series;
                 return (
                   <tr key={`${row.series}-${row.bore}`} className={isActive ? "is-active" : ""}>
                     <th scope="row" className="normal-case">
@@ -294,7 +316,9 @@ export function PneumaticCylinderCalc() {
           </table>
         </div>
         <SourceBadge>{t.sourceBadge}</SourceBadge>
-        <SourceLink href="https://en.wikipedia.org/wiki/Pneumatic_cylinder">{t.sourceWiki}</SourceLink>
+        <SourceLink href="https://en.wikipedia.org/wiki/Pneumatic_cylinder">
+          {t.sourceWiki}
+        </SourceLink>
       </section>
     </>
   );

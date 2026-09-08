@@ -1,0 +1,397 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearch } from "@/lib/reference-router";
+import {
+  BEAM_END_CONDITIONS,
+  bendingStress,
+  computeDeflection,
+  copyLine,
+  fmtDotComma,
+  maxBendingMoment,
+  type BeamEndCondition,
+} from "@/lib/toolkit/deflection";
+import {
+  eFor,
+  extremeFiber,
+  MATERIALS_E,
+  rp02For,
+  sectionProps,
+  SECTION_KINDS,
+  fmtN,
+  type SectionKind,
+} from "@/lib/toolkit/knik";
+import { tx, useLocale } from "@/lib/i18n/locale";
+import {
+  CalcEyebrow,
+  CalcPanel,
+  CopyLink,
+  CopyResult,
+  Field,
+  Note,
+  NumInput,
+  ResultGrid,
+  SelectInput,
+} from "./calc-ui";
+import { BeamDeflection, SchemaPanel } from "./schema";
+
+function parseNum(raw: string): number | null {
+  const t = raw.trim().replace(",", ".");
+  if (t === "") return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function DeflectionCalc() {
+  const { locale } = useLocale();
+  const search = useSearch({ from: "/toolkit/doorbuiging-balk" });
+  const navigate = useNavigate({ from: "/toolkit/doorbuiging-balk" });
+  const [sectionKind, setSectionKind] = useState<SectionKind>(
+    (search.section as SectionKind) ?? "rond",
+  );
+  const [D, setD] = useState(search.D ?? "20");
+  const [dIn, setDIn] = useState(search.dIn ?? "14");
+  const [bDim, setBDim] = useState(search.b ?? "40");
+  const [hDim, setHDim] = useState(search.h ?? "10");
+  const [aDim, setADim] = useState(search.a ?? "10");
+  const [tDim, setTDim] = useState(search.t ?? "3");
+  const [L, setL] = useState(search.L ?? "1000");
+  const [endCondition, setEndCondition] = useState<BeamEndCondition>(
+    (search.end as BeamEndCondition) ?? "ss",
+  );
+  const [materialId, setMaterialId] = useState(search.material ?? "rvs");
+  const [P, setP] = useState(search.P ?? "1000");
+  const [posA, setPosA] = useState(search.posA ?? "500");
+
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        section: sectionKind,
+        D: D || undefined,
+        dIn: dIn || undefined,
+        b: bDim || undefined,
+        h: hDim || undefined,
+        a: aDim || undefined,
+        t: tDim || undefined,
+        L: L || undefined,
+        end: endCondition,
+        material: materialId,
+        P: P || undefined,
+        posA: posA || undefined,
+      }),
+      replace: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionKind, D, dIn, bDim, hDim, aDim, tDim, L, endCondition, materialId, P, posA]);
+
+  const dims = useMemo(() => {
+    switch (sectionKind) {
+      case "rond":
+        return { D: parseNum(D) ?? undefined };
+      case "buis":
+        return { D: parseNum(D) ?? undefined, d: parseNum(dIn) ?? undefined };
+      case "rechthoek":
+        return { b: parseNum(bDim) ?? undefined, h: parseNum(hDim) ?? undefined };
+      case "vierkant":
+        return { a: parseNum(aDim) ?? undefined };
+      case "koker":
+        return {
+          b: parseNum(bDim) ?? undefined,
+          h: parseNum(hDim) ?? undefined,
+          t: parseNum(tDim) ?? undefined,
+        };
+    }
+  }, [sectionKind, D, dIn, bDim, hDim, aDim, tDim]);
+
+  const section = useMemo(() => sectionProps(sectionKind, dims), [sectionKind, dims]);
+  const Lraw = parseNum(L);
+  const Praw = parseNum(P);
+  const posARaw = parseNum(posA);
+  const E = eFor(materialId);
+  const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
+  const endLabel = BEAM_END_CONDITIONS.find((c) => c.id === endCondition);
+
+  const result =
+    section && Lraw != null && Praw != null && posARaw != null
+      ? computeDeflection({ end: endCondition, L: Lraw, a: posARaw, E, I: section.I, P: Praw })
+      : null;
+
+  const c = useMemo(() => extremeFiber(sectionKind, dims), [sectionKind, dims]);
+  const sigma =
+    section &&
+    c != null &&
+    Lraw != null &&
+    Praw != null &&
+    posARaw != null &&
+    posARaw >= 0 &&
+    posARaw <= Lraw
+      ? bendingStress(
+          maxBendingMoment({ end: endCondition, L: Lraw, a: posARaw, P: Praw }),
+          c,
+          section.I,
+        )
+      : null;
+  const rp02 = rp02For(materialId);
+  const overYield = sigma != null && sigma > rp02;
+
+  const copy = useMemo(
+    () =>
+      result && endLabel && posARaw != null
+        ? copyLine(result, tx(locale, endLabel.label, endLabel.labelEn), posARaw, sigma)
+        : "",
+    [result, endLabel, posARaw, locale, sigma],
+  );
+
+  const outOfRange = Lraw != null && posARaw != null && (posARaw < 0 || posARaw > Lraw);
+
+  return (
+    <>
+      <CalcPanel>
+        <CalcEyebrow />
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {tx(locale, "Doorbuiging balk", "Beam deflection")}
+        </h2>
+        <Note>
+          {tx(
+            locale,
+            "Standaard balkformules voor een puntlast op willekeurige positie. Twee statisch bepaalde gevallen: vrij opgelegd en uitkraging. Lineair-elastisch, kleine doorbuigingen. Geen vervanging van een sterkteberekening volgens EN 1993-1-1 bij kritieke constructies.",
+            "Standard beam formulas for a point load at an arbitrary position. Two statically determinate cases: simply supported and cantilever. Linear-elastic, small deflections. Not a substitute for a strength calculation per EN 1993-1-1 on critical structures.",
+          )}
+        </Note>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Field label={tx(locale, "Lengte L (mm)", "Length L (mm)")}>
+            <NumInput id="defl-length" value={L} onChange={setL} />
+          </Field>
+          <Field label={tx(locale, "Inklemming", "End condition")}>
+            <SelectInput
+              value={endCondition}
+              onChange={(v) => setEndCondition(v as BeamEndCondition)}
+            >
+              {BEAM_END_CONDITIONS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {tx(locale, c.label, c.labelEn)}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field label={tx(locale, "Doorsnede", "Cross-section")}>
+            <SelectInput value={sectionKind} onChange={(v) => setSectionKind(v as SectionKind)}>
+              {SECTION_KINDS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {tx(locale, s.label, s.labelEn)}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field label={tx(locale, "Materiaal", "Material")}>
+            <SelectInput value={materialId} onChange={setMaterialId}>
+              {MATERIALS_E.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {tx(locale, m.label, m.labelEn)}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+
+          {sectionKind === "rond" ? (
+            <Field label={tx(locale, "Diameter D (mm)", "Diameter D (mm)")}>
+              <NumInput id="defl-D" value={D} onChange={setD} />
+            </Field>
+          ) : null}
+          {sectionKind === "buis" ? (
+            <>
+              <Field label={tx(locale, "Buitendiameter D (mm)", "Outer diameter D (mm)")}>
+                <NumInput id="defl-D" value={D} onChange={setD} />
+              </Field>
+              <Field label={tx(locale, "Binnendiameter d (mm)", "Inner diameter d (mm)")}>
+                <NumInput id="defl-d" value={dIn} onChange={setDIn} />
+              </Field>
+            </>
+          ) : null}
+          {sectionKind === "rechthoek" ? (
+            <>
+              <Field label={tx(locale, "Breedte b (mm)", "Width b (mm)")}>
+                <NumInput id="defl-b" value={bDim} onChange={setBDim} />
+              </Field>
+              <Field label={tx(locale, "Hoogte h (mm)", "Height h (mm)")}>
+                <NumInput id="defl-h" value={hDim} onChange={setHDim} />
+              </Field>
+            </>
+          ) : null}
+          {sectionKind === "vierkant" ? (
+            <Field label={tx(locale, "Zijde a (mm)", "Side a (mm)")}>
+              <NumInput id="defl-a" value={aDim} onChange={setADim} />
+            </Field>
+          ) : null}
+          {sectionKind === "koker" ? (
+            <>
+              <Field label={tx(locale, "Breedte b (mm)", "Width b (mm)")}>
+                <NumInput id="defl-koker-b" value={bDim} onChange={setBDim} />
+              </Field>
+              <Field label={tx(locale, "Hoogte h (mm)", "Height h (mm)")}>
+                <NumInput id="defl-koker-h" value={hDim} onChange={setHDim} />
+              </Field>
+              <Field label={tx(locale, "Wanddikte t (mm)", "Wall thickness t (mm)")}>
+                <NumInput id="defl-koker-t" value={tDim} onChange={setTDim} />
+              </Field>
+            </>
+          ) : null}
+
+          <Field label={tx(locale, "Puntlast P (N)", "Point load P (N)")}>
+            <NumInput id="defl-P" value={P} onChange={setP} />
+          </Field>
+          <Field
+            label={tx(
+              locale,
+              endCondition === "cant"
+                ? "Afstand a vanaf inklemming (mm)"
+                : "Afstand a vanaf linker steunpunt (mm)",
+              endCondition === "cant"
+                ? "Distance a from the fixed end (mm)"
+                : "Distance a from the left support (mm)",
+            )}
+          >
+            <NumInput id="defl-posA" value={posA} onChange={setPosA} />
+          </Field>
+        </div>
+
+        {section ? (
+          result ? (
+            <>
+              <p className="mt-5 text-sm text-muted">
+                {tx(locale, endLabel?.label ?? "", endLabel?.labelEn ?? "")} ·{" "}
+                {tx(locale, material.label, material.labelEn)} · E = {fmtN(E)} N/mm²
+              </p>
+              <ResultGrid
+                items={
+                  [
+                    { label: "I", value: `${fmtN(section.I)} mm⁴` },
+                    { label: "A", value: `${fmtN(section.A)} mm²` },
+                    { label: "δ(a)", value: `${fmtDotComma(result.deltaAtLoad, 3)} mm` },
+                    { label: "δ_max", value: `${fmtDotComma(result.deltaMax, 3)} mm` },
+                    { label: "x (δ_max)", value: `${fmtDotComma(result.xMax, 0)} mm` },
+                    sigma != null ? { label: "σ_max", value: `${fmtN(sigma)} N/mm²` } : null,
+                  ].filter(Boolean) as { label: string; value: string }[]
+                }
+              />
+              {overYield ? (
+                <Note>
+                  {tx(
+                    locale,
+                    `σ_max = ${fmtN(sigma ?? 0)} N/mm² ≥ Rp0,2 ≈ ${fmtN(rp02)} N/mm² (${tx(locale, material.label, material.labelEn)}, richtwaarde) — deze last geeft blijvende vervorming, de doorbuiging hierboven is dan niet meer geldig.`,
+                    `σ_max = ${fmtN(sigma ?? 0)} N/mm² ≥ Rp0.2 ≈ ${fmtN(rp02)} N/mm² (${tx(locale, material.label, material.labelEn)}, indicative) — this load causes permanent deformation, the deflection above no longer applies.`,
+                  )}
+                </Note>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <CopyResult text={copy} />
+                <CopyLink />
+              </div>
+            </>
+          ) : outOfRange ? (
+            <p className="mt-5 text-sm text-muted">
+              {tx(
+                locale,
+                "Afstand a moet tussen 0 en de lengte L liggen.",
+                "Distance a must be between 0 and the length L.",
+              )}
+            </p>
+          ) : (
+            <p className="mt-5 text-sm text-muted">
+              {tx(
+                locale,
+                "Vul lengte, puntlast en afstand a in (a tussen 0 en L).",
+                "Enter length, point load and distance a (a between 0 and L).",
+              )}
+            </p>
+          )
+        ) : (
+          <p className="mt-5 text-sm text-muted">
+            {tx(
+              locale,
+              "Vul geldige afmetingen in voor de gekozen doorsnede.",
+              "Enter valid dimensions for the selected cross-section.",
+            )}
+          </p>
+        )}
+      </CalcPanel>
+
+      <section className="mt-12">
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {tx(locale, "Belastingschema", "Loading diagram")}
+        </h2>
+        <Note>
+          {tx(
+            locale,
+            "Positie van de last en van de maximale doorbuiging bij de gekozen inklemming. Geen schaal.",
+            "Position of the load and of the maximum deflection for the selected end condition. Not to scale.",
+          )}
+        </Note>
+        <SchemaPanel
+          caption={tx(locale, "Belastingschema · puntlast", "Loading diagram · point load")}
+        >
+          <BeamDeflection
+            end={endCondition}
+            a={posARaw != null && Lraw != null ? Math.min(Math.max(posARaw, 0), Lraw) : 0}
+            L={Lraw ?? 1000}
+            E={E}
+            I={section?.I ?? 7854}
+            P={Praw ?? 1000}
+          />
+        </SchemaPanel>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {tx(
+            locale,
+            "E-modulus en vloeigrens (indicatief)",
+            "Modulus of elasticity and yield strength (indicative)",
+          )}
+        </h2>
+        <Note>
+          {tx(
+            locale,
+            "Richtwaarden voor een generieke kwaliteit binnen de materiaalgroep, geen specifieke legering of temper — behalve aluminium, dat expliciet 6082-T6 is: zacht/gegloeid aluminium (1000/3000/5000-serie) vloeit al bij 30-100 N/mm², ver onder de 240 hier. Kunststof gebruikt elastische balktheorie met een kortetermijn-E; kruip (tijdsafhankelijke doorbuiging onder blijvende last) zit hier niet in — voor een langdurig belaste kunststof balk is de werkelijke doorbuiging na verloop van tijd groter dan getoond. Voor een specifieke legering of kwaliteit: materiaalcertificaat of norm nalopen.",
+            "Indicative values for a generic grade within the material group, not a specific alloy or temper — except aluminium, which is explicitly 6082-T6: soft/annealed aluminium (1000/3000/5000 series) already yields at 30-100 N/mm², well below the 240 used here. Plastic uses elastic beam theory with a short-term E; creep (time-dependent deflection under sustained load) is not included — for a plastic beam under long-term load, the real deflection grows larger over time than shown. For a specific alloy or grade: check the material certificate or standard.",
+          )}
+        </Note>
+        <div className="table-scroll mt-4">
+          <table className="ref-table">
+            <thead>
+              <tr>
+                <th>{tx(locale, "Materiaal", "Material")}</th>
+                <th>E (N/mm²)</th>
+                <th>Rp0,2 (N/mm²)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {MATERIALS_E.map((m) => (
+                <tr key={m.id} className={m.id === materialId ? "is-active" : ""}>
+                  <th scope="row">{tx(locale, m.label, m.labelEn)}</th>
+                  <td>{fmtN(m.E)}</td>
+                  <td>{fmtN(m.Rp02)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-xs leading-relaxed text-subtle">
+          {tx(locale, "Bron:", "Source:")}{" "}
+          <a
+            href="https://www.engineeringtoolbox.com/young-modulus-d_417.html"
+            className="text-accent hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Engineering ToolBox — Young's modulus of elasticity
+          </a>
+          {tx(
+            locale,
+            ". Doorbuigingsformules: Roark's Formulas for Stress and Strain (klassieke balktheorie).",
+            ". Deflection formulas: Roark's Formulas for Stress and Strain (classical beam theory).",
+          )}
+        </p>
+      </section>
+    </>
+  );
+}

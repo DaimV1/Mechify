@@ -1,3 +1,4 @@
+import { OringGroove, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -46,8 +47,19 @@ const T = {
     thDepthAt: (pct: number) => `Groefdiepte @ ${pct}% squeeze`,
     sourceBadge:
       "ISO 3601-1 definieert 1,80 / 2,65 / 3,55 / 5,30 / 7,00 mm als standaard metrische koorddiameters. Groefafmetingen hier zijn een ontwerpregel (squeeze% en breedtefactor), geen ISO 3601-2 gland-tabel.",
-    copy: (cord: string, seal: string, squeeze: string, depthLabel: string, depth: string, width: string) =>
-      [`Koord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`, `${depthLabel} = ${depth} mm`, `Groefbreedte = ${width} mm`].join("\n"),
+    copy: (
+      cord: string,
+      seal: string,
+      squeeze: string,
+      depthLabel: string,
+      depth: string,
+      width: string,
+    ) =>
+      [
+        `Koord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
+        `${depthLabel} = ${depth} mm`,
+        `Groefbreedte = ${width} mm`,
+      ].join("\n"),
   },
   en: {
     heading: "O-ring groove at cord diameter",
@@ -71,8 +83,19 @@ const T = {
     thDepthAt: (pct: number) => `Groove depth @ ${pct}% squeeze`,
     sourceBadge:
       "ISO 3601-1 defines 1.80 / 2.65 / 3.55 / 5.30 / 7.00 mm as standard metric cord diameters. Groove dimensions here are a design rule (squeeze% and width factor), not an ISO 3601-2 gland table.",
-    copy: (cord: string, seal: string, squeeze: string, depthLabel: string, depth: string, width: string) =>
-      [`Cord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`, `${depthLabel} = ${depth} mm`, `Groove width = ${width} mm`].join("\n"),
+    copy: (
+      cord: string,
+      seal: string,
+      squeeze: string,
+      depthLabel: string,
+      depth: string,
+      width: string,
+    ) =>
+      [
+        `Cord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
+        `${depthLabel} = ${depth} mm`,
+        `Groove width = ${width} mm`,
+      ].join("\n"),
   },
 };
 
@@ -81,10 +104,15 @@ export function OringGroovesCalc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [cord, setCord] = useState(search.get("cord") ?? "3.55");
-  const [direction, setDirection] = useState<GrooveDirection>((search.get("dir") as GrooveDirection) ?? "radiaal");
-  const [sealType, setSealType] = useState<SealType>((search.get("seal") as SealType) ?? "statisch");
+  const [direction, setDirection] = useState<GrooveDirection>(
+    (search.get("dir") as GrooveDirection) ?? "radiaal",
+  );
+  const [sealType, setSealType] = useState<SealType>(
+    (search.get("seal") as SealType) ?? "statisch",
+  );
   const seal = SEAL_TYPES.find((s) => s.id === sealType) ?? SEAL_TYPES[0];
-  const sealLabel = (s: { label: string; labelEn: string }) => (locale === "nl" ? s.label : s.labelEn);
+  const sealLabel = (s: { label: string; labelEn: string }) =>
+    locale === "nl" ? s.label : s.labelEn;
   const [squeeze, setSqueeze] = useState(search.get("sq") ?? String(seal.default));
   const [widthFactor, setWidthFactor] = useState(search.get("wf") ?? "1.4");
 
@@ -107,14 +135,25 @@ export function OringGroovesCalc() {
 
   const cordVal = parseNum(cord);
   const squeezeVal = parseNum(squeeze);
-  const widthFactorVal = parseNum(widthFactor) ?? 1.4;
-  const result = cordVal != null && squeezeVal != null ? computeOringGroove(cordVal, squeezeVal, widthFactorVal) : null;
-  const outOfRange = squeezeVal != null && (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
+  const widthFactorVal = parseNum(widthFactor) ?? NaN;
+  const result =
+    cordVal != null && squeezeVal != null
+      ? computeOringGroove(cordVal, squeezeVal, widthFactorVal)
+      : null;
+  const outOfRange =
+    squeezeVal != null && (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
 
   const copy = useMemo(() => {
     if (!result) return "";
     const depthLabel = direction === "radiaal" ? t.depthRadial : t.depthAxial;
-    return t.copy(cord, sealLabel(seal), squeeze, depthLabel, fmtOring(result.depth), fmtOring(result.width));
+    return t.copy(
+      cord,
+      sealLabel(seal),
+      squeeze,
+      depthLabel,
+      fmtOring(result.depth),
+      fmtOring(result.width),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, cord, sealType, squeeze, direction, locale]);
 
@@ -122,7 +161,9 @@ export function OringGroovesCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.cordDiameter}>
@@ -161,10 +202,17 @@ export function OringGroovesCalc() {
           <p className="mt-5 text-sm text-muted">{t.fillValid}</p>
         ) : (
           <>
-            {outOfRange ? <Note>{t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))}</Note> : null}
+            {outOfRange ? (
+              <Note>
+                {t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))}
+              </Note>
+            ) : null}
             <ResultGrid
               items={[
-                { label: direction === "radiaal" ? t.depthRadial : t.depthAxial, value: `${fmtOring(result.depth)} mm` },
+                {
+                  label: direction === "radiaal" ? t.depthRadial : t.depthAxial,
+                  value: `${fmtOring(result.depth)} mm`,
+                },
                 { label: t.grooveWidth, value: `${fmtOring(result.width)} mm` },
               ]}
             />
@@ -175,9 +223,18 @@ export function OringGroovesCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <OringGroove
+          kind={direction === "axiaal" ? "axial" : "radial"}
+          t={result?.depth}
+          b={result?.width}
+        />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.standardCords}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.standardCords}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>

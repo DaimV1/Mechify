@@ -15,7 +15,8 @@ createRoot(container).render(
       <BrowserRouter>
         <App />
       </BrowserRouter>
-      <Analytics />
+      {["mechify.nl", "www.mechify.nl"].includes(window.location.hostname) || window.location.hostname.endsWith(".vercel.app") ? <Analytics /> : null}
     </LocaleProvider>
   </StrictMode>,
 );
+

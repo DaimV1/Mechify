@@ -20,6 +20,7 @@ export function bendAllowance(angleDeg: number, Ri: number, T: number, K: number
 
 /** Buigaftrek BD = 2·(Ri+T)·tan(θ/2) − BA. */
 export function bendDeduction(angleDeg: number, Ri: number, T: number, K: number): number {
+  if (!Number.isFinite(angleDeg) || angleDeg <= 0 || angleDeg >= 180) return NaN;
   const rad = (angleDeg * Math.PI) / 180;
   const BA = bendAllowance(angleDeg, Ri, T, K);
   return 2 * (Ri + T) * Math.tan(rad / 2) - BA;
@@ -39,10 +40,30 @@ export type MaterialClass = { id: string; label: string; labelEn: string; rminFa
  * plaatleverancier of het zetbedrijf voor kritieke onderdelen.
  */
 export const MATERIAL_CLASSES: MaterialClass[] = [
-  { id: "zacht", label: "Zacht (aluminium, koper, gegloeid rvs)", labelEn: "Soft (aluminium, copper, annealed stainless)", rminFactor: 1 },
-  { id: "staal", label: "Staal (warmgewalst / zacht koudgewalst)", labelEn: "Steel (hot-rolled / soft cold-rolled)", rminFactor: 1 },
-  { id: "rvs", label: "RVS (roestvast staal, hard)", labelEn: "Stainless steel (hard)", rminFactor: 1.5 },
-  { id: "veer", label: "Veerstaal / hard gewalst", labelEn: "Spring steel / hard-rolled", rminFactor: 3 },
+  {
+    id: "zacht",
+    label: "Zacht (aluminium, koper, gegloeid rvs)",
+    labelEn: "Soft (aluminium, copper, annealed stainless)",
+    rminFactor: 1,
+  },
+  {
+    id: "staal",
+    label: "Staal (warmgewalst / zacht koudgewalst)",
+    labelEn: "Steel (hot-rolled / soft cold-rolled)",
+    rminFactor: 1,
+  },
+  {
+    id: "rvs",
+    label: "RVS (roestvast staal, hard)",
+    labelEn: "Stainless steel (hard)",
+    rminFactor: 1.5,
+  },
+  {
+    id: "veer",
+    label: "Veerstaal / hard gewalst",
+    labelEn: "Spring steel / hard-rolled",
+    rminFactor: 3,
+  },
 ];
 
 export function rminFor(materialId: string, T: number): number {

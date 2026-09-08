@@ -1,3 +1,63 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/tools/:slug",
+      "destination": "/tools/:slug.html"
+    },
+    {
+      "source": "/calculators/:slug",
+      "destination": "/calculators/:slug.html"
+    },
+    {
+      "source": "/cad/:slug",
+      "destination": "/cad/:slug.html"
+    },
+    {
+      "source": "/topics/:slug",
+      "destination": "/topics/:slug.html"
+    },
+    {
+      "source": "/toolkit",
+      "destination": "/toolkit.html"
+    },
+    {
+      "source": "/topics",
+      "destination": "/topics.html"
+    },
+    {
+      "source": "/cad-workflows",
+      "destination": "/cad-workflows.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/tables",
+      "destination": "/tables.html"
+    },
+    {
+      "source": "/materials",
+      "destination": "/materials.html"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools.html"
+    },
+    {
+      "source": "/calculators",
+      "destination": "/calculators.html"
+    },
+    {
+      "source": "/cad",
+      "destination": "/cad.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }

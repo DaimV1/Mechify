@@ -1,3 +1,4 @@
+import { BearingFitChart, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -49,8 +50,20 @@ const T = {
     thHousingClass: "Behuizing-klasse",
     sourceBadge:
       "Vereenvoudigde richtlijn op basis van de algemene selectiecriteria die lagerfabrikanten (o.a. SKF) publiceren. Numerieke afwijkingen via de ISO 286-tabellen van de passingen-tool. Raadpleeg de lagercatalogus voor de volledige selectietabel.",
-    copy: (d: number, load: string, side: string, shaftClass: string, shaftRange: string, housingClass: string, housingRange: string) =>
-      [`As Ø${d} mm, ${load} belasting, ${side} zijde`, `As: ${shaftClass} → ${shaftRange} mm`, `Behuizing: ${housingClass} → ${housingRange} mm`].join("\n"),
+    copy: (
+      d: number,
+      load: string,
+      side: string,
+      shaftClass: string,
+      shaftRange: string,
+      housingClass: string,
+      housingRange: string,
+    ) =>
+      [
+        `As Ø${d} mm, ${load} belasting, ${side} zijde`,
+        `As: ${shaftClass} → ${shaftRange} mm`,
+        `Behuizing: ${housingClass} → ${housingRange} mm`,
+      ].join("\n"),
   },
   en: {
     heading: "Bearing fit at shaft Ø",
@@ -72,8 +85,20 @@ const T = {
     thHousingClass: "Housing class",
     sourceBadge:
       "Simplified guideline based on the general selection criteria published by bearing manufacturers (SKF, among others). Numeric deviations via the fits tool's ISO 286 tables. Consult the bearing catalog for the full selection table.",
-    copy: (d: number, load: string, side: string, shaftClass: string, shaftRange: string, housingClass: string, housingRange: string) =>
-      [`Shaft Ø${d} mm, ${load} load, ${side} side`, `Shaft: ${shaftClass} → ${shaftRange} mm`, `Housing: ${housingClass} → ${housingRange} mm`].join("\n"),
+    copy: (
+      d: number,
+      load: string,
+      side: string,
+      shaftClass: string,
+      shaftRange: string,
+      housingClass: string,
+      housingRange: string,
+    ) =>
+      [
+        `Shaft Ø${d} mm, ${load} load, ${side} side`,
+        `Shaft: ${shaftClass} → ${shaftRange} mm`,
+        `Housing: ${housingClass} → ${housingRange} mm`,
+      ].join("\n"),
   },
 };
 
@@ -81,7 +106,9 @@ export function BearingFitsCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [diameter, setDiameter] = useState(() => search.get("d") ?? readStoredDiameter({ min: 1, max: 50 }));
+  const [diameter, setDiameter] = useState(
+    () => search.get("d") ?? readStoredDiameter({ min: 1, max: 50 }),
+  );
   const [load, setLoad] = useState<LoadClass>((search.get("load") as LoadClass) ?? "normaal");
   const [side, setSide] = useState<BearingSide>((search.get("side") as BearingSide) ?? "vast");
 
@@ -108,14 +135,24 @@ export function BearingFitsCalc() {
   const housingClass = housingClassFor(load, side);
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
   const housingFit = Number.isFinite(d) ? housingFitAt(d, housingClass) : null;
-  const loadLabel = (l: { label: string; labelEn: string }) => (locale === "nl" ? l.label : l.labelEn);
-  const sideLabel = (s: { label: string; labelEn: string }) => (locale === "nl" ? s.label : s.labelEn);
+  const loadLabel = (l: { label: string; labelEn: string }) =>
+    locale === "nl" ? l.label : l.labelEn;
+  const sideLabel = (s: { label: string; labelEn: string }) =>
+    locale === "nl" ? s.label : s.labelEn;
 
   const copy = useMemo(() => {
     if (!shaftClass || !shaftFit || !housingFit) return "";
     const loadObj = LOAD_CLASSES.find((l) => l.id === load);
     const sideObj = BEARING_SIDES.find((s) => s.id === side);
-    return t.copy(d, loadObj ? loadLabel(loadObj) : load, sideObj ? sideLabel(sideObj) : side, shaftClass, shaftFit.range, housingClass, housingFit.range);
+    return t.copy(
+      d,
+      loadObj ? loadLabel(loadObj) : load,
+      sideObj ? sideLabel(sideObj) : side,
+      shaftClass,
+      shaftFit.range,
+      housingClass,
+      housingFit.range,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shaftClass, shaftFit, housingFit, d, load, side, housingClass, locale]);
 
@@ -123,7 +160,9 @@ export function BearingFitsCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.diameter}>
@@ -168,9 +207,14 @@ export function BearingFitsCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <BearingFitChart bandIndex={0} shaft={shaftClass ?? undefined} hole={housingClass} />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.guideTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.guideTitle}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>

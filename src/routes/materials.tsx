@@ -22,11 +22,13 @@ const T = {
     footnotePrefix:
       "Aluminium is expliciet 6082-T6 (een harde temper); zacht/gegloeid aluminium vloeit al bij 30-100 N/mm². Deze waarden worden onder meer gebruikt in de",
     footnoteLink: "knikberekening",
-    planned: "Een uitgebreidere materialendatabase (dichtheid, warmtegeleiding, corrosiebestendigheid) staat op de planning voor Mechify.",
+    planned:
+      "Een uitgebreidere materialendatabase (dichtheid, warmtegeleiding, corrosiebestendigheid) staat op de planning voor Mechify.",
   },
   en: {
     metaTitle: "Materials",
-    metaDescription: "Mechanical properties per material: Young's modulus and indicative yield strength, used in Mechify's calculators.",
+    metaDescription:
+      "Mechanical properties per material: Young's modulus and indicative yield strength, used in Mechify's calculators.",
     eyebrow: "Mechify · Reference",
     title: "Materials",
     intro:
@@ -38,7 +40,8 @@ const T = {
     footnotePrefix:
       "Aluminium is explicitly 6082-T6 (a hard temper); soft/annealed aluminium already yields at 30-100 N/mm². These values are used in, among others, the",
     footnoteLink: "buckling calculation",
-    planned: "A more extensive materials database (density, thermal conductivity, corrosion resistance) is planned for Mechify.",
+    planned:
+      "A more extensive materials database (density, thermal conductivity, corrosion resistance) is planned for Mechify.",
   },
 };
 
@@ -52,7 +55,9 @@ export function Materials() {
       <PageWrap wide>
         <Breadcrumbs items={[{ href: "/", label: "Mechify" }, { label: t.title }]} />
         <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">{t.eyebrow}</p>
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">{t.title}</h1>
+        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          {t.title}
+        </h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{t.intro}</p>
 
         <div className="table-scroll mt-10">
@@ -75,7 +80,9 @@ export function Materials() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.engineeringtoolbox.com/young-modulus-d_417.html">{t.source}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/young-modulus-d_417.html">
+          {t.source}
+        </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">
           {t.footnotePrefix}{" "}
           <Link to="/calculators/buckling" className="text-accent hover:underline">
@@ -84,7 +91,9 @@ export function Materials() {
           .
         </p>
 
-        <div className="mt-10 rounded-xl border border-dashed border-border-strong bg-surface p-6 text-sm text-muted">{t.planned}</div>
+        <div className="mt-10 rounded-xl border border-dashed border-border-strong bg-surface p-6 text-sm text-muted">
+          {t.planned}
+        </div>
       </PageWrap>
     </PageShell>
   );

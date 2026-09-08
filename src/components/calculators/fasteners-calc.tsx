@@ -1,3 +1,5 @@
+import { BoltSection, SchemaPanel } from "@/components/toolkit/schema";
+import { lookupFastener } from "@/lib/toolkit/fastener";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -42,7 +44,17 @@ const T = {
     torquePerSize: (k: string) => `Aandraaimoment per maat (K = ${k})`,
     thSize: "Maat",
     source: "Engineering ToolBox — ISO metric screw threads",
-    copy: (size: string, cls: string, fine: number, medium: number, coarse: number, hex: number, socket: number, torque: string, k: string) =>
+    copy: (
+      size: string,
+      cls: string,
+      fine: number,
+      medium: number,
+      coarse: number,
+      hex: number,
+      socket: number,
+      torque: string,
+      k: string,
+    ) =>
       [
         `${size}, klasse ${cls}`,
         `Doorlaat: fijn ${fine} / middel ${medium} / grof ${coarse} mm`,
@@ -66,7 +78,17 @@ const T = {
     torquePerSize: (k: string) => `Tightening torque per size (K = ${k})`,
     thSize: "Size",
     source: "Engineering ToolBox — ISO metric screw threads",
-    copy: (size: string, cls: string, fine: number, medium: number, coarse: number, hex: number, socket: number, torque: string, k: string) =>
+    copy: (
+      size: string,
+      cls: string,
+      fine: number,
+      medium: number,
+      coarse: number,
+      hex: number,
+      socket: number,
+      torque: string,
+      k: string,
+    ) =>
       [
         `${size}, class ${cls}`,
         `Clearance: fine ${fine} / medium ${medium} / coarse ${coarse} mm`,
@@ -80,7 +102,9 @@ export function FastenersCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [size, setSize] = useState<ThreadSize>((search.get("m") as ThreadSize) ?? "M8");
+  const [size, setSize] = useState<ThreadSize>(
+    (search.get("m") && search.get("m")! in CLEARANCE_HOLES ? search.get("m") : "M8") as ThreadSize,
+  );
   const [classId, setClassId] = useState(search.get("c") ?? "8.8");
   const [k, setK] = useState(search.get("k") ?? "0.2");
 
@@ -95,14 +119,24 @@ export function FastenersCalc() {
   }, [size, classId, k]);
 
   const cls = PROPERTY_CLASSES.find((c) => c.id === classId) ?? PROPERTY_CLASSES[0];
-  const kVal = parseNum(k) ?? 0.2;
+  const kVal = parseNum(k) ?? NaN;
   const torqueResult = kVal > 0 ? computeTorque(size, cls, kVal) : null;
   const hole = CLEARANCE_HOLES[size];
   const wrench = WRENCH_SIZES[size];
 
   const copy = useMemo(() => {
     if (!torqueResult) return "";
-    return t.copy(size, classId, hole.fine, hole.medium, hole.coarse, wrench.hex, wrench.socket, fmtFastener(torqueResult.torque), String(kVal));
+    return t.copy(
+      size,
+      classId,
+      hole.fine,
+      hole.medium,
+      hole.coarse,
+      wrench.hex,
+      wrench.socket,
+      fmtFastener(torqueResult.torque),
+      Number.isFinite(kVal) ? String(kVal) : "—",
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [torqueResult, size, classId, hole, wrench, kVal, locale]);
 
@@ -110,7 +144,9 @@ export function FastenersCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.threadSize}>
@@ -137,23 +173,32 @@ export function FastenersCalc() {
         </div>
 
         <ResultGrid
-          items={[
-            { label: t.holeFine, value: `Ø${hole.fine} mm` },
-            { label: t.holeMedium, value: `Ø${hole.medium} mm` },
-            { label: t.holeCoarse, value: `Ø${hole.coarse} mm` },
-            { label: t.wrenchHex, value: `${wrench.hex} mm` },
-            { label: t.wrenchSocket, value: `${wrench.socket} mm` },
-            torqueResult ? { label: t.torque, value: `≈ ${fmtFastener(torqueResult.torque)} N·m` } : null,
-          ].filter(Boolean) as { label: string; value: string }[]}
+          items={
+            [
+              { label: t.holeFine, value: `Ø${hole.fine} mm` },
+              { label: t.holeMedium, value: `Ø${hole.medium} mm` },
+              { label: t.holeCoarse, value: `Ø${hole.coarse} mm` },
+              { label: t.wrenchHex, value: `${wrench.hex} mm` },
+              { label: t.wrenchSocket, value: `${wrench.socket} mm` },
+              torqueResult
+                ? { label: t.torque, value: `≈ ${fmtFastener(torqueResult.torque)} N·m` }
+                : null,
+            ].filter(Boolean) as { label: string; value: string }[]
+          }
         />
         <div className="flex flex-wrap gap-2">
           <CopyResult text={copy} />
           <CopyLink />
         </div>
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <BoltSection row={lookupFastener(Number(size.slice(1)))} hole={hole.medium} />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.torquePerSize(String(kVal))}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.torquePerSize(String(kVal))}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
@@ -173,14 +218,18 @@ export function FastenersCalc() {
                   </th>
                   <td>{STRESS_AREA[s]}</td>
                   {PROPERTY_CLASSES.map((c) => (
-                    <td key={c.id}>{fmtFastener(computeTorque(s, c, kVal).torque)} N·m</td>
+                    <td key={c.id}>
+                      {kVal > 0 ? fmtFastener(computeTorque(s, c, kVal).torque) : "—"} N·m
+                    </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.engineeringtoolbox.com/iso-metric-screw-thread-d_777.html">{t.source}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/iso-metric-screw-thread-d_777.html">
+          {t.source}
+        </SourceLink>
       </section>
     </>
   );

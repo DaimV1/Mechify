@@ -8,7 +8,9 @@ export function PageShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <Header />
-      <main className="flex-1">{children}</main>
+      <main id="main" tabIndex={-1} className="flex-1">
+        {children}
+      </main>
       <Footer />
     </div>
   );

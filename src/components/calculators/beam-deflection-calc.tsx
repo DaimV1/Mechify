@@ -1,7 +1,20 @@
+import { BeamDeflection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BEAM_TYPES, computeBeam, DEFLECTION_GUIDELINES, fmtBeamNum, type BeamType } from "@/lib/calculators/beam";
-import { eFor, MATERIALS_E, SECTION_KINDS, sectionProps, type SectionKind } from "@/lib/calculators/knik";
+import {
+  BEAM_TYPES,
+  computeBeam,
+  DEFLECTION_GUIDELINES,
+  fmtBeamNum,
+  type BeamType,
+} from "@/lib/calculators/beam";
+import {
+  eFor,
+  MATERIALS_E,
+  SECTION_KINDS,
+  sectionProps,
+  type SectionKind,
+} from "@/lib/calculators/knik";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
   CalcEyebrow,
@@ -41,12 +54,14 @@ const T = {
     sideA: "Zijde a (mm)",
     wallT: "Wanddikte t (mm)",
     fillDims: "Vul geldige afmetingen in voor de gekozen doorsnede.",
-    fillSpan: "Vul een overspanning L en een lastpositie a in (0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging).",
+    fillSpan:
+      "Vul een overspanning L en een lastpositie a in (0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging).",
     deflection: (at: string) => `Doorbuiging δ (${at})`,
     moment: "Moment M_max",
     ratio: "L / δ",
     guidelinesTitle: "Richtwaarden toelaatbare doorbuiging",
-    guidelinesNote: "Generieke vuistregels — controleer de toepasselijke norm voor de specifieke toepassing.",
+    guidelinesNote:
+      "Generieke vuistregels — controleer de toepasselijke norm voor de specifieke toepassing.",
     thRatio: "Verhouding",
     thUse: "Typische toepassing",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -69,12 +84,14 @@ const T = {
     sideA: "Side a (mm)",
     wallT: "Wall thickness t (mm)",
     fillDims: "Enter valid dimensions for the selected cross-section.",
-    fillSpan: "Enter a span L and a load position a (0 < a < L for simply supported, 0 < a ≤ L for cantilever).",
+    fillSpan:
+      "Enter a span L and a load position a (0 < a < L for simply supported, 0 < a ≤ L for cantilever).",
     deflection: (at: string) => `Deflection δ (${at})`,
     moment: "Moment M_max",
     ratio: "L / δ",
     guidelinesTitle: "Allowable deflection guidelines",
-    guidelinesNote: "Generic rules of thumb — check the applicable standard for the specific application.",
+    guidelinesNote:
+      "Generic rules of thumb — check the applicable standard for the specific application.",
     thRatio: "Ratio",
     thUse: "Typical use",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -85,8 +102,12 @@ export function BeamDeflectionCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [beamType, setBeamType] = useState<BeamType>((search.get("type") as BeamType) ?? "opgelegd");
-  const [sectionKind, setSectionKind] = useState<SectionKind>((search.get("section") as SectionKind) ?? "rechthoek");
+  const [beamType, setBeamType] = useState<BeamType>(
+    (search.get("type") as BeamType) ?? "opgelegd",
+  );
+  const [sectionKind, setSectionKind] = useState<SectionKind>(
+    (search.get("section") as SectionKind) ?? "rechthoek",
+  );
   const [D, setD] = useState(search.get("D") ?? "20");
   const [dIn, setDIn] = useState(search.get("dIn") ?? "14");
   const [b, setB] = useState(search.get("b") ?? "40");
@@ -128,7 +149,11 @@ export function BeamDeflectionCalc() {
       case "vierkant":
         return { a: parseNum(a) ?? undefined };
       case "koker":
-        return { b: parseNum(b) ?? undefined, h: parseNum(h) ?? undefined, t: parseNum(t2) ?? undefined };
+        return {
+          b: parseNum(b) ?? undefined,
+          h: parseNum(h) ?? undefined,
+          t: parseNum(t2) ?? undefined,
+        };
     }
   }, [sectionKind, D, dIn, b, h, a, t2]);
 
@@ -166,7 +191,9 @@ export function BeamDeflectionCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.beamType}>
@@ -258,12 +285,17 @@ export function BeamDeflectionCalc() {
         ) : (
           <>
             <ResultGrid
-              items={[
-                { label: t.deflection(AT_LABEL[locale][result.at]), value: `${fmtBeamNum(result.deflection, 3)} mm` },
-                { label: t.moment, value: `${fmtBeamNum(result.momentMax, 0)} N·mm` },
-                { label: "I", value: `${fmtBeamNum(section.I, 0)} mm⁴` },
-                ratio != null ? { label: t.ratio, value: `≈ ${fmtBeamNum(ratio, 0)}` } : null,
-              ].filter(Boolean) as { label: string; value: string }[]}
+              items={
+                [
+                  {
+                    label: t.deflection(AT_LABEL[locale][result.at]),
+                    value: `${fmtBeamNum(result.deflection, 3)} mm`,
+                  },
+                  { label: t.moment, value: `${fmtBeamNum(result.momentMax, 0)} N·mm` },
+                  { label: "I", value: `${fmtBeamNum(section.I, 0)} mm⁴` },
+                  ratio != null ? { label: t.ratio, value: `≈ ${fmtBeamNum(ratio, 0)}` } : null,
+                ].filter(Boolean) as { label: string; value: string }[]
+              }
             />
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
@@ -272,9 +304,25 @@ export function BeamDeflectionCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        {result && Lraw != null && posARaw != null && Fraw != null && section ? (
+          <BeamDeflection
+            end={beamType === "opgelegd" ? "ss" : "cant"}
+            L={Lraw}
+            a={posARaw}
+            P={Fraw}
+            E={E}
+            I={section.I}
+          />
+        ) : (
+          <p>Vul geldige balkgegevens in om het schema te tonen.</p>
+        )}
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.guidelinesTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.guidelinesTitle}
+        </h2>
         <Note>{t.guidelinesNote}</Note>
         <div className="table-scroll mt-4">
           <table className="ref-table">
@@ -296,7 +344,9 @@ export function BeamDeflectionCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.engineeringtoolbox.com/beam-deflection-stress-d_1312.html">{t.source}</SourceLink>
+        <SourceLink href="https://www.engineeringtoolbox.com/beam-deflection-stress-d_1312.html">
+          {t.source}
+        </SourceLink>
       </section>
     </>
   );

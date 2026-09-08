@@ -29,7 +29,15 @@ export const GEO_CLASSES: { id: GeoClass; label: string }[] = [
   { id: "L", label: "L" },
 ];
 
-type LinearBand = { over: number; to: number; label: string; f: number | null; m: number | null; c: number | null; v: number | null };
+type LinearBand = {
+  over: number;
+  to: number;
+  label: string;
+  f: number | null;
+  m: number | null;
+  c: number | null;
+  v: number | null;
+};
 
 /** ISO 2768-1 Tabel 1: toegestane afwijking lineaire maten (mm). */
 export const LINEAR_BANDS: LinearBand[] = [
@@ -50,7 +58,15 @@ export const RADIUS_CHAMFER_BANDS: LinearBand[] = [
   { over: 6, to: Infinity, label: ">6", f: 1.0, m: 1.0, c: 2.0, v: 2.0 },
 ];
 
-type AngularBand = { over: number; to: number; label: string; f: number; m: number; c: number; v: number };
+type AngularBand = {
+  over: number;
+  to: number;
+  label: string;
+  f: number;
+  m: number;
+  c: number;
+  v: number;
+};
 
 /** ISO 2768-1 Tabel 3: toegestane afwijking hoekmaten (graden), o.b.v. lengte kortste been (mm). */
 export const ANGULAR_BANDS: AngularBand[] = [

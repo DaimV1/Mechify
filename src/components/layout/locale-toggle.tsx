@@ -9,7 +9,10 @@ export function LocaleToggle({ className }: { className?: string }) {
     <div
       role="group"
       aria-label="Taal / Language"
-      className={cn("inline-flex items-center rounded-md border border-border-strong bg-surface p-0.5", className)}
+      className={cn(
+        "inline-flex items-center rounded-md border border-border-strong bg-surface p-0.5",
+        className,
+      )}
     >
       {LOCALES.map((l) => (
         <button

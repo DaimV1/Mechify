@@ -57,7 +57,11 @@ export function retractForce(boreMm: number, rodMm: number, pBar: number): numbe
 }
 
 /** Smallest standard bore whose extend force meets or exceeds the requested load. */
-export function minBoreFor(requiredN: number, pBar: number, table: CylinderRow[] = ALL_BORES): CylinderRow | null {
+export function minBoreFor(
+  requiredN: number,
+  pBar: number,
+  table: CylinderRow[] = ALL_BORES,
+): CylinderRow | null {
   const sorted = [...table].sort((a, b) => a.bore - b.bore);
   return sorted.find((row) => extendForce(row.bore, pBar) >= requiredN) ?? null;
 }

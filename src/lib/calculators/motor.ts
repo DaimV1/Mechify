@@ -62,13 +62,23 @@ export function computeMotor({
   efficiency: number;
   safety: number;
 }): MotorResult | null {
-  if (!(force >= 0) || !(speedMs > 0) || !(diameterMm > 0) || !(efficiency > 0) || !(safety > 0)) return null;
+  if (![force, speedMs, diameterMm, efficiency, safety].every(Number.isFinite) || efficiency > 1)
+    return null;
+  if (!(force >= 0) || !(speedMs > 0) || !(diameterMm > 0) || !(efficiency > 0) || !(safety > 0))
+    return null;
   const Dm = diameterMm / 1000;
   const rpm = (speedMs * 60) / (Math.PI * Dm);
   const torque = force * (Dm / 2);
   const shaftPowerW = (force * speedMs) / efficiency;
   const designPowerW = shaftPowerW * safety;
-  return { force, rpm, torque, shaftPowerW, designPowerW, iecPower: iecStepFor(designPowerW / 1000) };
+  return {
+    force,
+    rpm,
+    torque,
+    shaftPowerW,
+    designPowerW,
+    iecPower: iecStepFor(designPowerW / 1000),
+  };
 }
 
 /**
@@ -78,8 +88,8 @@ export function computeMotor({
  * polentaal/frame verschillen per fabrikant — controleer de catalogus.
  */
 export const IEC_POWERS_KW = [
-  0.06, 0.09, 0.12, 0.18, 0.25, 0.37, 0.55, 0.75, 1.1, 1.5, 2.2, 3, 4, 5.5, 7.5, 11, 15, 18.5, 22, 30, 37, 45, 55,
-  75, 90, 110, 132, 160, 200, 250, 315, 355,
+  0.06, 0.09, 0.12, 0.18, 0.25, 0.37, 0.55, 0.75, 1.1, 1.5, 2.2, 3, 4, 5.5, 7.5, 11, 15, 18.5, 22,
+  30, 37, 45, 55, 75, 90, 110, 132, 160, 200, 250, 315, 355,
 ];
 
 export function iecStepFor(requiredKw: number): number | null {

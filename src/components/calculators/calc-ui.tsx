@@ -46,7 +46,7 @@ export function sanitizeDiameterInput(raw: string) {
 export function parseWholeMm(raw: string): { status: "empty" } | { status: "ok"; mm: number } {
   const t = raw.trim();
   if (t === "") return { status: "empty" };
-  const mm = Number.parseInt(t, 10);
+  const mm = /^\d+$/.test(t) ? Number(t) : NaN;
   if (!Number.isFinite(mm)) return { status: "empty" };
   return { status: "ok", mm };
 }
@@ -76,7 +76,7 @@ export function NumInput({
       spellCheck={false}
       value={value}
       onFocus={(e) => e.currentTarget.select()}
-      onChange={(e) => onChange(sanitizeDiameterInput(e.target.value))}
+      onChange={(e) => onChange(e.target.value)}
       className={controlClass}
     />
   );
@@ -105,7 +105,7 @@ export function WholeMmInput({
       spellCheck={false}
       value={value}
       onFocus={(e) => e.currentTarget.select()}
-      onChange={(e) => onChange(sanitizeWholeMmInput(e.target.value))}
+      onChange={(e) => onChange(e.target.value)}
       className={controlClass}
     />
   );
@@ -218,7 +218,11 @@ export function KindDot({ kind }: { kind: "los" | "overgang" | "lijn" | "vast" }
 
 export function CalcEyebrow({ children }: { children?: ReactNode }) {
   const { locale } = useLocale();
-  return <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">{children ?? COMMON[locale].calcHelper}</p>;
+  return (
+    <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted">
+      {children ?? COMMON[locale].calcHelper}
+    </p>
+  );
 }
 
 export function Note({ children }: { children: ReactNode }) {
@@ -240,7 +244,12 @@ export function SourceLink({ href, children }: { href: string; children: ReactNo
   return (
     <p className="mt-4 text-xs leading-relaxed text-subtle">
       {COMMON[locale].source}{" "}
-      <a href={href} className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">
+      <a
+        href={href}
+        className="text-accent hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {children}
       </a>
     </p>

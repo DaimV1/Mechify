@@ -1,0 +1,1354 @@
+import type { ReactNode } from "react";
+import { useId } from "react";
+import { tx, useLocale } from "@/lib/i18n/locale";
+import { fmtMm } from "@/lib/utils";
+import type { FastenerRow } from "@/lib/toolkit/fastener";
+import type { SeegerKind } from "@/lib/toolkit/seeger";
+import type { OringKind } from "@/lib/toolkit/oring";
+import { dashMm, type Kind as BendKind } from "@/lib/toolkit/kanten";
+import { END_CONDITIONS, type EndConditionId } from "@/lib/toolkit/knik";
+import {
+  computeDeflection,
+  deflectionShapePoints,
+  fmtDotComma,
+  type BeamEndCondition,
+} from "@/lib/toolkit/deflection";
+
+const FONT = "IBM Plex Mono, ui-monospace, monospace";
+
+export function SchemaPanel({ caption, children }: { caption: ReactNode; children: ReactNode }) {
+  return (
+    <figure className="mt-4 overflow-hidden rounded-lg border border-line bg-elevated">
+      <figcaption className="border-b border-line px-4 py-2 font-mono text-xs uppercase tracking-[0.14em] text-muted">
+        {caption}
+      </figcaption>
+      <div className="px-2 py-3 sm:px-4">{children}</div>
+    </figure>
+  );
+}
+
+function HatchDefs({ uid }: { uid: string }) {
+  return (
+    <defs>
+      <pattern
+        id={`${uid}-a`}
+        width="7"
+        height="7"
+        patternUnits="userSpaceOnUse"
+        patternTransform="rotate(45)"
+      >
+        <line x1="0" y1="0" x2="0" y2="7" stroke="currentColor" strokeWidth="0.9" opacity="0.32" />
+      </pattern>
+      <pattern
+        id={`${uid}-b`}
+        width="7"
+        height="7"
+        patternUnits="userSpaceOnUse"
+        patternTransform="rotate(-45)"
+      >
+        <line x1="0" y1="0" x2="0" y2="7" stroke="currentColor" strokeWidth="0.9" opacity="0.22" />
+      </pattern>
+    </defs>
+  );
+}
+
+function DimH({
+  x1,
+  x2,
+  y,
+  label,
+  side = "down",
+}: {
+  x1: number;
+  x2: number;
+  y: number;
+  label: string;
+  side?: "up" | "down";
+}) {
+  const a = Math.min(x1, x2);
+  const b = Math.max(x1, x2);
+  const mid = (a + b) / 2;
+  const tick = side === "down" ? 5 : -5;
+  const ty = y + (side === "down" ? 16 : -7);
+  return (
+    <g stroke="currentColor" fill="none" strokeWidth="1">
+      <line x1={a} y1={y} x2={b} y2={y} />
+      <line x1={a} y1={y - tick} x2={a} y2={y + tick} />
+      <line x1={b} y1={y - tick} x2={b} y2={y + tick} />
+      <text
+        x={mid}
+        y={ty}
+        textAnchor="middle"
+        fill="currentColor"
+        stroke="none"
+        fontSize="12"
+        fontFamily={FONT}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+function DimV({
+  x,
+  y1,
+  y2,
+  label,
+  side = "left",
+}: {
+  x: number;
+  y1: number;
+  y2: number;
+  label: string;
+  side?: "left" | "right";
+}) {
+  const a = Math.min(y1, y2);
+  const b = Math.max(y1, y2);
+  const mid = (a + b) / 2;
+
+  const txPos = x + (side === "left" ? -8 : 8);
+  return (
+    <g stroke="currentColor" fill="none" strokeWidth="1">
+      <line x1={x} y1={a} x2={x} y2={b} />
+      <line x1={x - 5} y1={a} x2={x + 5} y2={a} />
+      <line x1={x - 5} y1={b} x2={x + 5} y2={b} />
+      <text
+        x={txPos}
+        y={mid + 4}
+        textAnchor={side === "left" ? "end" : "start"}
+        fill="currentColor"
+        stroke="none"
+        fontSize="12"
+        fontFamily={FONT}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+/** Dimension line running parallel to a feature (e.g. an angled leg), offset to its outer side. */
+function DimAligned({
+  x1,
+  y1,
+  x2,
+  y2,
+  offset,
+  label,
+}: {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  offset: number;
+  label: string;
+}) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const px = -uy;
+  const py = ux;
+  const ax1 = x1 + px * offset;
+  const ay1 = y1 + py * offset;
+  const ax2 = x2 + px * offset;
+  const ay2 = y2 + py * offset;
+  const tick = 5;
+  const mx = (ax1 + ax2) / 2 + px * 16;
+  const my = (ay1 + ay2) / 2 + py * 16;
+  const labelW = label.length * 7 + 8;
+  return (
+    <g>
+      <Ext x1={x1} y1={y1} x2={ax1} y2={ay1} />
+      <Ext x1={x2} y1={y2} x2={ax2} y2={ay2} />
+      <g stroke="currentColor" fill="none" strokeWidth="1">
+        <line x1={ax1} y1={ay1} x2={ax2} y2={ay2} />
+        <line x1={ax1 - px * tick} y1={ay1 - py * tick} x2={ax1 + px * tick} y2={ay1 + py * tick} />
+        <line x1={ax2 - px * tick} y1={ay2 - py * tick} x2={ax2 + px * tick} y2={ay2 + py * tick} />
+      </g>
+      {/* backing plate so the label stays legible over the leg it runs beside */}
+      <rect
+        x={mx - labelW / 2}
+        y={my - 13}
+        width={labelW}
+        height={17}
+        fill="var(--paper-elevated)"
+      />
+      <text
+        x={mx}
+        y={my}
+        textAnchor="middle"
+        fill="currentColor"
+        stroke="none"
+        fontSize="12"
+        fontFamily={FONT}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+function Ext({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) {
+  return (
+    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth="0.75" opacity="0.45" />
+  );
+}
+
+export function BoltSection({ row, hole }: { row: FastenerRow | null; hole: number | null }) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+  const d = row ? `d M${row.d}` : "d";
+  const D = hole != null ? `D ${fmtMm(hole)}` : "D";
+  const k = row ? `k ${fmtMm(row.k)}` : "k";
+  const sw = row ? `SW ${fmtMm(row.sw)}` : "SW";
+  const plate = tx(locale, "plaat", "plate");
+
+  return (
+    <svg
+      className="w-full max-w-xl text-ink"
+      viewBox="0 0 460 300"
+      role="img"
+      aria-label={tx(
+        locale,
+        "Doorsnede: zeskantbout door twee platen, met kop k, doorlaat D, draad d en SW",
+        "Section: hex bolt through two plates, head k, clearance D, thread d and SW",
+      )}
+    >
+      <HatchDefs uid={uid} />
+      <line
+        x1="168"
+        y1="28"
+        x2="168"
+        y2="272"
+        stroke="currentColor"
+        strokeDasharray="4 5"
+        strokeWidth="0.8"
+        opacity="0.4"
+      />
+      {/* plates */}
+      <rect x="48" y="96" width="92" height="38" fill={`url(#${uid}-a)`} stroke="currentColor" />
+      <rect x="196" y="96" width="92" height="38" fill={`url(#${uid}-a)`} stroke="currentColor" />
+      <rect x="48" y="134" width="92" height="38" fill={`url(#${uid}-b)`} stroke="currentColor" />
+      <rect x="196" y="134" width="92" height="38" fill={`url(#${uid}-b)`} stroke="currentColor" />
+      <text x="64" y="120" fill="currentColor" fontSize="11" fontFamily={FONT} opacity="0.75">
+        {plate}
+      </text>
+      <text x="64" y="158" fill="currentColor" fontSize="11" fontFamily={FONT} opacity="0.75">
+        {plate}
+      </text>
+      {/* clearance D */}
+      <rect x="140" y="96" width="56" height="76" fill="var(--paper)" />
+      {/* shank d, flush between head and nut */}
+      <rect x="150" y="96" width="36" height="76" fill="var(--accent)" />
+      {/* hex head, flush against the top plate */}
+      <rect
+        x="122"
+        y="64"
+        width="92"
+        height="32"
+        fill="var(--accent)"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+      {/* nut, flush against the bottom plate */}
+      <rect
+        x="122"
+        y="172"
+        width="92"
+        height="24"
+        fill="var(--paper)"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+      <rect x="150" y="172" width="36" height="24" fill="var(--accent)" />
+
+      <Ext x1={122} y1={64} x2={122} y2={40} />
+      <Ext x1={214} y1={64} x2={214} y2={40} />
+      <DimH x1={122} x2={214} y={36} label={sw} side="up" />
+
+      <Ext x1={304} y1={64} x2={318} y2={64} />
+      <Ext x1={304} y1={96} x2={318} y2={96} />
+      <DimV x={324} y1={64} y2={96} label={k} side="right" />
+
+      <Ext x1={150} y1={196} x2={150} y2={212} />
+      <Ext x1={186} y1={196} x2={186} y2={212} />
+      <DimH x1={150} x2={186} y={220} label={d} />
+
+      <Ext x1={140} y1={196} x2={140} y2={244} />
+      <Ext x1={196} y1={196} x2={196} y2={244} />
+      <DimH x1={140} x2={196} y={252} label={D} />
+    </svg>
+  );
+}
+
+export function KeywaySection({
+  row,
+}: {
+  row: { b: number; h: number; t1: number; t2: number } | null;
+}) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+  const cx = 150;
+  const cy = 150;
+  const rHub = 112;
+  const rShaft = 74;
+  const bw = 30;
+  const t2 = 20;
+  const t1 = 26;
+  const keyTop = cy - rShaft - t2;
+  const keyBot = cy - rShaft + t1;
+  const keyL = cx - bw / 2;
+  const keyR = cx + bw / 2;
+  const t1l = row ? `t₁ ${fmtMm(row.t1)}` : "t₁";
+  const t2l = row ? `t₂ ${fmtMm(row.t2)}` : "t₂";
+  const bl = row ? `b ${row.b}` : "b";
+  const hl = row ? `h ${row.h}` : "h";
+
+  return (
+    <svg
+      className="w-full max-w-xl text-ink"
+      viewBox="0 0 420 310"
+      role="img"
+      aria-label={tx(
+        locale,
+        "Dwarsdoorsnede as, spie en naaf met t1, t2, b en h",
+        "Cross-section of shaft, key and hub with t1, t2, b and h",
+      )}
+    >
+      <HatchDefs uid={uid} />
+      <circle cx={cx} cy={cy} r={rHub} fill={`url(#${uid}-a)`} stroke="currentColor" />
+      <circle cx={cx} cy={cy} r={rShaft} fill="var(--paper)" stroke="none" />
+      <circle cx={cx} cy={cy} r={rShaft} fill={`url(#${uid}-b)`} stroke="currentColor" />
+      {/* key sits in both grooves */}
+      <rect
+        x={keyL}
+        y={keyTop}
+        width={bw}
+        height={t1 + t2}
+        rx="1.5"
+        fill="var(--accent)"
+        stroke="currentColor"
+        strokeWidth="1"
+      />
+      {/* groove walls */}
+      <line x1={keyL} y1={keyTop} x2={keyL} y2={keyBot} stroke="currentColor" strokeWidth="1.2" />
+      <line x1={keyR} y1={keyTop} x2={keyR} y2={keyBot} stroke="currentColor" strokeWidth="1.2" />
+      <text
+        x={cx}
+        y={cy + 5}
+        textAnchor="middle"
+        fill="currentColor"
+        fontSize="12"
+        fontFamily={FONT}
+      >
+        {tx(locale, "as", "shaft")}
+      </text>
+      <text x={58} y={cy - 48} fill="currentColor" fontSize="12" fontFamily={FONT}>
+        {tx(locale, "naaf", "hub")}
+      </text>
+
+      <Ext x1={keyR} y1={keyTop} x2={292} y2={keyTop} />
+      <Ext x1={keyR} y1={cy - rShaft} x2={292} y2={cy - rShaft} />
+      <DimV x={300} y1={keyTop} y2={cy - rShaft} label={t2l} side="right" />
+
+      <Ext x1={keyR} y1={cy - rShaft} x2={332} y2={cy - rShaft} />
+      <Ext x1={keyR} y1={keyBot} x2={332} y2={keyBot} />
+      <DimV x={340} y1={cy - rShaft} y2={keyBot} label={t1l} side="right" />
+
+      <Ext x1={keyL} y1={keyTop} x2={keyL} y2={36} />
+      <Ext x1={keyR} y1={keyTop} x2={keyR} y2={36} />
+      <DimH x1={keyL} x2={keyR} y={28} label={bl} side="up" />
+
+      <Ext x1={keyL} y1={keyTop} x2={48} y2={keyTop} />
+      <Ext x1={keyL} y1={keyBot} x2={48} y2={keyBot} />
+      <DimV x={40} y1={keyTop} y2={keyBot} label={hl} side="left" />
+    </svg>
+  );
+}
+
+export function CirclipSection({
+  kind,
+  d1,
+  d2,
+  b,
+  t,
+}: {
+  kind: SeegerKind;
+  d1?: number;
+  d2?: number;
+  b?: number;
+  t?: number;
+}) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+  const asShaft = kind === "as";
+  const d1l = d1 != null ? `d₁ ${d1}` : "d₁";
+  const d2l = d2 != null ? `d₂ ${fmtMm(d2)}` : "d₂";
+  const bl = b != null ? `b ${fmtMm(b)}` : "b";
+  const tl = t != null ? `t ${fmtMm(t)}` : "t";
+
+  const bodyY = 70;
+  const bodyH = 110;
+  const bodyX = 50;
+  const bodyW = 250;
+  const grooveX = 168;
+  const grooveW = 22;
+  const grooveD = 16;
+
+  return (
+    <svg
+      className="w-full max-w-xl text-ink"
+      viewBox="0 0 460 250"
+      role="img"
+      aria-label={
+        asShaft
+          ? tx(
+              locale,
+              "Lengtedoorsnede as met seegerringgroef DIN 471",
+              "Longitudinal section, shaft circlip groove DIN 471",
+            )
+          : tx(
+              locale,
+              "Lengtedoorsnede boring met seegerringgroef DIN 472",
+              "Longitudinal section, bore circlip groove DIN 472",
+            )
+      }
+    >
+      <HatchDefs uid={uid} />
+      <line
+        x1={bodyX}
+        y1={bodyY + bodyH / 2}
+        x2={bodyX + bodyW}
+        y2={bodyY + bodyH / 2}
+        stroke="currentColor"
+        strokeDasharray="4 5"
+        strokeWidth="0.8"
+        opacity="0.4"
+      />
+
+      {asShaft ? (
+        <>
+          <rect
+            x={bodyX}
+            y={bodyY}
+            width={bodyW}
+            height={bodyH}
+            fill={`url(#${uid}-a)`}
+            stroke="currentColor"
+          />
+          {/* OD grooves: notches into the shaft */}
+          <rect x={grooveX} y={bodyY} width={grooveW} height={grooveD} fill="var(--paper)" />
+          <rect
+            x={grooveX}
+            y={bodyY + bodyH - grooveD}
+            width={grooveW}
+            height={grooveD}
+            fill="var(--paper)"
+          />
+          <rect
+            x={grooveX + 3}
+            y={bodyY + 2}
+            width={grooveW - 6}
+            height={grooveD - 2}
+            fill="var(--accent)"
+          />
+          <rect
+            x={grooveX + 3}
+            y={bodyY + bodyH - grooveD}
+            width={grooveW - 6}
+            height={grooveD - 2}
+            fill="var(--accent)"
+          />
+        </>
+      ) : (
+        <>
+          <rect
+            x={bodyX}
+            y={bodyY - 28}
+            width={bodyW}
+            height={bodyH + 56}
+            fill={`url(#${uid}-a)`}
+            stroke="currentColor"
+          />
+          <rect
+            x={bodyX}
+            y={bodyY}
+            width={bodyW}
+            height={bodyH}
+            fill="var(--paper)"
+            stroke="currentColor"
+          />
+          {/* ID grooves: notches into the housing wall */}
+          <rect
+            x={grooveX}
+            y={bodyY - grooveD}
+            width={grooveW}
+            height={grooveD}
+            fill="var(--paper)"
+            stroke="currentColor"
+          />
+          <rect
+            x={grooveX}
+            y={bodyY + bodyH}
+            width={grooveW}
+            height={grooveD}
+            fill="var(--paper)"
+            stroke="currentColor"
+          />
+          <rect
+            x={grooveX + 3}
+            y={bodyY - grooveD}
+            width={grooveW - 6}
+            height={grooveD}
+            fill="var(--accent)"
+          />
+          <rect
+            x={grooveX + 3}
+            y={bodyY + bodyH}
+            width={grooveW - 6}
+            height={grooveD}
+            fill="var(--accent)"
+          />
+        </>
+      )}
+
+      <text
+        x={bodyX + 8}
+        y={bodyY + bodyH / 2 + 4}
+        fill="currentColor"
+        fontSize="12"
+        fontFamily={FONT}
+      >
+        {asShaft ? tx(locale, "as", "shaft") : tx(locale, "boring", "bore")}
+      </text>
+      <text
+        x={grooveX + grooveW + 8}
+        y={asShaft ? bodyY + 12 : bodyY - grooveD - 8}
+        fill="var(--accent)"
+        fontSize="11"
+        fontFamily={FONT}
+      >
+        {tx(locale, "ring", "ring")}
+      </text>
+
+      <Ext x1={bodyX} y1={asShaft ? bodyY : bodyY} x2={36} y2={asShaft ? bodyY : bodyY} />
+      <Ext
+        x1={bodyX}
+        y1={asShaft ? bodyY + bodyH : bodyY + bodyH}
+        x2={36}
+        y2={asShaft ? bodyY + bodyH : bodyY + bodyH}
+      />
+      <DimV x={28} y1={bodyY} y2={bodyY + bodyH} label={d1l} side="left" />
+
+      {asShaft ? (
+        <>
+          <Ext x1={grooveX} y1={bodyY + grooveD} x2={328} y2={bodyY + grooveD} />
+          <Ext x1={grooveX} y1={bodyY + bodyH - grooveD} x2={328} y2={bodyY + bodyH - grooveD} />
+          <DimV
+            x={336}
+            y1={bodyY + grooveD}
+            y2={bodyY + bodyH - grooveD}
+            label={d2l}
+            side="right"
+          />
+        </>
+      ) : (
+        <>
+          <Ext x1={grooveX + grooveW} y1={bodyY - grooveD} x2={328} y2={bodyY - grooveD} />
+          <Ext
+            x1={grooveX + grooveW}
+            y1={bodyY + bodyH + grooveD}
+            x2={328}
+            y2={bodyY + bodyH + grooveD}
+          />
+          <DimV
+            x={336}
+            y1={bodyY - grooveD}
+            y2={bodyY + bodyH + grooveD}
+            label={d2l}
+            side="right"
+          />
+        </>
+      )}
+
+      <Ext x1={grooveX} y1={asShaft ? bodyY : bodyY - grooveD} x2={grooveX} y2={28} />
+      <Ext
+        x1={grooveX + grooveW}
+        y1={asShaft ? bodyY : bodyY - grooveD}
+        x2={grooveX + grooveW}
+        y2={28}
+      />
+      <DimH x1={grooveX} x2={grooveX + grooveW} y={20} label={bl} side="up" />
+
+      <Ext
+        x1={grooveX + grooveW}
+        y1={asShaft ? bodyY : bodyY - grooveD}
+        x2={380}
+        y2={asShaft ? bodyY : bodyY - grooveD}
+      />
+      <Ext
+        x1={grooveX + grooveW}
+        y1={asShaft ? bodyY + grooveD : bodyY}
+        x2={380}
+        y2={asShaft ? bodyY + grooveD : bodyY}
+      />
+      <DimV
+        x={388}
+        y1={asShaft ? bodyY : bodyY - grooveD}
+        y2={asShaft ? bodyY + grooveD : bodyY}
+        label={tl}
+        side="right"
+      />
+    </svg>
+  );
+}
+
+export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: number }) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+  const axial = kind === "axial";
+  const tl = t != null ? `t ${fmtMm(t)}` : "t";
+  const bl = b != null ? `b ${fmtMm(b)}` : "b";
+
+  const grooveX = 194;
+  const grooveW = 52;
+  const grooveD = 26;
+  const grooveFloorY = 150 + grooveD;
+
+  return (
+    <svg
+      className="w-full max-w-xl text-ink"
+      viewBox="0 0 440 260"
+      role="img"
+      aria-label={
+        axial
+          ? tx(
+              locale,
+              "Doorsnede flensgroef met O-ring, geklemd tussen twee vlakke platen",
+              "Section of a flange groove with O-ring, clamped between two flat faces",
+            )
+          : tx(
+              locale,
+              "Doorsnede as met radiale O-ringgroef, afdichtend tegen de boring",
+              "Section of a shaft with radial O-ring groove, sealing against the bore",
+            )
+      }
+    >
+      <HatchDefs uid={uid} />
+      {axial ? (
+        <line
+          x1="220"
+          y1="20"
+          x2="220"
+          y2="240"
+          stroke="currentColor"
+          strokeDasharray="4 5"
+          strokeWidth="0.8"
+          opacity="0.4"
+        />
+      ) : null}
+
+      {axial ? (
+        <>
+          {/* upper flange, clamped face down */}
+          <rect
+            x="40"
+            y="36"
+            width="360"
+            height="54"
+            fill={`url(#${uid}-b)`}
+            stroke="currentColor"
+          />
+          {/* lower flange with groove cut into its top face */}
+          <rect
+            x="40"
+            y={150}
+            width="360"
+            height="60"
+            fill={`url(#${uid}-a)`}
+            stroke="currentColor"
+          />
+          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--paper)" />
+          <line
+            x1={grooveX}
+            y1="150"
+            x2={grooveX}
+            y2={grooveFloorY}
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <line
+            x1={grooveX + grooveW}
+            y1="150"
+            x2={grooveX + grooveW}
+            y2={grooveFloorY}
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <circle
+            cx="220"
+            cy="133"
+            r="43"
+            fill="var(--accent)"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+          <text x="56" y="68" fill="currentColor" fontSize="12" fontFamily={FONT}>
+            {tx(locale, "flens boven", "upper flange")}
+          </text>
+          <text x="56" y="184" fill="currentColor" fontSize="12" fontFamily={FONT}>
+            {tx(locale, "flens onder", "lower flange")}
+          </text>
+        </>
+      ) : (
+        <>
+          {/* housing / bore */}
+          <rect
+            x="40"
+            y="56"
+            width="360"
+            height="54"
+            fill={`url(#${uid}-b)`}
+            stroke="currentColor"
+          />
+          {/* shaft with groove cut into its OD */}
+          <rect
+            x="40"
+            y="150"
+            width="360"
+            height="64"
+            fill={`url(#${uid}-a)`}
+            stroke="currentColor"
+          />
+          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--paper)" />
+          <line
+            x1={grooveX}
+            y1="150"
+            x2={grooveX}
+            y2={grooveFloorY}
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <line
+            x1={grooveX + grooveW}
+            y1="150"
+            x2={grooveX + grooveW}
+            y2={grooveFloorY}
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <circle
+            cx="220"
+            cy="143"
+            r="34"
+            fill="var(--accent)"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+          <text x="56" y="88" fill="currentColor" fontSize="12" fontFamily={FONT}>
+            {tx(locale, "behuizing / boring", "housing / bore")}
+          </text>
+          <text x="56" y="188" fill="currentColor" fontSize="12" fontFamily={FONT}>
+            {tx(locale, "as", "shaft")}
+          </text>
+        </>
+      )}
+
+      <Ext x1={grooveX} y1={150} x2={grooveX} y2={204} />
+      <Ext x1={grooveX + grooveW} y1={150} x2={grooveX + grooveW} y2={204} />
+      <DimH x1={grooveX} x2={grooveX + grooveW} y={210} label={bl} side="down" />
+
+      <Ext x1={grooveX + grooveW} y1={150} x2={330} y2={150} />
+      <Ext x1={grooveX + grooveW} y1={grooveFloorY} x2={330} y2={grooveFloorY} />
+      <DimV x={338} y1={150} y2={grooveFloorY} label={tl} side="right" />
+    </svg>
+  );
+}
+
+function clamp(v: number, lo: number, hi: number) {
+  return Math.min(hi, Math.max(lo, v));
+}
+
+export function BendSection({
+  kind,
+  ri,
+  s,
+  w,
+  t,
+}: {
+  kind: BendKind;
+  ri: number | null;
+  s: number | null;
+  w: number | null;
+  t: number | null;
+}) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+  const sharp = kind === "scherp";
+
+  // The sheet sits in the die's V-groove at the bottom of the stroke, legs
+  // following the die's own 45°/45° walls out into the open air — this is
+  // the same for every bend kind; only the Ri/s/w values differ. Only the
+  // stroke weight (plate thickness) tracks the real value; leg length and
+  // groove width stay fixed so the diagram doesn't reflow with input.
+  const bendX = 220;
+  const bendY = 224;
+  const leg1End = { x: 370, y: 74 };
+  const leg2End = { x: 70, y: 74 };
+  const path = `M${leg1End.x},${leg1End.y} L${bendX},${bendY} L${leg2End.x},${leg2End.y}`;
+
+  const strokeW = clamp(6 + Math.sqrt(t ?? 2) * 7, 8, 30);
+  const accentW = Math.max(strokeW - 3, 5);
+  const DIAG = Math.SQRT1_2;
+
+  const wl = w != null ? `w ${dashMm(w)}` : "w";
+  const sl = s != null ? `s ${dashMm(s)}` : "s";
+  const ril = ri != null ? `Ri ${dashMm(ri)}` : "Ri";
+  const tl = t != null ? `t ${dashMm(t)}` : "t";
+
+  // Thickness dimension: spans the flat cut edge at the left leg's tip,
+  // perpendicular to the leg (width = strokeW). The leg runs along (-1,-1),
+  // so its perpendicular is (1,-1) — opposite-sign offsets, not same-sign.
+  const halfStroke = strokeW / 2;
+  const tTip1 = { x: leg2End.x + DIAG * halfStroke, y: leg2End.y - DIAG * halfStroke };
+  const tTip2 = { x: leg2End.x - DIAG * halfStroke, y: leg2End.y + DIAG * halfStroke };
+
+  return (
+    <svg
+      className="w-full max-w-xl text-ink"
+      viewBox="0 0 440 260"
+      role="img"
+      aria-label={
+        sharp
+          ? tx(
+              locale,
+              "Doorsnede scherpe kant in de matrijs, met groefwijdte w, minimale beenlengte s, plaatdikte t en inwendige radius Ri",
+              "Section of a sharp bend in the die, with die width w, minimum leg length s, plate thickness t and inner radius Ri",
+            )
+          : tx(
+              locale,
+              "Doorsnede haakse kant (90°) in de matrijs, met groefwijdte w, minimale beenlengte s, plaatdikte t en inwendige radius Ri",
+              "Section of a right-angle bend (90°) in the die, with die width w, minimum leg length s, plate thickness t and inner radius Ri",
+            )
+      }
+    >
+      <HatchDefs uid={uid} />
+      {/* die */}
+      <rect x="40" y="190" width="360" height="54" fill={`url(#${uid}-a)`} stroke="currentColor" />
+      <path d={`M186,190 L${bendX},224 L254,190 Z`} fill="var(--paper)" />
+      <text x="56" y="228" fill="currentColor" fontSize="12" fontFamily={FONT}>
+        {tx(locale, "matrijs", "die")}
+      </text>
+
+      {/* bent sheet — square-cut ends (butt cap), rounded only at the bend itself */}
+      <path
+        d={path}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeW}
+        strokeLinecap="butt"
+        strokeLinejoin="round"
+      />
+      <path
+        d={path}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth={accentW}
+        strokeLinecap="butt"
+        strokeLinejoin="round"
+      />
+
+      {/* Ri is the concave (inner) radius, so its label sits inside the V opening, above the apex — not below it in the die's clearance notch */}
+      <text
+        x={bendX}
+        y={bendY - 54}
+        textAnchor="middle"
+        fill="currentColor"
+        fontSize="11"
+        fontFamily={FONT}
+      >
+        {ril}
+      </text>
+
+      <Ext x1={186} y1={190} x2={186} y2={144} />
+      <Ext x1={254} y1={190} x2={254} y2={144} />
+      <DimH x1={186} x2={254} y={144} label={wl} side="up" />
+
+      {/* s starts where the rounded bend fillet ends (10 units up the 45° leg
+          from the apex — the round line-join's tangent point at this corner
+          angle), not at the sharp-corner apex itself, offset well clear of
+          the leg so the line and label both read easily */}
+      <DimAligned x1={227} y1={217} x2={leg1End.x} y2={leg1End.y} offset={28} label={sl} />
+
+      {/* plate thickness, directly on the left leg's flat cut edge */}
+      <DimAligned x1={tTip1.x} y1={tTip1.y} x2={tTip2.x} y2={tTip2.y} offset={0} label={tl} />
+    </svg>
+  );
+}
+
+function bucklePathH(
+  x0: number,
+  x1: number,
+  cy: number,
+  amp: number,
+  shape: (t: number) => number,
+) {
+  const N = 24;
+  const pts: string[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const x = x0 + (x1 - x0) * t;
+    const y = cy - amp * shape(t);
+    pts.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  return pts.join(" ");
+}
+
+function GroundHatchH({ x, y, dir }: { x: number; y: number; dir: 1 | -1 }) {
+  const h = 30;
+  const n = 4;
+  const ticks = [];
+  for (let i = 0; i <= n; i++) {
+    const ty = y - h / 2 + (i * h) / n;
+    ticks.push(
+      <line
+        key={i}
+        x1={x}
+        y1={ty}
+        x2={x + dir * 9}
+        y2={ty - 7}
+        stroke="currentColor"
+        strokeWidth="1"
+        opacity="0.55"
+      />,
+    );
+  }
+  return (
+    <g>
+      <line x1={x} y1={y - h / 2} x2={x} y2={y + h / 2} stroke="currentColor" strokeWidth="1.3" />
+      {ticks}
+    </g>
+  );
+}
+
+function BuckleSupportH({
+  kind,
+  x,
+  y,
+  dir,
+}: {
+  kind: "pin" | "fixed" | "free";
+  x: number;
+  y: number;
+  dir: 1 | -1;
+}) {
+  if (kind === "free") return null;
+  if (kind === "fixed") return <GroundHatchH x={x} y={y} dir={dir} />;
+  return (
+    <>
+      <circle cx={x} cy={y} r="4" fill="var(--paper)" stroke="currentColor" strokeWidth="1.2" />
+      <GroundHatchH x={x + dir * 11} y={y} dir={dir} />
+    </>
+  );
+}
+
+const BUCKLE_CASES: {
+  id: EndConditionId;
+  near: "pin" | "fixed";
+  far: "pin" | "fixed" | "free";
+  shape: (t: number) => number;
+}[] = [
+  { id: "hh", near: "pin", far: "pin", shape: (t) => Math.sin(Math.PI * t) },
+  { id: "fc", near: "fixed", far: "free", shape: (t) => 1 - Math.cos((Math.PI / 2) * t) },
+  { id: "ff", near: "fixed", far: "fixed", shape: (t) => (1 - Math.cos(2 * Math.PI * t)) / 2 },
+  { id: "fp", near: "fixed", far: "pin", shape: (t) => Math.sin(Math.PI * t) * (1 - 0.3 * t) },
+];
+
+/** Only the selected case, drawn as a horizontal beam (load applied at the far/right end). */
+export function BucklingModes({ active }: { active: EndConditionId }) {
+  const { locale } = useLocale();
+  const c = BUCKLE_CASES.find((entry) => entry.id === active) ?? BUCKLE_CASES[0];
+  const cond = END_CONDITIONS.find((e) => e.id === c.id);
+  const x0 = 90;
+  const x1 = 560;
+  const cy = 108;
+  const amp = 34;
+  const d = bucklePathH(x0, x1, cy, amp, c.shape);
+
+  return (
+    <svg
+      className="w-full max-w-2xl text-ink"
+      viewBox="0 0 640 200"
+      role="img"
+      aria-label={
+        cond
+          ? tx(
+              locale,
+              `Knikvorm ${cond.label}, horizontale staaf, last aan het verre uiteinde`,
+              `Buckling mode ${cond.labelEn}, horizontal strut, load at the far end`,
+            )
+          : ""
+      }
+    >
+      <line
+        x1={x0}
+        y1={cy}
+        x2={x1}
+        y2={cy}
+        stroke="currentColor"
+        strokeWidth="0.75"
+        strokeDasharray="3 4"
+        opacity="0.3"
+      />
+      <path d={d} fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
+      <BuckleSupportH kind={c.near} x={x0} y={cy} dir={-1} />
+      <BuckleSupportH kind={c.far} x={x1} y={cy} dir={1} />
+      <line
+        x1={x1 + 30}
+        y1={cy}
+        x2={x1 + 6}
+        y2={cy}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        opacity="0.75"
+      />
+      <path
+        d={`M${x1 + 12},${cy - 4} L${x1 + 6},${cy} L${x1 + 12},${cy + 4}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        opacity="0.75"
+      />
+      <text
+        x={(x0 + x1) / 2}
+        y={172}
+        textAnchor="middle"
+        fill="var(--accent)"
+        fontSize="13"
+        fontFamily={FONT}
+        fontWeight={500}
+      >
+        {cond ? tx(locale, cond.label, cond.labelEn) : ""}
+      </text>
+      <text
+        x={(x0 + x1) / 2}
+        y={190}
+        textAnchor="middle"
+        fill="currentColor"
+        fontSize="11"
+        fontFamily={FONT}
+        opacity="0.75"
+      >
+        k = {cond ? cond.k : ""}
+      </text>
+    </svg>
+  );
+}
+
+/** Beam with supports for the chosen end condition, a load arrow at x=a, and a marker at the max-deflection point. Not to scale. */
+export function BeamDeflection({
+  end,
+  a,
+  L,
+  E,
+  I,
+  P,
+}: {
+  end: BeamEndCondition;
+  a: number;
+  L: number;
+  E: number;
+  I: number;
+  P: number;
+}) {
+  const { locale } = useLocale();
+  const x0 = 90;
+  const x1 = 560;
+  const cy = 100;
+  const toX = (v: number) => x0 + (x1 - x0) * (Math.min(Math.max(v, 0), L) / L);
+  const loadX = toX(a);
+
+  const result = computeDeflection({ end, L, a, E, I, P });
+  const xMax = result?.xMax ?? a;
+  const maxX = toX(xMax);
+  const showMaxMarker = Math.abs(maxX - loadX) > 4;
+
+  const points = deflectionShapePoints({ end, L, a, E, I, P });
+  const peak = points.reduce((m, p) => Math.max(m, Math.abs(p.y)), 0) || 1;
+  const amp = 26;
+  const curve = points
+    .map(
+      (p, i) =>
+        `${i === 0 ? "M" : "L"}${toX(p.x).toFixed(1)},${(cy + (p.y / peak) * amp).toFixed(1)}`,
+    )
+    .join(" ");
+
+  const dAtLoad = result ? `δ(a) ${fmtDotComma(result.deltaAtLoad, 2)} mm` : "";
+  const dMax = result ? `δ_max ${fmtDotComma(result.deltaMax, 2)} mm` : "";
+
+  return (
+    <svg
+      className="w-full max-w-2xl text-ink"
+      viewBox="0 0 640 210"
+      role="img"
+      aria-label={
+        end === "cant"
+          ? tx(
+              locale,
+              "Uitkraging, ingeklemd links, puntlast P op afstand a vanaf de inklemming, indicatieve doorbuigingscurve",
+              "Cantilever, fixed at the left, point load P at distance a from the fixed end, indicative deflection curve",
+            )
+          : tx(
+              locale,
+              "Vrij opgelegde balk, puntlast P op afstand a vanaf het linker steunpunt, indicatieve doorbuigingscurve",
+              "Simply supported beam, point load P at distance a from the left support, indicative deflection curve",
+            )
+      }
+    >
+      <line
+        x1={x0}
+        y1={cy}
+        x2={x1}
+        y2={cy}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeDasharray="3 4"
+        opacity="0.4"
+      />
+      <path d={curve} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
+      {end === "ss" ? (
+        <>
+          <BuckleSupportH kind="pin" x={x0} y={cy} dir={-1} />
+          <BuckleSupportH kind="pin" x={x1} y={cy} dir={1} />
+        </>
+      ) : (
+        <BuckleSupportH kind="fixed" x={x0} y={cy} dir={-1} />
+      )}
+
+      <line x1={loadX} y1={cy - 40} x2={loadX} y2={cy - 6} stroke="var(--accent)" strokeWidth="2" />
+      <path
+        d={`M${loadX - 5},${cy - 12} L${loadX},${cy - 4} L${loadX + 5},${cy - 12}`}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <text
+        x={loadX}
+        y={cy - 46}
+        textAnchor="middle"
+        fill="var(--accent)"
+        fontSize="13"
+        fontFamily={FONT}
+        fontWeight={500}
+      >
+        P
+      </text>
+
+      {showMaxMarker ? (
+        <>
+          <line
+            x1={maxX}
+            y1={cy + (amp * (points.find((p) => Math.abs(toX(p.x) - maxX) < 3)?.y ?? 0)) / peak}
+            x2={maxX}
+            y2={cy + amp + 14}
+            stroke="currentColor"
+            strokeWidth="1"
+            opacity="0.6"
+          />
+          <text
+            x={loadX}
+            y={cy + amp + 28}
+            textAnchor="middle"
+            fill="var(--accent)"
+            fontSize="11"
+            fontFamily={FONT}
+          >
+            {dAtLoad}
+          </text>
+          <text
+            x={maxX}
+            y={cy + amp + 44}
+            textAnchor="middle"
+            fill="currentColor"
+            fontSize="11"
+            fontFamily={FONT}
+          >
+            {dMax}
+          </text>
+        </>
+      ) : (
+        <text
+          x={loadX}
+          y={cy + amp + 28}
+          textAnchor="middle"
+          fill="var(--accent)"
+          fontSize="11"
+          fontFamily={FONT}
+        >
+          {`δ ${fmtDotComma(result?.deltaAtLoad ?? 0, 2)} mm`}
+        </text>
+      )}
+
+      <Ext x1={x0} y1={cy} x2={x0} y2={cy + amp + 62} />
+      <Ext x1={loadX} y1={cy} x2={loadX} y2={cy + amp + 62} />
+      <DimH x1={x0} x2={loadX} y={cy + amp + 62} label="a" side="down" />
+    </svg>
+  );
+}
+
+export function BearingFitChart({
+  shaft,
+  hole,
+  holeAlt,
+}: {
+  bandIndex: number;
+  shaft?: string;
+  hole?: string;
+  holeAlt?: string | null;
+}) {
+  const { locale } = useLocale();
+  const uid = useId().replace(/:/g, "");
+
+  const cy = 170;
+  const shaftTop = cy - 26;
+  const shaftBot = cy + 26;
+  const innerOuterTop = shaftTop - 22;
+  const innerOuterBot = shaftBot + 22;
+  const ballR = 16;
+  const ballTopCy = innerOuterTop - ballR;
+  const ballBotCy = innerOuterBot + ballR;
+  const outerInnerTop = ballTopCy - ballR;
+  const outerInnerBot = ballBotCy + ballR;
+  const outerOuterTop = outerInnerTop - 20;
+  const outerOuterBot = outerInnerBot + 20;
+  const housingTop = outerOuterTop - 30;
+  const housingBot = outerOuterBot + 30;
+
+  const ringX = 190;
+  const ringW = 100;
+  const ballCx = ringX + ringW / 2;
+  const housingX = 140;
+  const housingW = 200;
+
+  const shaftL = tx(locale, "As", "Shaft");
+  const houseL = tx(locale, "Huis", "Housing");
+  const shaftLabel = shaft ? `${shaftL} ${shaft}` : shaftL;
+  const holeLabel = hole ? `${houseL} ${hole}${holeAlt ? ` / ${holeAlt}` : ""}` : houseL;
+
+  return (
+    <svg
+      className="w-full text-ink"
+      viewBox="0 0 500 340"
+      role="img"
+      aria-label={tx(
+        locale,
+        "Doorsnede van een groefkogellager in een huis, met de pasvlakken bij de as en het huis",
+        "Cross-section of a deep-groove ball bearing in a housing, with the fit surfaces at the shaft and housing",
+      )}
+    >
+      <HatchDefs uid={uid} />
+
+      {/* rotation axis, stops short of the shaft-fit and housing-fit labels on either side */}
+      <line
+        x1={housingX - 20}
+        y1={cy}
+        x2={housingX + housingW + 20}
+        y2={cy}
+        stroke="currentColor"
+        strokeDasharray="10 4 2 4"
+        strokeWidth="0.8"
+        opacity="0.4"
+      />
+
+      {/* housing, flush against the outer ring */}
+      <rect
+        x={housingX}
+        y={housingTop}
+        width={housingW}
+        height={outerOuterTop - housingTop}
+        fill={`url(#${uid}-a)`}
+        stroke="currentColor"
+      />
+      <rect
+        x={housingX}
+        y={outerOuterBot}
+        width={housingW}
+        height={housingBot - outerOuterBot}
+        fill={`url(#${uid}-a)`}
+        stroke="currentColor"
+      />
+
+      {/* outer ring */}
+      <rect
+        x={ringX}
+        y={outerOuterTop}
+        width={ringW}
+        height={outerInnerTop - outerOuterTop}
+        fill={`url(#${uid}-b)`}
+        stroke="currentColor"
+      />
+      <rect
+        x={ringX}
+        y={outerInnerBot}
+        width={ringW}
+        height={outerOuterBot - outerInnerBot}
+        fill={`url(#${uid}-b)`}
+        stroke="currentColor"
+      />
+
+      {/* inner ring, flush against the shaft */}
+      <rect
+        x={ringX}
+        y={innerOuterTop}
+        width={ringW}
+        height={shaftTop - innerOuterTop}
+        fill={`url(#${uid}-b)`}
+        stroke="currentColor"
+      />
+      <rect
+        x={ringX}
+        y={shaftBot}
+        width={ringW}
+        height={innerOuterBot - shaftBot}
+        fill={`url(#${uid}-b)`}
+        stroke="currentColor"
+      />
+
+      {/* shaft, flush with the housing footprint on both sides so neither fit label sits on the shaft fill */}
+      <rect
+        x={housingX}
+        y={shaftTop}
+        width={housingW}
+        height={shaftBot - shaftTop}
+        fill="var(--accent)"
+      />
+
+      {/* rolling elements */}
+      <circle
+        cx={ballCx}
+        cy={ballTopCy}
+        r={ballR}
+        fill="color-mix(in oklab, var(--accent) 35%, var(--paper))"
+        stroke="currentColor"
+      />
+      <circle
+        cx={ballCx}
+        cy={ballBotCy}
+        r={ballR}
+        fill="color-mix(in oklab, var(--accent) 35%, var(--paper))"
+        stroke="currentColor"
+      />
+
+      {/* shaft fit, in the clear space to the left of the housing */}
+      <DimV x={housingX - 40} y1={shaftTop} y2={shaftBot} label={shaftLabel} side="left" />
+
+      {/* housing fit, at the outer-ring / housing-bore interface */}
+      <DimV x={380} y1={outerOuterTop} y2={outerOuterBot} label={holeLabel} side="right" />
+    </svg>
+  );
+}

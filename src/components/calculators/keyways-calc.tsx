@@ -1,3 +1,4 @@
+import { KeywaySection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { KEYWAYS, keyWidthTol, lookupKeyway, WIDTH_FITS } from "@/lib/calculators/keyway";
@@ -29,7 +30,8 @@ const T = {
       "As-Ø in hele mm. DIN 6885-1: boven de ondergrens tot en met de bovengrens. De eerste rij is boven 6 t/m 8 — Ø 6 mm valt erbuiten.",
     diameterLabel: "As-Ø (mm)",
     fillDiameter: "Vul een as-Ø in.",
-    noRow: (d: number) => `Geen rij in DIN 6885-1 voor Ø ${d} mm. De tabel begint boven 6 mm tot en met 110 mm.`,
+    noRow: (d: number) =>
+      `Geen rij in DIN 6885-1 voor Ø ${d} mm. De tabel begint boven 6 mm tot en met 110 mm.`,
     shaftAt: (d: number, range: string) => `As Ø ${d} mm · ${range}`,
     keyBH: "Spie b × h",
     t1: "t₁ as",
@@ -48,13 +50,15 @@ const T = {
     n9Title: "N9 / JS9 — licht",
     n9Body: "As N9, naaf JS9. Makkelijker monteren. Alleen als de toepassing dat toelaat.",
     h9Title: "H9 / D10 — glijdend",
-    h9Body: "Werkplaats-/UNI-conventie voor verschuifbare naven. DIN 6885-1:2021 noemt P9 sluitend en N9/JS9 vrij.",
+    h9Body:
+      "Werkplaats-/UNI-conventie voor verschuifbare naven. DIN 6885-1:2021 noemt P9 sluitend en N9/JS9 vrij.",
     thClass: "Klasse",
     thBounds: "Bovenmaat / ondermaat",
-    forB: (b: number, d: number) => `Voor b = ${b} mm (Ø ${d} mm). Spleet = gatbasis, per ISO 286-2.`,
+    forB: (b: number, d: number) =>
+      `Voor b = ${b} mm (Ø ${d} mm). Spleet = gatbasis, per ISO 286-2.`,
     fillForTable: "Vul een as-Ø in bovenaan de pagina voor de numerieke boven-/ondermaat van b.",
     footnote:
-      '(hoge vorm). DIN 6885-2 is de lage vorm. H9/D10 is werkplaats-/UNI-conventie, niet de benoemde glijdpassing in DIN 6885-1:2021. Controleer kritieke maten in de actuele norm.',
+      "(hoge vorm). DIN 6885-2 is de lage vorm. H9/D10 is werkplaats-/UNI-conventie, niet de benoemde glijdpassing in DIN 6885-1:2021. Controleer kritieke maten in de actuele norm.",
   },
   en: {
     heading: "Key at shaft Ø",
@@ -62,7 +66,8 @@ const T = {
       "Shaft Ø in whole mm. DIN 6885-1: above the lower bound up to and including the upper bound. The first row is above 6 up to 8 — Ø 6 mm falls outside it.",
     diameterLabel: "Shaft Ø (mm)",
     fillDiameter: "Enter a shaft Ø.",
-    noRow: (d: number) => `No row in DIN 6885-1 for Ø ${d} mm. The table starts above 6 mm up to and including 110 mm.`,
+    noRow: (d: number) =>
+      `No row in DIN 6885-1 for Ø ${d} mm. The table starts above 6 mm up to and including 110 mm.`,
     shaftAt: (d: number, range: string) => `Shaft Ø ${d} mm · ${range}`,
     keyBH: "Key b × h",
     t1: "t₁ shaft",
@@ -81,11 +86,13 @@ const T = {
     n9Title: "N9 / JS9 — light",
     n9Body: "Shaft N9, hub JS9. Easier to assemble. Only where the application allows it.",
     h9Title: "H9 / D10 — sliding",
-    h9Body: "Shop/UNI convention for sliding hubs. DIN 6885-1:2021 calls P9 close-fit and N9/JS9 free.",
+    h9Body:
+      "Shop/UNI convention for sliding hubs. DIN 6885-1:2021 calls P9 close-fit and N9/JS9 free.",
     thClass: "Class",
     thBounds: "Upper / lower deviation",
     forB: (b: number, d: number) => `For b = ${b} mm (Ø ${d} mm). Gap = hole basis, per ISO 286-2.`,
-    fillForTable: "Enter a shaft Ø at the top of the page for the numeric upper/lower deviation of b.",
+    fillForTable:
+      "Enter a shaft Ø at the top of the page for the numeric upper/lower deviation of b.",
     footnote:
       "(tall form). DIN 6885-2 is the low form. H9/D10 is a shop/UNI convention, not the named sliding fit in DIN 6885-1:2021. Check critical dimensions in the current standard.",
   },
@@ -96,7 +103,9 @@ export function KeywaysCalc() {
   const t = T[locale];
   const rangeLabel = locale === "nl" ? rangeLabelNl : rangeLabelEn;
   const [search, setSearch] = useSearchParams();
-  const [diameter, setDiameter] = useState(() => search.get("d") ?? readStoredDiameter({ min: 7, max: 110 }));
+  const [diameter, setDiameter] = useState(
+    () => search.get("d") ?? readStoredDiameter({ min: 7, max: 110 }),
+  );
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -133,7 +142,9 @@ export function KeywaysCalc() {
     <>
       <CalcPanel>
         <CalcEyebrow />
-        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">{t.heading}</h2>
+        <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+          {t.heading}
+        </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 max-w-xs">
           <Field label={t.diameterLabel}>
@@ -146,7 +157,9 @@ export function KeywaysCalc() {
           <p className="mt-5 text-sm text-muted">{t.noRow(d)}</p>
         ) : (
           <>
-            <p className="mt-5 text-sm text-muted">{t.shaftAt(d, rangeLabelDisplay(row.over, row.to))}</p>
+            <p className="mt-5 text-sm text-muted">
+              {t.shaftAt(d, rangeLabelDisplay(row.over, row.to))}
+            </p>
             <ResultGrid
               items={[
                 { label: t.keyBH, value: `${row.b} × ${row.h} mm` },
@@ -162,9 +175,14 @@ export function KeywaysCalc() {
           </>
         )}
       </CalcPanel>
+      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+        <KeywaySection row={row} />
+      </SchemaPanel>
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.tableTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.tableTitle}
+        </h2>
         <div className="table-scroll mt-4">
           <table className="ref-table">
             <thead>
@@ -194,11 +212,15 @@ export function KeywaysCalc() {
             </tbody>
           </table>
         </div>
-        <SourceLink href="https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf">{t.source}</SourceLink>
+        <SourceLink href="https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf">
+          {t.source}
+        </SourceLink>
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">{t.widthTolTitle}</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          {t.widthTolTitle}
+        </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <article className="rounded-lg border border-border bg-surface p-4">
             <p className="flex items-center gap-2 font-medium text-ink">
@@ -249,7 +271,9 @@ export function KeywaysCalc() {
           <p className="mt-6 text-sm text-muted">{t.fillForTable}</p>
         )}
 
-        <SourceLink href="https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf">{t.source}</SourceLink>
+        <SourceLink href="https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf">
+          {t.source}
+        </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">{t.footnote}</p>
       </section>
     </>
