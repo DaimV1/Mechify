@@ -5,12 +5,6 @@ export const EXTRA_MODELS: Record<
   string,
   { label: string; original: string; note: string; component: ComponentType }
 > = {
-  "bearing-fits": {
-    label: "Binnen- of buitenring",
-    original: "Vaste of losse zijde",
-    note: "Selectie op roterende ring. Dit is een ander belastingsgeval dan de vaste/losse lagerpositie.",
-    component: module(() => import("@/components/toolkit/lager-calc"), "LagerCalc"),
-  },
   "seeger-grooves": {
     label: "Groeftabel",
     original: "Ontwerpschatting",

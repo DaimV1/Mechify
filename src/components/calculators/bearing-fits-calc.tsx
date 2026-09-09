@@ -196,7 +196,14 @@ export function BearingFitsCalc() {
           <>
             <ResultGrid
               items={[
-                { label: `${t.shaft} — ${shaftClass}`, value: `${shaftFit.range} mm` },
+                {
+                  label: (
+                    <>
+                      {t.shaft} — <span className="normal-case">{shaftClass}</span>
+                    </>
+                  ),
+                  value: `${shaftFit.range} mm`,
+                },
                 { label: `${t.housing} — ${housingClass}`, value: `${housingFit.range} mm` },
               ]}
             />

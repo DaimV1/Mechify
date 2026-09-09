@@ -43,7 +43,7 @@ const LEGACY: Record<string, string> = {
   passingen: "/tools/fit-tolerances",
   "iso-2768": "/tools/iso-2768",
   "spiebaan-toleranties": "/tools/keyways",
-  lagerpassingen: "/tools/bearing-fits?model=referentie",
+  lagerpassingen: "/tools/bearing-fits",
   "seegerring-groef": "/tools/seeger-grooves?model=referentie",
   bevestigers: "/tools/fasteners?model=referentie",
   "o-ringgroef": "/tools/o-ring-grooves?model=referentie",
