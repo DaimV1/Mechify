@@ -1,5 +1,5 @@
 import { useLocale } from "@/lib/i18n/locale-context";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow } from "@/components/brand-ui";
@@ -17,7 +17,6 @@ export function ToolDetail({ section }: { section: ToolSection }) {
   const { locale, setLocale } = useLocale();
   const { slug = "" } = useParams();
   const [params, setParams] = useSearchParams();
-  const [revision, setRevision] = useState(0);
   const tool = findTool(section, slug);
   const model = params.get("model") || "basis";
   const extra = tool ? EXTRA_MODELS[tool.id] : null;
@@ -33,8 +32,9 @@ export function ToolDetail({ section }: { section: ToolSection }) {
     ? toolkitCopy(sourceKey as Parameters<typeof toolkitCopy>[0], locale)
     : null;
   function reset() {
-    setParams(model === "basis" ? {} : { model }, { replace: true });
-    setRevision((n) => n + 1);
+    window.location.assign(
+      window.location.pathname + (model === "basis" ? "" : "?model=" + encodeURIComponent(model)),
+    );
   }
   return (
     <PageShell>
@@ -73,7 +73,6 @@ export function ToolDetail({ section }: { section: ToolSection }) {
                   setParams(e.target.value === "basis" ? {} : { model: e.target.value }, {
                     replace: true,
                   });
-                  setRevision((n) => n + 1);
                 }}
               >
                 <option value="basis">{extra.original}</option>
@@ -93,7 +92,7 @@ export function ToolDetail({ section }: { section: ToolSection }) {
             </p>
           }
         >
-          <div key={tool.id + model + revision} className="calc-workbench">
+          <div key={tool.id + model} className="calc-workbench">
             {model === "kracht" && tool.id === "pneumatic-cylinder" ? (
               <QuickDrive kind="force" />
             ) : model === "referentie" && Alternate ? (
