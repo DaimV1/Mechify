@@ -106,8 +106,8 @@ export function ToolDetail({ section }: { section: ToolSection }) {
           <>
             <h2 className="mt-12">Downloadbare macro’s</h2>
             <p>
-              Originele VBA-modules voor SolidWorks en Inventor. Inspecteer de code en test op een
-              kopie; Mechify voert deze bestanden niet uit.
+              VBA-modules en aanvullende rapportmacro’s voor SolidWorks en Inventor. Inspecteer de
+              code en test op een kopie; Mechify voert deze bestanden niet uit.
             </p>
             <MacroDownloads />
           </>
