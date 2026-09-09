@@ -1,3 +1,4 @@
+import { additionalMacros } from "@/lib/additional-macros";
 import { Download } from "lucide-react";
 import { CopyResult } from "@/components/toolkit/calc-ui";
 import { tx, useLocale, type Locale } from "@/lib/i18n/locale";
@@ -142,15 +143,43 @@ export function MacroDownloads() {
   const { locale } = useLocale();
   return (
     <section className="source-resources">
+      <p className="mono muted">
+        {groups(locale).reduce((sum, g) => sum + g.macros.length, additionalMacros.length)}{" "}
+        {tx(locale, "downloadbare VBA-macro’s", "downloadable VBA macros")}
+      </p>
+      <p>
+        {tx(
+          locale,
+          "Importeer .bas-bestanden via File > Import File in de VBA-editor. Bij handmatig plakken laat je de eerste regel Attribute VB_Name weg; die regel hoort bij het importformaat.",
+          "Import .bas files through File > Import File in the VBA editor. When pasting manually, omit the first Attribute VB_Name line; it belongs to the import format.",
+        )}
+      </p>
       {groups(locale).map((group) => (
         <section key={group.title}>
           <h2>{group.title}</h2>
           <p>{group.install}</p>
           <div>
-            {group.macros.map((m) => (
+            {[
+              ...group.macros.map((m) => ({ ...m, source: null as string | null })),
+              ...additionalMacros
+                .filter((m) => group.title.startsWith(m.software))
+                .map((m) => ({ ...m, name: m.name[locale], note: m.note[locale] })),
+            ].map((m) => (
               <article key={m.file}>
                 <h3>{m.name}</h3>
                 <p>{m.note}</p>
+                {m.source ? (
+                  <p className="text-sm text-muted">
+                    {tx(
+                      locale,
+                      "Nieuwe voorbeeldmacro · API gecontroleerd, niet uitgevoerd in CAD. ",
+                      "New example macro · API reviewed, not executed in CAD. ",
+                    )}
+                    <a href={m.source} target="_blank" rel="noopener noreferrer">
+                      {tx(locale, "Officiële API-documentatie ↗", "Official API documentation ↗")}
+                    </a>
+                  </p>
+                ) : null}
                 <a className="button secondary" href={m.file} download>
                   <Download size={16} />
                   Download .bas
