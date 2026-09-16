@@ -11,7 +11,7 @@ import { Faq } from "@/components/toolkit/calc-ui";
 import { MacroDownloads } from "@/components/toolkit/macros-content";
 import { ReferenceResources } from "@/components/toolkit/bronnen-content";
 import { QuickDrive } from "@/components/quick-drive";
-import { useDocumentMeta } from "@/lib/use-document-meta";
+import { useDocumentMeta, useFaqJsonLd } from "@/lib/use-document-meta";
 import { NotFound } from "./not-found";
 export function ToolDetail({ section }: { section: ToolSection }) {
   const { locale, setLocale } = useLocale();
@@ -21,16 +21,17 @@ export function ToolDetail({ section }: { section: ToolSection }) {
   const model = params.get("model") || "basis";
   const extra = tool ? EXTRA_MODELS[tool.id] : null;
   const Calculator = tool ? CALCULATOR_REGISTRY[tool.id] : null;
+  const sourceKey = tool ? SOURCE_KEYS[tool.id] : undefined;
+  const copy = sourceKey
+    ? toolkitCopy(sourceKey as Parameters<typeof toolkitCopy>[0], locale)
+    : null;
   useDocumentMeta(
     tool?.title[locale] || "Niet gevonden",
     tool?.blurb[locale] || "Deze tool bestaat niet.",
   );
+  useFaqJsonLd(copy?.faq);
   if (!tool || !Calculator) return <NotFound />;
   const Alternate = extra?.component;
-  const sourceKey = SOURCE_KEYS[tool.id];
-  const copy = sourceKey
-    ? toolkitCopy(sourceKey as Parameters<typeof toolkitCopy>[0], locale)
-    : null;
   function reset() {
     window.location.assign(
       window.location.pathname + (model === "basis" ? "" : "?model=" + encodeURIComponent(model)),

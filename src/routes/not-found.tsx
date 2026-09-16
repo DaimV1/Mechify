@@ -21,7 +21,7 @@ const T = {
 export function NotFound() {
   const { locale } = useLocale();
   const t = T[locale];
-  useDocumentMeta(t.title, t.description);
+  useDocumentMeta(t.title, t.description, { noindex: true });
   return (
     <PageShell>
       <PageWrap className="text-center">
