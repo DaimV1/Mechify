@@ -44,7 +44,7 @@ const LEGACY: Record<string, string> = {
   "iso-2768": "/tools/iso-2768",
   "spiebaan-toleranties": "/tools/keyways",
   lagerpassingen: "/tools/bearing-fits",
-  "seegerring-groef": "/tools/seeger-grooves?model=referentie",
+  "seegerring-groef": "/tools/seeger-grooves",
   bevestigers: "/tools/fasteners?model=referentie",
   "o-ringgroef": "/tools/o-ring-grooves?model=referentie",
   kanten: "/tools/edges?model=referentie",

@@ -8,7 +8,7 @@ import {
   nearestStandardSizes,
   type CirclipKind,
 } from "@/lib/calculators/circlip";
-import { VERIFIED_SEEGER_D1 } from "@/lib/toolkit/seeger";
+import { fmtSeeger3, VERIFIED_SEEGER_D1 } from "@/lib/toolkit/seeger";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import {
@@ -46,6 +46,7 @@ const T = {
     grooveDiameter: "Groefdiameter",
     grooveWidth: "Groefbreedte",
     grooveDepth: "Groefdiepte",
+    depthTolerance: "Dieptetolerantie",
     verified: "Geverifieerd t.o.v. fabrikant-datasheet.",
     notVerified:
       "Niet geverifieerd — controleer tegen DIN 471/472 of de fabrikantcatalogus vóór productie.",
@@ -75,6 +76,7 @@ const T = {
     grooveDiameter: "Groove diameter",
     grooveWidth: "Groove width",
     grooveDepth: "Groove depth",
+    depthTolerance: "Depth tolerance",
     verified: "Verified against a manufacturer datasheet.",
     notVerified:
       "Not verified — confirm against DIN 471/472 or the manufacturer catalog before production.",
@@ -121,9 +123,10 @@ export function SeegerGroovesCalc() {
     const status = result.verified ? t.verified : t.notVerified;
     return [
       `${t.copyKind[kind]} Ø${d} mm (${standard}) — ${status}`,
-      `${t.grooveDiameter} ${fmtCirclip(result.grooveDiameter)} mm`,
+      `${t.grooveDiameter} ${fmtCirclip(result.grooveDiameter)} mm ${result.grooveDiameterClass}`,
       `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm`,
       `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm`,
+      `${t.depthTolerance} 0 / +${fmtSeeger3(result.grooveDepthPlus)} mm`,
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, kind, d, standard, locale]);
@@ -168,9 +171,16 @@ export function SeegerGroovesCalc() {
             </p>
             <ResultGrid
               items={[
-                { label: t.grooveDiameter, value: `Ø${fmtCirclip(result.grooveDiameter)} mm` },
+                {
+                  label: t.grooveDiameter,
+                  value: `Ø${fmtCirclip(result.grooveDiameter)} mm ${result.grooveDiameterClass}`,
+                },
                 { label: t.grooveWidth, value: `${fmtCirclip(result.grooveWidth)} mm` },
                 { label: t.grooveDepth, value: `${fmtCirclip(result.grooveDepth)} mm` },
+                {
+                  label: t.depthTolerance,
+                  value: `0 / +${fmtSeeger3(result.grooveDepthPlus)} mm`,
+                },
               ]}
             />
             <div className="flex flex-wrap gap-2">
@@ -202,6 +212,7 @@ export function SeegerGroovesCalc() {
                 <th>{t.grooveDiameter}</th>
                 <th>{t.grooveWidth}</th>
                 <th>{t.grooveDepth}</th>
+                <th>{t.depthTolerance}</th>
                 <th>{locale === "nl" ? "Status" : "Status"}</th>
               </tr>
             </thead>
@@ -214,9 +225,12 @@ export function SeegerGroovesCalc() {
                       <th scope="row" className="normal-case">
                         {dia}
                       </th>
-                      <td>{r ? `Ø${fmtCirclip(r.grooveDiameter)}` : "—"}</td>
+                      <td>
+                        {r ? `Ø${fmtCirclip(r.grooveDiameter)} ${r.grooveDiameterClass}` : "—"}
+                      </td>
                       <td>{r ? fmtCirclip(r.grooveWidth) : "—"}</td>
                       <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
+                      <td>{r ? `0/+${fmtSeeger3(r.grooveDepthPlus)}` : "—"}</td>
                       <td>
                         {r
                           ? r.verified
