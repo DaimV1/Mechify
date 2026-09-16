@@ -302,6 +302,14 @@ export function MotorCalc() {
               <CopyLink />
             </div>
           </>
+        ) : etaRaw != null && !(etaRaw > 0 && etaRaw <= 1) ? (
+          <p className="mt-5 text-sm text-muted">
+            {tx(
+              locale,
+              "Rendement η moet groter dan 0 en maximaal 1 (100%) zijn — een aandrijving kan geen vermogen toevoegen.",
+              "Efficiency η must be greater than 0 and at most 1 (100%) — a driven mechanism cannot add power.",
+            )}
+          </p>
         ) : (
           <p className="mt-5 text-sm text-muted">
             {tx(

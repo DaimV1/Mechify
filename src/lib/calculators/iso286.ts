@@ -1,4 +1,4 @@
-import { mmFromUm } from "../utils";
+import { mmFromUm } from "../utils.ts";
 
 type Band = {
   over: number;

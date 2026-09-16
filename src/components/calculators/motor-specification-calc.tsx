@@ -46,6 +46,8 @@ const T = {
     resultIec: "IEC-vermogen",
     outOfRange: "> 355 kW — buiten reeks",
     fillFields: "Vul massa, snelheid en trommeldiameter groter dan 0 in.",
+    etaOutOfRange:
+      "Rendement η moet groter dan 0 en maximaal 1 (100%) zijn — een aandrijving kan geen vermogen toevoegen.",
     iecSeriesTitle: "IEC-vermogensreeks (IEC 60072)",
     thPower: "Vermogen (kW)",
     sourceBadge:
@@ -87,6 +89,8 @@ const T = {
     resultIec: "IEC power",
     outOfRange: "> 355 kW — outside range",
     fillFields: "Enter mass, speed and drum diameter greater than 0.",
+    etaOutOfRange:
+      "Efficiency η must be greater than 0 and at most 1 (100%) — a driven mechanism cannot add power.",
     iecSeriesTitle: "IEC power series (IEC 60072)",
     thPower: "Power (kW)",
     sourceBadge:
@@ -223,8 +227,10 @@ export function MotorSpecificationCalc() {
               <CopyLink />
             </div>
           </>
-        ) : (
+        ) : eta > 0 && eta <= 1 ? (
           <p className="mt-5 text-sm text-muted">{t.fillFields}</p>
+        ) : (
+          <p className="mt-5 text-sm text-muted">{t.etaOutOfRange}</p>
         )}
       </CalcPanel>
 

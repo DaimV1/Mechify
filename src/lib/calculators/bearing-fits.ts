@@ -1,4 +1,4 @@
-import { bandIndex, holeDeviationAt, pairRange, shaftDeviationAt } from "@/lib/calculators/iso286";
+import { bandIndex, holeDeviationAt, pairRange, shaftDeviationAt } from "./iso286.ts";
 
 /**
  * Vereenvoudigde selectiegids voor groefkogellagers, cilindrische boring,

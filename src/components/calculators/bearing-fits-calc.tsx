@@ -31,16 +31,20 @@ import {
 
 const T = {
   nl: {
-    heading: "Lagerpassing bij as-Ø",
+    heading: "Lagerpassing bij as-Ø en lager-buitendiameter",
     intro:
-      "Groefkogellagers, cilindrische boring, tot Ø50 mm. Uitgangspunt: roterende binnenring, stilstaande buitenring met puntbelasting — het gangbare geval. Algemene richtlijn; de volledige selectietabel van de lagerfabrikant houdt ook rekening met asmateriaal, warmteontwikkeling en meeroterende buitenring.",
-    diameter: "As-Ø (mm)",
+      "Groefkogellagers, cilindrische boring, tot Ø50 mm. Uitgangspunt: roterende binnenring, stilstaande buitenring met puntbelasting — het gangbare geval. As-Ø en lager-buitendiameter (D) zijn twee verschillende maten: de behuizingspassing wordt bepaald door D, niet door de as-Ø. Zoek D op in de lagercatalogus (bijv. 6204: d=20 mm, D=47 mm). Algemene richtlijn; de volledige selectietabel van de lagerfabrikant houdt ook rekening met asmateriaal, warmteontwikkeling en meeroterende buitenring.",
+    diameter: "As-Ø / lagerboring d (mm)",
+    housingDiameter: "Lager-buitendiameter D (mm)",
+    housingDiameterHint: "Niet de as-Ø — de buitendiameter van het gekozen lager (lagercatalogus).",
     load: "Belasting",
     position: "Lagerpositie",
-    fillDiameter: "Vul een as-Ø in.",
+    fillDiameter: "Vul een as-Ø en lager-buitendiameter D in.",
     noData: (d: number) => `Geen gegevens voor Ø${d} mm — het bereik is 0 t/m 50 mm.`,
+    noDataHousing: (D: number) =>
+      `Geen behuizingsgegevens voor D=${D} mm — het bereik is 0 t/m 50 mm. Vul de werkelijke lager-buitendiameter in.`,
     shaft: "As",
-    housing: "Behuizing",
+    housing: "Behuizing (D)",
     guideTitle: "Selectiegids (vereenvoudigd)",
     thLoad: "Belasting",
     thShaftClass: "As-klasse",
@@ -52,6 +56,7 @@ const T = {
       "Vereenvoudigde richtlijn op basis van de algemene selectiecriteria die lagerfabrikanten (o.a. SKF) publiceren. Numerieke afwijkingen via de ISO 286-tabellen van de passingen-tool. Raadpleeg de lagercatalogus voor de volledige selectietabel.",
     copy: (
       d: number,
+      housingD: number,
       load: string,
       side: string,
       shaftClass: string,
@@ -60,22 +65,27 @@ const T = {
       housingRange: string,
     ) =>
       [
-        `As Ø${d} mm, ${load} belasting, ${side} zijde`,
+        `As Ø${d} mm, lager-buitendiameter D=${housingD} mm, ${load} belasting, ${side} zijde`,
         `As: ${shaftClass} → ${shaftRange} mm`,
-        `Behuizing: ${housingClass} → ${housingRange} mm`,
+        `Behuizing (D=${housingD} mm): ${housingClass} → ${housingRange} mm`,
       ].join("\n"),
   },
   en: {
-    heading: "Bearing fit at shaft Ø",
+    heading: "Bearing fit at shaft Ø and bearing outside diameter",
     intro:
-      "Deep groove ball bearings, cylindrical bore, up to Ø50 mm. Assumption: rotating inner ring, stationary outer ring with point load — the common case. General guideline; the bearing manufacturer's full selection table also accounts for shaft material, heat build-up and a co-rotating outer ring.",
-    diameter: "Shaft Ø (mm)",
+      "Deep groove ball bearings, cylindrical bore, up to Ø50 mm. Assumption: rotating inner ring, stationary outer ring with point load — the common case. Shaft Ø and bearing outside diameter (D) are two different dimensions: the housing fit is determined by D, not by the shaft Ø. Look up D in the bearing catalog (e.g. 6204: d=20 mm, D=47 mm). General guideline; the bearing manufacturer's full selection table also accounts for shaft material, heat build-up and a co-rotating outer ring.",
+    diameter: "Shaft Ø / bearing bore d (mm)",
+    housingDiameter: "Bearing outside diameter D (mm)",
+    housingDiameterHint:
+      "Not the shaft Ø — the outside diameter of the selected bearing (bearing catalog).",
     load: "Load",
     position: "Bearing position",
-    fillDiameter: "Enter a shaft Ø.",
+    fillDiameter: "Enter a shaft Ø and a bearing outside diameter D.",
     noData: (d: number) => `No data for Ø${d} mm — the range is 0 to 50 mm.`,
+    noDataHousing: (D: number) =>
+      `No housing data for D=${D} mm — the range is 0 to 50 mm. Enter the bearing's actual outside diameter.`,
     shaft: "Shaft",
-    housing: "Housing",
+    housing: "Housing (D)",
     guideTitle: "Selection guide (simplified)",
     thLoad: "Load",
     thShaftClass: "Shaft class",
@@ -87,6 +97,7 @@ const T = {
       "Simplified guideline based on the general selection criteria published by bearing manufacturers (SKF, among others). Numeric deviations via the fits tool's ISO 286 tables. Consult the bearing catalog for the full selection table.",
     copy: (
       d: number,
+      housingD: number,
       load: string,
       side: string,
       shaftClass: string,
@@ -95,9 +106,9 @@ const T = {
       housingRange: string,
     ) =>
       [
-        `Shaft Ø${d} mm, ${load} load, ${side} side`,
+        `Shaft Ø${d} mm, bearing outside diameter D=${housingD} mm, ${load} load, ${side} side`,
         `Shaft: ${shaftClass} → ${shaftRange} mm`,
-        `Housing: ${housingClass} → ${housingRange} mm`,
+        `Housing (D=${housingD} mm): ${housingClass} → ${housingRange} mm`,
       ].join("\n"),
   },
 };
@@ -109,6 +120,7 @@ export function BearingFitsCalc() {
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 1, max: 50 }),
   );
+  const [housingDiameter, setHousingDiameter] = useState(() => search.get("D") ?? "");
   const [load, setLoad] = useState<LoadClass>((search.get("load") as LoadClass) ?? "normaal");
   const [side, setSide] = useState<BearingSide>((search.get("side") as BearingSide) ?? "vast");
 
@@ -116,11 +128,13 @@ export function BearingFitsCalc() {
     const next = new URLSearchParams(search);
     if (diameter) next.set("d", diameter);
     else next.delete("d");
+    if (housingDiameter) next.set("D", housingDiameter);
+    else next.delete("D");
     next.set("load", load);
     next.set("side", side);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [diameter, load, side]);
+  }, [diameter, housingDiameter, load, side]);
 
   function onDia(v: string) {
     setDiameter(v);
@@ -130,11 +144,13 @@ export function BearingFitsCalc() {
 
   const parsed = parseWholeMm(diameter);
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
+  const parsedHousing = parseWholeMm(housingDiameter);
+  const D = parsedHousing.status === "ok" ? parsedHousing.mm : Number.NaN;
 
   const shaftClass = Number.isFinite(d) ? shaftClassFor(load, d) : null;
   const housingClass = housingClassFor(load, side);
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
-  const housingFit = Number.isFinite(d) ? housingFitAt(d, housingClass) : null;
+  const housingFit = Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
   const loadLabel = (l: { label: string; labelEn: string }) =>
     locale === "nl" ? l.label : l.labelEn;
   const sideLabel = (s: { label: string; labelEn: string }) =>
@@ -146,6 +162,7 @@ export function BearingFitsCalc() {
     const sideObj = BEARING_SIDES.find((s) => s.id === side);
     return t.copy(
       d,
+      D,
       loadObj ? loadLabel(loadObj) : load,
       sideObj ? sideLabel(sideObj) : side,
       shaftClass,
@@ -154,7 +171,7 @@ export function BearingFitsCalc() {
       housingFit.range,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shaftClass, shaftFit, housingFit, d, load, side, housingClass, locale]);
+  }, [shaftClass, shaftFit, housingFit, d, D, load, side, housingClass, locale]);
 
   return (
     <>
@@ -164,9 +181,16 @@ export function BearingFitsCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-4">
           <Field label={t.diameter}>
             <WholeMmInput id="bearing-diameter" value={diameter} onChange={onDia} />
+          </Field>
+          <Field label={t.housingDiameter}>
+            <WholeMmInput
+              id="bearing-housing-diameter"
+              value={housingDiameter}
+              onChange={setHousingDiameter}
+            />
           </Field>
           <Field label={t.load}>
             <SelectInput value={load} onChange={(v) => setLoad(v as LoadClass)}>
@@ -187,11 +211,14 @@ export function BearingFitsCalc() {
             </SelectInput>
           </Field>
         </div>
+        <p className="mt-2 text-xs text-subtle">{t.housingDiameterHint}</p>
 
-        {parsed.status === "empty" ? (
+        {parsed.status === "empty" || parsedHousing.status === "empty" ? (
           <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
-        ) : !shaftFit || !housingFit ? (
+        ) : !shaftFit ? (
           <p className="mt-5 text-sm text-muted">{t.noData(d)}</p>
+        ) : !housingFit ? (
+          <p className="mt-5 text-sm text-muted">{t.noDataHousing(D)}</p>
         ) : (
           <>
             <ResultGrid
@@ -281,7 +308,7 @@ export function BearingFitsCalc() {
               </thead>
               <tbody>
                 {HOUSING_BEARING_CLASSES.map((c) => {
-                  const fit = Number.isFinite(d) ? housingFitAt(d, c) : null;
+                  const fit = Number.isFinite(D) ? housingFitAt(D, c) : null;
                   return (
                     <tr key={c} className={c === housingClass ? "is-active" : ""}>
                       <th scope="row" className="normal-case">

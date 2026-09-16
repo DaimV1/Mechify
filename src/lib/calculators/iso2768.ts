@@ -112,11 +112,22 @@ function findBand<T extends { over: number; to: number }>(bands: T[], size: numb
   return bands.find((b) => size > b.over && size <= b.to) ?? null;
 }
 
+/**
+ * ISO 2768-1 Tables 1 and 2 both start their first row at "0.5 up to 3", not
+ * at 0. The BANDS above use `over: 0` only because the table has no row
+ * below 0.5 mm to set as the true lower bound, so without this guard a size
+ * like 0.4 mm silently matched the first row (M-4, 16 sept 2026 audit: 0.4
+ * mm returned ±0.1 mm for class m instead of "out of scope").
+ */
+export const LINEAR_SIZE_MIN = 0.5;
+
 export function lookupLinear(size: number): LinearBand | null {
+  if (size < LINEAR_SIZE_MIN) return null;
   return findBand(LINEAR_BANDS, size);
 }
 
 export function lookupRadiusChamfer(size: number): LinearBand | null {
+  if (size < LINEAR_SIZE_MIN) return null;
   return findBand(RADIUS_CHAMFER_BANDS, size);
 }
 
@@ -144,7 +155,20 @@ export function fmtAngle(deg: number): string {
   return m === 0 ? `±${d}°` : `±${d}°${String(m).padStart(2, "0")}'`;
 }
 
+/** Bilateral dimensional deviation (ISO 2768-1 linear/radius/chamfer values) — a ± range around the nominal size. */
 export function fmtIso2768(n: number | null): string {
   if (n == null) return "—";
   return `±${n.toLocaleString("nl-NL", { maximumFractionDigits: 3 })}`;
+}
+
+/**
+ * Geometric-tolerance zone magnitude (ISO 2768-2: straightness/flatness,
+ * perpendicularity, symmetry, circular run-out). This is the TOTAL width of
+ * the tolerance zone, not a ± deviation from a nominal value — displaying it
+ * with a "±" prefix (M-5, 16 sept 2026 audit) implies the zone is twice as
+ * permissive as it actually is and risks a factor-of-two inspection error.
+ */
+export function fmtGeoZone(n: number | null): string {
+  if (n == null) return "—";
+  return n.toLocaleString("nl-NL", { maximumFractionDigits: 3 });
 }

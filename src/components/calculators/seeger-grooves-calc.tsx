@@ -5,8 +5,10 @@ import {
   CIRCLIP_KINDS,
   computeGroove,
   fmtCirclip,
+  nearestStandardSizes,
   type CirclipKind,
 } from "@/lib/calculators/circlip";
+import { VERIFIED_SEEGER_D1 } from "@/lib/toolkit/seeger";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import {
@@ -27,37 +29,59 @@ const T = {
   nl: {
     heading: "Seegerringgroef bij Ø",
     intro:
-      "Technische schatting op basis van de gebruikelijke opbouw van seeger-groeven (breedte in vaste stappen, diepte ruwweg evenredig met de diameter). Geen vervanging van de DIN 471/472-tabel of de catalogus van de ringfabrikant — neem de definitieve groefmaat daaruit over vóór productie.",
+      "Catalogusopzoeking (DIN 471 as / DIN 472 boring, werkplaatstabel Ø 3–100 mm op vaste nominale maten). Geen ring bij deze diameter geeft geen resultaat — kies een van de standaardmaten. Alleen de hieronder gemarkeerde maat is onafhankelijk geverifieerd tegen een fabrikant-datasheet; andere maten controleren tegen de actuele DIN of ringfabrikant-catalogus vóór productie.",
     type: "Type",
     diameterShaft: "As-Ø (mm)",
     diameterBore: "Boring-Ø (mm)",
     fillDiameter: "Vul een diameter in.",
     fillPositive: "Vul een diameter groter dan 0 in.",
+    noRing: (d: number, lower: number | null, upper: number | null) => {
+      const near = [lower, upper].filter((v): v is number => v != null);
+      const hint =
+        near.length > 0
+          ? ` Dichtstbijzijnde standaardmaten: ${near.map((v) => `Ø${v}`).join(" en ")} mm.`
+          : "";
+      return `Geen standaard seegerring voor Ø${d} mm in deze tabel (bereik 3–100 mm, niet elke maat).${hint}`;
+    },
     grooveDiameter: "Groefdiameter",
     grooveWidth: "Groefbreedte",
     grooveDepth: "Groefdiepte",
-    estimateTitle: "Schatting over het bereik",
+    verified: "Geverifieerd t.o.v. fabrikant-datasheet.",
+    notVerified:
+      "Niet geverifieerd — controleer tegen DIN 471/472 of de fabrikantcatalogus vóór productie.",
+    estimateTitle: "Catalogustabel",
     thDiameter: "Ø (mm)",
-    sourceBadge:
-      "Schatting, geen catalogusdata. DIN 471 (as) en DIN 472 (boring) publiceren per nominale diameter een vaste groefdiameter, -breedte en tolerantie — vraag de actuele norm of ringfabrikant-catalogus op voor productietekeningen.",
+    sourceBadge: (verifiedList: string) =>
+      `Catalogusdata uit een werkplaatstabel (samenvatting van DIN 471/472), niet de officiële norm-PDF. Alleen Ø${verifiedList} mm is onafhankelijk geverifieerd tegen een fabrikant-datasheet (Rotor Clip); vraag voor elke andere maat de actuele norm of ringfabrikant-catalogus op vóór productie.`,
     copyKind: { as: "As", boring: "Boring" },
   },
   en: {
     heading: "Circlip groove at Ø",
     intro:
-      "Technical estimate based on the typical structure of circlip grooves (width in fixed steps, depth roughly proportional to diameter). Not a substitute for the DIN 471/472 table or the ring manufacturer's catalog — take the final groove size from there before production.",
+      "Catalogue lookup (DIN 471 shaft / DIN 472 bore, workshop table Ø 3-100 mm at fixed nominal sizes). No ring at a given diameter returns no result — pick one of the standard sizes instead. Only the size flagged below has been independently verified against a manufacturer datasheet; check every other size against the current DIN or ring manufacturer catalog before production.",
     type: "Type",
     diameterShaft: "Shaft Ø (mm)",
     diameterBore: "Bore Ø (mm)",
     fillDiameter: "Enter a diameter.",
     fillPositive: "Enter a diameter greater than 0.",
+    noRing: (d: number, lower: number | null, upper: number | null) => {
+      const near = [lower, upper].filter((v): v is number => v != null);
+      const hint =
+        near.length > 0
+          ? ` Nearest standard sizes: ${near.map((v) => `Ø${v}`).join(" and ")} mm.`
+          : "";
+      return `No standard circlip for Ø${d} mm in this table (range 3-100 mm, not every size).${hint}`;
+    },
     grooveDiameter: "Groove diameter",
     grooveWidth: "Groove width",
     grooveDepth: "Groove depth",
-    estimateTitle: "Estimate across the range",
+    verified: "Verified against a manufacturer datasheet.",
+    notVerified:
+      "Not verified — confirm against DIN 471/472 or the manufacturer catalog before production.",
+    estimateTitle: "Catalogue table",
     thDiameter: "Ø (mm)",
-    sourceBadge:
-      "Estimate, not catalog data. DIN 471 (shaft) and DIN 472 (bore) publish a fixed groove diameter, width and tolerance per nominal diameter — request the current standard or ring manufacturer catalog for production drawings.",
+    sourceBadge: (verifiedList: string) =>
+      `Catalogue data from a workshop table (summary of DIN 471/472), not the official standard PDF. Only Ø${verifiedList} mm is independently verified against a manufacturer datasheet (Rotor Clip); request the current standard or ring manufacturer catalog for every other size before production.`,
     copyKind: { as: "Shaft", boring: "Bore" },
   },
 };
@@ -90,11 +114,13 @@ export function SeegerGroovesCalc() {
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
   const result = Number.isFinite(d) ? computeGroove(kind, d) : null;
   const standard = CIRCLIP_KINDS.find((k) => k.id === kind)?.standard ?? "";
+  const nearest = Number.isFinite(d) && !result ? nearestStandardSizes(kind, d) : null;
 
   const copy = useMemo(() => {
     if (!result) return "";
+    const status = result.verified ? t.verified : t.notVerified;
     return [
-      `${t.copyKind[kind]} Ø${d} mm (${standard})`,
+      `${t.copyKind[kind]} Ø${d} mm (${standard}) — ${status}`,
       `${t.grooveDiameter} ${fmtCirclip(result.grooveDiameter)} mm`,
       `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm`,
       `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm`,
@@ -127,10 +153,19 @@ export function SeegerGroovesCalc() {
 
         {parsed.status === "empty" ? (
           <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
-        ) : !result ? (
+        ) : !Number.isFinite(d) || d <= 0 ? (
           <p className="mt-5 text-sm text-muted">{t.fillPositive}</p>
+        ) : !result ? (
+          <p className="mt-5 text-sm text-muted">
+            {t.noRing(d, nearest?.lower ?? null, nearest?.upper ?? null)}
+          </p>
         ) : (
           <>
+            <p
+              className={`mt-5 text-sm font-medium ${result.verified ? "text-ink" : "text-danger"}`}
+            >
+              {result.verified ? t.verified : t.notVerified}
+            </p>
             <ResultGrid
               items={[
                 { label: t.grooveDiameter, value: `Ø${fmtCirclip(result.grooveDiameter)} mm` },
@@ -167,6 +202,7 @@ export function SeegerGroovesCalc() {
                 <th>{t.grooveDiameter}</th>
                 <th>{t.grooveWidth}</th>
                 <th>{t.grooveDepth}</th>
+                <th>{locale === "nl" ? "Status" : "Status"}</th>
               </tr>
             </thead>
             <tbody>
@@ -181,6 +217,17 @@ export function SeegerGroovesCalc() {
                       <td>{r ? `Ø${fmtCirclip(r.grooveDiameter)}` : "—"}</td>
                       <td>{r ? fmtCirclip(r.grooveWidth) : "—"}</td>
                       <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
+                      <td>
+                        {r
+                          ? r.verified
+                            ? locale === "nl"
+                              ? "geverifieerd"
+                              : "verified"
+                            : locale === "nl"
+                              ? "niet geverifieerd"
+                              : "not verified"
+                          : "—"}
+                      </td>
                     </tr>
                   );
                 },
@@ -188,7 +235,7 @@ export function SeegerGroovesCalc() {
             </tbody>
           </table>
         </div>
-        <SourceBadge>{t.sourceBadge}</SourceBadge>
+        <SourceBadge>{t.sourceBadge([...VERIFIED_SEEGER_D1].join(", "))}</SourceBadge>
       </section>
     </>
   );

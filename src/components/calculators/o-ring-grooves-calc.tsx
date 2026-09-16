@@ -39,6 +39,9 @@ const T = {
     fillValid: "Vul een geldige koorddiameter en squeeze% (0–100) in.",
     outOfRange: (squeeze: string, min: number, max: number, seal: string) =>
       `Squeeze ${squeeze}% ligt buiten de richtwaarde ${min}–${max}% voor ${seal}. Te weinig squeeze lekt, te veel verkort de levensduur van de O-ring.`,
+    overfilled: (fill: string) =>
+      `Ongeldige geometrie: de O-ring vult ${fill}% van de groefdoorsnede — dat is meer dan 100% vóór zwelling, toleranties of montagerek. De ring past niet in deze groef. Verhoog de breedtefactor of verlaag de squeeze%.`,
+    fillPercent: "Vulgraad (doorsnede)",
     depthRadial: "Groefdiepte (radiaal)",
     depthAxial: "Groefdiepte (axiaal)",
     grooveWidth: "Groefbreedte",
@@ -54,11 +57,13 @@ const T = {
       depthLabel: string,
       depth: string,
       width: string,
+      fill: string,
     ) =>
       [
         `Koord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
         `${depthLabel} = ${depth} mm`,
         `Groefbreedte = ${width} mm`,
+        `Vulgraad = ${fill}%`,
       ].join("\n"),
   },
   en: {
@@ -75,6 +80,9 @@ const T = {
     fillValid: "Enter a valid cord diameter and squeeze% (0–100).",
     outOfRange: (squeeze: string, min: number, max: number, seal: string) =>
       `Squeeze ${squeeze}% is outside the guideline ${min}–${max}% for ${seal.toLowerCase()}. Too little squeeze leaks, too much shortens the O-ring's life.`,
+    overfilled: (fill: string) =>
+      `Invalid geometry: the O-ring fills ${fill}% of the groove cross-section — over 100% before any swelling, tolerances or installation stretch. The ring does not fit in this groove. Increase the width factor or reduce squeeze%.`,
+    fillPercent: "Fill (cross-section)",
     depthRadial: "Groove depth (radial)",
     depthAxial: "Groove depth (axial)",
     grooveWidth: "Groove width",
@@ -90,11 +98,13 @@ const T = {
       depthLabel: string,
       depth: string,
       width: string,
+      fill: string,
     ) =>
       [
         `Cord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
         `${depthLabel} = ${depth} mm`,
         `Groove width = ${width} mm`,
+        `Fill = ${fill}%`,
       ].join("\n"),
   },
 };
@@ -144,7 +154,7 @@ export function OringGroovesCalc() {
     squeezeVal != null && (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
 
   const copy = useMemo(() => {
-    if (!result) return "";
+    if (!result || result.overfilled) return "";
     const depthLabel = direction === "radiaal" ? t.depthRadial : t.depthAxial;
     return t.copy(
       cord,
@@ -153,6 +163,7 @@ export function OringGroovesCalc() {
       depthLabel,
       fmtOring(result.depth),
       fmtOring(result.width),
+      fmtOring(result.fillPercent, 0),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, cord, sealType, squeeze, direction, locale]);
@@ -202,7 +213,11 @@ export function OringGroovesCalc() {
           <p className="mt-5 text-sm text-muted">{t.fillValid}</p>
         ) : (
           <>
-            {outOfRange ? (
+            {result.overfilled ? (
+              <p className="mt-3 text-sm font-medium leading-relaxed text-danger">
+                {t.overfilled(fmtOring(result.fillPercent, 0))}
+              </p>
+            ) : outOfRange ? (
               <Note>
                 {t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))}
               </Note>
@@ -214,12 +229,15 @@ export function OringGroovesCalc() {
                   value: `${fmtOring(result.depth)} mm`,
                 },
                 { label: t.grooveWidth, value: `${fmtOring(result.width)} mm` },
+                { label: t.fillPercent, value: `${fmtOring(result.fillPercent, 0)} %` },
               ]}
             />
-            <div className="flex flex-wrap gap-2">
-              <CopyResult text={copy} />
-              <CopyLink />
-            </div>
+            {!result.overfilled ? (
+              <div className="flex flex-wrap gap-2">
+                <CopyResult text={copy} />
+                <CopyLink />
+              </div>
+            ) : null}
           </>
         )}
       </CalcPanel>
@@ -242,6 +260,7 @@ export function OringGroovesCalc() {
                 <th>{t.thCord}</th>
                 <th>{t.thDepthAt(seal.default)}</th>
                 <th>{t.grooveWidth}</th>
+                <th>{t.fillPercent}</th>
               </tr>
             </thead>
             <tbody>
@@ -254,6 +273,9 @@ export function OringGroovesCalc() {
                     </th>
                     <td>{r ? `${fmtOring(r.depth)} mm` : "—"}</td>
                     <td>{r ? `${fmtOring(r.width)} mm` : "—"}</td>
+                    <td className={r?.overfilled ? "text-danger" : undefined}>
+                      {r ? `${fmtOring(r.fillPercent, 0)} %${r.overfilled ? " ⚠" : ""}` : "—"}
+                    </td>
                   </tr>
                 );
               })}

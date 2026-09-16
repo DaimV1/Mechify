@@ -3,10 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import {
   ANGULAR_BANDS,
   fmtAngle,
+  fmtGeoZone,
   fmtIso2768,
   GEO_CLASSES,
   LINEAR_BANDS,
   LINEAR_CLASSES,
+  LINEAR_SIZE_MIN,
   lookupAngular,
   lookupLinear,
   lookupPerpendicularity,
@@ -47,6 +49,8 @@ const T = {
     linearSize: "Lineaire maat",
     radiusChamfer: "Radius / afschuining",
     angularSize: "Hoekmaat",
+    belowMin: (min: number) =>
+      `ISO 2768-1 Tabel 1/2 begint bij ${min} mm — geen algemene tolerantie voor lineaire maat/radius/afschuining onder deze grens. Geef voor kleinere maten een individuele tolerantie op.`,
     thSize: "Maat (mm)",
     table1Note: (cls: string) =>
       `ISO 2768-1 Tabel 1, toegestane afwijking lineaire maten (mm). Klasse actief: ${cls}.`,
@@ -57,6 +61,8 @@ const T = {
     geoHeading: "Geometrische toleranties (ISO 2768-2)",
     geoIntro:
       "Rechtheid/vlakheid, loodrechtheid, symmetrie en rondloop zonder individuele aanduiding — klassen H, K, L.",
+    geoZoneNote:
+      "Deze waarden zijn de totale breedte van de tolerantiezone, geen ±afwijking — een vlakheid van 0,2 mm betekent dat het hele oppervlak binnen een zone van 0,2 mm dik moet liggen, niet ±0,2 mm rond een nominale waarde.",
     classLabel: "Klasse",
     nominalLength: "Nominale lengte (mm)",
     straightnessFlatness: "Rechtheid / vlakheid",
@@ -76,7 +82,7 @@ const T = {
     copyAngle: (leg: string, cls: string, angle: string) =>
       `Hoek (been ${leg} mm), klasse ${cls}: ${angle}`,
     copyStraight: (len: string, cls: string, dev: string) =>
-      `Rechtheid/vlakheid (${len} mm), klasse ${cls}: ${dev} mm`,
+      `Rechtheid/vlakheid (${len} mm), klasse ${cls}: totale zone ${dev} mm (geen ±)`,
   },
   en: {
     heading: "Linear and angular dimensions (ISO 2768-1)",
@@ -88,6 +94,8 @@ const T = {
     linearSize: "Linear size",
     radiusChamfer: "Radius / chamfer",
     angularSize: "Angular size",
+    belowMin: (min: number) =>
+      `ISO 2768-1 Table 1/2 starts at ${min} mm — no general tolerance for linear size/radius/chamfer below this limit. Specify an individual tolerance for smaller sizes.`,
     thSize: "Size (mm)",
     table1Note: (cls: string) =>
       `ISO 2768-1 Table 1, permissible deviation of linear sizes (mm). Active class: ${cls}.`,
@@ -98,6 +106,8 @@ const T = {
     geoHeading: "Geometric tolerances (ISO 2768-2)",
     geoIntro:
       "Straightness/flatness, perpendicularity, symmetry and circular run-out without individual indication — classes H, K, L.",
+    geoZoneNote:
+      "These values are the total width of the tolerance zone, not a ± deviation — a flatness of 0.2 mm means the whole surface must lie within a 0.2 mm thick zone, not ±0.2 mm around a nominal value.",
     classLabel: "Class",
     nominalLength: "Nominal length (mm)",
     straightnessFlatness: "Straightness / flatness",
@@ -117,7 +127,7 @@ const T = {
     copyAngle: (leg: string, cls: string, angle: string) =>
       `Angle (leg ${leg} mm), class ${cls}: ${angle}`,
     copyStraight: (len: string, cls: string, dev: string) =>
-      `Straightness/flatness (${len} mm), class ${cls}: ${dev} mm`,
+      `Straightness/flatness (${len} mm), class ${cls}: total zone ${dev} mm (not ±)`,
   },
 };
 
@@ -166,7 +176,7 @@ export function Iso2768Calc() {
     if (radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
     if (angularRow) lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
     if (straightRow)
-      lines.push(t.copyStraight(geoLength, geoClass, fmtIso2768(straightRow[geoClass])));
+      lines.push(t.copyStraight(geoLength, geoClass, fmtGeoZone(straightRow[geoClass])));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -210,6 +220,8 @@ export function Iso2768Calc() {
             <NumInput id="iso2768-leg" value={legLength} onChange={setLegLength} />
           </Field>
         </div>
+
+        {d != null && d < LINEAR_SIZE_MIN ? <Note>{t.belowMin(LINEAR_SIZE_MIN)}</Note> : null}
 
         <ResultGrid
           items={[
@@ -313,6 +325,7 @@ export function Iso2768Calc() {
           {t.geoHeading}
         </h2>
         <Note>{t.geoIntro}</Note>
+        <Note>{t.geoZoneNote}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={t.classLabel}>
             <SelectInput value={geoClass} onChange={(v) => setGeoClass(v as GeoClass)}>
@@ -331,14 +344,14 @@ export function Iso2768Calc() {
           items={[
             {
               label: t.straightnessFlatness,
-              value: straightRow ? `${fmtIso2768(straightRow[geoClass])} mm` : "—",
+              value: straightRow ? `${fmtGeoZone(straightRow[geoClass])} mm` : "—",
             },
             {
               label: t.perpendicularity,
-              value: perpRow ? `${fmtIso2768(perpRow[geoClass])} mm` : "—",
+              value: perpRow ? `${fmtGeoZone(perpRow[geoClass])} mm` : "—",
             },
-            { label: t.symmetry, value: symRow ? `${fmtIso2768(symRow[geoClass])} mm` : "—" },
-            { label: t.runout, value: `${fmtIso2768(RUNOUT[geoClass])} mm` },
+            { label: t.symmetry, value: symRow ? `${fmtGeoZone(symRow[geoClass])} mm` : "—" },
+            { label: t.runout, value: `${fmtGeoZone(RUNOUT[geoClass])} mm` },
           ]}
         />
 
@@ -358,9 +371,9 @@ export function Iso2768Calc() {
                   <th scope="row" className="normal-case">
                     {b.label}
                   </th>
-                  <td>{fmtIso2768(b.H)}</td>
-                  <td>{fmtIso2768(b.K)}</td>
-                  <td>{fmtIso2768(b.L)}</td>
+                  <td>{fmtGeoZone(b.H)}</td>
+                  <td>{fmtGeoZone(b.K)}</td>
+                  <td>{fmtGeoZone(b.L)}</td>
                 </tr>
               ))}
             </tbody>
@@ -383,9 +396,9 @@ export function Iso2768Calc() {
                   <th scope="row" className="normal-case">
                     {b.label}
                   </th>
-                  <td>{fmtIso2768(b.H)}</td>
-                  <td>{fmtIso2768(b.K)}</td>
-                  <td>{fmtIso2768(b.L)}</td>
+                  <td>{fmtGeoZone(b.H)}</td>
+                  <td>{fmtGeoZone(b.K)}</td>
+                  <td>{fmtGeoZone(b.L)}</td>
                 </tr>
               ))}
             </tbody>
@@ -408,9 +421,9 @@ export function Iso2768Calc() {
                   <th scope="row" className="normal-case">
                     {b.label}
                   </th>
-                  <td>{fmtIso2768(b.H)}</td>
-                  <td>{fmtIso2768(b.K)}</td>
-                  <td>{fmtIso2768(b.L)}</td>
+                  <td>{fmtGeoZone(b.H)}</td>
+                  <td>{fmtGeoZone(b.K)}</td>
+                  <td>{fmtGeoZone(b.L)}</td>
                 </tr>
               ))}
             </tbody>

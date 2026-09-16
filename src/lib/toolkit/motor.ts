@@ -117,7 +117,11 @@ export type MotorResult = {
 
 export function sizeMotor(input: MotorInput): MotorResult | null {
   const { v_ms, D_m, mass_kg, duty, mu, alpha_deg = 0, eta, fb, a_ms2 = 0, rollerMass_kg } = input;
-  if (!(v_ms > 0) || !(D_m > 0) || !(mass_kg > 0) || !(eta > 0) || !(fb > 0)) {
+  // M-7 (16 sept 2026 audit): eta > 1 (an efficiency above 100%) used to pass
+  // this guard and produce a motor power lower than the load power itself —
+  // physically impossible for a driven mechanism. See calculators/motor.ts's
+  // computeMotor for the same bound already enforced there.
+  if (!(v_ms > 0) || !(D_m > 0) || !(mass_kg > 0) || !(eta > 0) || !(eta <= 1) || !(fb > 0)) {
     return null;
   }
 

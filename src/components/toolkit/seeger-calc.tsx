@@ -4,9 +4,11 @@ import {
   fmtSeeger,
   fmtSeeger3,
   grooveDepth,
+  isVerifiedSeeger,
   lookupSeeger,
   seegerFor,
   SEEGER,
+  VERIFIED_SEEGER_D1,
   type SeegerKind,
 } from "@/lib/toolkit/seeger";
 import { readStoredDiameter, storeDiameter } from "@/lib/toolkit/tools";
@@ -57,8 +59,11 @@ export function SeegerCalc() {
     if (!result || Number.isNaN(d)) return "";
     const where = kind === "as" ? "as" : "boring";
     const norm = kind === "as" ? "DIN 471" : "DIN 472";
+    const status = result.verified
+      ? "geverifieerd t.o.v. fabrikant-datasheet"
+      : "NIET geverifieerd — controleer tegen DIN 471/472 of fabrikantcatalogus vóór productie";
     return [
-      `Seegerring ${where} Ø ${d} mm · ${norm}`,
+      `Seegerring ${where} Ø ${d} mm · ${norm} (${status})`,
       `d₂ groef  ${fmtSeeger(result.d2)} mm ${result.d2Class}`,
       `b breedte  ${fmtSeeger(result.b)} mm (H13, werkplaatstabel)`,
       `t diepte  ${fmtSeeger(result.t)} mm  0 / +${fmtSeeger3(result.tPlus)}`,
@@ -123,6 +128,23 @@ export function SeegerCalc() {
               {kind === "as" ? tx(locale, "As", "Shaft") : tx(locale, "Boring", "Bore")} Ø {d} mm ·{" "}
               {kind === "as" ? "DIN 471" : "DIN 472"}
             </p>
+            {result.verified ? (
+              <p className="mt-2 text-sm font-medium text-ink">
+                {tx(
+                  locale,
+                  "Geverifieerd t.o.v. fabrikant-datasheet.",
+                  "Verified against a manufacturer datasheet.",
+                )}
+              </p>
+            ) : (
+              <p className="mt-2 text-sm font-medium text-danger">
+                {tx(
+                  locale,
+                  "Niet geverifieerd — controleer tegen DIN 471/472 of de fabrikantcatalogus vóór productie.",
+                  "Not verified — confirm against DIN 471/472 or the manufacturer catalog before production.",
+                )}
+              </p>
+            )}
             <ResultGrid
               items={[
                 {
@@ -202,9 +224,11 @@ export function SeegerCalc() {
                 <th>d₁</th>
                 <th>d₂ as (h11)</th>
                 <th>t as</th>
+                <th>b as</th>
                 <th>d₂ boring (H11)</th>
                 <th>t boring</th>
-                <th>b</th>
+                <th>b boring</th>
+                <th>{tx(locale, "Status", "Status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -213,9 +237,15 @@ export function SeegerCalc() {
                   <th scope="row">{r.d1}</th>
                   <td>{r.d2as != null ? fmtSeeger(r.d2as) : "—"}</td>
                   <td>{r.d2as != null ? fmtSeeger(grooveDepth(r.d1, r.d2as)) : "—"}</td>
+                  <td>{fmtSeeger(r.bAs)}</td>
                   <td>{r.d2bor != null ? fmtSeeger(r.d2bor) : "—"}</td>
                   <td>{r.d2bor != null ? fmtSeeger(grooveDepth(r.d1, r.d2bor)) : "—"}</td>
-                  <td>{fmtSeeger(r.b)}</td>
+                  <td>{fmtSeeger(r.bBor)}</td>
+                  <td>
+                    {isVerifiedSeeger(r.d1)
+                      ? tx(locale, "geverifieerd", "verified")
+                      : tx(locale, "niet geverifieerd", "not verified")}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -240,8 +270,8 @@ export function SeegerCalc() {
         </a>
         {tx(
           locale,
-          ". b = groefbreedte H13 uit die tabel — niet 1:1 overnemen uit de officiële DIN zonder check. t = |d₁ − d₂| / 2 (nominaal). d₂ as = h11, d₂ boring = H11: t wordt daardoor 0 / +IT11/2 — dieper mag, ondieper niet. Geen n-min. (schouder). Controleer kritieke maten in de actuele DIN.",
-          ". b = groove width H13 from that table — do not copy 1:1 from the official DIN without checking. t = |d₁ − d₂| / 2 (nominal). d₂ shaft = h11, d₂ bore = H11: t therefore becomes 0 / +IT11/2 — deeper is allowed, shallower is not. No n-min. (shoulder). Verify critical dimensions in the current DIN.",
+          `. b = groefbreedte H13 uit die tabel — niet 1:1 overnemen uit de officiële DIN zonder check. Alleen Ø${[...VERIFIED_SEEGER_D1].join(", ")} mm heeft afzonderlijk geverifieerde b-waarden voor as en boring (fabrikant-datasheet); voor elke andere maat is b nog niet onafhankelijk bevestigd en kan de as- en boringwaarde in werkelijkheid uiteenlopen. t = |d₁ − d₂| / 2 (nominaal). d₂ as = h11, d₂ boring = H11: t wordt daardoor 0 / +IT11/2 — dieper mag, ondieper niet. Geen n-min. (schouder). Controleer kritieke maten in de actuele DIN.`,
+          `. b = groove width H13 from that table — do not copy 1:1 from the official DIN without checking. Only Ø${[...VERIFIED_SEEGER_D1].join(", ")} mm has independently verified b values for shaft and bore (manufacturer datasheet); for every other size b is not yet independently confirmed and the shaft/bore values may in reality differ. t = |d₁ − d₂| / 2 (nominal). d₂ shaft = h11, d₂ bore = H11: t therefore becomes 0 / +IT11/2 — deeper is allowed, shallower is not. No n-min. (shoulder). Verify critical dimensions in the current DIN.`,
         )}
       </p>
     </>

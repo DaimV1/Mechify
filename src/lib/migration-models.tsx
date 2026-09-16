@@ -6,9 +6,9 @@ export const EXTRA_MODELS: Record<
   { label: string; original: string; note: string; component: ComponentType }
 > = {
   "seeger-grooves": {
-    label: "Groeftabel",
-    original: "Ontwerpschatting",
-    note: "Vaste referentietabel uit de oorspronkelijke toolkit; de ontwerpschatting blijft afzonderlijk beschikbaar. Gebruik fabrikantgegevens voor vrijgave.",
+    label: "Groeftabel met toleranties",
+    original: "Groeftabel (kort)",
+    note: "Beide modellen gebruiken dezelfde DIN 471/472-werkplaatstabel (16 sept 2026 audit: de eerdere wortelfunctie-schatting is verwijderd omdat die een verkeerde groefmaat gaf). Dit model toont ook de groeftoleranties (h11/H11, dieptetolerantie 0/+IT11-2). Gebruik fabrikantgegevens voor vrijgave.",
     component: module(() => import("@/components/toolkit/seeger-calc"), "SeegerCalc"),
   },
   fasteners: {

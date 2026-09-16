@@ -1,19 +1,26 @@
 /**
  * Seegerringgroef (DIN 471 — as, buitenring; DIN 472 — boring, binnenring).
  *
- * De exacte DIN 471/472-catalogustabel bevat honderden specifieke
- * combinaties (groefdiameter, -breedte en ringdikte per nominale
- * diameter) die per fabrikant net iets kunnen verschillen. In plaats van
- * die precieze cijfers uit het geheugen te reproduceren — met het risico
- * op een groef die net verkeerd is — rekent deze tool met de bekende
- * OPBOUW van de norm: groefbreedte in vaste stappen, groefdiepte
- * ruwweg evenredig met de diameter. Dit is een technische schatting voor
- * een eerste ontwerp, GEEN vervanging van de norm of de catalogus van de
- * ringfabrikant (Seeger-Orbis, Rotor Clip, Truarc) — neem de definitieve
- * groefmaat daaruit over vóór productie.
+ * M-3 (16 sept 2026 audit): dit was ooit een wortelfunctie-schatting van
+ * groefbreedte en -diepte, gepresenteerd als het standaardresultaat naast de
+ * DIN 471/472-aanduiding. Voor een nominale 20 mm as gaf dat model 2,0 mm
+ * groefbreedte / 0,8 mm diepte tegenover Rotor Clip's DSH-20-referentie van
+ * 1,3 mm / 0,5 mm — een geometrisch verschil dat niet geschikt is voor een
+ * standaardring. Dit bestand rekent nu uitsluitend met de catalogustabel in
+ * `@/lib/toolkit/seeger` (dezelfde tabel als de aanvullende "werkplaatstabel"
+ * tool): geen maat in de tabel betekent geen resultaat, in plaats van een
+ * geïnterpoleerde schatting.
  */
 
-export type CirclipKind = "as" | "boring";
+import {
+  grooveDepth,
+  isVerifiedSeeger,
+  lookupSeeger,
+  SEEGER,
+  type SeegerKind,
+} from "../toolkit/seeger.ts";
+
+export type CirclipKind = SeegerKind;
 
 export const CIRCLIP_KINDS: {
   id: CirclipKind;
@@ -30,40 +37,51 @@ export const CIRCLIP_KINDS: {
   },
 ];
 
-const STANDARD_WIDTHS = [
-  0.4, 0.6, 0.8, 1.0, 1.2, 1.5, 1.75, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0,
-];
-
-function nearestStandardWidth(w: number): number {
-  return STANDARD_WIDTHS.reduce(
-    (best, v) => (Math.abs(v - w) < Math.abs(best - w) ? v : best),
-    STANDARD_WIDTHS[0],
-  );
-}
-
-/** Geschatte groefbreedte (mm): vaste stappenreeks, benaderd met een wortelfunctie van de diameter. */
-export function estimatedGrooveWidth(d: number): number {
-  return nearestStandardWidth(0.4 + 0.35 * Math.sqrt(d));
-}
-
-/** Geschatte groefdiepte (mm): ruwweg 4% van de diameter, met een ondergrens. */
-export function estimatedGrooveDepth(d: number): number {
-  return Math.max(0.15, Math.round(d * 0.04 * 20) / 20);
-}
-
 export type CirclipResult = {
   grooveDiameter: number;
   grooveWidth: number;
   grooveDepth: number;
+  /** True only for sizes independently checked against a manufacturer datasheet — see VERIFIED_SEEGER_D1 in toolkit/seeger.ts. */
+  verified: boolean;
 };
 
-/** As (DIN 471): groef ligt binnen de as-diameter. Boring (DIN 472): groef ligt buiten de boring-diameter. */
+/** Nearest standard nominal diameters on either side of `d` that have a catalogue entry for `kind` (for a "no ring at this size" hint). */
+export function nearestStandardSizes(
+  kind: CirclipKind,
+  d: number,
+): { lower: number | null; upper: number | null } {
+  const sizes = SEEGER.filter((r) => (kind === "as" ? r.d2as != null : r.d2bor != null)).map(
+    (r) => r.d1,
+  );
+  let lower: number | null = null;
+  let upper: number | null = null;
+  for (const s of sizes) {
+    if (s < d && (lower == null || s > lower)) lower = s;
+    if (s > d && (upper == null || s < upper)) upper = s;
+  }
+  return { lower, upper };
+}
+
+/**
+ * Catalogue lookup only — no square-root or percentage approximation. As
+ * (DIN 471): groef ligt binnen de as-diameter. Boring (DIN 472): groef ligt
+ * buiten de boring-diameter. Returns null when `d` has no standard ring in
+ * the table (use nearestStandardSizes to point to the closest sizes that do).
+ */
 export function computeGroove(kind: CirclipKind, d: number): CirclipResult | null {
   if (!(d > 0)) return null;
-  const depth = estimatedGrooveDepth(d);
-  const width = estimatedGrooveWidth(d);
-  const grooveDiameter = kind === "as" ? d - 2 * depth : d + 2 * depth;
-  return { grooveDiameter, grooveWidth: width, grooveDepth: depth };
+  const row = lookupSeeger(d);
+  if (!row) return null;
+  const d2 = kind === "as" ? row.d2as : row.d2bor;
+  if (d2 == null) return null;
+  const width = kind === "as" ? row.bAs : row.bBor;
+  const depth = grooveDepth(row.d1, d2);
+  return {
+    grooveDiameter: d2,
+    grooveWidth: width,
+    grooveDepth: depth,
+    verified: isVerifiedSeeger(d),
+  };
 }
 
 export function fmtCirclip(n: number, digits = 2): string {

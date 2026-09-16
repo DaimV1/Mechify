@@ -46,6 +46,10 @@ export type GrooveDirection = "radiaal" | "axiaal";
 export type OringGroove = {
   depth: number;
   width: number;
+  /** O-ring cross-section area / groove cross-section area × 100, before swelling, tolerances or installation stretch. */
+  fillPercent: number;
+  /** True when the nominal O-ring cross-section alone exceeds the groove volume — a physically invalid geometry, not just a squeeze/durability concern. */
+  overfilled: boolean;
 };
 
 /**
@@ -53,6 +57,16 @@ export type OringGroove = {
  * Groefbreedte (dwars op de samendrukking) = koorddiameter × breedtefactor —
  * ruimte voor het volumeoverschot bij samendrukking en thermische
  * uitzetting, typisch 1,3–1,5× de koorddiameter.
+ *
+ * M-6 (16 sept 2026 audit): depth and width used to be returned without
+ * checking whether the O-ring's own nominal cross-section fits in the
+ * resulting groove. At cord 3.55 mm / squeeze 30% / width factor 1.1, the
+ * groove that comes out (depth 2.485 mm, width 3.905 mm) holds only about
+ * 98% of the O-ring's cross-sectional area (fill ≈ 102%) — the ring
+ * physically does not fit before any swelling, tolerance stack-up or
+ * thermal expansion is even considered.
+ * `overfilled` flags that condition so the UI can reject the geometry
+ * instead of only checking whether squeeze% falls in the seal-type range.
  */
 export function computeOringGroove(
   cord: number,
@@ -61,10 +75,12 @@ export function computeOringGroove(
 ): OringGroove | null {
   if (!(cord > 0) || !(squeezePercent >= 0) || !(squeezePercent < 100) || !(widthFactor > 1))
     return null;
-  return {
-    depth: cord * (1 - squeezePercent / 100),
-    width: cord * widthFactor,
-  };
+  const depth = cord * (1 - squeezePercent / 100);
+  const width = cord * widthFactor;
+  const ringArea = (Math.PI * cord ** 2) / 4;
+  const grooveArea = depth * width;
+  const fillPercent = (ringArea / grooveArea) * 100;
+  return { depth, width, fillPercent, overfilled: fillPercent > 100 };
 }
 
 export function fmtOring(n: number, digits = 2): string {
