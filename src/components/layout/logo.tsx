@@ -6,16 +6,20 @@ export function Logo({ className, size = "sm" }: { className?: string; size?: "s
     <Link
       to="/"
       aria-label="Mechify"
-      className={cn("inline-flex shrink-0 rounded-md bg-white px-2 py-1.5", className)}
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent",
+        className,
+      )}
     >
-      <svg
-        viewBox="160 200 1650 400"
-        className={size === "lg" ? "h-14 w-auto sm:h-16" : "h-8 w-auto"}
+      <img
+        src={`${import.meta.env.BASE_URL}brand/mechify-primary.svg`}
+        width={220}
+        height={40}
+        className={size === "lg" ? "h-10 w-auto sm:h-12" : "h-6 w-auto sm:h-8"}
+        alt=""
         aria-hidden="true"
-        focusable="false"
-      >
-        <image href={`${import.meta.env.BASE_URL}mechify-logo.png`} width="1942" height="809" />
-      </svg>
+        decoding="async"
+      />
     </Link>
   );
 }

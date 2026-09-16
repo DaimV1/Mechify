@@ -17,12 +17,6 @@ export const EXTRA_MODELS: Record<
     note: "De tabel levert vaste groefmaten; het vrije ontwerpmodel berekent maten uit compressie en breedtefactor.",
     component: module(() => import("@/components/toolkit/oring-calc"), "OringCalc"),
   },
-  edges: {
-    label: "Kantpersrichtlijnen",
-    original: "Vrije buigberekening",
-    note: "247TailorSteel-richtlijnen met eigen tabellen voor materiaal en haaks/scherp kanten. Geen algemene ISO/DIN-rekenmethode.",
-    component: module(() => import("@/components/toolkit/kanten-calc"), "KantenCalc"),
-  },
   "motor-specification": {
     label: "Inclusief versnelling",
     original: "Stationair werkpunt",
