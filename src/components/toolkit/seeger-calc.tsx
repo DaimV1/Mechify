@@ -11,7 +11,7 @@ import {
   VERIFIED_SEEGER_D1,
   type SeegerKind,
 } from "@/lib/toolkit/seeger";
-import { readStoredDiameter, storeDiameter } from "@/lib/toolkit/tools";
+import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import {
   CalcEyebrow,

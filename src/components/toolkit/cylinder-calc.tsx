@@ -11,7 +11,7 @@ import {
   sizeCylinder,
   type StrokeDir,
 } from "@/lib/toolkit/cylinder";
-import { fmtDotComma, fmtN } from "@/lib/toolkit/knik";
+import { fmtDotComma, fmtN } from "@/lib/calculators/knik";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import { fmtNl } from "@/lib/utils";
 import {

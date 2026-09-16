@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeBearing, pickBearing } from "../src/lib/toolkit/bearing.ts";
 import { lookupFastener } from "../src/lib/toolkit/fastener.ts";
-import { FRICTION, scaleMa } from "../src/lib/toolkit/friction.ts";
 import {
   BANDS,
   HOLE,
@@ -12,9 +10,8 @@ import {
   holeDeviationAt,
   isExtendedBand,
   shaftDeviationAt,
-} from "../src/lib/toolkit/iso286.ts";
-import { designation, lookupIso2768 } from "../src/lib/toolkit/iso2768.ts";
-import { keyWidthTol, lookupKeyway } from "../src/lib/toolkit/keyway.ts";
+} from "../src/lib/calculators/iso286.ts";
+import { keyWidthTol, lookupKeyway } from "../src/lib/calculators/keyway.ts";
 import { copyLine, nextIecKw, sizeMotor } from "../src/lib/toolkit/motor.ts";
 import { GROOVE, squeeze } from "../src/lib/toolkit/oring.ts";
 import { lookupSeeger, seegerFor } from "../src/lib/toolkit/seeger.ts";
@@ -26,9 +23,9 @@ import {
   kFor,
   lambdaLimit,
   sectionProps,
-} from "../src/lib/toolkit/knik.ts";
+} from "../src/lib/calculators/knik.ts";
 import { rodBucklingCheck } from "../src/lib/toolkit/cylinder.ts";
-import { rangeHint, matchTools, TOOLS } from "../src/lib/toolkit/tools.ts";
+import { matchTools, TOOLS } from "../src/lib/tools.ts";
 describe("ISO 286 passingen", () => {
   it("H7/h6 at 20 mm is 0 to 34 µm clearance", () => {
     const r = computeFit(20, "H7/h6");
@@ -198,27 +195,11 @@ describe("DIN 6885 spiebaan", () => {
   });
 });
 
-describe("lagerpassingen", () => {
-  it("Ø 20 inner ring normal load is k5 / H7", () => {
-    const rec = pickBearing(20, "binnen", "normaal");
-    assert.equal(rec.shaft, "k5");
-    assert.equal(rec.hole, "H7");
-    const r = computeBearing(20, "binnen", "normaal");
-    assert.ok(r);
-    assert.equal(r.shaftDev.es, 11);
-    assert.equal(r.shaftDev.ei, 2);
-  });
-
-  it("light load at Ø 20 is j6 not js5", () => {
-    assert.equal(pickBearing(20, "binnen", "licht").shaft, "j6");
-    assert.equal(pickBearing(17, "binnen", "licht").shaft, "js5");
-  });
-
-  it("M-2: the tool's own 4-50 mm range never touches the >0-3 mm band, but an out-of-range Ø there degrades to null instead of reading a missing (js5/j5/k5) class", () => {
-    assert.equal(computeBearing(2, "binnen", "licht"), null);
-    assert.equal(computeBearing(2, "binnen", "normaal"), null);
-  });
-});
+// toolkit/bearing.ts (pickBearing/computeBearing, rotating-ring selection
+// logic) was dead code — no UI ever rendered it since the "drop
+// bearing-fits legacy model" commit — and has been deleted. The live
+// bearing tool is calculators/bearing-fits.ts, covered in
+// reference-calculators.test.ts.
 
 describe("seeger DIN 471/472", () => {
   it("Ø 20 shaft groove is 19.0 × 1.3", () => {
@@ -252,13 +233,6 @@ describe("bevestigers", () => {
     assert.equal(row.ma?.["8.8"], 27.3);
   });
 
-  it("scales Ma with friction class and keeps table at factor 1", () => {
-    assert.equal(scaleMa(27.3, "tabel"), 27.3);
-    assert.equal(FRICTION.tabel.factor, 1);
-    assert.ok(scaleMa(27.3, "geolied") < 27.3);
-    assert.ok(scaleMa(27.3, "droog") > 27.3);
-  });
-
   it("H-1: M12/M14/M16 ISO 273 medium/coarse clearance holes are 0.5 mm smaller than the old (wrong) values", () => {
     assert.deepEqual(lookupFastener(12)?.hole, { fijn: 13, middel: 13.5, grof: 14.5 });
     assert.deepEqual(lookupFastener(14)?.hole, { fijn: 15, middel: 15.5, grof: 16.5 });
@@ -271,14 +245,6 @@ describe("bevestigers", () => {
     assert.equal(row.ma?.["8.8"], 1.44);
     assert.equal(row.fv?.["8.8"], 2480);
     assert.ok(row.ma && row.ma["10.9"] > row.ma["8.8"] && row.ma["12.9"] > row.ma["10.9"]);
-  });
-});
-
-describe("bereikstop", () => {
-  it("warns below exclusive lower bound and above max", () => {
-    assert.match(rangeHint(6, 6, 7, 110) ?? "", /buiten/);
-    assert.match(rangeHint(60, null, 4, 50) ?? "", /50/);
-    assert.equal(rangeHint(20, 3, 4, 50), null);
   });
 });
 
@@ -356,53 +322,10 @@ describe("motor", () => {
   });
 });
 
-describe("iso2768", () => {
-  it("42 mm class m → ±0,3 linear", () => {
-    const r = lookupIso2768(42, "m", "K");
-    assert.ok(r);
-    assert.equal(r.linearTol, 0.3);
-  });
-
-  it("ISO 2768-mK returns K form", () => {
-    const r = lookupIso2768(42, "m", "K");
-    assert.ok(r);
-    assert.equal(r.callout, "ISO 2768-mK");
-    assert.equal(r.form, "K");
-    assert.equal(r.straightness, 0.2);
-    assert.equal(designation("m", "K"), "ISO 2768-mK");
-    assert.equal(designation("f", "H"), "ISO 2768-fH");
-  });
-
-  it("0,4 mm no row", () => {
-    assert.equal(lookupIso2768(0.4, "m", "K"), null);
-  });
-
-  it("6 mm f linear ±0,05", () => {
-    const r = lookupIso2768(6, "f", "K");
-    assert.ok(r);
-    assert.equal(r.linearTol, 0.05);
-  });
-
-  it("8 mm v linear ±1,0", () => {
-    const r = lookupIso2768(8, "v", "K");
-    assert.ok(r);
-    assert.equal(r.linearTol, 1.0);
-  });
-
-  it("v at 2 mm linear is empty", () => {
-    const r = lookupIso2768(2, "v", "K");
-    assert.ok(r);
-    assert.equal(r.linearTol, null);
-  });
-
-  it("circulaire uitloop K = 0,2 independent of size", () => {
-    const a = lookupIso2768(2, "m", "K");
-    const b = lookupIso2768(200, "m", "K");
-    assert.ok(a && b);
-    assert.equal(a.runout, 0.2);
-    assert.equal(b.runout, 0.2);
-  });
-});
+// ISO 2768 coverage now lives in reference-calculators.test.ts against the
+// live calculators/iso2768.ts — see "ISO 2768 (active default tool)" there.
+// The old dead-code toolkit/iso2768.ts (test-only, no UI consumer) was
+// deleted as part of the architecture consolidation.
 
 describe("kanten", () => {
   it("2 mm staal haaks → Ri 1,88, w 12, s 9,10", () => {
@@ -445,32 +368,35 @@ describe("kanten", () => {
   });
 });
 
-describe("toolkit zoek", () => {
+// Ported from the now-deleted dead-code toolkit/tools.ts (its own TOOLS/
+// matchTools were never rendered — the live /toolkit route always used
+// @/lib/tools). Same assertions, updated to the live module's English slugs.
+describe("tool search (@/lib/tools)", () => {
   it("empty query returns every tool", () => {
     assert.equal(matchTools("").length, TOOLS.length);
     assert.equal(matchTools("   ").length, TOOLS.length);
   });
 
-  it("ISO 286 hits passingen and lager, not seeger", () => {
+  it("ISO 286 hits fit-tolerances and bearing-fits, not seeger-grooves", () => {
     const ids = matchTools("ISO 286").map((t) => t.id);
-    assert.ok(ids.includes("passingen"));
-    assert.ok(ids.includes("lager"));
-    assert.equal(ids.includes("seeger"), false);
+    assert.ok(ids.includes("fit-tolerances"));
+    assert.ok(ids.includes("bearing-fits"));
+    assert.equal(ids.includes("seeger-grooves"), false);
   });
 
-  it("H7 finds passingen via tags", () => {
+  it("H7 finds fit-tolerances via tags", () => {
     assert.deepEqual(
       matchTools("h7").map((t) => t.id),
-      ["passingen"],
+      ["fit-tolerances"],
     );
   });
 
-  it("moment finds bevestigers", () => {
-    assert.ok(matchTools("moment").some((t) => t.id === "bevestigers"));
+  it("moment finds fasteners", () => {
+    assert.ok(matchTools("moment").some((t) => t.id === "fasteners"));
   });
 
-  it("inch finds eenheden despite capital I", () => {
-    assert.ok(matchTools("INCH").some((t) => t.id === "eenheden"));
+  it("inch finds units despite capital I", () => {
+    assert.ok(matchTools("INCH").some((t) => t.id === "units"));
   });
 
   it("unknown term is empty", () => {

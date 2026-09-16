@@ -13,6 +13,7 @@ import {
   lookupLinear,
   lookupRadiusChamfer,
   LINEAR_SIZE_MIN,
+  RUNOUT,
 } from "../src/lib/calculators/iso2768.ts";
 import { bandIndex, computeFit } from "../src/lib/calculators/iso286.ts";
 import { computeOringGroove } from "../src/lib/calculators/oring.ts";
@@ -90,6 +91,33 @@ describe("ISO 2768 (active default tool)", () => {
   it("geometric zone formatting carries no ± prefix, unlike bilateral deviations", () => {
     assert.equal(fmtGeoZone(0.2), "0,2");
     assert.equal(fmtIso2768(0.2), "±0,2");
+  });
+
+  // Ported from the now-deleted toolkit/iso2768.ts's dead-code test suite —
+  // same underlying ISO 2768-1 data, exercised here against the live module.
+  it("42 mm class m is ±0.3 linear", () => {
+    assert.equal(lookupLinear(42)?.m, 0.3);
+  });
+
+  it("6 mm class f is ±0.05 linear", () => {
+    assert.equal(lookupLinear(6)?.f, 0.05);
+  });
+
+  it("8 mm class v is ±1.0 linear", () => {
+    assert.equal(lookupLinear(8)?.v, 1.0);
+  });
+
+  it("class v has no defined value in the first band (2 mm), unlike f/m/c", () => {
+    const row = lookupLinear(2);
+    assert.ok(row);
+    assert.equal(row.v, null);
+    assert.ok(row.f != null && row.m != null && row.c != null);
+  });
+
+  it("circular run-out is a flat per-class value, independent of size", () => {
+    assert.equal(RUNOUT.H, 0.1);
+    assert.equal(RUNOUT.K, 0.2);
+    assert.equal(RUNOUT.L, 0.5);
   });
 });
 

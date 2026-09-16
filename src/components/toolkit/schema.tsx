@@ -6,7 +6,7 @@ import type { FastenerRow } from "@/lib/toolkit/fastener";
 import type { SeegerKind } from "@/lib/toolkit/seeger";
 import type { OringKind } from "@/lib/toolkit/oring";
 import { dashMm, type Kind as BendKind } from "@/lib/toolkit/kanten";
-import { END_CONDITIONS, type EndConditionId } from "@/lib/toolkit/knik";
+import { END_CONDITIONS, type EndConditionId } from "@/lib/calculators/knik";
 import {
   computeDeflection,
   deflectionShapePoints,

@@ -18,7 +18,7 @@ import {
   SECTION_KINDS,
   fmtN,
   type SectionKind,
-} from "@/lib/toolkit/knik";
+} from "@/lib/calculators/knik";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import {
   CalcEyebrow,

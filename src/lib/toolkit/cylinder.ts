@@ -11,7 +11,7 @@
  * verified universal catalogue. For an actual order, use the rod diameter
  * from a named cylinder family's own datasheet.
  */
-import { columnCapacity, END_CONDITIONS } from "./knik.ts";
+import { columnCapacity, END_CONDITIONS } from "../calculators/knik.ts";
 
 /** 1 bar (gauge) = 0,1 N/mm². */
 export const BAR_N_PER_MM2 = 0.1;
