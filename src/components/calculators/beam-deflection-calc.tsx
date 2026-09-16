@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   BEAM_TYPES,
+  bendingStress,
   computeBeam,
   DEFLECTION_GUIDELINES,
   fmtBeamNum,
@@ -10,7 +11,9 @@ import {
 } from "@/lib/calculators/beam";
 import {
   eFor,
+  extremeFiber,
   MATERIALS_E,
+  rp02For,
   SECTION_KINDS,
   sectionProps,
   type SectionKind,
@@ -30,18 +33,18 @@ import {
   SourceLink,
 } from "@/components/calculators/calc-ui";
 
-const AT_LABEL = {
-  nl: { load: "onder de last", tip: "bij de tip" },
-  en: { load: "under the load", tip: "at the tip" },
-};
-
 const T = {
   nl: {
     heading: "Doorbuiging onder puntlast",
     intro:
-      "Euler-Bernoulli balktheorie, één puntlast. Vrij opgelegd: a is de afstand van de last tot de linker oplegging. Uitkraging: a is de afstand van de last tot de inklemming (tip bij a = L). Rechthoek en koker rekenen met I_min (zwakke as).",
+      "Euler-Bernoulli balktheorie, één puntlast. Vrij opgelegd: a is de afstand van de last tot de linker oplegging. Uitkraging: a is de afstand van de last tot de inklemming (tip bij a = L). Toont zowel de doorbuiging onder de last als de werkelijke maximale doorbuiging — bij een niet-gecentreerde last vallen die niet samen.",
     beamType: "Balktype",
     section: "Doorsnede",
+    axis: "Buigas",
+    axisWeak: "Zwakke as (I_min)",
+    axisStrong: "Sterke as (I_max)",
+    axisNote:
+      "Een balk buigt om de as die je daadwerkelijk oplegt — meestal de sterke as (bijv. een rechtop staande plaat). De zwakke as is het conservatieve/knik-gedrag. Kies de as die overeenkomt met de werkelijke oriëntatie.",
     span: "Overspanning / lengte L (mm)",
     loadPosition: "Positie last a (mm)",
     pointLoad: "Puntlast F (N)",
@@ -53,15 +56,27 @@ const T = {
     heightH: "Hoogte h (mm)",
     sideA: "Zijde a (mm)",
     wallT: "Wanddikte t (mm)",
+    allowable: "Toelaatbare doorbuiging (mm, optioneel)",
     fillDims: "Vul geldige afmetingen in voor de gekozen doorsnede.",
     fillSpan:
       "Vul een overspanning L en een lastpositie a in (0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging).",
-    deflection: (at: string) => `Doorbuiging δ (${at})`,
+    deflectionAtLoad: "Doorbuiging onder de last δ(a)",
+    deflectionMax: "Maximale doorbuiging δ_max",
+    xMax: "Positie x (δ_max)",
     moment: "Moment M_max",
-    ratio: "L / δ",
+    sigmaMax: "σ_max",
+    ratio: "L / δ_max",
+    sameNote:
+      "Gecentreerde last of uitkraging: δ(a) en δ_max vallen hier samen (het maximum ligt bij de last resp. bij de tip).",
+    overYieldNote: (sigma: string, rp02: string, material: string) =>
+      `σ_max = ${sigma} N/mm² ≥ Rp0,2 ≈ ${rp02} N/mm² (${material}, richtwaarde) — deze last geeft blijvende vervorming; de doorbuiging hierboven is dan niet meer geldig.`,
+    allowableFailNote: (max: string, allow: string) =>
+      `δ_max = ${max} mm overschrijdt de opgegeven toelaatbare doorbuiging van ${allow} mm.`,
+    allowablePassNote: (max: string, allow: string) =>
+      `δ_max = ${max} mm blijft binnen de opgegeven toelaatbare doorbuiging van ${allow} mm.`,
     guidelinesTitle: "Richtwaarden toelaatbare doorbuiging",
     guidelinesNote:
-      "Generieke vuistregels — controleer de toepasselijke norm voor de specifieke toepassing.",
+      "Generieke vuistregels — controleer de toepasselijke norm voor de specifieke toepassing. Vul hierboven desgewenst een eigen, projectspecifieke toelaatbare doorbuiging in.",
     thRatio: "Verhouding",
     thUse: "Typische toepassing",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -69,9 +84,14 @@ const T = {
   en: {
     heading: "Deflection under point load",
     intro:
-      "Euler-Bernoulli beam theory, one point load. Simply supported: a is the distance from the load to the left support. Cantilever: a is the distance from the load to the fixed support (tip at a = L). Rectangle and box section use I_min (weak axis).",
+      "Euler-Bernoulli beam theory, one point load. Simply supported: a is the distance from the load to the left support. Cantilever: a is the distance from the load to the fixed support (tip at a = L). Shows both the deflection at the load and the actual maximum deflection — for an off-centre load these are not the same.",
     beamType: "Beam type",
     section: "Cross-section",
+    axis: "Bending axis",
+    axisWeak: "Weak axis (I_min)",
+    axisStrong: "Strong axis (I_max)",
+    axisNote:
+      "A beam bends about the axis it's actually loaded on — usually the strong axis (e.g. a plate standing on edge). The weak axis is the conservative/buckling-style behavior. Pick the axis that matches the real orientation.",
     span: "Span / length L (mm)",
     loadPosition: "Load position a (mm)",
     pointLoad: "Point load F (N)",
@@ -83,15 +103,27 @@ const T = {
     heightH: "Height h (mm)",
     sideA: "Side a (mm)",
     wallT: "Wall thickness t (mm)",
+    allowable: "Allowable deflection (mm, optional)",
     fillDims: "Enter valid dimensions for the selected cross-section.",
     fillSpan:
       "Enter a span L and a load position a (0 < a < L for simply supported, 0 < a ≤ L for cantilever).",
-    deflection: (at: string) => `Deflection δ (${at})`,
+    deflectionAtLoad: "Deflection at the load δ(a)",
+    deflectionMax: "Maximum deflection δ_max",
+    xMax: "Position x (δ_max)",
     moment: "Moment M_max",
-    ratio: "L / δ",
+    sigmaMax: "σ_max",
+    ratio: "L / δ_max",
+    sameNote:
+      "Centred load or cantilever: δ(a) and δ_max coincide here (the maximum is at the load, or at the tip).",
+    overYieldNote: (sigma: string, rp02: string, material: string) =>
+      `σ_max = ${sigma} N/mm² ≥ Rp0.2 ≈ ${rp02} N/mm² (${material}, indicative) — this load causes permanent deformation; the deflection above no longer applies.`,
+    allowableFailNote: (max: string, allow: string) =>
+      `δ_max = ${max} mm exceeds the specified allowable deflection of ${allow} mm.`,
+    allowablePassNote: (max: string, allow: string) =>
+      `δ_max = ${max} mm stays within the specified allowable deflection of ${allow} mm.`,
     guidelinesTitle: "Allowable deflection guidelines",
     guidelinesNote:
-      "Generic rules of thumb — check the applicable standard for the specific application.",
+      "Generic rules of thumb — check the applicable standard for the specific application. Enter your own project-specific allowable deflection above if you have one.",
     thRatio: "Ratio",
     thUse: "Typical use",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -118,6 +150,10 @@ export function BeamDeflectionCalc() {
   const [posA, setPosA] = useState(search.get("posA") ?? "500");
   const [force, setForce] = useState(search.get("f") ?? "500");
   const [materialId, setMaterialId] = useState(search.get("material") ?? "staal");
+  const [axis, setAxis] = useState<"weak" | "strong">(
+    (search.get("axis") as "weak" | "strong") ?? "strong",
+  );
+  const [allowable, setAllowable] = useState(search.get("allow") ?? "");
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -134,9 +170,11 @@ export function BeamDeflectionCalc() {
     set("posA", posA);
     set("f", force);
     next.set("material", materialId);
+    next.set("axis", axis);
+    set("allow", allowable);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [beamType, sectionKind, D, dIn, b, h, a, t2, L, posA, force, materialId]);
+  }, [beamType, sectionKind, D, dIn, b, h, a, t2, L, posA, force, materialId, axis, allowable]);
 
   const dims = useMemo(() => {
     switch (sectionKind) {
@@ -157,11 +195,21 @@ export function BeamDeflectionCalc() {
     }
   }, [sectionKind, D, dIn, b, h, a, t2]);
 
-  const section = useMemo(() => sectionProps(sectionKind, dims), [sectionKind, dims]);
+  const axisApplies = sectionKind === "rechthoek" || sectionKind === "koker";
+  const section = useMemo(
+    () => sectionProps(sectionKind, dims, axisApplies ? axis : "weak"),
+    [sectionKind, dims, axisApplies, axis],
+  );
+  const c = useMemo(
+    () => extremeFiber(sectionKind, dims, axisApplies ? axis : "weak"),
+    [sectionKind, dims, axisApplies, axis],
+  );
   const Lraw = parseNum(L);
   const posARaw = parseNum(posA);
   const Fraw = parseNum(force);
+  const allowableRaw = parseNum(allowable);
   const E = eFor(materialId);
+  const rp02 = rp02For(materialId);
   const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
@@ -170,22 +218,51 @@ export function BeamDeflectionCalc() {
       ? computeBeam({ type: beamType, F: Fraw, L: Lraw, a: posARaw, E, I: section.I })
       : null;
 
-  const ratio = result && result.deflection > 0 && Lraw ? Lraw / result.deflection : null;
+  const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
+  const overYield = sigma != null && sigma > rp02;
+  const sameLocation =
+    result != null && Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
+  const ratio = result && result.deflectionMax > 0 && Lraw ? Lraw / result.deflectionMax : null;
+  const allowableOk =
+    result != null && allowableRaw != null && allowableRaw > 0
+      ? result.deflectionMax <= allowableRaw
+      : null;
 
   const copy = useMemo(() => {
     if (!result) return "";
     const beamLabel = BEAM_TYPES.find((bt) => bt.id === beamType);
     const beamLabelText = beamLabel ? label(beamLabel) : "";
     return [
-      `${beamLabelText}, L=${L} mm, a=${posA} mm, F=${force} N, ${label(material)}`,
-      `δ ${AT_LABEL[locale][result.at]} = ${fmtBeamNum(result.deflection, 3)} mm`,
+      `${beamLabelText}, L=${L} mm, a=${posA} mm, F=${force} N, ${label(material)}, ${axisApplies ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
+      `δ(a) = ${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
+      `δ_max = ${fmtBeamNum(result.deflectionMax, 3)} mm bij x=${fmtBeamNum(result.xMax, 0)} mm`,
       `M_max = ${fmtBeamNum(result.momentMax, 0)} N·mm`,
-      ratio != null ? `L/δ ≈ ${fmtBeamNum(ratio, 0)}` : "",
+      sigma != null ? `σ_max = ${fmtBeamNum(sigma, 1)} N/mm²` : "",
+      ratio != null ? `L/δ_max ≈ ${fmtBeamNum(ratio, 0)}` : "",
+      allowableOk != null
+        ? allowableOk
+          ? t.allowablePassNote(fmtBeamNum(result.deflectionMax, 3), allowable)
+          : t.allowableFailNote(fmtBeamNum(result.deflectionMax, 3), allowable)
+        : "",
     ]
       .filter(Boolean)
       .join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result, beamType, L, posA, force, material, ratio, locale]);
+  }, [
+    result,
+    beamType,
+    L,
+    posA,
+    force,
+    material,
+    ratio,
+    sigma,
+    allowableOk,
+    allowable,
+    axis,
+    axisApplies,
+    locale,
+  ]);
 
   return (
     <>
@@ -232,6 +309,17 @@ export function BeamDeflectionCalc() {
               ))}
             </SelectInput>
           </Field>
+          {axisApplies ? (
+            <Field label={t.axis}>
+              <SelectInput value={axis} onChange={(v) => setAxis(v as "weak" | "strong")}>
+                <option value="strong">{t.axisStrong}</option>
+                <option value="weak">{t.axisWeak}</option>
+              </SelectInput>
+            </Field>
+          ) : null}
+          <Field label={t.allowable}>
+            <NumInput id="beam-allowable" value={allowable} onChange={setAllowable} />
+          </Field>
 
           {sectionKind === "rond" ? (
             <Field label={t.diameterD}>
@@ -277,6 +365,7 @@ export function BeamDeflectionCalc() {
             </>
           ) : null}
         </div>
+        {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
         {!section ? (
           <p className="mt-5 text-sm text-muted">{t.fillDims}</p>
@@ -288,15 +377,33 @@ export function BeamDeflectionCalc() {
               items={
                 [
                   {
-                    label: t.deflection(AT_LABEL[locale][result.at]),
-                    value: `${fmtBeamNum(result.deflection, 3)} mm`,
+                    label: t.deflectionAtLoad,
+                    value: `${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
                   },
+                  { label: t.deflectionMax, value: `${fmtBeamNum(result.deflectionMax, 3)} mm` },
+                  { label: t.xMax, value: `${fmtBeamNum(result.xMax, 0)} mm` },
                   { label: t.moment, value: `${fmtBeamNum(result.momentMax, 0)} N·mm` },
+                  sigma != null
+                    ? { label: t.sigmaMax, value: `${fmtBeamNum(sigma, 1)} N/mm²` }
+                    : null,
                   { label: "I", value: `${fmtBeamNum(section.I, 0)} mm⁴` },
                   ratio != null ? { label: t.ratio, value: `≈ ${fmtBeamNum(ratio, 0)}` } : null,
                 ].filter(Boolean) as { label: string; value: string }[]
               }
             />
+            {sameLocation ? <Note>{t.sameNote}</Note> : null}
+            {overYield ? (
+              <Note>
+                {t.overYieldNote(fmtBeamNum(sigma ?? 0, 1), fmtBeamNum(rp02, 0), label(material))}
+              </Note>
+            ) : null}
+            {allowableOk != null ? (
+              <Note>
+                {allowableOk
+                  ? t.allowablePassNote(fmtBeamNum(result.deflectionMax, 3), allowable)
+                  : t.allowableFailNote(fmtBeamNum(result.deflectionMax, 3), allowable)}
+              </Note>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
               <CopyLink />

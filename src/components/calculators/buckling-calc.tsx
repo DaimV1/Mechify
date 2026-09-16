@@ -58,11 +58,14 @@ const T = {
     resultI2: "i",
     resultLeff: "L_eff",
     resultLambda: "λ",
-    resultFcrBuckle: "F_cr (plooilast)",
+    resultFcrBuckle: "F_cr (plooilast, bovengrens)",
     resultFcrEuler: "F_cr (Euler)",
     resultSigmaCr: "σ_cr",
     resultS: "S",
+    resultSScreening: "S (bovengrens, geen kolomcontrole)",
     unsafeNote: "F ≥ F_cr — bij deze last knikt de staaf volgens Euler. S < 1.",
+    additionalCheckNote:
+      "Aanvullende kolomcontrole vereist: dit is geen goedgekeurde ontwerpcapaciteit, alleen een bovengrens.",
     lowLambdaNote: (
       lambda: string,
       limit: string,
@@ -73,8 +76,12 @@ const T = {
       <>
         λ = {lambda} ligt onder λ_grens = {limit} voor {material} (π√(E/Rp0,2)). Euler geldt hier
         niet: de staaf plooit/vloeit voordat hij knikt. F_cr hierboven is daarom de plooilast
-        A·Rp0,2 = {squash} N, niet de Euler-last ({euler} N — fors hoger, en niet haalbaar). Tussen
-        beide regimes is Tetmajer of de Johnson-parabool nauwkeuriger dan deze harde overgang.
+        A·Rp0,2 = {squash} N — een bovengrens die deze tool kan berekenen uit A en Rp0,2, GEEN
+        geverifieerde kolomcapaciteit. Dat is fors lager dan de (hier niet geldige) Euler-last (
+        {euler} N), maar zegt niets over initiële kromming, restspanning, excentrische belasting of
+        lokaal plooien van dunwandige profielen. Voer voor deze staaf een aanvullende
+        kolomberekening uit (Tetmajer, Johnson-parabool of een nationale ontwerpnorm) in plaats van
+        dit getal als eindresultaat te gebruiken.
       </>
     ),
     casesTitle: "Knikgevallen (Euler)",
@@ -116,11 +123,14 @@ const T = {
     resultI2: "i",
     resultLeff: "L_eff",
     resultLambda: "λ",
-    resultFcrBuckle: "F_cr (squash load)",
+    resultFcrBuckle: "F_cr (squash load, upper bound)",
     resultFcrEuler: "F_cr (Euler)",
     resultSigmaCr: "σ_cr",
     resultS: "S",
+    resultSScreening: "S (upper bound, not a column check)",
     unsafeNote: "F ≥ F_cr — at this load the bar buckles per Euler. S < 1.",
+    additionalCheckNote:
+      "Additional column assessment required: this is not an approved design capacity, only an upper bound.",
     lowLambdaNote: (
       lambda: string,
       limit: string,
@@ -131,9 +141,12 @@ const T = {
       <>
         λ = {lambda} is below λ_limit = {limit} for {material} (π√(E/Rp0.2)). Euler doesn't apply
         here: the bar squashes/yields before it buckles. F_cr above is therefore the squash load
-        A·Rp0.2 = {squash} N, not the Euler load ({euler} N — far higher, and not achievable).
-        Between the two regimes, Tetmajer or the Johnson parabola is more accurate than this hard
-        transition.
+        A·Rp0.2 = {squash} N — an upper bound this tool can compute from A and Rp0.2, NOT a verified
+        column design resistance. It's far lower than the (here invalid) Euler load ({euler} N), but
+        it says nothing about initial curvature, residual stress, eccentric loading or local
+        buckling of thin-walled sections. Run an additional column check for this bar (Tetmajer, the
+        Johnson parabola, or a national design standard) instead of treating this number as a final
+        answer.
       </>
     ),
     casesTitle: "Buckling cases (Euler)",
@@ -361,11 +374,15 @@ export function BucklingCalc() {
                     },
                     { label: t.resultSigmaCr, value: `${fmtDotComma(result.sigmaCr, 1)} N/mm²` },
                     result.safety != null
-                      ? { label: t.resultS, value: fmtDotComma(result.safety, 2) }
+                      ? {
+                          label: result.verifiedCapacity ? t.resultS : t.resultSScreening,
+                          value: fmtDotComma(result.safety, 2),
+                        }
                       : null,
                   ].filter(Boolean) as { label: string; value: string }[]
                 }
               />
+              {!result.verifiedCapacity ? <Note>{t.additionalCheckNote}</Note> : null}
               {unsafe ? (
                 <Note>{t.unsafeNote}</Note>
               ) : lowLambda ? (

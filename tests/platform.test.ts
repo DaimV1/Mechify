@@ -57,11 +57,11 @@ test("Motor rejects nonphysical efficiency and infinity", () => {
 });
 test("Beam load and tip formulas with off-centre and zero load", () => {
   const args = { type: "opgelegd" as const, F: 1000, L: 1000, a: 500, E: 200000, I: 10000 };
-  close(computeBeam(args)!.deflection, (1000 * 1000 ** 3) / (48 * 200000 * 10000));
+  close(computeBeam(args)!.deflectionAtLoad, (1000 * 1000 ** 3) / (48 * 200000 * 10000));
   close(
-    computeBeam({ ...args, type: "uitkraging", a: 1000 })!.deflection,
+    computeBeam({ ...args, type: "uitkraging", a: 1000 })!.deflectionAtLoad,
     (1000 * 1000 ** 3) / (3 * 200000 * 10000),
   );
   assert.equal(computeBeam({ ...args, a: 0 }), null);
-  assert.equal(computeBeam({ ...args, F: 0 })!.deflection, 0);
+  assert.equal(computeBeam({ ...args, F: 0 })!.deflectionAtLoad, 0);
 });

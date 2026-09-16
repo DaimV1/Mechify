@@ -14,10 +14,14 @@ import {
   lookupRadiusChamfer,
   LINEAR_SIZE_MIN,
 } from "../src/lib/calculators/iso2768.ts";
+import { bandIndex, computeFit } from "../src/lib/calculators/iso286.ts";
 import { computeOringGroove } from "../src/lib/calculators/oring.ts";
 import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { sizeMotor } from "../src/lib/toolkit/motor.ts";
 import { isVerifiedSeeger } from "../src/lib/toolkit/seeger.ts";
+import { columnCapacity, extremeFiber, sectionProps } from "../src/lib/calculators/knik.ts";
+import { rodBucklingCheck } from "../src/lib/toolkit/cylinder.ts";
+import { bendingStress, computeBeam } from "../src/lib/calculators/beam.ts";
 
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
@@ -143,5 +147,121 @@ describe("Motor efficiency guard", () => {
       safety: 1,
     });
     assert.equal(r, null);
+  });
+});
+
+// E12 — the fits tool must accept decimal nominal diameters (bandIndex is
+// the shared lookup the UI's parseNum-based input now feeds decimals into).
+describe("ISO 286 decimal diameters", () => {
+  it("bandIndex resolves a decimal diameter to the same band as its rounded-up neighbour", () => {
+    assert.equal(bandIndex(2.5), bandIndex(3));
+    assert.equal(bandIndex(19.5), bandIndex(20));
+  });
+
+  it("computeFit works with a decimal diameter", () => {
+    const r = computeFit(19.5, "H7/h6");
+    assert.ok(r);
+    close(r.ES, 21);
+    close(r.EI, 0);
+  });
+});
+
+// E09 — a squash-capped buckling result must be flagged as a screening
+// upper bound, not a verified design capacity.
+describe("Buckling: verified capacity vs screening-only upper bound", () => {
+  it("a stubby column below the Euler limit is squash-capped and unverified", () => {
+    // Ø20 mm round, RVS (E=193000, Rp0.2=215), L=100mm, pinned-pinned: well
+    // below lambda_lim, so the squash load governs (same case as the
+    // knik.ts doc comment: Euler would say ~1496 kN vs a ~68 kN squash load).
+    const A = (Math.PI * 20 ** 2) / 4;
+    const I = (Math.PI * 20 ** 4) / 64;
+    const r = columnCapacity({ L: 100, k: 1, E: 193000, I, A, F: null, rp02: 215 });
+    assert.ok(r);
+    assert.equal(r.governing, "plooien");
+    assert.equal(r.verifiedCapacity, false);
+    close(r.Fcr, r.squashLoad);
+  });
+
+  it("a slender column above the Euler limit is a verified Euler result", () => {
+    const A = (Math.PI * 10 ** 2) / 4;
+    const I = (Math.PI * 10 ** 4) / 64;
+    const r = columnCapacity({ L: 2000, k: 1, E: 210000, I, A, F: null, rp02: 235 });
+    assert.ok(r);
+    assert.equal(r.governing, "euler");
+    assert.equal(r.verifiedCapacity, true);
+  });
+});
+
+// E10 — rod protrusion is a length ADD-ON: omitting it (protrusion=0) must
+// give the highest (most optimistic) F_cr, never a conservative default.
+describe("Pneumatic rod buckling: protrusion is not a worst-case default", () => {
+  it("more protrusion strictly lowers F_cr", () => {
+    const noProtrusion = rodBucklingCheck(12, 300, 500, 0);
+    const withProtrusion = rodBucklingCheck(12, 300, 500, 50);
+    assert.ok(noProtrusion && withProtrusion);
+    assert.ok(
+      withProtrusion.Fcr < noProtrusion.Fcr,
+      `expected added protrusion to lower F_cr: ${withProtrusion.Fcr} vs ${noProtrusion.Fcr}`,
+    );
+  });
+});
+
+// E11 — the beam tool must separately report deflection AT the load and the
+// true maximum (with location), matching the review's worked example.
+describe("Beam deflection: at-load vs true maximum", () => {
+  it("F=1000N, L=1000mm, a=200mm, E=210000, I=1e6: at-load 0.040635mm, max 0.057466mm at x=434.315mm", () => {
+    const r = computeBeam({ type: "opgelegd", F: 1000, L: 1000, a: 200, E: 210000, I: 1e6 });
+    assert.ok(r);
+    close(r.deflectionAtLoad, 0.040635, 1e-5);
+    close(r.deflectionMax, 0.057466, 1e-5);
+    close(r.xMax, 434.315, 1e-2);
+    assert.ok(r.deflectionMax > r.deflectionAtLoad);
+  });
+
+  it("a centred load has the maximum coincide with the load", () => {
+    const r = computeBeam({ type: "opgelegd", F: 1000, L: 1000, a: 500, E: 210000, I: 1e6 });
+    assert.ok(r);
+    close(r.deflectionAtLoad, r.deflectionMax, 1e-9);
+    close(r.xMax, 500, 1e-9);
+  });
+
+  it("a cantilever's maximum is always at the tip", () => {
+    const r = computeBeam({ type: "uitkraging", F: 500, L: 800, a: 300, E: 210000, I: 5e5 });
+    assert.ok(r);
+    close(r.deflectionAtLoad, r.deflectionMax, 1e-9);
+    assert.equal(r.xMax, 800);
+  });
+});
+
+// E11 — bending axis selection: a rectangle's strong- and weak-axis I must
+// differ, and extremeFiber must track the same axis as sectionProps.
+describe("Beam bending axis selection", () => {
+  it("a 20x100mm rectangle has a 25x difference between strong and weak axis I", () => {
+    const weak = sectionProps("rechthoek", { b: 20, h: 100 }, "weak");
+    const strong = sectionProps("rechthoek", { b: 20, h: 100 }, "strong");
+    assert.ok(weak && strong);
+    close(strong.I / weak.I, 25, 1e-9);
+  });
+
+  it("extremeFiber tracks the same axis as sectionProps for a rectangle", () => {
+    const dims = { b: 20, h: 100 };
+    assert.equal(extremeFiber("rechthoek", dims, "weak"), 10);
+    assert.equal(extremeFiber("rechthoek", dims, "strong"), 50);
+  });
+
+  it("bending stress is far lower on the strong axis than the (default, conservative) weak axis", () => {
+    const dims = { b: 20, h: 100 };
+    const M = 1e6;
+    const weakSigma = bendingStress(
+      M,
+      extremeFiber("rechthoek", dims, "weak")!,
+      sectionProps("rechthoek", dims, "weak")!.I,
+    );
+    const strongSigma = bendingStress(
+      M,
+      extremeFiber("rechthoek", dims, "strong")!,
+      sectionProps("rechthoek", dims, "strong")!.I,
+    );
+    assert.ok(strongSigma < weakSigma);
   });
 });

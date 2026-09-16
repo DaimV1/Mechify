@@ -108,6 +108,21 @@ export const HOLE: Record<string, { ES: (number | null)[]; EI: (number | null)[]
   N7: { ES: [null, -4, -4, -5, -7, -8, -8], EI: [null, -16, -19, -23, -28, -33, -33] },
 };
 
+/**
+ * E12 (16 sept 2026 review): the >0-3 mm p6 cell below (es=16, ei=10) is
+ * derived, not transcribed — see the M-2 comment above ("this codebase's own
+ * FITS note... holds as an exact equality"). An independent (Schaeffler)
+ * indexed table reportedly lists the first p6 pair as es=12/ei=6 instead —
+ * if that's confirmed, H7/p6 at ≤3 mm becomes a TRANSITION fit (−12 to +4
+ * µm clearance), not the line-fit-only relationship this file's derivation
+ * assumes. Full-table access to resolve this was not available, so the
+ * value below is left UNCHANGED (not silently "corrected" from an
+ * unconfirmed second-hand claim either) and flagged here + in the
+ * fit-tolerances UI as disputed for this one band — verify against a
+ * primary ISO 286-2 table before relying on it.
+ */
+export const DISPUTED_P6_FIRST_BAND = true;
+
 export const SHAFT: Record<string, { es: (number | null)[]; ei: (number | null)[] }> = {
   c11: {
     es: [null, -70, -80, -95, -110, -120, -130],

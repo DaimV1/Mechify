@@ -187,16 +187,16 @@ export function CylinderCalc() {
                 { label: "F_uit", value: `${fmtNl(forces.F_uit, 0)} N` },
                 { label: "F_in", value: `${fmtNl(forces.F_in, 0)} N` },
                 {
-                  label: tx(locale, "Lucht / cyclus", "Air / cycle"),
-                  value: liters != null ? `${fmtNl(liters, 2)} NL` : "—",
+                  label: tx(locale, "Vrije lucht / cyclus (ca.)", "Free air / cycle (approx.)"),
+                  value: liters != null ? `${fmtNl(liters, 2)} L` : "—",
                 },
               ]}
             />
             <Note>
               {tx(
                 locale,
-                "Lucht/cyclus is alleen het geveegde volume (zuiger × slag). Dode ruimte in de eindkappen, poortkanalen, leidingwerk en het ventiel tellen niet mee — reken op de compressor-/leidingdimensionering met +10–20% erbovenop.",
-                "Air/cycle is swept volume only (piston × stroke). Dead volume in the end caps, port passages, tubing and the valve are not included — add 10–20% on top when sizing the compressor or piping.",
+                "Vrije lucht/cyclus is een schatting: geveegd volume (zuiger × slag) geschaald met (p+1)/1 als absolute-drukverhouding bij omgevingstemperatuur — geen genormaliseerd NL-getal tegen een vaste referentietoestand (bijv. DIN 1343: 0°C, 1013,25 mbar). Dode ruimte in de eindkappen, poortkanalen, leidingwerk en het ventiel tellen niet mee — reken op de compressor-/leidingdimensionering met +10–20% erbovenop.",
+                "Free air/cycle is an estimate: swept volume (piston × stroke) scaled by (p+1)/1 as an approximate absolute-pressure ratio at ambient temperature — not a normalised NL figure against a fixed reference condition (e.g. DIN 1343: 0°C, 1013.25 mbar). Dead volume in the end caps, port passages, tubing and the valve are not included — add 10–20% on top when sizing the compressor or piping.",
               )}
             </Note>
             {buckling ? (
@@ -205,8 +205,8 @@ export function CylinderCalc() {
                   {buckling.belowEulerLimit
                     ? tx(
                         locale,
-                        `Stangknik (indicatief): λ onder de Euler-grens — de rekgrens (plooien/vloeien) is maatgevend, niet Euler-knik. F_cr hier is de plooilast A·Rp0,2.`,
-                        `Rod buckling (indicative): λ is below the Euler limit — the yield/squash load governs, not Euler buckling. F_cr here is the squash load A·Rp0.2.`,
+                        `Stangknik (indicatief): λ onder de Euler-grens — de rekgrens (plooien/vloeien) is maatgevend, niet Euler-knik. F_cr hier is de plooilast A·Rp0,2, een bovengrens uit A en Rp0,2 — geen geverifieerde kolomcapaciteit. Aanvullende kolomcontrole vereist.`,
+                        `Rod buckling (indicative): λ is below the Euler limit — the yield/squash load governs, not Euler buckling. F_cr here is the squash load A·Rp0.2, an upper bound from A and Rp0.2 — not a verified column capacity. Additional column assessment required.`,
                       )
                     : tx(
                         locale,
@@ -242,8 +242,8 @@ export function CylinderCalc() {
                         )
                       : tx(
                           locale,
-                          "Aanname: stang massief staal (Rp0,2 235 N/mm², conservatief), ingeklemd–vrij (k=2,1 ontwerp, onbekende bevestiging), knik-lengte = slag zonder geleidingsreserve. Richtwaarde S ≥ 3,5. Alleen voor uitgaan (drukstang). Zie de Euler-knik rekenhulp voor een echte bevestiging en materiaal.",
-                          "Assumption: solid steel rod (Rp0.2 235 N/mm², conservative), fixed–free (k=2.1 design, unknown mounting), buckling length = stroke with no guide-length allowance. Target S ≥ 3.5. Extend (push) direction only. See the Euler buckling tool for an actual mounting and material.",
+                          "Aanname: stang massief staal (Rp0,2 235 N/mm², conservatief), ingeklemd–vrij (k=2,1 ontwerp, onbekende bevestiging), knik-lengte = slag zonder extra protrusie (rod-eye, onbeugelde lengte voorbij de voorste lagerbus). Dat is een optimistische ondergrens van de knik-lengte, geen worst case: elke werkelijke protrusie verlaagt F_cr verder. Richtwaarde S ≥ 3,5. Alleen voor uitgaan (drukstang). Zie de Euler-knik rekenhulp voor een echte bevestiging, protrusie en materiaal.",
+                          "Assumption: solid steel rod (Rp0.2 235 N/mm², conservative), fixed–free (k=2.1 design, unknown mounting), buckling length = stroke with no extra protrusion (rod-eye, unsupported length past the front bearing). That's an optimistic lower bound on the buckling length, not a worst case: any real protrusion lowers F_cr further. Target S ≥ 3.5. Extend (push) direction only. See the Euler buckling tool for an actual mounting, protrusion and material.",
                         )}
                 </Note>
               </>
@@ -285,6 +285,13 @@ export function CylinderCalc() {
             locale,
             "F_uit = p·A_zuiger, F_in = p·A_ring. Geen wrijving. Stang = ISO-basis. Actieve rij is de gekozen boring.",
             "F_extend = p·A_piston, F_retract = p·A_annulus. No friction. Rod = ISO basic. Active row is the selected bore.",
+          )}
+        </Note>
+        <Note>
+          {tx(
+            locale,
+            'Bij Ø200/250/320 wijkt de stangdiameter hier af van de standaard-rekenhulp ("ISO-boring bij een last") — geen van beide is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.',
+            'At Ø200/250/320 the rod diameter here differs from the default tool ("ISO bore for a load") — neither is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.',
           )}
         </Note>
         <div className="table-scroll mt-4">

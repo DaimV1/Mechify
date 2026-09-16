@@ -211,11 +211,11 @@ const pages = {
       title: "Algemene toleranties.",
       accent: "toleranties.",
       crumb: "Algemene toleranties",
-      lede: "Titelblok-default als een maat geen vakje heeft. Geen passing (dat is ISO 286). Standaardaanduiding ISO 2768-mK.",
+      lede: "Titelblok-default als een maat geen vakje heeft. Geen passing (dat is ISO 286). ISO 2768-mK is de klassieke aanduiding (deel 1 nog geldig; deel 2 ingetrokken in 2021, opvolger ISO 22081) — bruikbaar om bestaande tekeningen te lezen; controleer voor een NIEUWE tekening zelf de actuele status van deel 1 en overweeg ISO 22081 voor de geometrische klasse.",
       faq: [
         {
           q: "Wat betekent ISO 2768-mK?",
-          a: "m is de middelste lineaire klasse (2768-1), K de middelste vormklasse (2768-2). Zet die aanduiding in of bij het titelblok.",
+          a: "m is de middelste lineaire klasse (2768-1), K de middelste vormklasse (2768-2, ingetrokken in 2021 — zie de volgende vraag). Voor het LEZEN van een bestaande tekening met mK in het titelblok: gebruik de tabellen hieronder. Voor een NIEUWE tekening: controleer eerst de actuele status van 2768-1 en overweeg ISO 22081 voor de geometrische klasse in plaats van klakkeloos mK over te nemen.",
         },
         {
           q: "Wanneer zet ik de afwijking naast de maat?",
@@ -227,7 +227,7 @@ const pages = {
         },
         {
           q: "2768-2 is ingetrokken. Waarom H/K/L?",
-          a: "Deel 2 is in 2021 ingetrokken; opvolger ISO 22081. Tekeningen zetten nog mK, daarom staat de oude tabel erbij. Geen vervanging van een getolereerde maat in een vakje.",
+          a: "Deel 2 is in 2021 ingetrokken; opvolger ISO 22081. De H/K/L-tabellen hier zijn nuttig om een BESTAANDE tekening met mK te interpreteren — dat is niet hetzelfde als zeggen dat de opvolgersnorm automatisch dezelfde H/K/L-indeling overneemt. Specificeer een NIEUWE tekening volgens ISO 22081 (en controleer zelf de actuele status van deel 1), niet door het oude schema te kopiëren. Geen vervanging van een getolereerde maat in een vakje.",
         },
       ],
     },
@@ -235,11 +235,11 @@ const pages = {
       title: "General tolerances.",
       accent: "tolerances.",
       crumb: "General tolerances",
-      lede: "Title-block default when a dimension has no box. Not a fit (that is ISO 286). Standard designation ISO 2768-mK.",
+      lede: "Title-block default when a dimension has no box. Not a fit (that is ISO 286). ISO 2768-mK is the classic designation (part 1 still current; part 2 withdrawn in 2021, successor ISO 22081) — useful for reading existing drawings; for a NEW drawing check the current status of part 1 yourself and consider ISO 22081 for the geometrical class.",
       faq: [
         {
           q: "What does ISO 2768-mK mean?",
-          a: "m is the medium linear class (2768-1), K the medium geometrical class (2768-2). Put that designation in or next to the title block.",
+          a: "m is the medium linear class (2768-1), K the medium geometrical class (2768-2, withdrawn in 2021 — see the next question). For READING an existing drawing with mK in the title block: use the tables below. For a NEW drawing: check the current status of 2768-1 first and consider ISO 22081 for the geometrical class rather than copying mK by default.",
         },
         {
           q: "When do I put the deviation next to the dimension?",
@@ -251,7 +251,7 @@ const pages = {
         },
         {
           q: "2768-2 is withdrawn. Why H/K/L?",
-          a: "Part 2 was withdrawn in 2021; successor ISO 22081. Drawings still use mK, so the old table stays. It does not replace a boxed, individually tolerated dimension.",
+          a: "Part 2 was withdrawn in 2021; successor ISO 22081. The H/K/L tables here are useful for interpreting an EXISTING drawing that specifies mK — that is not the same as the successor standard automatically carrying over the same H/K/L scheme. Specify a NEW drawing per ISO 22081 (and check the current status of part 1 yourself), not by copying the old scheme. It does not replace a boxed, individually tolerated dimension.",
         },
       ],
     },

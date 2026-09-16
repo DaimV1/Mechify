@@ -2,6 +2,14 @@
  * Theoretical pneumatic cylinder force. F = p·A, gauge pressure.
  * ISO 15552 / ISO 6432 basic piston-rod diameters (not oversized rods).
  * No friction, no Festo/SMC type code.
+ *
+ * E10 (16 sept 2026 review): at bore Ø200/250/320 this table's basic rod
+ * (40/50/63) does not match calculators/pneumatic.ts's table (50/63/80) for
+ * the same nominal bores. Neither file names a specific manufacturer/type
+ * code per row, so which supplier variant each represents was not
+ * established — treat this as ONE possible "basic rod" convention, not a
+ * verified universal catalogue. For an actual order, use the rod diameter
+ * from a named cylinder family's own datasheet.
  */
 import { columnCapacity, END_CONDITIONS } from "./knik.ts";
 
@@ -101,7 +109,12 @@ export function sizeCylinder({
 
 /**
  * Free-air volume for one double-acting cycle (extend + retract).
- * Shop approximation: (p + 1) bar absolute, 1 bar ≈ normaaldruk.
+ * Shop approximation: (p + 1) bar absolute, atmospheric ≈ 1 bar. This is NOT
+ * a normal-litre (NL) value against a defined reference condition (e.g. DIN
+ * 1343: 0°C, 1013.25 mbar) — it is swept volume scaled by an approximate
+ * absolute-pressure ratio at ambient temperature. Label it as an
+ * approximate free-air volume, not NL, so it isn't mistaken for a
+ * compressor-catalogue-grade figure (E10, 16 sept 2026 review).
  * A in mm², s in mm → liters.
  */
 export function cycleLiters(row: CylinderRow, pBar: number, strokeMm: number) {
@@ -113,10 +126,16 @@ export function cycleLiters(row: CylinderRow, pBar: number, strokeMm: number) {
 /**
  * Fixed–free (kDesign 2,1, per knik.ts) — the conservative default when the
  * actual mounting (clevis, trunnion, foot) isn't known. Exposed rod length
- * ≈ stroke; any guide/bearing length inside the head isn't subtracted. Rod
+ * ≈ stroke; any guide/bearing length inside the head isn't subtracted, and
+ * any real protrusion beyond the stroke (rod-eye/clevis length, unsupported
+ * length past the front bearing) is NOT included unless the caller supplies
+ * it — see rodBucklingCheck's protrusionMm. That makes the buckling length,
+ * and therefore F_cr, an optimistic best case rather than a worst case: a
+ * real cylinder with any unsupported protrusion has a longer buckling
+ * length and a lower F_cr than this reports (E10, 16 sept 2026 review). Rod
  * assumed hardened/ground steel (E ≈ 210 000 N/mm²) regardless of body
- * material. Indicative worst case, push (F_uit) direction only — for a known
- * mounting and length, use the general Euler-knik tool.
+ * material. Indicative, push (F_uit) direction only — for a known mounting
+ * and length, use the general Euler-knik tool.
  */
 /** Single source of truth: knik.ts's END_CONDITIONS "fc" (fixed-free) kDesign — the same value the Euler-knik tool now uses for its own fixed-free case. */
 export const ROD_BUCKLING_K_DESIGN = END_CONDITIONS.find((c) => c.id === "fc")!.kDesign;
@@ -136,8 +155,10 @@ export type RodBucklingResult = NonNullable<ReturnType<typeof columnCapacity>> &
 /**
  * Buckling length = stroke + rod protrusion into the mounting (guide/bearing
  * length inside the head is not stroke). No protrusion figure is known here,
- * so this stays a worst-case default (protrusion = 0) unless the caller
- * supplies one.
+ * so protrusionMm defaults to 0 — the SHORTEST possible buckling length, not
+ * a conservative one: any real protrusion only makes F_cr lower than this
+ * default reports. Supply the actual protrusion for a result that isn't
+ * optimistic.
  */
 export function rodBucklingCheck(
   rodMm: number,

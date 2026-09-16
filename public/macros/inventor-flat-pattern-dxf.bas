@@ -70,7 +70,7 @@ Sub ExporteerVlakPatroonNaarDXF()
 
     If InStrRev(oDoc.FullFileName, ".") = 0 Then
         MsgBox "Bestandspad heeft geen extensie.", vbExclamation
-        Exit Sub
+        GoTo Cleanup
     End If
 
     Dim dxfPath As String
@@ -79,12 +79,28 @@ Sub ExporteerVlakPatroonNaarDXF()
     Dim sOptions As String
     sOptions = "FLAT PATTERN DXF?AcadVersion=" & ACAD_VERSION & "&OuterProfileLayer=" & OUTER_PROFILE_LAYER
 
+    ' On Error Resume Next + explicit Err check, not On Error GoTo, so the
+    ' Cleanup label below always runs next regardless of success or failure —
+    ' a raised error here used to skip straight past oFlatPattern.Delete,
+    ' leaving a flat pattern this macro created (and the document marked
+    ' dirty) behind on export failure (E17, 16 sept 2026 review).
+    Dim exportErrorDescription As String
+    On Error Resume Next
     oFlatPattern.DataIO.WriteDataToFile sOptions, dxfPath
+    If Err.Number <> 0 Then exportErrorDescription = Err.Description
+    On Error GoTo 0
 
-    If createdFlatPattern Then
-        oFlatPattern.Delete
+    If exportErrorDescription = "" Then
+        MsgBox "Opgeslagen als:" & vbCrLf & dxfPath, vbInformation
+    Else
+        MsgBox "Exporteren mislukt: " & exportErrorDescription, vbCritical
     End If
 
-    MsgBox "Opgeslagen als:" & vbCrLf & dxfPath, vbInformation
+Cleanup:
+    If createdFlatPattern Then
+        On Error Resume Next
+        oFlatPattern.Delete
+        On Error GoTo 0
+    End If
 
 End Sub

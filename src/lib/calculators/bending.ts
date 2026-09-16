@@ -76,10 +76,19 @@ export function minFlangeLength(T: number): number {
   return 4 * T;
 }
 
-/** Typische V-matrijsopening (luchtbuigen) ≈ 8 × plaatdikte; bijbehorende ponsstraal ≈ V/6. */
-export function suggestedDieOpening(T: number): { v: number; punchRadius: number } {
+/**
+ * Typische V-matrijsopening (luchtbuigen) ≈ 8 × plaatdikte. `insideRadiusGuide`
+ * (≈ V/6) is een vuistregel voor de resulterende BINNENSTRAAL die bij die
+ * opening ontstaat — dit is niet hetzelfde als de ponsneusstraal die je
+ * daadwerkelijk kiest: ponsneusstraal, resulterende binnenstraal en
+ * matrijsopening zijn drie te onderscheiden maten. In de praktijk is de
+ * gekozen ponsneusstraal doorgaans kleiner dan of gelijk aan deze richtwaarde
+ * (E15, 16 sept 2026 review) — dit veld heette voorheen "punchRadius", wat
+ * die twee maten liet samenvallen.
+ */
+export function suggestedDieOpening(T: number): { v: number; insideRadiusGuide: number } {
   const v = 8 * T;
-  return { v, punchRadius: v / 6 };
+  return { v, insideRadiusGuide: v / 6 };
 }
 
 /**

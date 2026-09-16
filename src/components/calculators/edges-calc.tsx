@@ -50,7 +50,9 @@ const TXT = {
     minRadius: (material: string) => `Min. binnenstraal (${material})`,
     minFlange: "Min. beenlengte (4×T)",
     typicalDie: "Typische V-matrijsopening (8×T)",
-    punchRadius: "Bijbehorende ponsstraal (V/6)",
+    punchRadius: "Richtwaarde resulterende binnenstraal (≈V/6)",
+    punchRadiusNote:
+      "V/6 is een vuistregel voor de binnenstraal die bij deze matrijsopening ontstaat — niet de ponsneusstraal die je kiest. Ponsneusstraal, resulterende binnenstraal en matrijsopening zijn drie verschillende maten; de gekozen ponsneusstraal is doorgaans kleiner dan of gelijk aan deze richtwaarde.",
     zTitle: "Z-buiging (offset)",
     zNote:
       "Geometrische ondergrens: de twee buigstralen plus de plaatdikte moeten fysiek passen (Z_min = 2·Ri + T). Dit is geen volledige gereedschap-vrijloopcontrole — bij een krappe offset altijd de matrijs- en ponsvorm van de kantpers controleren.",
@@ -81,7 +83,9 @@ const TXT = {
     minRadius: (material: string) => `Min. inside radius (${material})`,
     minFlange: "Min. flange length (4×T)",
     typicalDie: "Typical V-die opening (8×T)",
-    punchRadius: "Matching punch radius (V/6)",
+    punchRadius: "Guideline resulting inside radius (≈V/6)",
+    punchRadiusNote:
+      "V/6 is a rule of thumb for the inside radius that results from this die opening — not the punch nose radius you select. Punch nose radius, resulting inside radius and die opening are three distinct quantities; the chosen punch nose radius is typically smaller than or equal to this guideline.",
     zTitle: "Z-bend (offset)",
     zNote:
       "Geometric lower bound: the two bend radii plus the sheet thickness must physically fit (Z_min = 2·Ri + T). This is not a full tooling clearance check — for a tight offset, always check the press brake's die and punch shape.",
@@ -243,11 +247,15 @@ export function EdgesCalc() {
                 ? { label: t.typicalDie, value: `${fmtBendNum(dieOpening.v, 1)} mm` }
                 : null,
               dieOpening != null
-                ? { label: t.punchRadius, value: `${fmtBendNum(dieOpening.punchRadius, 2)} mm` }
+                ? {
+                    label: t.punchRadius,
+                    value: `${fmtBendNum(dieOpening.insideRadiusGuide, 2)} mm`,
+                  }
                 : null,
             ].filter(Boolean) as { label: string; value: string }[]
           }
         />
+        {dieOpening != null ? <Note>{t.punchRadiusNote}</Note> : null}
 
         <h3 className="mt-8 font-display text-lg font-semibold tracking-tight text-ink">
           {t.zTitle}

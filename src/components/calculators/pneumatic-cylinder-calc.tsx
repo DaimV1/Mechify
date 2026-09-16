@@ -56,7 +56,11 @@ const T = {
     strokeLabel: "Uitgeschoven lengte L (mm)",
     endConditionLabel: "Inklemming",
     rodMaterialLabel: "Materiaal zuigerstang",
-    safetyRatio: "S = F_cr / F",
+    safetyRatio: "S = F_cr / F_uit",
+    bucklingBasisNote:
+      "De uitknikcontrole rekent met de beschikbare uittrekkracht F_uit bij deze boring en druk (het geblokkeerde/vastgelopen geval), niet met de opgegeven last F — een cilinder die tegen een aanslag vastloopt levert zijn volledige theoretische kracht, ook als de last zelf lager is.",
+    additionalCheckNote:
+      "λ ligt onder de Euler-grens: F_cr hierboven is de plooilast (bovengrens), geen geverifieerde kolomcapaciteit. Aanvullende kolomcontrole vereist — zie de Euler-knik rekenhulp.",
     lowSafetyNote: (s: string) =>
       `S = ${s} ligt onder de gangbare fabrikant-marge van 3,5–5× voor pneumatische zuigerstangen. Kies een dikkere stang, een kortere slag, of een grotere boring.`,
     fillLength: "Vul een lengte groter dan 0 in.",
@@ -66,13 +70,14 @@ const T = {
     thRod: "Zuigerstang",
     thExtendAt: (p: string) => `Uittrekkracht @ ${p} bar`,
     sourceBadge:
-      "Boring/zuigerstang-combinaties volgens de gangbare cilindercatalogi (Festo DSBC/DNC, SMC CA2/CQ2) die ISO 15552 en ISO 6432 volgen. Sommige boringen hebben meerdere standaard stangdiameters; controleer de fabrikant-catalogus voor de volledige set.",
+      'Boring/zuigerstang-combinaties volgens de gangbare cilindercatalogi (Festo DSBC/DNC, SMC CA2/CQ2) die ISO 15552 en ISO 6432 volgen. Sommige boringen hebben meerdere standaard stangdiameters; controleer de fabrikant-catalogus voor de volledige set. Bij Ø200/250/320 wijkt de stangdiameter hier af van de aanvullende rekenhulp ("Lastfactor & luchtverbruik") — geen van beide is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.',
     sourceWiki: "Wikipedia — Pneumatic cylinder",
     copyLoad: (F: string, p: string) => `Last ${F} N bij ${p} bar`,
     copyBore: (bore: number, series: string) => `Aanbevolen boring: Ø${bore} mm (${series})`,
     copyRod: (rod?: number) => `Zuigerstang Ø${rod} mm`,
     copyExtend: (n: string) => `Uittrekkracht ${n} N`,
-    copyBuckling: (fcr: string, s: string) => `Uitknik zuigerstang: F_cr = ${fcr} N, S = ${s}`,
+    copyBuckling: (fcr: string, s: string) =>
+      `Uitknik zuigerstang (o.b.v. F_uit, geblokkeerd geval): F_cr = ${fcr} N, S = ${s}`,
   },
   en: {
     heading: "ISO bore for a load",
@@ -95,7 +100,11 @@ const T = {
     strokeLabel: "Extended length L (mm)",
     endConditionLabel: "End condition",
     rodMaterialLabel: "Rod material",
-    safetyRatio: "S = F_cr / F",
+    safetyRatio: "S = F_cr / F_uit",
+    bucklingBasisNote:
+      "The buckling check uses the available extend force F_uit at this bore and pressure (the blocked/stalled case), not the requested load F — a cylinder jammed against a hard stop delivers its full theoretical force, even if the actual load is lower.",
+    additionalCheckNote:
+      "λ is below the Euler limit: F_cr above is the squash load (an upper bound), not a verified column capacity. Additional column assessment required — see the Euler buckling tool.",
     lowSafetyNote: (s: string) =>
       `S = ${s} is below the typical manufacturer margin of 3.5–5× for pneumatic rods. Choose a thicker rod, a shorter stroke, or a larger bore.`,
     fillLength: "Enter a length greater than 0.",
@@ -105,13 +114,14 @@ const T = {
     thRod: "Rod",
     thExtendAt: (p: string) => `Extend force @ ${p} bar`,
     sourceBadge:
-      "Bore/rod combinations per common cylinder catalogs (Festo DSBC/DNC, SMC CA2/CQ2) following ISO 15552 and ISO 6432. Some bores have several standard rod diameters; check the manufacturer catalog for the full set.",
+      'Bore/rod combinations per common cylinder catalogs (Festo DSBC/DNC, SMC CA2/CQ2) following ISO 15552 and ISO 6432. Some bores have several standard rod diameters; check the manufacturer catalog for the full set. At Ø200/250/320 the rod diameter here differs from the supplementary tool ("Load factor & air use") — neither is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.',
     sourceWiki: "Wikipedia — Pneumatic cylinder",
     copyLoad: (F: string, p: string) => `Load ${F} N at ${p} bar`,
     copyBore: (bore: number, series: string) => `Recommended bore: Ø${bore} mm (${series})`,
     copyRod: (rod?: number) => `Rod Ø${rod} mm`,
     copyExtend: (n: string) => `Extend force ${n} N`,
-    copyBuckling: (fcr: string, s: string) => `Rod buckling: F_cr = ${fcr} N, S = ${s}`,
+    copyBuckling: (fcr: string, s: string) =>
+      `Rod buckling (based on F_uit, blocked case): F_cr = ${fcr} N, S = ${s}`,
   },
 };
 
@@ -149,19 +159,24 @@ export function PneumaticCylinderCalc() {
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
   const buckling = useMemo(() => {
-    if (!recommended || rod == null || L == null || !(L > 0) || F == null) return null;
+    if (!recommended || rod == null || L == null || !(L > 0) || p == null) return null;
     const section = sectionProps("rond", { D: rod });
     if (!section) return null;
+    // Buckling is checked against the cylinder's own available extend force
+    // (the blocked/stalled case), not the requested load F — see
+    // bucklingBasisNote. A stalled or end-of-stroke cylinder can exert its
+    // full theoretical force on the rod regardless of the nominal load.
+    const F_uit = extendForce(recommended.bore, p);
     return columnCapacity({
       L,
       k: kDesignFor(endCondition),
       E: eFor(materialId),
       I: section.I,
       A: section.A,
-      F,
+      F: F_uit,
       rp02: rp02For(materialId),
     });
-  }, [recommended, rod, L, F, endCondition, materialId]);
+  }, [recommended, rod, L, p, endCondition, materialId]);
 
   const copy = useMemo(() => {
     if (!recommended || F == null || p == null) return "";
@@ -234,6 +249,7 @@ export function PneumaticCylinderCalc() {
             {showBuckling ? (
               <div className="mt-4 rounded-lg border border-border bg-bg p-4">
                 <Note>{t.bucklingIntro}</Note>
+                <Note>{t.bucklingBasisNote}</Note>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <Field label={t.strokeLabel}>
                     <NumInput id="pneu-stroke" value={stroke} onChange={setStroke} />
@@ -269,7 +285,9 @@ export function PneumaticCylinderCalc() {
                         { label: "λ", value: fmtDotComma(buckling.lambda, 1) },
                       ]}
                     />
-                    {buckling.safety != null && buckling.safety < 3.5 ? (
+                    {!buckling.verifiedCapacity ? (
+                      <Note>{t.additionalCheckNote}</Note>
+                    ) : buckling.safety != null && buckling.safety < 3.5 ? (
                       <Note>{t.lowSafetyNote(fmtDotComma(buckling.safety, 2))}</Note>
                     ) : null}
                   </>

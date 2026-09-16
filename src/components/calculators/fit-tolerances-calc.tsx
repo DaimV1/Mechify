@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   BANDS,
+  DISPUTED_P6_FIRST_BAND,
   FITS,
   HOLE_FIELDS,
   SHAFT_FIELDS,
@@ -27,11 +28,11 @@ import {
   Field,
   KindDot,
   Note,
-  parseWholeMm,
+  NumInput,
+  parseNum,
   ResultGrid,
   SelectInput,
   SourceLink,
-  WholeMmInput,
 } from "@/components/calculators/calc-ui";
 
 const T = {
@@ -39,10 +40,10 @@ const T = {
     heading: "Nominale passing",
     intro: (
       <>
-        Nominale Ø in hele millimeters, boven 0 t/m 3150 mm (de volledige ISO 286-reeks). H/h,
-        JS/js, G/g, F/f en D/d zijn berekend uit de ISO 286-1-formules en gelden over de hele reeks.
-        c11, k6, n6, p6 en s6 hebben geen eenvoudige formule en blijven beperkt tot t/m 50 mm — zie
-        hieronder. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11, JS7, h6, h7 en p6
+        Nominale Ø in mm (decimalen toegestaan), boven 0 t/m 3150 mm (de volledige ISO 286-reeks).
+        H/h, JS/js, G/g, F/f en D/d zijn berekend uit de ISO 286-1-formules en gelden over de hele
+        reeks. c11, k6, n6, p6 en s6 hebben geen eenvoudige formule en blijven beperkt tot t/m 50 mm
+        — zie hieronder. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11, JS7, h6, h7 en p6
         geverifieerd; de overige klassen tonen daar "—" (nog geen bron gecontroleerd) in plaats van
         een gok.
       </>
@@ -70,6 +71,8 @@ const T = {
     clearanceMinMax: "Speling min … max",
     extendedNote:
       "Boven 50 mm: de IT-breedte komt uit de ISO 286-1-tabel (exact), de fundamentele afwijking van G/F/D en g/f/d uit de formule — boven Ø400 kan die 1 µm van de tabelwaarde verschillen.",
+    disputedP6Note:
+      "Betwiste waarde in deze band (>0–≤3 mm): p6 hier is afgeleid (niet uit een tabel overgenomen). Een andere geïndexeerde bron vermeldt mogelijk es=+12/ei=+6 µm i.p.v. de +16/+10 hier — als dat klopt wordt H7/p6 in deze band een overgangspassing, geen lijnpassing. Controleer tegen een primaire ISO 286-2-tabel vóór gebruik.",
     copyLine: (d: number, fitId: string, bandLabel: string) =>
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Voorkeurpassingen",
@@ -94,11 +97,11 @@ const T = {
     heading: "Nominal fit",
     intro: (
       <>
-        Nominal Ø in whole millimeters, above 0 up to 3150 mm (the full ISO 286 range). H/h, JS/js,
-        G/g, F/f and D/d are computed from the ISO 286-1 formulas and apply across the whole range.
-        c11, k6, n6, p6 and s6 have no simple formula and stay limited to 50 mm and below — see
-        below. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7, h6, h7 and p6 are verified; the
-        other classes show "—" there (not yet checked against a source) instead of a guess.
+        Nominal Ø in mm (decimals allowed), above 0 up to 3150 mm (the full ISO 286 range). H/h,
+        JS/js, G/g, F/f and D/d are computed from the ISO 286-1 formulas and apply across the whole
+        range. c11, k6, n6, p6 and s6 have no simple formula and stay limited to 50 mm and below —
+        see below. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7, h6, h7 and p6 are verified;
+        the other classes show "—" there (not yet checked against a source) instead of a guess.
       </>
     ),
     diameterLabel: "Nominal Ø (mm)",
@@ -124,6 +127,8 @@ const T = {
     clearanceMinMax: "Clearance min … max",
     extendedNote:
       "Above 50 mm: the IT width comes from the ISO 286-1 table (exact), the fundamental deviation of G/F/D and g/f/d from the formula — above Ø400 it can differ by 1 µm from the table value.",
+    disputedP6Note:
+      "Disputed value in this band (>0–≤3 mm): p6 here is derived (not transcribed from a table). Another indexed source reportedly lists es=+12/ei=+6 µm instead of the +16/+10 used here — if that's correct, H7/p6 in this band becomes a transition fit, not a line fit. Verify against a primary ISO 286-2 table before use.",
     copyLine: (d: number, fitId: string, bandLabel: string) =>
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Preferred fits",
@@ -169,8 +174,8 @@ export function FitTolerancesCalc() {
 
   function onDia(v: string) {
     setDiameter(v);
-    const parsed = parseWholeMm(v);
-    if (parsed.status === "ok") storeDiameter(String(parsed.mm));
+    const n = parseNum(v);
+    if (n != null && Number.isInteger(n)) storeDiameter(String(n));
   }
 
   const bandLabel = (band: (typeof BANDS)[number]) => (locale === "nl" ? band.label : band.labelEn);
@@ -178,13 +183,15 @@ export function FitTolerancesCalc() {
   const kindText = (kind: { text: string; textEn: string }) =>
     locale === "nl" ? kind.text : kind.textEn;
 
-  const parsed = parseWholeMm(diameter);
-  const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
-  const result = parsed.status === "ok" ? computeFit(d, fitId) : null;
-  const activeBand = parsed.status === "ok" ? bandIndex(d) : -1;
+  const dRaw = parseNum(diameter);
+  const isEmpty = diameter.trim() === "";
+  const d = dRaw != null && dRaw > 0 ? dRaw : Number.NaN;
+  const result = Number.isFinite(d) ? computeFit(d, fitId) : null;
+  const activeBand = Number.isFinite(d) ? bandIndex(d) : -1;
   const activeBandExtended = activeBand >= 0 && isExtendedBand(activeBand);
   const fitOutOfBandRange =
-    parsed.status === "ok" && activeBand >= 0 && activeBandExtended && !fitExtendable(fitId);
+    Number.isFinite(d) && activeBand >= 0 && activeBandExtended && !fitExtendable(fitId);
+  const disputedP6 = DISPUTED_P6_FIRST_BAND && activeBand === 0 && result?.fit.shaft === "p6";
 
   const copy = useMemo(() => {
     if (!result) return "";
@@ -207,7 +214,7 @@ export function FitTolerancesCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.diameterLabel}>
-            <WholeMmInput id="fit-diameter" value={diameter} onChange={onDia} />
+            <NumInput id="fit-diameter" value={diameter} onChange={onDia} />
           </Field>
           <Field label={t.fitLabel}>
             <SelectInput id="fit-select" value={fitId} onChange={setFitId}>
@@ -221,7 +228,7 @@ export function FitTolerancesCalc() {
           </Field>
         </div>
 
-        {parsed.status === "empty" ? (
+        {isEmpty ? (
           <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
         ) : fitOutOfBandRange ? (
           <p className="mt-5 text-sm text-muted">
@@ -257,6 +264,7 @@ export function FitTolerancesCalc() {
             />
             <p className="mt-4 text-sm leading-relaxed text-muted">{fitUse(result.fit)}</p>
             {activeBandExtended ? <Note>{t.extendedNote}</Note> : null}
+            {disputedP6 ? <Note>{t.disputedP6Note}</Note> : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
               <CopyLink />
@@ -308,7 +316,7 @@ export function FitTolerancesCalc() {
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {FITS.map((f) => {
-            const live = parsed.status === "ok" ? computeFit(d, f.id) : null;
+            const live = Number.isFinite(d) ? computeFit(d, f.id) : null;
             const kind = live?.kind.kind ?? f.kind;
             return (
               <article key={f.id} className="rounded-lg border border-border bg-surface p-4">
@@ -387,7 +395,13 @@ export function FitTolerancesCalc() {
                   <th scope="row">{bandLabel(band)}</th>
                   {SHAFT_FIELDS.map((k) => {
                     const dev = shaftDeviationAt(k, i);
-                    return <td key={k}>{dev ? pairRange(dev.es, dev.ei) : "—"}</td>;
+                    const flagged = DISPUTED_P6_FIRST_BAND && i === 0 && k === "p6";
+                    return (
+                      <td key={k} className={flagged ? "text-danger" : undefined}>
+                        {dev ? pairRange(dev.es, dev.ei) : "—"}
+                        {flagged ? " †" : ""}
+                      </td>
+                    );
                   })}
                 </tr>
               ))}
@@ -398,6 +412,7 @@ export function FitTolerancesCalc() {
           {t.sourceShaft}
         </SourceLink>
         <p className="mt-1 text-xs leading-relaxed text-subtle">{t.sec3Footnote}</p>
+        <p className="mt-1 text-xs leading-relaxed text-danger">† {t.disputedP6Note}</p>
       </section>
     </>
   );

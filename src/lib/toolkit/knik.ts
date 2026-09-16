@@ -80,10 +80,20 @@ export function rp02For(id: string): number {
   return MATERIALS_E.find((m) => m.id === id)?.Rp02 ?? MATERIALS_E[0].Rp02;
 }
 
-/** I (mm⁴) en A (mm²) uit doorsnede-afmetingen (mm). Rechthoek en koker geven I_min (zwakke as). */
+/**
+ * I (mm⁴) en A (mm²) uit doorsnede-afmetingen (mm). Rond/buis/vierkant zijn
+ * as-onafhankelijk (symmetrisch); rechthoek en koker geven per default I_min
+ * (zwakke as) — het juiste, conservatieve gedrag voor een knikcontrole, waar
+ * een staaf altijd om de zwakke as knikt. Een BALK buigt meestal om de
+ * as die de gebruiker daadwerkelijk oplegt (vaak de sterke as, bijv. een
+ * rechtop staande plaat); pass axis="strong" expliciet voor dat geval — zie
+ * beam.ts. Bestaande aanroepen zonder derde argument (alle knik-gebruik)
+ * behouden hun huidige, conservatieve gedrag.
+ */
 export function sectionProps(
   kind: SectionKind,
   dims: { D?: number; d?: number; b?: number; h?: number; a?: number; t?: number },
+  axis: "weak" | "strong" = "weak",
 ): { I: number; A: number } | null {
   switch (kind) {
     case "rond": {
@@ -106,7 +116,7 @@ export function sectionProps(
       if (b == null || h == null || !(b > 0) || !(h > 0)) return null;
       const Ix = (b * h ** 3) / 12;
       const Iy = (h * b ** 3) / 12;
-      return { I: Math.min(Ix, Iy), A: b * h };
+      return { I: axis === "weak" ? Math.min(Ix, Iy) : Math.max(Ix, Iy), A: b * h };
     }
     case "vierkant": {
       const a = dims.a;
@@ -123,17 +133,18 @@ export function sectionProps(
       if (bi <= 0 || hi <= 0) return null;
       const Ix = (b * h ** 3 - bi * hi ** 3) / 12;
       const Iy = (h * b ** 3 - hi * bi ** 3) / 12;
-      return { I: Math.min(Ix, Iy), A: b * h - bi * hi };
+      return { I: axis === "weak" ? Math.min(Ix, Iy) : Math.max(Ix, Iy), A: b * h - bi * hi };
     }
     default:
       return null;
   }
 }
 
-/** Afstand (mm) van de neutrale lijn tot de uiterste vezel, voor dezelfde (zwakke) as als sectionProps' I. */
+/** Afstand (mm) van de neutrale lijn tot de uiterste vezel, voor dezelfde as als sectionProps' I — geef dezelfde `axis` mee als daar. */
 export function extremeFiber(
   kind: SectionKind,
   dims: { D?: number; d?: number; b?: number; h?: number; a?: number; t?: number },
+  axis: "weak" | "strong" = "weak",
 ): number | null {
   switch (kind) {
     case "rond":
@@ -147,7 +158,7 @@ export function extremeFiber(
       const b = dims.b;
       const h = dims.h;
       if (b == null || h == null || !(b > 0) || !(h > 0)) return null;
-      return Math.min(b, h) / 2;
+      return (axis === "weak" ? Math.min(b, h) : Math.max(b, h)) / 2;
     }
     case "vierkant": {
       const a = dims.a;
@@ -215,6 +226,18 @@ export type ColumnCapacity = BucklingResult & {
   squashLoad: number;
   /** Which mechanism sets the reported F_cr. */
   governing: "euler" | "plooien";
+  /**
+   * False whenever `governing` is "plooien": the squash load is an upper
+   * bound this tool can compute from A and Rp0,2, not a verified column
+   * design resistance. A genuine intermediate-column check (Johnson
+   * parabola, Tetmajer, or a national design standard) needs initial
+   * curvature, residual stress, eccentricity and — for thin-walled
+   * sections — local buckling, none of which this model has. Only the
+   * Euler-valid regime (governing: "euler") is this tool's actual result;
+   * the squash regime is "additional column assessment required", not a
+   * pass/fail answer (see E09, 16 sept 2026 engineering review).
+   */
+  verifiedCapacity: boolean;
 };
 
 /**
@@ -232,6 +255,10 @@ export type ColumnCapacity = BucklingResult & {
  * the 4 Sept audit raised as H-6, and shared code is what keeps them equal. A
  * transition curve would be more accurate between the regimes, but it has to
  * land in both tools at once.
+ *
+ * The squash cap is a safe UPPER BOUND, not a certified design resistance —
+ * see verifiedCapacity above. Reporting A·Rp0,2 as if it were a validated
+ * capacity would overstate what this model actually checks.
  */
 export function columnCapacity({
   L,
@@ -256,6 +283,8 @@ export function columnCapacity({
   const belowEulerLimit = raw.lambda < lambdaLim;
   const squashLoad = A * rp02;
   const Fcr = belowEulerLimit ? Math.min(raw.Fcr, squashLoad) : raw.Fcr;
+  const governing: "euler" | "plooien" =
+    Fcr === squashLoad && belowEulerLimit ? "plooien" : "euler";
   return {
     ...raw,
     Fcr,
@@ -264,7 +293,8 @@ export function columnCapacity({
     belowEulerLimit,
     lambdaLim,
     squashLoad,
-    governing: Fcr === squashLoad && belowEulerLimit ? "plooien" : "euler",
+    governing,
+    verifiedCapacity: governing === "euler",
   };
 }
 
@@ -279,7 +309,11 @@ export function fmtDotComma(n: number, digits: number) {
   return n.toFixed(digits).replace(".", ",");
 }
 
-export function copyLine(r: BucklingResult, kLabel: string) {
+export function copyLine(r: BucklingResult | ColumnCapacity, kLabel: string) {
   const safetyPart = r.safety != null ? `, S=${fmtDotComma(r.safety, 2)}` : "";
-  return `F_cr=${fmtN(r.Fcr)} N, σ_cr=${fmtDotComma(r.sigmaCr, 1)} N/mm², λ=${fmtDotComma(r.lambda, 1)} (${kLabel})${safetyPart}`;
+  const screeningPart =
+    "verifiedCapacity" in r && !r.verifiedCapacity
+      ? " — bovengrens (plooien/vloeien), aanvullende kolomcontrole vereist, geen geverifieerde capaciteit"
+      : "";
+  return `F_cr=${fmtN(r.Fcr)} N, σ_cr=${fmtDotComma(r.sigmaCr, 1)} N/mm², λ=${fmtDotComma(r.lambda, 1)} (${kLabel})${safetyPart}${screeningPart}`;
 }
