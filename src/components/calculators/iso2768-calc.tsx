@@ -83,6 +83,12 @@ const T = {
       `Hoek (been ${leg} mm), klasse ${cls}: ${angle}`,
     copyStraight: (len: string, cls: string, dev: string) =>
       `Rechtheid/vlakheid (${len} mm), klasse ${cls}: totale zone ${dev} mm (geen ±)`,
+    copyPerp: (len: string, cls: string, dev: string) =>
+      `Loodrechtheid (${len} mm), klasse ${cls}: totale zone ${dev} mm (geen ±)`,
+    copySym: (len: string, cls: string, dev: string) =>
+      `Symmetrie (${len} mm), klasse ${cls}: totale zone ${dev} mm (geen ±)`,
+    copyRunout: (cls: string, dev: string) =>
+      `Rondloop, klasse ${cls}: totale zone ${dev} mm (geen ±, onafh. van lengte)`,
   },
   en: {
     heading: "Linear and angular dimensions (ISO 2768-1)",
@@ -128,6 +134,12 @@ const T = {
       `Angle (leg ${leg} mm), class ${cls}: ${angle}`,
     copyStraight: (len: string, cls: string, dev: string) =>
       `Straightness/flatness (${len} mm), class ${cls}: total zone ${dev} mm (not ±)`,
+    copyPerp: (len: string, cls: string, dev: string) =>
+      `Perpendicularity (${len} mm), class ${cls}: total zone ${dev} mm (not ±)`,
+    copySym: (len: string, cls: string, dev: string) =>
+      `Symmetry (${len} mm), class ${cls}: total zone ${dev} mm (not ±)`,
+    copyRunout: (cls: string, dev: string) =>
+      `Circular run-out, class ${cls}: total zone ${dev} mm (not ±, length-independent)`,
   },
 };
 
@@ -177,6 +189,9 @@ export function Iso2768Calc() {
     if (angularRow) lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
     if (straightRow)
       lines.push(t.copyStraight(geoLength, geoClass, fmtGeoZone(straightRow[geoClass])));
+    if (perpRow) lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[geoClass])));
+    if (symRow) lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[geoClass])));
+    if (gl != null) lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[geoClass])));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -184,6 +199,10 @@ export function Iso2768Calc() {
     radiusRow,
     angularRow,
     straightRow,
+    perpRow,
+    symRow,
+    gl,
+    geoClass,
     size,
     legLength,
     geoLength,
@@ -231,7 +250,7 @@ export function Iso2768Calc() {
           ]}
         />
         <div className="flex flex-wrap gap-2">
-          <CopyResult text={copy} />
+          {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
         </div>
 
@@ -354,6 +373,12 @@ export function Iso2768Calc() {
             { label: t.runout, value: `${fmtGeoZone(RUNOUT[geoClass])} mm` },
           ]}
         />
+        {copy ? (
+          <div className="flex flex-wrap gap-2">
+            <CopyResult text={copy} />
+            <CopyLink />
+          </div>
+        ) : null}
 
         <div className="table-scroll mt-6">
           <table className="ref-table">

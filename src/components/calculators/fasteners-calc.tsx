@@ -187,7 +187,7 @@ export function FastenersCalc() {
           }
         />
         <div className="flex flex-wrap gap-2">
-          <CopyResult text={copy} />
+          {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
         </div>
       </CalcPanel>
