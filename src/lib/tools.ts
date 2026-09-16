@@ -248,7 +248,7 @@ export const TOOLS: Tool[] = [
     title: { nl: "Richtlijnen kanten", en: "Sheet metal edge guidelines" },
     standard: "Plaatwerk",
     blurb: {
-      nl: "Buigradius, minimale beenlengte, groefwijdte en Z-buiging voor zetwerk.",
+      nl: "Beenlengte en gat tot zetting controleren met de gereedschapstabellen van 247TailorSteel.",
       en: "Bend radius, minimum flange length, die width and Z-bend for sheet metal.",
     },
     tags: [

@@ -877,11 +877,15 @@ export function BendSection({
       <Ext x1={254} y1={190} x2={254} y2={144} />
       <DimH x1={186} x2={254} y={144} label={wl} side="up" />
 
-      {/* s starts where the rounded bend fillet ends (10 units up the 45° leg
-          from the apex — the round line-join's tangent point at this corner
-          angle), not at the sharp-corner apex itself, offset well clear of
-          the leg so the line and label both read easily */}
-      <DimAligned x1={227} y1={217} x2={leg1End.x} y2={leg1End.y} offset={28} label={sl} />
+      {/* Outside flange dimension: virtual outside corner to the cut edge. */}
+      <DimAligned
+        x1={bendX}
+        y1={bendY + halfStroke * Math.SQRT2}
+        x2={leg1End.x + halfStroke * DIAG}
+        y2={leg1End.y + halfStroke * DIAG}
+        offset={28}
+        label={sl}
+      />
 
       {/* plate thickness, directly on the left leg's flat cut edge */}
       <DimAligned x1={tTip1.x} y1={tTip1.y} x2={tTip2.x} y2={tTip2.y} offset={0} label={tl} />

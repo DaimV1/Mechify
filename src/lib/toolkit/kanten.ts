@@ -455,3 +455,51 @@ export function copyLine(row: KantenRow, bend?: { ba: number; bd: number } | nul
 export const RI_T_HAAKS = [0.8, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12] as const;
 export const RI_T_SCHERP = [0.8, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8] as const;
 export const BL_T_SCHERP = [0.63, 0.8, 0.88, 0.9, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8] as const;
+
+/** Full-string decimal parsing; empty/negative/non-finite dimensions are invalid. */
+export function parseBendDimension(raw: string): number | null {
+  const value = raw.trim().replace(",", ".");
+  if (!/^\d+(?:\.\d+)?$/.test(value)) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** 247 drawing uses the outside face / virtual outside corner, not the tangent.
+ * The source text says >5 mm, its drawing says ≥5 mm: conservatively use ≥5.
+ * Small holes inside the zone always require review, even below 10% interruption.
+ */
+export function checkBendHole(s: number | null, diameter: number | null, edge: number | null) {
+  if (
+    s == null ||
+    !Number.isFinite(s) ||
+    s <= 0 ||
+    diameter == null ||
+    !Number.isFinite(diameter) ||
+    diameter <= 0
+  )
+    return null;
+  const minCenter = s + diameter / 2;
+  const status =
+    edge == null || !Number.isFinite(edge) || edge < 0
+      ? "unmeasured"
+      : edge >= s
+        ? "outside"
+        : diameter >= 5
+          ? "too-close"
+          : "review";
+  return { minEdge: s, minCenter, status };
+}
+
+export function bendInterruptionPercent(total: number | null, length: number | null) {
+  if (
+    total == null ||
+    length == null ||
+    !Number.isFinite(total) ||
+    !Number.isFinite(length) ||
+    total < 0 ||
+    length <= 0 ||
+    total > length
+  )
+    return null;
+  return (100 * total) / length;
+}

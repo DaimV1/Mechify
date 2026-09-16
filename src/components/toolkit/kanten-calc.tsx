@@ -1,3 +1,4 @@
+import { BendClearance } from "./bend-clearance";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearch } from "@/lib/reference-router";
 import {
@@ -7,13 +8,12 @@ import {
   KANTEN_SOURCE,
   KINDS,
   MATERIALS,
-  RI_T_HAAKS,
-  RI_T_SCHERP,
   THICKNESSES,
   copyLine,
   dashMm,
   isRiNonMonotone,
   lookupKanten,
+  parseBendDimension,
   type Kind,
   type Material,
 } from "@/lib/toolkit/kanten";
@@ -32,10 +32,8 @@ import {
 import { BendSection, SchemaPanel } from "./schema";
 
 function parseK(raw: string): number | null {
-  const t = raw.trim().replace(",", ".");
-  if (t === "") return null;
-  const n = Number.parseFloat(t);
-  return Number.isFinite(n) && n > 0 ? n : null;
+  const n = parseBendDimension(raw);
+  return n != null && n > 0 && n <= 0.5 ? n : null;
 }
 
 export function KantenCalc() {
@@ -43,7 +41,7 @@ export function KantenCalc() {
   const search = useSearch({ from: "/toolkit/kanten" });
   const navigate = useNavigate({ from: "/toolkit/kanten" });
   const [tRaw, setTRaw] = useState(search.t ?? "2");
-  const [material, setMaterial] = useState<Material>((search.material as Material) ?? "rvs");
+  const [material, setMaterial] = useState<Material>((search.material as Material) ?? "staal");
   const [kind, setKind] = useState<Kind>((search.kind as Kind) ?? "haaks");
   const [kRaw, setKRaw] = useState(search.k ?? String(DEFAULT_K_FACTOR).replace(".", ","));
 
@@ -76,13 +74,24 @@ export function KantenCalc() {
       <CalcPanel>
         <CalcEyebrow />
         <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
-          {tx(locale, "Kantlijn", "Bend line")}
+          {tx(
+            locale,
+            "Gereedschapsrichtlijnen · 247TailorSteel",
+            "Tooling guidelines · 247TailorSteel",
+          )}
         </h2>
         <Note>
           {tx(
             locale,
-            "Shop-spec van 247TailorSteel Sophia, geen ISO of DIN. Discrete diktes; een lege cel is geen buurrij. Changelog bron: 11-03-2026.",
-            "Shop spec from 247TailorSteel Sophia, not ISO or DIN. Discrete thicknesses; an empty cell is not a neighboring row. Changelog source: 11-03-2026.",
+            "Shop-spec van 247TailorSteel Sophia, geen ISO of DIN. Discrete diktes; een lege cel is geen buurrij. Bron gecontroleerd: 16-09-2026.",
+            "Shop spec from 247TailorSteel Sophia, not ISO or DIN. Discrete thicknesses; an empty cell is not a neighboring row. Source checked: 2026-09-16.",
+          )}
+        </Note>
+        <Note>
+          {tx(
+            locale,
+            "Bevat het product een scherpe buiging? Gebruik dan voor alle zettingen de scherpe tabellen. Een tabelrij bevestigt niet dat elke legering/toestand in die dikte leverbaar of buigbaar is.",
+            "If the part contains a sharp bend, use the sharp tables for every bend. A table row does not confirm availability or bendability of every alloy/temper at that thickness.",
           )}
         </Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -155,21 +164,21 @@ export function KantenCalc() {
                 ].filter(Boolean) as { label: string; value: string }[]
               }
             />
+            {kind === "haaks" && kFactor == null ? (
+              <Note>
+                {tx(
+                  locale,
+                  "Vul een K-factor in groter dan 0 en maximaal 0,5.",
+                  "Enter a K-factor greater than 0 and at most 0.5.",
+                )}
+              </Note>
+            ) : null}
             {bendMath ? (
               <Note>
                 {tx(
                   locale,
                   "Alleen voor haaks (90°) — scherp heeft geen vaste hoek. Platte lengte = som beenlengtes tot de buigraaklijn + bend allowance, of som buitenmaten (OML) − bend deduction. K-factor is een richtwaarde (0,3–0,5, afhankelijk van materiaal en Ri/t) — pas aan of meet na op je eigen machine/materiaal.",
                   "Right angle (90°) only — sharp has no fixed angle. Flat length = sum of leg lengths to the bend tangent + bend allowance, or sum of outside dimensions (OML) − bend deduction. K-factor is indicative (0.3–0.5, depending on material and Ri/t) — adjust or verify on your own machine/material.",
-                )}
-              </Note>
-            ) : null}
-            {row.ri != null ? (
-              <Note>
-                {tx(
-                  locale,
-                  `Gat/inkeping bij een kant: richtwaarde minimaal ca. ${(2.5 * t).toFixed(1).replace(".", ",")}–${(3 * t).toFixed(1).replace(".", ",")} mm (2,5–3 × t) vanaf de buigraaklijn, anders vervormt het gat mee. Niet als harde regel van de fabrikant te lezen — vraag na bij 247.`,
-                  `Hole/notch near a bend: rule-of-thumb minimum ca. ${(2.5 * t).toFixed(1)}–${(3 * t).toFixed(1)} mm (2.5–3 × t) from the bend tangent, otherwise the hole distorts with the bend. Not a hard rule from the manufacturer — check with 247.`,
                 )}
               </Note>
             ) : null}
@@ -207,6 +216,8 @@ export function KantenCalc() {
         )}
       </CalcPanel>
 
+      <BendClearance row={row} />
+
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
           {tx(locale, "Naslagtabel", "Reference table")} —{" "}
@@ -227,11 +238,11 @@ export function KantenCalc() {
                 <th>Ri</th>
                 <th>s</th>
                 <th>w</th>
-                <th>{kind === "haaks" ? "x" : "—"}</th>
+                <th>x</th>
               </tr>
             </thead>
             <tbody>
-              {(kind === "haaks" ? RI_T_HAAKS : RI_T_SCHERP).map((rt) => {
+              {THICKNESSES.map((rt) => {
                 const r = lookupKanten(rt, material, kind);
                 return (
                   <tr key={rt} className={rt === t ? "is-active" : ""}>
@@ -242,7 +253,7 @@ export function KantenCalc() {
                     </td>
                     <td>{dashMm(r?.s ?? null)}</td>
                     <td>{dashMm(r?.w ?? null)}</td>
-                    <td>{kind === "haaks" ? dashMm(r?.x ?? null) : "—"}</td>
+                    <td>{dashMm(r?.x ?? null)}</td>
                   </tr>
                 );
               })}
@@ -272,8 +283,12 @@ export function KantenCalc() {
         <SchemaPanel
           caption={tx(
             locale,
-            kind === "haaks" ? "Dwarsdoorsnede · haaks (90°)" : "Dwarsdoorsnede · scherp",
-            kind === "haaks" ? "Cross-section · right angle (90°)" : "Cross-section · sharp",
+            kind === "haaks"
+              ? "Dwarsdoorsnede · haaks (90°)"
+              : "Referentie 90° · waarden uit scherpe tabel",
+            kind === "haaks"
+              ? "Cross-section · right angle (90°)"
+              : "90° reference · values from sharp table",
           )}
         >
           <BendSection
@@ -302,8 +317,8 @@ export function KantenCalc() {
         </a>
         {tx(
           locale,
-          ". Shop-spec Sophia, geen ISO/DIN. Geen commerciële band; altijd hun pagina nalopen (changelog 11-03-2026). Botsingcontrole, damwandfoto’s en de A–F-tolerantiegrid staan daar, niet hier.",
-          ". Shop spec Sophia, not ISO/DIN. No commercial affiliation; always check their page (changelog 11-03-2026). Collision checks, tooling photos and the A–F tolerance grid live there, not here.",
+          ". Shop-spec Sophia, geen ISO/DIN. Geen commerciële band; altijd hun pagina nalopen (gecontroleerd 16-09-2026). Botsingcontrole, damwandfoto’s en de A–F-tolerantiegrid staan daar, niet hier.",
+          ". Shop spec Sophia, not ISO/DIN. No commercial affiliation; always check their page (gecontroleerd 16-09-2026). Collision checks, tooling photos and the A–F tolerance grid live there, not here.",
         )}
       </p>
     </>
