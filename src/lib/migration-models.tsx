@@ -29,12 +29,6 @@ export const EXTRA_MODELS: Record<
     note: "Selectie op duwen of trekken, met lastfactor en slagvolume. De oorspronkelijke selectie zonder marge blijft beschikbaar.",
     component: module(() => import("@/components/toolkit/cylinder-calc"), "CylinderCalc"),
   },
-  "beam-deflection": {
-    label: "Maximale doorbuiging & spanning",
-    original: "Doorbuiging & moment",
-    note: "Toont ook de positie van maximale doorbuiging. Bij een excentrische puntlast ligt het maximum niet noodzakelijk onder de last.",
-    component: module(() => import("@/components/toolkit/deflection-calc"), "DeflectionCalc"),
-  },
   units: {
     label: "Tweerichtingsconversie",
     original: "Directe conversie",
