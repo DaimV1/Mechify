@@ -36,6 +36,8 @@ export type CirclipResult = {
   /** ISO 286 tolerance class of the groove diameter: h11 for a shaft groove, H11 for a bore groove. */
   grooveDiameterClass: string;
   grooveWidth: number;
+  /** Groove width tolerance class from the workshop table (fixed, not size-dependent). */
+  grooveWidthClass: string;
   grooveDepth: number;
   /** Groove depth tolerance, 0 / +grooveDepthPlus mm (ISO 286 IT11/2 on the groove diameter) — deeper is allowed, shallower is not. */
   grooveDepthPlus: number;
@@ -76,6 +78,7 @@ export function computeGroove(kind: CirclipKind, d: number): CirclipResult | nul
     grooveDiameter: seeger.d2,
     grooveDiameterClass: seeger.d2Class,
     grooveWidth: seeger.b,
+    grooveWidthClass: seeger.bClass,
     grooveDepth: seeger.t,
     grooveDepthPlus: seeger.tPlus,
     verified: seeger.verified,

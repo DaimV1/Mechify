@@ -47,14 +47,17 @@ describe("Circlip groove (active default tool)", () => {
     assert.equal(r.verified, true);
   });
 
-  // Tolerance info (h11/H11 groove class, depth tolerance) is always part of
-  // the default result now — there is no separate "without tolerances" model.
-  it("always reports the groove diameter tolerance class and depth tolerance", () => {
+  // Tolerance info (h11/H11 groove class, groove width class, depth
+  // tolerance) is always part of the default result now — there is no
+  // separate "without tolerances" model.
+  it("always reports the groove diameter/width tolerance classes and depth tolerance", () => {
     const shaft = computeGroove("as", 20);
     const bore = computeGroove("boring", 20);
     assert.ok(shaft && bore);
     assert.equal(shaft.grooveDiameterClass, "h11");
     assert.equal(bore.grooveDiameterClass, "H11");
+    assert.equal(shaft.grooveWidthClass, "H13");
+    assert.equal(bore.grooveWidthClass, "H13");
     assert.ok(shaft.grooveDepthPlus > 0);
     assert.ok(bore.grooveDepthPlus > 0);
   });

@@ -105,6 +105,9 @@ export function depthPlus(d2: number) {
   return Math.round((it11(d2) / 2) * 1000) / 1000;
 }
 
+/** Groove width tolerance class from the workshop table — fixed, not derived from d2 like d2Class/tPlus. */
+export const GROOVE_WIDTH_CLASS = "H13";
+
 export function seegerFor(row: SeegerRow, kind: SeegerKind) {
   const d2 = kind === "as" ? row.d2as : row.d2bor;
   if (d2 == null) return null;
@@ -112,6 +115,7 @@ export function seegerFor(row: SeegerRow, kind: SeegerKind) {
   return {
     d2,
     b: kind === "as" ? row.bAs : row.bBor,
+    bClass: GROOVE_WIDTH_CLASS,
     t,
     d2Class: kind === "as" ? "h11" : "H11",
     tPlus: depthPlus(d2),
