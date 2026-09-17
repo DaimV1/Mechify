@@ -4,7 +4,7 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import fs from "node:fs";
-import { TOOLS, toolHref } from "./src/lib/tools.ts";
+import { SECTIONS, TOOLS, toolHref } from "./src/lib/tools.ts";
 import { getAllRoutes } from "./src/lib/all-routes.ts";
 import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,8 +69,58 @@ function sitemapPlugin() {
 
       fs.writeFileSync(path.resolve(__dirname, "dist/sitemap.xml"), sitemap);
       fs.writeFileSync(path.resolve(__dirname, "dist/robots.txt"), robots);
+      fs.writeFileSync(path.resolve(__dirname, "dist/llms.txt"), buildLlmsTxt());
     },
   };
+}
+
+/**
+ * AI-001 (audit, 17 sept 2026): /llms.txt used to resolve to the SPA shell
+ * (content-type text/html, via the same catch-all rewrite removed for
+ * P1.2) — a crawler requesting the conventional LLM information path got
+ * the homepage. Generated from the same tool/article/section data the app
+ * renders, so it can't drift, following the emerging llms.txt convention
+ * (a short H1 + blockquote summary, then link sections).
+ */
+function buildLlmsTxt() {
+  const lines = [
+    "# Mechify",
+    "",
+    "> Engineering reference tools, calculators and articles for mechanical/machine-building engineers: fits and tolerances, sheet-metal bending, beams, fasteners, bearings, pneumatics and drive components.",
+    "",
+    `Canonical site: ${SITE_URL}/`,
+    "",
+    "## Source policy",
+    "",
+    "Mechify distinguishes standards tables, manufacturer/vendor data, physics-based calculations and practical design estimates. Standard and table data shows only recorded values — missing tabulated values are never silently interpolated. Estimate/heuristic models are explicitly labelled as indicative, with their assumptions and applicability limits shown alongside the result. See /about for the full source policy.",
+    "",
+  ];
+
+  for (const section of SECTIONS) {
+    lines.push(`## ${section.label.en}`, "");
+    const sectionTools = TOOLS.filter((t) => t.section === section.id && t.status === "live");
+    for (const tool of sectionTools) {
+      lines.push(`- [${tool.title.en}](${SITE_URL}${toolHref(tool)}): ${tool.blurb.en}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("## Engineering articles", "");
+  for (const article of articles) {
+    lines.push(`- [${article.title}](${SITE_URL}/topics/${article.slug}): ${article.intro}`);
+  }
+  lines.push("");
+
+  lines.push(
+    "## About",
+    "",
+    `- About Mechify: ${SITE_URL}/about`,
+    `- Sitemap: ${SITE_URL}/sitemap.xml`,
+    "- Contact: hello@mechify.nl",
+    "",
+  );
+
+  return lines.join("\n");
 }
 
 export default defineConfig({
