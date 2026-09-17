@@ -18,12 +18,15 @@ export const LOAD_KINDS: { id: LoadKind; label: string; labelEn: string }[] = [
 /**
  * E11 (16 sept 2026 review): this used to report only the deflection AT the
  * load, unlabelled as such, with no way to see the actual maximum. For an
- * off-centre point load the two differ — F=1000 N, L=1000 mm, a=200 mm,
- * E=210000 N/mm², I=1e6 mm⁴ gives 0.040635 mm at the load but 0.057466 mm
- * at x=434.315 mm, the real governing value for a stiffness check. Both are
- * now always returned; for a centred load or a cantilever the two coincide
- * (cantilever's maximum is always at the tip, by inspection of the moment
- * diagram) and xMax equals a or L respectively.
+ * off-centre simply-supported point load the two differ — F=1000 N,
+ * L=1000 mm, a=200 mm, E=210000 N/mm², I=1e6 mm⁴ gives 0.040635 mm at the
+ * load but 0.057466 mm at x=434.315 mm, the real governing value for a
+ * stiffness check. Both are now always returned.
+ *
+ * BEAM-001 (audit, 17 sept 2026): a cantilever's maximum deflection is
+ * always at the tip (xMax = L), but the deflection AT an off-tip load is a
+ * distinct, smaller value — the two coincide only when a = L (load at the
+ * tip). See cantileverPoint()'s own doc comment for the worked example.
  *
  * STRUCT-001: also always returns the support reactions. For a UDL there is
  * no single "load point", so deflectionAtLoad is set equal to deflectionMax
@@ -67,20 +70,31 @@ function simplySupportedPoint(F: number, L: number, a: number, E: number, I: num
 }
 
 /**
- * Uitkraging, ingeklemd bij x=0, puntlast F op afstand a van de inklemming
- * (0 < a ≤ L): doorbuiging bij de tip (x=L) δ = F·a²·(3L - a) / (6·E·I),
- * moment bij de inklemming M = F·a (maximaal, daar treedt bezwijking het
- * eerst op). Reactie bij de inklemming R_A = F, vrije uiteinde R_B = 0. Bij
- * a = L (last op de tip) reduceert dit tot de bekende F·L³ / (3·E·I). Bij
- * een uitkraging ligt de maximale doorbuiging altijd bij de tip, ook als de
- * last verderop naar de inklemming toe aangrijpt.
+ * BEAM-001 (audit, 17 sept 2026): for an off-tip point load, the deflection
+ * AT the load and the deflection at the free tip are two different
+ * quantities — a cantilever fixed at x=0 with a point load F at distance a
+ * from the fixed end (0 < a ≤ L) deflects, at the load point itself, exactly
+ * like a shorter cantilever of length a loaded at its own tip:
+ * δ(a) = F·a³ / (3·E·I). The segment beyond the load (a < x ≤ L) carries no
+ * further bending moment and stays straight at the slope reached at x=a, so
+ * the free-tip deflection is larger: δ(L) = F·a²·(3L - a) / (6·E·I) — the
+ * classic tip-deflection formula, but it is NOT the deflection at the load
+ * unless a = L. The previous implementation returned the tip formula for
+ * both quantities, silently overstating "deflection at the load" for any
+ * off-tip case (F=500 N, L=800 mm, a=300 mm, E=210000, I=5e5: at-load
+ * 0.04286 mm vs the tip's 0.15000 mm — 3.5x apart). Moment at the fixed end
+ * M = F·a is unaffected (it only depends on the load and its lever arm, not
+ * on where deflection is evaluated). Reaction at the fixed end R_A = F,
+ * free end R_B = 0. Standard sterkteleer (Roark/Shigley); geldig voor
+ * 0 < a ≤ L. Bij a = L vallen δ(a) en δ(L) samen (F·L³ / (3·E·I)).
  */
 function cantileverPoint(F: number, L: number, a: number, E: number, I: number): BeamResult | null {
   if (!(a > 0) || !(a <= L)) return null;
+  const deflectionAtLoad = (F * a ** 3) / (3 * E * I);
   const deflectionAtTip = (F * a ** 2 * (3 * L - a)) / (6 * E * I);
   const momentMax = F * a;
   return {
-    deflectionAtLoad: deflectionAtTip,
+    deflectionAtLoad,
     deflectionMax: deflectionAtTip,
     xMax: L,
     momentMax,

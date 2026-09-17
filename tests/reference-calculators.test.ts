@@ -288,10 +288,37 @@ describe("Beam deflection: at-load vs true maximum", () => {
     close(r.xMax, 500, 1e-9);
   });
 
-  it("a cantilever's maximum is always at the tip", () => {
+  it("BEAM-001 (audit worked example): F=500N, L=800mm, a=300mm, E=210000, I=5e5 — at-load 0.04286mm, tip max 0.15000mm, NOT equal", () => {
     const r = computeBeam({ type: "uitkraging", F: 500, L: 800, a: 300, E: 210000, I: 5e5 });
     assert.ok(r);
-    close(r.deflectionAtLoad, r.deflectionMax, 1e-9);
+    close(r.deflectionAtLoad, 0.042857, 1e-5);
+    close(r.deflectionMax, 0.15, 1e-5);
+    assert.equal(r.xMax, 800);
+    assert.ok(r.deflectionMax > r.deflectionAtLoad);
+  });
+
+  it("BEAM-001: independent check at a/L = 0.25, 0.50, 0.75, 1.00 — deflectionAtLoad = F*a^3/3EI, deflectionMax = F*a^2*(3L-a)/6EI", () => {
+    const F = 500;
+    const L = 800;
+    const E = 210000;
+    const I = 5e5;
+    for (const ratio of [0.25, 0.5, 0.75, 1.0]) {
+      const a = L * ratio;
+      const r = computeBeam({ type: "uitkraging", F, L, a, E, I });
+      assert.ok(r, `a/L=${ratio}`);
+      close(r.deflectionAtLoad, (F * a ** 3) / (3 * E * I), 1e-9);
+      close(r.deflectionMax, (F * a ** 2 * (3 * L - a)) / (6 * E * I), 1e-9);
+      if (ratio < 1.0) {
+        assert.ok(r.deflectionMax > r.deflectionAtLoad, `a/L=${ratio} should have max > at-load`);
+      } else {
+        close(r.deflectionAtLoad, r.deflectionMax, 1e-9);
+      }
+    }
+  });
+
+  it("a cantilever's maximum deflection is always at the tip, regardless of load position", () => {
+    const r = computeBeam({ type: "uitkraging", F: 500, L: 800, a: 300, E: 210000, I: 5e5 });
+    assert.ok(r);
     assert.equal(r.xMax, 800);
   });
 

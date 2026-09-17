@@ -89,7 +89,7 @@ const T = {
     reactionFixed: "Reactie bij inklemming",
     reactionFree: "Reactie bij vrij uiteinde",
     sameNote:
-      "Gecentreerde last of uitkraging: δ(a) en δ_max vallen hier samen (het maximum ligt bij de last resp. bij de tip).",
+      "Deze last staat op de plaats van de maximale doorbuiging (gecentreerd bij vrij opgelegd, of op de tip bij uitkraging), dus δ(a) en δ_max vallen hier samen.",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
       `σ_max = ${sigma} N/mm² ≥ Rp0,2 ≈ ${rp02} N/mm² (${material}, richtwaarde) — deze last geeft blijvende vervorming; de doorbuiging hierboven is dan niet meer geldig.`,
     allowableFailNote: (max: string, allow: string) =>
@@ -147,7 +147,7 @@ const T = {
     reactionFixed: "Reaction at the fixed support",
     reactionFree: "Reaction at the free end",
     sameNote:
-      "Centred load or cantilever: δ(a) and δ_max coincide here (the maximum is at the load, or at the tip).",
+      "This load sits at the location of maximum deflection (centred for simply supported, or at the tip for a cantilever), so δ(a) and δ_max coincide here.",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
       `σ_max = ${sigma} N/mm² ≥ Rp0.2 ≈ ${rp02} N/mm² (${material}, indicative) — this load causes permanent deformation; the deflection above no longer applies.`,
     allowableFailNote: (max: string, allow: string) =>
