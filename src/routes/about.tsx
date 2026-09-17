@@ -45,7 +45,7 @@ const T = {
     title: "About Mechify",
     p1: (
       <>
-        Mechify is a collection of engineering tools for mechanical engineers, constructors and
+        Mechify is a collection of engineering tools for mechanical engineers, machine builders and
         designers: calculators for fits, tolerances, connections and strength, plus the standard
         tables that go with them. The idea is simple — make the calculations you'd do by hand or in
         a spreadsheet anyway directly available, with the standard never far away.

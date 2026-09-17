@@ -324,7 +324,7 @@ export function KantenCalc() {
         {tx(
           locale,
           ". Shop-spec Sophia, geen ISO/DIN. Geen commerciële band; altijd hun pagina nalopen (gecontroleerd 16-09-2026). Botsingcontrole, damwandfoto’s en de A–F-tolerantiegrid staan daar, niet hier.",
-          ". Shop spec Sophia, not ISO/DIN. No commercial affiliation; always check their page (gecontroleerd 16-09-2026). Collision checks, tooling photos and the A–F tolerance grid live there, not here.",
+          ". Shop spec Sophia, not ISO/DIN. No commercial affiliation; always check their page (checked 16-09-2026). Collision checks, tooling photos and the A–F tolerance grid live there, not here.",
         )}
       </p>
     </>

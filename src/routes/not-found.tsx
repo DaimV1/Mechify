@@ -7,7 +7,7 @@ const T = {
   nl: {
     title: "Pagina niet gevonden",
     description: "Deze pagina bestaat niet op Mechify.",
-    body: "Deze pagina bestaat niet (meer). Ga terug naar de tools-overzicht om verder te zoeken.",
+    body: "Deze pagina bestaat niet (meer). Ga terug naar het tooloverzicht om verder te zoeken.",
     cta: "Naar alle tools",
   },
   en: {

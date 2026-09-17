@@ -40,8 +40,8 @@ const BOLTED_JOINT_META: EngineeringSourceMeta = {
     en: "Concentric, static axial load only — no eccentric/bending load, no transverse load, no fatigue",
   },
   assumptions: {
-    nl: "Alleen de twee klassieke VDI 2230-grensgevallen: restklemkracht onder volle bedrijfslast en maximale boutkracht onder volle bedrijfslast. De belastingsfactor Φ, settingverlies F_Z en de vereiste restklemkracht zijn eigen invoer (uit tabel of meting) — dit is geen volledige verbindingsdimensionering.",
-    en: "Only the two classic VDI 2230 boundary cases: residual clamp load under full working load and maximum bolt force under full working load. The load factor Φ, embedding loss F_Z and the required residual clamp load are your own input (from a table or measurement) — this is not a full joint dimensioning.",
+    nl: "Alleen de twee klassieke VDI 2230-grensgevallen: restklemkracht onder volle bedrijfslast en maximale boutkracht onder volle bedrijfslast. De belastingsfactor Φ, settingverlies F_Z en de vereiste restklemkracht zijn eigen invoer (uit tabel of meting) — dit is geen volledige verbindingsdimensionering. De caution-drempels (10% marge op F_Kerf, S_F tussen 1,0-1,2) zijn Mechify-screeningscriteria, geen letterlijke VDI 2230-tabelwaarden — VDI 2230 schrijft zelf geen vaste veiligheidsfactor voor.",
+    en: "Only the two classic VDI 2230 boundary cases: residual clamp load under full working load and maximum bolt force under full working load. The load factor Φ, embedding loss F_Z and the required residual clamp load are your own input (from a table or measurement) — this is not a full joint dimensioning. The caution thresholds (10% margin on F_Kerf, S_F between 1.0-1.2) are Mechify screening criteria, not literal VDI 2230 table values — VDI 2230 itself does not mandate one fixed safety factor.",
   },
   verification: {
     nl: "Voor een kritieke of excentrisch/dynamisch belaste verbinding: gebruik een volledige VDI 2230-berekening (settingtabel, torsie tijdens aandraaien, vermoeiingscontrole).",

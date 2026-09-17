@@ -91,7 +91,7 @@ export const COMMON: Record<Locale, CommonStrings> = {
     closeMenu: "Close menu",
     breadcrumbNav: "Breadcrumb",
     footerTagline:
-      "Practical engineering tools, calculators and standard tables for mechanical engineers, designers and constructors. Built to work accurately and fast on the shop floor.",
+      "Practical engineering tools, calculators and standard tables for mechanical engineers, designers and machine builders. Built to work accurately and fast on the shop floor.",
     footerPlatform: "Platform",
     footerTablesNorms: "Tables & standards",
     footerMaterials: "Materials",

@@ -34,7 +34,7 @@ export function Home() {
           </div>
           <div className="hero-note">
             <span className="status-dot" />
-            Gebouwd voor de praktijk. Direct bruikbaar.
+            Gebouwd voor de praktijk. Direct bruikbaar als reken- en ontwerphulp.
           </div>
         </div>
         <AssemblyHero />

@@ -57,7 +57,13 @@ export function computeBoltedJoint(input: BoltedJointInput): BoltedJointResult {
 
 export type JointStatus = "fail" | "caution" | "ok";
 
-/** Clamp check: the joint must stay closed under the full working load. */
+/**
+ * Clamp check: the joint must stay closed under the full working load. The
+ * 10% caution margin is a Mechify screening threshold, not a VDI 2230 table
+ * value — VDI 2230 doesn't publish one fixed number here (the required
+ * minimum residual clamp load F_Kerf itself, which the user supplies, is
+ * where the real margin decision belongs).
+ */
 export function clampStatus(fKR: number, fKreq: number): JointStatus {
   if (fKR < fKreq) return "fail";
   if (fKR < fKreq * 1.1) return "caution";
@@ -65,10 +71,12 @@ export function clampStatus(fKR: number, fKreq: number): JointStatus {
 }
 
 /**
- * Static bolt safety, VDI 2230-style bands: below 1.0 the bolt yields under
- * the assumed working load; 1.0-1.2 is the commonly used minimum design
- * target (S_F >= 1.0-1.2 depending on load-determination accuracy); above
- * that is comfortable margin.
+ * Static bolt safety bands: below 1.0 the bolt yields under the assumed
+ * working load, so that boundary is a direct physical fact. The 1.0-1.2
+ * "caution" band is a Mechify screening threshold reflecting the commonly
+ * cited practice of targeting S_F >= 1.0-1.2 depending on how accurately
+ * the working load is known — it is not a specific VDI 2230 clause value;
+ * VDI 2230 itself does not mandate one fixed safety factor.
  */
 export function boltSafetyStatus(sf: number): JointStatus {
   if (sf < 1.0) return "fail";
