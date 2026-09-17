@@ -434,6 +434,21 @@ export function pairRange(es: number, ei: number) {
   return `${mmFromUm(es)} / ${mmFromUm(ei)}`;
 }
 
+/**
+ * UX-001 (audit, 17 sept 2026): a deviation pair (+0/+21 µm) is correct but
+ * makes the operator do the arithmetic that turns it into the two absolute
+ * dimensions actually cut on the shaft/bore — "Ø20 H7" as a nominal Ø plus
+ * a deviation range is one interpretation step further from the drawing
+ * than "20.000 / 20.021 mm" is.
+ */
+export function absoluteLimits(d: number, upperUm: number, lowerUm: number) {
+  return { min: d + Math.min(upperUm, lowerUm) / 1000, max: d + Math.max(upperUm, lowerUm) / 1000 };
+}
+
+export function fmtAbsolute(n: number) {
+  return n.toLocaleString("nl-NL", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+}
+
 export function clearanceRange(minC: number, maxC: number) {
   return `${mmFromUm(minC)} … ${mmFromUm(maxC)}`;
 }

@@ -1,6 +1,6 @@
 import { BeamDeflection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   BEAM_TYPES,
   bendingStress,
@@ -90,6 +90,7 @@ const T = {
     guidelinesTitle: "Richtwaarden toelaatbare doorbuiging",
     guidelinesNote:
       "Generieke vuistregels — controleer de toepasselijke norm voor de specifieke toepassing. Vul hierboven desgewenst een eigen, projectspecifieke toelaatbare doorbuiging in.",
+    chainToBuckling: "Controleer deze doorsnede/materiaal op knik →",
     thRatio: "Verhouding",
     thUse: "Typische toepassing",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -137,6 +138,7 @@ const T = {
     guidelinesTitle: "Allowable deflection guidelines",
     guidelinesNote:
       "Generic rules of thumb — check the applicable standard for the specific application. Enter your own project-specific allowable deflection above if you have one.",
+    chainToBuckling: "Check this section/material for buckling →",
     thRatio: "Ratio",
     thUse: "Typical use",
     source: "Engineering ToolBox — Beam deflection and stress",
@@ -423,6 +425,14 @@ export function BeamDeflectionCalc() {
               <CopyResult text={copy} />
               <CopyLink />
             </div>
+            <p className="mt-3 text-sm">
+              <Link
+                to={`/calculators/buckling?section=${sectionKind}&D=${D}&dIn=${dIn}&b=${b}&h=${h}&a=${a}&t=${t2}&material=${materialId}`}
+                className="text-accent hover:underline"
+              >
+                {t.chainToBuckling}
+              </Link>
+            </p>
           </>
         )}
       </CalcPanel>

@@ -239,6 +239,58 @@ export function SourceBadge({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * UX-001 (audit, 17 sept 2026): a CAD-ready result the operator can paste
+ * straight into a drawing note or task, one click away from the deviation
+ * table above it — "Ø20 H7" plus its absolute limits, not just the raw
+ * deviation range the rest of the panel already shows.
+ */
+export function CadCallout({
+  designation,
+  limits,
+  copyText,
+}: {
+  designation: string;
+  limits?: string;
+  copyText: string;
+}) {
+  const { locale } = useLocale();
+  const [done, setDone] = useState(false);
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-accent/40 bg-bg px-4 py-3">
+      <div>
+        <p className="font-mono text-lg font-semibold tabular-nums text-ink">{designation}</p>
+        {limits ? (
+          <p className="mt-0.5 font-mono text-sm tabular-nums text-muted">{limits}</p>
+        ) : null}
+      </div>
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(copyText);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            /* ignore */
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {done
+          ? locale === "nl"
+            ? "Gekopieerd"
+            : "Copied"
+          : locale === "nl"
+            ? "Kopieer maataanduiding"
+            : "Copy callout"}
+      </Button>
+    </div>
+  );
+}
+
 export function SourceLink({ href, children }: { href: string; children: ReactNode }) {
   const { locale } = useLocale();
   return (

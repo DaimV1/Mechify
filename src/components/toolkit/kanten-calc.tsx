@@ -19,6 +19,7 @@ import {
 } from "@/lib/toolkit/kanten";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import {
+  CadCallout,
   CalcEyebrow,
   CalcPanel,
   CopyLink,
@@ -163,6 +164,11 @@ export function KantenCalc() {
                     : null,
                 ].filter(Boolean) as { label: string; value: string }[]
               }
+            />
+            <CadCallout
+              designation={`t${dashMm(t)} ${tx(locale, materialLabel, materialLabelEn)} · ${tx(locale, kindLabel, kindLabelEn)}`}
+              limits={`Ri ${dashMm(row.ri)} · s ${dashMm(row.s)} · w ${dashMm(row.w)} · x ${dashMm(row.x)} mm`}
+              copyText={`t${dashMm(t)} mm, ${tx(locale, materialLabel, materialLabelEn)}, ${tx(locale, kindLabel, kindLabelEn)} — Ri ${dashMm(row.ri)} mm, s ${dashMm(row.s)} mm, w ${dashMm(row.w)} mm, x ${dashMm(row.x)} mm (${KANTEN_SOURCE})`}
             />
             {kind === "haaks" && kFactor == null ? (
               <Note>

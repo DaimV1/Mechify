@@ -15,7 +15,9 @@ import {
 } from "@/lib/calculators/bearing-fits";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
+import { absoluteLimits, fmtAbsolute } from "@/lib/calculators/iso286";
 import {
+  CadCallout,
   CalcEyebrow,
   CalcPanel,
   CopyLink,
@@ -81,11 +83,13 @@ const T = {
       shaftRange: string,
       housingClass: string,
       housingRange: string,
+      shaftAbs: string,
+      housingAbs: string,
     ) =>
       [
         `As Ø${d} mm, lager-buitendiameter D=${housingD} mm, ${load} belasting, ${side} zijde`,
-        `As: ${shaftClass} → ${shaftRange} mm`,
-        `Behuizing (D=${housingD} mm): ${housingClass} → ${housingRange} mm`,
+        `As: ${shaftClass} → ${shaftRange} mm (absoluut: ${shaftAbs} mm)`,
+        `Behuizing (D=${housingD} mm): ${housingClass} → ${housingRange} mm (absoluut: ${housingAbs} mm)`,
       ].join("\n"),
   },
   en: {
@@ -122,11 +126,13 @@ const T = {
       shaftRange: string,
       housingClass: string,
       housingRange: string,
+      shaftAbs: string,
+      housingAbs: string,
     ) =>
       [
         `Shaft Ø${d} mm, bearing outside diameter D=${housingD} mm, ${load} load, ${side} side`,
-        `Shaft: ${shaftClass} → ${shaftRange} mm`,
-        `Housing (D=${housingD} mm): ${housingClass} → ${housingRange} mm`,
+        `Shaft: ${shaftClass} → ${shaftRange} mm (absolute: ${shaftAbs} mm)`,
+        `Housing (D=${housingD} mm): ${housingClass} → ${housingRange} mm (absolute: ${housingAbs} mm)`,
       ].join("\n"),
   },
 };
@@ -169,13 +175,15 @@ export function BearingFitsCalc() {
   const housingClass = housingClassFor(load, side);
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
   const housingFit = Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
+  const shaftLimits = shaftFit ? absoluteLimits(d, shaftFit.es, shaftFit.ei) : null;
+  const housingLimits = housingFit ? absoluteLimits(D, housingFit.ES, housingFit.EI) : null;
   const loadLabel = (l: { label: string; labelEn: string }) =>
     locale === "nl" ? l.label : l.labelEn;
   const sideLabel = (s: { label: string; labelEn: string }) =>
     locale === "nl" ? s.label : s.labelEn;
 
   const copy = useMemo(() => {
-    if (!shaftClass || !shaftFit || !housingFit) return "";
+    if (!shaftClass || !shaftFit || !housingFit || !shaftLimits || !housingLimits) return "";
     const loadObj = LOAD_CLASSES.find((l) => l.id === load);
     const sideObj = BEARING_SIDES.find((s) => s.id === side);
     return [
@@ -188,11 +196,25 @@ export function BearingFitsCalc() {
         shaftFit.range,
         housingClass,
         housingFit.range,
+        `${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)}`,
+        `${fmtAbsolute(housingLimits.min)} / ${fmtAbsolute(housingLimits.max)}`,
       ),
       metaCopyLine(BEARING_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shaftClass, shaftFit, housingFit, d, D, load, side, housingClass, locale]);
+  }, [
+    shaftClass,
+    shaftFit,
+    housingFit,
+    shaftLimits,
+    housingLimits,
+    d,
+    D,
+    load,
+    side,
+    housingClass,
+    locale,
+  ]);
 
   return (
     <>
@@ -256,6 +278,20 @@ export function BearingFitsCalc() {
                 { label: `${t.housing} — ${housingClass}`, value: `${housingFit.range} mm` },
               ]}
             />
+            {shaftLimits && housingLimits ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <CadCallout
+                  designation={`Ø${d}${shaftClass}`}
+                  limits={`${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)} mm`}
+                  copyText={`Ø${d}${shaftClass} → ${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)} mm`}
+                />
+                <CadCallout
+                  designation={`Ø${D}${housingClass}`}
+                  limits={`${fmtAbsolute(housingLimits.min)} / ${fmtAbsolute(housingLimits.max)} mm`}
+                  copyText={`Ø${D}${housingClass} → ${fmtAbsolute(housingLimits.min)} / ${fmtAbsolute(housingLimits.max)} mm`}
+                />
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
               <CopyLink />

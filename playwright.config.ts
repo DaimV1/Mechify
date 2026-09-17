@@ -21,6 +21,9 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],
   snapshotPathTemplate: "{testDir}/__screenshots__/{testFilePath}/{arg}{ext}",
+  // A small tolerance absorbs sub-pixel font-hinting jitter in the SVG text
+  // labels between runs — the diagrams themselves don't change run to run.
+  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.02 } },
   use: {
     baseURL: "http://127.0.0.1:8081",
     trace: "retain-on-failure",

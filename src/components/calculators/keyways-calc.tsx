@@ -6,6 +6,7 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import { fmtMm, mmFromUm } from "@/lib/utils";
 import {
+  CadCallout,
   CalcEyebrow,
   CalcPanel,
   CopyLink,
@@ -151,6 +152,7 @@ export function KeywaysCalc() {
       `${t.t1}  ${fmtMm(row.t1)} mm`,
       `${t.t2}  ${fmtMm(row.t2)} mm`,
       `${t.depthTol}  0 / +${fmtMm(row.depthTol)} mm`,
+      `DIN 6885-A ${row.b}×${row.h}×L — t1 ${fmtMm(row.t1)} mm, t2 ${fmtMm(row.t2)} mm, 0/+${fmtMm(row.depthTol)} mm`,
       metaCopyLine(KEYWAY_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,6 +188,11 @@ export function KeywaysCalc() {
                 { label: t.t2, value: `${fmtMm(row.t2)} mm` },
                 { label: t.depthTol, value: `0 / +${fmtMm(row.depthTol)} mm` },
               ]}
+            />
+            <CadCallout
+              designation={`DIN 6885-A ${row.b}×${row.h}×L`}
+              limits={`t1 ${fmtMm(row.t1)} / t2 ${fmtMm(row.t2)} mm · 0/+${fmtMm(row.depthTol)} mm`}
+              copyText={`DIN 6885-A ${row.b}×${row.h}×L — t1 ${fmtMm(row.t1)} mm, t2 ${fmtMm(row.t2)} mm, dieptetolerantie 0/+${fmtMm(row.depthTol)} mm`}
             />
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />

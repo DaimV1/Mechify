@@ -163,6 +163,55 @@ export function CopyResult({ text }: { text: string }) {
   );
 }
 
+/**
+ * UX-001 (audit, 17 sept 2026): a compact design-constraints block the
+ * operator can paste straight into a CAD task or drawing note, one click
+ * away from the itemised result grid above it.
+ */
+export function CadCallout({
+  designation,
+  limits,
+  copyText,
+}: {
+  designation: string;
+  limits?: string;
+  copyText: string;
+}) {
+  const { locale } = useLocale();
+  const [done, setDone] = useState(false);
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-accent/40 bg-bg px-4 py-3">
+      <div>
+        <p className="font-mono text-lg font-semibold tabular-nums text-ink">{designation}</p>
+        {limits ? (
+          <p className="mt-0.5 font-mono text-sm tabular-nums text-muted">{limits}</p>
+        ) : null}
+      </div>
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(copyText);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            /* ignore */
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {tx(
+          locale,
+          done ? "Gekopieerd" : "Kopieer maataanduiding",
+          done ? "Copied" : "Copy callout",
+        )}
+      </Button>
+    </div>
+  );
+}
+
 /** Copies the current page URL (with its query-string state) so a result can be pasted into a mail or a ticket. */
 export function CopyLink() {
   const [done, setDone] = useState(false);

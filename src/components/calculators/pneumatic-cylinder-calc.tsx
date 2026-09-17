@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ALL_BORES,
   extendForce,
@@ -76,6 +76,7 @@ const T = {
       "De uitknikcontrole rekent met de beschikbare uittrekkracht F_uit bij deze boring en druk (het geblokkeerde/vastgelopen geval), niet met de opgegeven last F — een cilinder die tegen een aanslag vastloopt levert zijn volledige theoretische kracht, ook als de last zelf lager is.",
     additionalCheckNote:
       "λ ligt onder de Euler-grens: F_cr hierboven is de plooilast (bovengrens), geen geverifieerde kolomcapaciteit. Aanvullende kolomcontrole vereist — zie de Euler-knik rekenhulp.",
+    chainToBuckling: "Open deze staaf in de Euler-knik tool →",
     lowSafetyNote: (s: string) =>
       `S = ${s} ligt onder de gangbare fabrikant-marge van 3,5–5× voor pneumatische zuigerstangen. Kies een dikkere stang, een kortere slag, of een grotere boring.`,
     fillLength: "Vul een lengte groter dan 0 in.",
@@ -120,6 +121,7 @@ const T = {
       "The buckling check uses the available extend force F_uit at this bore and pressure (the blocked/stalled case), not the requested load F — a cylinder jammed against a hard stop delivers its full theoretical force, even if the actual load is lower.",
     additionalCheckNote:
       "λ is below the Euler limit: F_cr above is the squash load (an upper bound), not a verified column capacity. Additional column assessment required — see the Euler buckling tool.",
+    chainToBuckling: "Open this rod in the Euler buckling tool →",
     lowSafetyNote: (s: string) =>
       `S = ${s} is below the typical manufacturer margin of 3.5–5× for pneumatic rods. Choose a thicker rod, a shorter stroke, or a larger bore.`,
     fillLength: "Enter a length greater than 0.",
@@ -306,6 +308,16 @@ export function PneumaticCylinderCalc() {
                       <Note>{t.additionalCheckNote}</Note>
                     ) : buckling.safety != null && buckling.safety < 3.5 ? (
                       <Note>{t.lowSafetyNote(fmtDotComma(buckling.safety, 2))}</Note>
+                    ) : null}
+                    {rod != null ? (
+                      <p className="mt-3 text-sm">
+                        <Link
+                          to={`/calculators/buckling?section=rond&D=${rod}&L=${stroke}&end=${endCondition}&material=${materialId}`}
+                          className="text-accent hover:underline"
+                        >
+                          {t.chainToBuckling}
+                        </Link>
+                      </p>
                     ) : null}
                   </>
                 ) : (

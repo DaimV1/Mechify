@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
+  absoluteLimits,
   BANDS,
   DISPUTED_P6_FIRST_BAND,
+  fmtAbsolute,
   FITS,
   HOLE_FIELDS,
   SHAFT_FIELDS,
@@ -21,6 +23,7 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import { mmFromUm } from "@/lib/utils";
 import {
+  CadCallout,
   CalcEyebrow,
   CalcPanel,
   CopyLink,
@@ -88,6 +91,8 @@ const T = {
     hole: "Gat",
     shaft: "As",
     clearanceMinMax: "Speling min … max",
+    absoluteLimits: "Absolute grensmaten",
+    chainToBearing: "Gebruik deze Ø in Lagerpassingen →",
     extendedNote:
       "Boven 50 mm: de IT-breedte komt uit de ISO 286-1-tabel (exact), de fundamentele afwijking van G/F/D en g/f/d uit de formule — boven Ø400 kan die 1 µm van de tabelwaarde verschillen.",
     disputedP6Note:
@@ -145,6 +150,8 @@ const T = {
     hole: "Hole",
     shaft: "Shaft",
     clearanceMinMax: "Clearance min … max",
+    absoluteLimits: "Absolute limits",
+    chainToBearing: "Use this Ø in Bearing fits →",
     extendedNote:
       "Above 50 mm: the IT width comes from the ISO 286-1 table (exact), the fundamental deviation of G/F/D and g/f/d from the formula — above Ø400 it can differ by 1 µm from the table value.",
     disputedP6Note:
@@ -207,6 +214,8 @@ export function FitTolerancesCalc() {
   const isEmpty = diameter.trim() === "";
   const d = dRaw != null && dRaw > 0 ? dRaw : Number.NaN;
   const result = Number.isFinite(d) ? computeFit(d, fitId) : null;
+  const holeLimits = result ? absoluteLimits(d, result.ES, result.EI) : null;
+  const shaftLimits = result ? absoluteLimits(d, result.es, result.ei) : null;
   const activeBand = Number.isFinite(d) ? bandIndex(d) : -1;
   const activeBandExtended = activeBand >= 0 && isExtendedBand(activeBand);
   const fitOutOfBandRange =
@@ -214,16 +223,16 @@ export function FitTolerancesCalc() {
   const disputedP6 = DISPUTED_P6_FIRST_BAND && activeBand === 0 && result?.fit.shaft === "p6";
 
   const copy = useMemo(() => {
-    if (!result) return "";
+    if (!result || !holeLimits || !shaftLimits) return "";
     return [
       t.copyLine(d, result.fit.id, bandLabel(result.band)),
-      `${t.hole} ${result.fit.hole}  ${mmFromUm(result.ES)} / ${mmFromUm(result.EI)} mm`,
-      `${t.shaft} ${result.fit.shaft}  ${mmFromUm(result.es)} / ${mmFromUm(result.ei)} mm`,
+      `${t.hole} ${result.fit.hole}  ${mmFromUm(result.ES)} / ${mmFromUm(result.EI)} mm  (${t.absoluteLimits}: ${fmtAbsolute(holeLimits.min)} / ${fmtAbsolute(holeLimits.max)} mm)`,
+      `${t.shaft} ${result.fit.shaft}  ${mmFromUm(result.es)} / ${mmFromUm(result.ei)} mm  (${t.absoluteLimits}: ${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)} mm)`,
       `${t.clearanceMinMax}  ${mmFromUm(result.minC)} … ${mmFromUm(result.maxC)} mm`,
       metaCopyLine(FIT_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [d, result, locale]);
+  }, [d, result, holeLimits, shaftLimits, locale]);
 
   return (
     <>
@@ -286,6 +295,20 @@ export function FitTolerancesCalc() {
                 },
               ]}
             />
+            {holeLimits && shaftLimits ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <CadCallout
+                  designation={`Ø${d}${result.fit.hole}`}
+                  limits={`${fmtAbsolute(holeLimits.min)} / ${fmtAbsolute(holeLimits.max)} mm`}
+                  copyText={`Ø${d}${result.fit.hole} → ${fmtAbsolute(holeLimits.min)} / ${fmtAbsolute(holeLimits.max)} mm`}
+                />
+                <CadCallout
+                  designation={`Ø${d}${result.fit.shaft}`}
+                  limits={`${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)} mm`}
+                  copyText={`Ø${d}${result.fit.shaft} → ${fmtAbsolute(shaftLimits.min)} / ${fmtAbsolute(shaftLimits.max)} mm`}
+                />
+              </div>
+            ) : null}
             <p className="mt-4 text-sm leading-relaxed text-muted">{fitUse(result.fit)}</p>
             {activeBandExtended ? <Note>{t.extendedNote}</Note> : null}
             {disputedP6 ? <Note>{t.disputedP6Note}</Note> : null}
@@ -293,6 +316,11 @@ export function FitTolerancesCalc() {
               <CopyResult text={copy} />
               <CopyLink />
             </div>
+            <p className="mt-4 text-sm">
+              <Link to={`/tools/bearing-fits?d=${d}`} className="text-accent hover:underline">
+                {t.chainToBearing}
+              </Link>
+            </p>
           </>
         )}
       </CalcPanel>

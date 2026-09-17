@@ -62,6 +62,90 @@
   }
 }
 
+/**
+ * THEME-001 (audit, 17 sept 2026): the dark theme is right for a screen,
+ * wrong for a printed page or a bright shop floor — a near-black background
+ * either burns through a full cartridge or, when the browser's "print
+ * background graphics" option is off (the common default), disappears
+ * entirely and leaves light text invisible on white paper. Overriding the
+ * same custom properties every Tailwind utility already reads means the
+ * whole app repaints for print without touching each component.
+ */
+@media print {
+  :root {
+    color-scheme: light;
+
+    --color-paper: #ffffff;
+    --color-elevated: #f3f4f5;
+    --color-line: #c7ccd0;
+    --color-line-strong: #9aa1aa;
+
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-2: #f3f4f5;
+    --color-border: #d0d3d6;
+    --color-border-strong: #a8adb2;
+
+    --color-ink: #10161a;
+    --color-muted: #454b50;
+    --color-subtle: #62686e;
+
+    --color-accent: #0f8f7f;
+    --color-accent-ink: #ffffff;
+    --color-accent-soft: #d9f5f1;
+
+    --color-success: #1a7a4f;
+    --color-warning: #8a6008;
+    --color-danger: #b91c2b;
+
+    --color-fit-clearance: #1a7a4f;
+    --color-fit-transition: #8a6008;
+    --color-fit-line: #b34700;
+    --color-fit-interference: #b91c2b;
+  }
+
+  body {
+    background-color: #ffffff;
+  }
+
+  /*
+   * Belt-and-braces: force the actual utility classes too, not just the
+   * custom properties they read. Some result-tile backgrounds render a
+   * faint accent-tinted dark color instead of pure var(--color-bg) even
+   * once the property itself is confirmed correct — force the rendered
+   * value directly so print never depends on tracking that down.
+   */
+  .bg-bg,
+  .bg-surface,
+  .bg-surface-2,
+  .bg-elevated,
+  .bg-paper {
+    background-color: #ffffff !important;
+  }
+
+  .text-ink {
+    color: #10161a !important;
+  }
+
+  .ref-table thead th {
+    position: static;
+  }
+
+  /*
+   * Chrome that only matters on screen: nav, menu toggle, CTAs and footer
+   * link lists. !important because brand.css's unconditional (non-media-
+   * guarded) .header nav{display:flex} rule sits later in the cascade at
+   * equal specificity and would otherwise win even inside @media print.
+   */
+  .skip,
+  .header .menu-button,
+  .header nav,
+  .header-cta,
+  footer {
+    display: none !important;
+  }
+}
+
 @layer components {
   .bg-blueprint-grid {
     background-image:
