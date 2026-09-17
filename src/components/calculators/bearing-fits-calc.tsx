@@ -28,6 +28,24 @@ import {
   SourceBadge,
   WholeMmInput,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const BEARING_META: EngineeringSourceMeta = {
+  basisType: "catalogue",
+  reference:
+    "Simplified guideline from published bearing-manufacturer selection criteria (SKF-style) · ISO 286 deviations",
+  status: "vendor-current",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "Groefkogellagers, cilindrische boring, Ø ≤ 50 mm",
+    en: "Deep-groove ball bearings, cylindrical bore, Ø ≤ 50 mm",
+  },
+  assumptions: {
+    nl: "Roterende binnenring / stilstaande buitenring met puntbelasting. Houdt geen rekening met asmateriaal, warmteontwikkeling of een meeroterende buitenring — raadpleeg de volledige selectietabel van de lagerfabrikant voor die gevallen.",
+    en: "Rotating inner ring / stationary outer ring with point load. Does not account for shaft material, heat build-up, or a co-rotating outer ring — consult the bearing manufacturer's full selection table for those cases.",
+  },
+};
 
 const T = {
   nl: {
@@ -160,16 +178,19 @@ export function BearingFitsCalc() {
     if (!shaftClass || !shaftFit || !housingFit) return "";
     const loadObj = LOAD_CLASSES.find((l) => l.id === load);
     const sideObj = BEARING_SIDES.find((s) => s.id === side);
-    return t.copy(
-      d,
-      D,
-      loadObj ? loadLabel(loadObj) : load,
-      sideObj ? sideLabel(sideObj) : side,
-      shaftClass,
-      shaftFit.range,
-      housingClass,
-      housingFit.range,
-    );
+    return [
+      t.copy(
+        d,
+        D,
+        loadObj ? loadLabel(loadObj) : load,
+        sideObj ? sideLabel(sideObj) : side,
+        shaftClass,
+        shaftFit.range,
+        housingClass,
+        housingFit.range,
+      ),
+      metaCopyLine(BEARING_META, locale),
+    ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shaftClass, shaftFit, housingFit, d, D, load, side, housingClass, locale]);
 
@@ -181,6 +202,7 @@ export function BearingFitsCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={BEARING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-4">
           <Field label={t.diameter}>
             <WholeMmInput id="bearing-diameter" value={diameter} onChange={onDia} />

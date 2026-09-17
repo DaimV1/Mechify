@@ -24,6 +24,20 @@ import {
   SourceBadge,
   WholeMmInput,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const SEEGER_META: EngineeringSourceMeta = {
+  basisType: "catalogue",
+  reference: "DIN 471 (shaft) / DIN 472 (bore) workshop table",
+  status: "vendor-current",
+  checkedDate: "2026-09-17",
+  validityRange: { nl: "Ø 3-100 mm, vaste nominale maten", en: "Ø 3-100 mm, fixed nominal sizes" },
+  assumptions: {
+    nl: "Alleen Ø20 mm is onafhankelijk geverifieerd tegen een fabrikant-datasheet (zie status per maat hieronder). Alleen groefgeometrie — bepaalt geen axiale borgcapaciteit, groefspanning of randafstand-geschiktheid.",
+    en: "Only Ø20 mm is independently verified against a manufacturer datasheet (see per-size status below). Groove geometry only — does not establish axial retention capacity, groove stress or edge-distance suitability.",
+  },
+};
 
 const T = {
   nl: {
@@ -124,6 +138,7 @@ export function SeegerGroovesCalc() {
       `${t.grooveDiameter} ${fmtCirclip(result.grooveDiameter)} mm ${result.grooveDiameterClass}`,
       `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm ${result.grooveWidthClass}`,
       `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm · 0/+${fmtSeeger3(result.grooveDepthPlus)} mm`,
+      metaCopyLine(SEEGER_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, kind, d, standard, locale]);
@@ -136,6 +151,7 @@ export function SeegerGroovesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={SEEGER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.type}>
             <SelectInput value={kind} onChange={(v) => setKind(v as CirclipKind)}>

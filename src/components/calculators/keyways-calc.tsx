@@ -18,6 +18,23 @@ import {
   SourceLink,
   WholeMmInput,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const KEYWAY_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "DIN 6885-1:2021 (Elesa+Ganter transcription)",
+  status: "current",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "As-Ø >6-110 mm, hoge vorm; DIN 6885-2 (lage vorm) niet gedekt",
+    en: "Shaft Ø >6-110 mm, tall (high) form; DIN 6885-2 (low form) not covered",
+  },
+  assumptions: {
+    nl: "Alleen geometrie — bepaalt geen overgebracht koppel, spielengte of contactdruk. H9/D10 glijd-label is een werkplaats-/UNI-conventie, niet de benoemde passing in de 2021-tekst.",
+    en: "Geometry only — does not size transmitted torque, key length or contact pressure. H9/D10 sliding label is a shop/UNI convention, not the named fit in the 2021 text.",
+  },
+};
 
 const rangeLabelNl = (over: number, to: number) => `boven ${over} t/m ${to}`;
 const rangeLabelEn = (over: number, to: number) => `above ${over} up to ${to}`;
@@ -134,6 +151,7 @@ export function KeywaysCalc() {
       `${t.t1}  ${fmtMm(row.t1)} mm`,
       `${t.t2}  ${fmtMm(row.t2)} mm`,
       `${t.depthTol}  0 / +${fmtMm(row.depthTol)} mm`,
+      metaCopyLine(KEYWAY_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d, row, locale]);
@@ -146,6 +164,7 @@ export function KeywaysCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={KEYWAY_META} />
         <div className="mt-6 max-w-xs">
           <Field label={t.diameterLabel}>
             <WholeMmInput id="key-diameter" value={diameter} onChange={onDia} />

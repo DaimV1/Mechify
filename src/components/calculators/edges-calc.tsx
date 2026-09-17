@@ -20,6 +20,19 @@ import {
   parseNum,
   ResultGrid,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const KFACTOR_META: EngineeringSourceMeta = {
+  basisType: "heuristic",
+  reference: "K-factor rule of thumb by Ri/T band (<1 -> 0.33, 1-<3 -> 0.40, >=3 -> 0.50)",
+  status: "estimate",
+  checkedDate: "2026-09-17",
+  assumptions: {
+    nl: "Praktijkbenadering, geen gemeten materiaalwaarde — kalibreer op de eigen kantpers voor kritieke toleranties.",
+    en: "Practical approximation, not a measured material value — calibrate on your own press brake for critical tolerances.",
+  },
+};
 
 const TXT = {
   nl: {
@@ -113,6 +126,7 @@ export function EdgesCalc() {
     ];
     if (flat != null && (L1 > 0 || L2 > 0))
       lines.push(`${t.flatLength} = ${fmtBendNum(flat, 2)} mm`);
+    lines.push(metaCopyLine(KFACTOR_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valid, BA, BD, flat, K, thickness, radius, angle, L1, L2, locale]);
@@ -132,6 +146,7 @@ export function EdgesCalc() {
             {t.heading}
           </h2>
           <Note>{t.intro}</Note>
+          <SourceMetaBadge meta={KFACTOR_META} />
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <Field label={t.thickness}>
               <NumInput id="edge-t" value={thickness} onChange={setThickness} />

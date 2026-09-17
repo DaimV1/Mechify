@@ -33,6 +33,21 @@ import {
   SourceBadge,
   SourceLink,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const CYLINDER_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "ISO 15552 / ISO 6432 bore-rod combinations · F = p*A theoretical force model",
+  status: "current",
+  checkedDate: "2026-09-17",
+  validityRange: { nl: "Boring tot Ø320 mm", en: "Bore up to Ø320 mm" },
+  assumptions: {
+    nl: "ISO 15552/6432 zijn interwisselbaarheid-/montagemaatnormen, geen krachtprestatiegarantie. F = p·A is theoretisch: geen wrijving, echt drukverlies, snelheids-/debietlimieten of demping zijn inbegrepen — reken zelf een veiligheidsfactor.",
+    en: "ISO 15552/6432 are interchangeability/mounting-dimension standards, not a force-performance guarantee. F = p*A is theoretical: no friction, real pressure drop, speed/flow limits or cushioning are included — add your own safety factor.",
+  },
+  sourceUrl: "https://committee.iso.org/standard/66921.html?browse=ics",
+};
 
 const T = {
   nl: {
@@ -189,6 +204,7 @@ export function PneumaticCylinderCalc() {
     ];
     if (buckling)
       lines.push(t.copyBuckling(fmtN0(buckling.Fcr), fmtDotComma(buckling.safety ?? 0, 2)));
+    lines.push(metaCopyLine(CYLINDER_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommended, F, p, rod, buckling, locale]);
@@ -201,6 +217,7 @@ export function PneumaticCylinderCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={CYLINDER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.forceLabel}>
             <NumInput id="pneu-force" value={force} onChange={setForce} />

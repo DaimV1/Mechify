@@ -23,6 +23,36 @@ import {
   SelectInput,
   SourceBadge,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+/**
+ * M-02 (audit, 17 sept 2026): the tool registry badged this whole tool
+ * "ISO 3601-1", which only actually governs the standard cord diameters.
+ * The groove itself is a squeeze%/width-factor design rule, not an ISO
+ * 3601-2 gland-table lookup — ISO 3601-2:2025 is the current standard for
+ * housing/groove dimensions. Labelling the groove as an estimate keeps a
+ * preliminary number from being read as a normative table result.
+ */
+const ORING_META: EngineeringSourceMeta = {
+  basisType: "heuristic",
+  reference: "ISO 3601-1 cord sizes · preliminary gland estimate (squeeze% / width factor)",
+  status: "estimate",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "Standaard metrische koorden 1,80-7,00 mm",
+    en: "Standard metric cords 1.80-7.00 mm",
+  },
+  assumptions: {
+    nl: "Groefdiepte/-breedte zijn een ontwerpregel-schatting, geen ISO 3601-2 gland-tabel. Controleert geen toepassingstype (as/zuiger/vlak), zwelmarge, extrusiespleet of oppervlakteruwheid.",
+    en: "Groove depth/width are a design-rule estimate, not an ISO 3601-2 gland lookup. Does not check application type (rod/piston/face), swell allowance, extrusion gap or surface finish.",
+  },
+  verification: {
+    nl: "Controleer de definitieve gland tegen ISO 3601-2:2025 of de fabrikant-designgids vóór productie.",
+    en: "Verify the final gland against ISO 3601-2:2025 or the manufacturer's design guide before production.",
+  },
+  sourceUrl: "https://www.iso.org/standard/85921.html",
+};
 
 const T = {
   nl: {
@@ -156,15 +186,18 @@ export function OringGroovesCalc() {
   const copy = useMemo(() => {
     if (!result || result.overfilled) return "";
     const depthLabel = direction === "radiaal" ? t.depthRadial : t.depthAxial;
-    return t.copy(
-      cord,
-      sealLabel(seal),
-      squeeze,
-      depthLabel,
-      fmtOring(result.depth),
-      fmtOring(result.width),
-      fmtOring(result.fillPercent, 0),
-    );
+    return [
+      t.copy(
+        cord,
+        sealLabel(seal),
+        squeeze,
+        depthLabel,
+        fmtOring(result.depth),
+        fmtOring(result.width),
+        fmtOring(result.fillPercent, 0),
+      ),
+      metaCopyLine(ORING_META, locale),
+    ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, cord, sealType, squeeze, direction, locale]);
 
@@ -176,6 +209,7 @@ export function OringGroovesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={ORING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.cordDiameter}>
             <SelectInput value={cord} onChange={setCord}>

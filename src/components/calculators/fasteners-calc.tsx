@@ -26,6 +26,25 @@ import {
   SelectInput,
   SourceLink,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const FASTENER_META: EngineeringSourceMeta = {
+  basisType: "heuristic",
+  reference:
+    "K-factor torque estimate (T = K·F·d) · ISO 273/4014-4017/4762 clearance & wrench reference data",
+  status: "estimate",
+  checkedDate: "2026-09-17",
+  validityRange: { nl: "M3-M24", en: "M3-M24" },
+  assumptions: {
+    nl: "K≈0,2 nominale moerfactor voor niet-gesmeerde bevestigers; werkelijke K varieert 0,10-0,20 met smering/afwerking. Aanhaalspreiding, afzonderlijke draad-/kopwrijving, verbindingsstijfheid, settingverlies, scheiding, slip en vermoeiing worden niet gecontroleerd — dit is een aandraaimoment-schatting, geen VDI 2230-verbindingsverificatie.",
+    en: "K≈0.2 nominal nut factor for non-lubricated fasteners; actual K varies 0.10-0.20 with lubrication/finish. Tightening scatter, separate thread/head friction, joint stiffness, embedment loss, separation, slip and fatigue are not checked — this is a torque estimate, not a VDI 2230 joint verification.",
+  },
+  verification: {
+    nl: "Gebruik een volledige VDI 2230-berekening of de opgegeven aanhaalspecificatie voor kritieke verbindingen.",
+    en: "Use a full VDI 2230 calculation or the specified tightening spec for critical joints.",
+  },
+};
 
 const T = {
   nl: {
@@ -126,17 +145,20 @@ export function FastenersCalc() {
 
   const copy = useMemo(() => {
     if (!torqueResult) return "";
-    return t.copy(
-      size,
-      classId,
-      hole.fine,
-      hole.medium,
-      hole.coarse,
-      wrench.hex,
-      wrench.socket,
-      fmtFastener(torqueResult.torque),
-      Number.isFinite(kVal) ? String(kVal) : "—",
-    );
+    return [
+      t.copy(
+        size,
+        classId,
+        hole.fine,
+        hole.medium,
+        hole.coarse,
+        wrench.hex,
+        wrench.socket,
+        fmtFastener(torqueResult.torque),
+        Number.isFinite(kVal) ? String(kVal) : "—",
+      ),
+      metaCopyLine(FASTENER_META, locale),
+    ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [torqueResult, size, classId, hole, wrench, kVal, locale]);
 
@@ -148,6 +170,7 @@ export function FastenersCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={FASTENER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.threadSize}>
             <SelectInput value={size} onChange={(v) => setSize(v as ThreadSize)}>

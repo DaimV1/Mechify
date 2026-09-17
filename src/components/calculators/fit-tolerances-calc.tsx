@@ -34,6 +34,24 @@ import {
   SelectInput,
   SourceLink,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const FIT_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "ISO 286-2:2010",
+  status: "current",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "Nominale Ø >0-3150 mm; c11/k6/n6/p6/s6 beperkt tot ≤50 mm (geen gesloten formule)",
+    en: "Nominal Ø >0-3150 mm; c11/k6/n6/p6/s6 limited to ≤50 mm (no closed formula)",
+  },
+  assumptions: {
+    nl: "Alleen maatpassing — omhullende/vorm en geometrische toleranties zijn aparte controles (zie ISO 2768/ISO 1101).",
+    en: "Size fit only — envelope/form and geometric tolerances are separate checks (see ISO 2768/ISO 1101).",
+  },
+  sourceUrl: "https://committee.iso.org/standard/54915.html?browse=tc",
+};
 
 const T = {
   nl: {
@@ -200,6 +218,7 @@ export function FitTolerancesCalc() {
       `${t.hole} ${result.fit.hole}  ${mmFromUm(result.ES)} / ${mmFromUm(result.EI)} mm`,
       `${t.shaft} ${result.fit.shaft}  ${mmFromUm(result.es)} / ${mmFromUm(result.ei)} mm`,
       `${t.clearanceMinMax}  ${mmFromUm(result.minC)} … ${mmFromUm(result.maxC)} mm`,
+      metaCopyLine(FIT_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d, result, locale]);
@@ -212,6 +231,7 @@ export function FitTolerancesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={FIT_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.diameterLabel}>
             <NumInput id="fit-diameter" value={diameter} onChange={onDia} />

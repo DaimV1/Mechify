@@ -223,7 +223,7 @@ export const TOOLS: Tool[] = [
     section: "tools",
     slug: "o-ring-grooves",
     title: { nl: "O-ringgroef", en: "O-ring groove" },
-    standard: "ISO 3601-1",
+    standard: "ISO 3601-1 sizes · gland estimate",
     blurb: {
       nl: "ISO-koorden 1,80–7,00 mm: groefdiepte en -breedte, radiaal en axiaal.",
       en: "ISO cords 1.80–7.00 mm: groove depth and width, radial and axial.",

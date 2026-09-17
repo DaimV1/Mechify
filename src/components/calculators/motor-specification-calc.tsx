@@ -23,6 +23,19 @@ import {
   SelectInput,
   SourceBadge,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const MOTOR_META: EngineeringSourceMeta = {
+  basisType: "physics",
+  reference: "F = m·g·(sinθ + μ·cosθ) / μ·m·g / m·g; steady-state operating point",
+  status: "current",
+  checkedDate: "2026-09-17",
+  assumptions: {
+    nl: "Alleen eerste schatting, stationair werkpunt: geen acceleratie/inertie, bedrijfscyclus, start-/piekkoppel of thermische beperkingen. Geen vervanging van DIN 22101/FEM-berekeningen voor bandtransporteurs of een hijswerktuigberekening volgens EN 13001/ISO 4301 bij kritieke installaties.",
+    en: "First-pass, steady-state sizing only: no acceleration/inertia, duty cycle, start/peak torque or thermal constraints. Not a substitute for DIN 22101/FEM belt-conveyor calculations or a hoist calculation per EN 13001/ISO 4301 on critical installations.",
+  },
+};
 
 const T = {
   nl: {
@@ -158,7 +171,10 @@ export function MotorSpecificationCalc() {
 
   const copy = useMemo(() => {
     if (!result) return "";
-    return t.copy(appLabelText, mass, speed, diameter, result);
+    return [
+      t.copy(appLabelText, mass, speed, diameter, result),
+      metaCopyLine(MOTOR_META, locale),
+    ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, appLabelText, mass, speed, diameter, locale]);
 
@@ -170,6 +186,7 @@ export function MotorSpecificationCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={MOTOR_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.application}>
             <SelectInput value={app} onChange={(v) => setApp(v as Application)}>

@@ -31,6 +31,19 @@ import {
   SelectInput,
   SourceLink,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const BUCKLING_META: EngineeringSourceMeta = {
+  basisType: "physics",
+  reference: "Euler critical load F_cr = pi^2 * E * I / L_eff^2",
+  status: "current",
+  checkedDate: "2026-09-17",
+  assumptions: {
+    nl: "Ideale Euler-theorie geldt alleen boven de slankheidsgrens λ_grens (zie de bovengrens-notitie eronder) — geen initiële kromming, restspanning of partiële veiligheidsfactoren. Geen vervanging van EN 1993-1-1 bij kritieke constructies.",
+    en: "Ideal Euler theory only valid above the slenderness limit lambda_lim (see the screening-upper-bound note below it) — no initial curvature, residual stress or partial safety factors. Not a substitute for EN 1993-1-1 on critical structures.",
+  },
+};
 
 const T = {
   nl: {
@@ -245,7 +258,10 @@ export function BucklingCalc() {
       : null;
 
   const copy = useMemo(
-    () => (result && endLabel ? copyLine(result, label(endLabel)) : ""),
+    () =>
+      result && endLabel
+        ? [copyLine(result, label(endLabel)), metaCopyLine(BUCKLING_META, locale)].join("\n")
+        : "",
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [result, endLabel, locale],
   );
@@ -262,6 +278,7 @@ export function BucklingCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={BUCKLING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.lengthLabel}>
             <NumInput id="knik-length" value={L} onChange={setL} />

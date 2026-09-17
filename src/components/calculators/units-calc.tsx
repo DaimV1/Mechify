@@ -12,6 +12,19 @@ import {
   Note,
   SelectInput,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const UNITS_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "NIST SP 811 / ISO 80000 exact conversion constants",
+  status: "current",
+  checkedDate: "2026-09-17",
+  assumptions: {
+    nl: "Exacte definities (inch, lbf, bar, atm) of standaard afgeleide constanten (psi, mmHg) — geen afgeronde vuistregels.",
+    en: "Exact definitions (inch, lbf, bar, atm) or standard derived constants (psi, mmHg) — no rounded rules of thumb.",
+  },
+};
 
 const T = {
   nl: {
@@ -97,8 +110,11 @@ export function UnitsCalc() {
     if (result == null) return "";
     const from = category.units.find((u) => u.id === fromId);
     const to = category.units.find((u) => u.id === toId);
-    return `${value} ${from?.label ?? ""} = ${fmtConverted(result)} ${to?.label ?? ""}`;
-  }, [result, category, fromId, toId, value]);
+    return [
+      `${value} ${from?.label ?? ""} = ${fmtConverted(result)} ${to?.label ?? ""}`,
+      metaCopyLine(UNITS_META, locale),
+    ].join("\n");
+  }, [result, category, fromId, toId, value, locale]);
 
   return (
     <>
@@ -108,6 +124,7 @@ export function UnitsCalc() {
           {t.heading}
         </h2>
         <Note>{t.baseNote(category.baseLabel)}</Note>
+        <SourceMetaBadge meta={UNITS_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.category}>
             <SelectInput value={categoryId} onChange={onCategory}>

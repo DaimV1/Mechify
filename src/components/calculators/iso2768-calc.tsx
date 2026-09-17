@@ -37,6 +37,48 @@ import {
   SelectInput,
   SourceBadge,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+/**
+ * M-01 (audit, 17 sept 2026): ISO 2768-1 (dimensional, Tables 1-3) and
+ * ISO 2768-2 (geometric H/K/L, Tables 4-7) are two different standards with
+ * two different statuses, not one "ISO 2768". -2:1989 is withdrawn (ISO
+ * points to ISO 22081:2021); -1:1989 is still published but a second
+ * edition is under publication. Each section below carries its own status
+ * badge so neither can be mistaken for "current, unqualified" guidance.
+ */
+const DIMENSIONAL_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "ISO 2768-1:1989",
+  status: "under-publication",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "Tabellen 1-3, lineaire/hoekmaten zonder individuele toleranties",
+    en: "Tables 1-3, linear/angular sizes without individual tolerances",
+  },
+  assumptions: {
+    nl: "Een tweede editie van ISO 2768-1 is bij ISO in publicatie en zal deze editie uit 1989 naar verwachting vervangen; onderstaande waarden zijn de 1989-tekst, op het moment van schrijven nog gepubliceerd.",
+    en: "A second edition of ISO 2768-1 is under publication at ISO and is expected to replace this 1989 edition; values below are the 1989 text, still published at the time of writing.",
+  },
+  sourceUrl: "https://www.iso.org/standard/85741.html",
+};
+
+const GEOMETRIC_META: EngineeringSourceMeta = {
+  basisType: "standard",
+  reference: "ISO 2768-2:1989",
+  status: "withdrawn-legacy",
+  checkedDate: "2026-09-17",
+  validityRange: {
+    nl: "Tabellen 4-7, geometrische tolerantieklassen H/K/L",
+    en: "Tables 4-7, geometric tolerance classes H/K/L",
+  },
+  assumptions: {
+    nl: "ISO 2768-2:1989 is ingetrokken. ISO 22081:2021 is het huidige algemene GPS-raamwerk dat deze vervangt — gebruik deze H/K/L-klassen alleen om bestaande tekeningen te interpreteren, niet voor nieuwe ontwerpen.",
+    en: "ISO 2768-2:1989 is withdrawn. ISO 22081:2021 is the current general geometrical specifications framework that replaces it — use these H/K/L classes only to interpret existing drawings, not for new designs.",
+  },
+  sourceUrl: "https://www.iso.org/standard/72514.html",
+};
 
 const T = {
   nl: {
@@ -58,9 +100,11 @@ const T = {
     table2Note: "ISO 2768-1 Tabel 2.",
     thLeg: "Been (mm)",
     table3Note: "ISO 2768-1 Tabel 3, o.b.v. lengte kortste been van de hoek.",
-    geoHeading: "Geometrische toleranties (ISO 2768-2)",
+    geoHeading: "Geometrische toleranties (ISO 2768-2:1989 — vervallen)",
     geoIntro:
       "Rechtheid/vlakheid, loodrechtheid, symmetrie en rondloop zonder individuele aanduiding — klassen H, K, L.",
+    iso22081Notice:
+      "ISO 2768-2:1989 is ingetrokken. ISO wijst ISO 22081:2021 aan als de huidige algemene GPS-richtlijn. Gebruik H/K/L hieronder alleen om bestaande tekeningen te interpreteren, niet als aanbeveling voor nieuw werk.",
     geoZoneNote:
       "Deze waarden zijn de totale breedte van de tolerantiezone, geen ±afwijking — een vlakheid van 0,2 mm betekent dat het hele oppervlak binnen een zone van 0,2 mm dik moet liggen, niet ±0,2 mm rond een nominale waarde.",
     classLabel: "Klasse",
@@ -109,9 +153,11 @@ const T = {
     table2Note: "ISO 2768-1 Table 2.",
     thLeg: "Leg (mm)",
     table3Note: "ISO 2768-1 Table 3, based on the length of the shorter leg of the angle.",
-    geoHeading: "Geometric tolerances (ISO 2768-2)",
+    geoHeading: "Geometric tolerances (ISO 2768-2:1989 — withdrawn)",
     geoIntro:
       "Straightness/flatness, perpendicularity, symmetry and circular run-out without individual indication — classes H, K, L.",
+    iso22081Notice:
+      "ISO 2768-2:1989 is withdrawn. ISO points to ISO 22081:2021 as the current general GPS guidance. Use H/K/L below only to interpret existing drawings, not as a recommendation for new work.",
     geoZoneNote:
       "These values are the total width of the tolerance zone, not a ± deviation — a flatness of 0.2 mm means the whole surface must lie within a 0.2 mm thick zone, not ±0.2 mm around a nominal value.",
     classLabel: "Class",
@@ -192,6 +238,9 @@ export function Iso2768Calc() {
     if (perpRow) lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[geoClass])));
     if (symRow) lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[geoClass])));
     if (gl != null) lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[geoClass])));
+    if (linearRow || radiusRow || angularRow) lines.push(metaCopyLine(DIMENSIONAL_META, locale));
+    if (straightRow || perpRow || symRow || gl != null)
+      lines.push(metaCopyLine(GEOMETRIC_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -222,6 +271,7 @@ export function Iso2768Calc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={DIMENSIONAL_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.toleranceClass}>
             <SelectInput value={linearClass} onChange={(v) => setLinearClass(v as LinearClass)}>
@@ -344,6 +394,8 @@ export function Iso2768Calc() {
           {t.geoHeading}
         </h2>
         <Note>{t.geoIntro}</Note>
+        <SourceMetaBadge meta={GEOMETRIC_META} />
+        <Note>{t.iso22081Notice}</Note>
         <Note>{t.geoZoneNote}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={t.classLabel}>

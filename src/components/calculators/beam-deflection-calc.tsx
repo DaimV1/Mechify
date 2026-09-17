@@ -32,6 +32,19 @@ import {
   SelectInput,
   SourceLink,
 } from "@/components/calculators/calc-ui";
+import { SourceMetaBadge } from "@/components/calculators/source-meta";
+import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+
+const BEAM_META: EngineeringSourceMeta = {
+  basisType: "physics",
+  reference: "Euler-Bernoulli beam theory, single point load (Roark)",
+  status: "current",
+  checkedDate: "2026-09-17",
+  assumptions: {
+    nl: "Lineair-elastisch, kleine doorbuigingen, alleen één puntlast — geen verdeelde last, meerdere lasten of oplegreacties. Geen vervanging van een sterkteberekening volgens EN 1993-1-1 bij kritieke constructies.",
+    en: "Linear-elastic, small deflections, one point load only — no UDL, multiple loads, or reactions. Not a substitute for a strength calculation per EN 1993-1-1 on critical structures.",
+  },
+};
 
 const T = {
   nl: {
@@ -244,6 +257,7 @@ export function BeamDeflectionCalc() {
           ? t.allowablePassNote(fmtBeamNum(result.deflectionMax, 3), allowable)
           : t.allowableFailNote(fmtBeamNum(result.deflectionMax, 3), allowable)
         : "",
+      metaCopyLine(BEAM_META, locale),
     ]
       .filter(Boolean)
       .join("\n");
@@ -272,6 +286,7 @@ export function BeamDeflectionCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
+        <SourceMetaBadge meta={BEAM_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.beamType}>
             <SelectInput value={beamType} onChange={(v) => setBeamType(v as BeamType)}>
