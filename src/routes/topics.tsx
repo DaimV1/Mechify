@@ -1,7 +1,7 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow, Action } from "@/components/brand-ui";
-import { articles } from "@/lib/articles";
+import { ARTICLE_AUTHOR, articles } from "@/lib/articles";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { NotFound } from "./not-found";
 const toolLinks: Record<string, string> = {
@@ -98,6 +98,20 @@ export function TopicArticle() {
           </Eyebrow>
           <h1>{a.title}</h1>
           <p>{a.intro}</p>
+          <dl className="article-provenance">
+            <div>
+              <dt>Geschreven door</dt>
+              <dd>{ARTICLE_AUTHOR}</dd>
+            </div>
+            <div>
+              <dt>Laatst gecontroleerd</dt>
+              <dd>{a.reviewedDate}</dd>
+            </div>
+            <div>
+              <dt>Technische basis</dt>
+              <dd>{a.basis}</dd>
+            </div>
+          </dl>
         </header>
         <div className="article-layout">
           <aside className="article-toc">

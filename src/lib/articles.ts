@@ -1,6 +1,12 @@
+/** P1.8 (audit, 17 sept 2026): every article now carries its own provenance — author, technical basis and a review date — instead of requiring a reader to inspect source code to know whether a claim came from physics, a standard, a manufacturer catalogue or a design rule of thumb. */
+export const ARTICLE_AUTHOR = "Damian Vink";
+
 export const articles = [
   {
     slug: "koppel-en-toerental",
+    basis:
+      "P = T·ω (P[kW] = T[N·m]·n[omw/min] / 9549,2966), fysica. Stationair mechanisch werkpunt — geen elektrisch/thermisch motormodel.",
+    reviewedDate: "17 sept 2026",
     category: "Aandrijftechniek",
     title: "Meer koppel begint bij het juiste werkpunt.",
     intro:
@@ -30,6 +36,9 @@ export const articles = [
   },
   {
     slug: "overbrenging-kiezen",
+    basis:
+      "i = n₁/n₂, T₂ = T₁·i·η, fysica. Vaste verhouding en constant rendement — geen terugaandrijving, zelfremming of belastingsafhankelijk rendement.",
+    reviewedDate: "17 sept 2026",
     category: "Aandrijftechniek",
     title: "Een overbrenging kiezen zonder verrassingen.",
     intro:
@@ -58,6 +67,9 @@ export const articles = [
   },
   {
     slug: "pneumatische-cilinder",
+    basis:
+      "F = p·A (ISO 15552/6432 oppervlakteformule), fysica, met een aangenomen 90% krachtfactor voor verliezen — een schatting, geen fabrikantwaarde. Statische axiale kracht — geen snelheid, luchtverbruik, demping of knik.",
+    reviewedDate: "17 sept 2026",
     category: "Pneumatiek",
     title: "Cilinderkracht: de stang maakt het verschil.",
     intro:
@@ -91,6 +103,9 @@ export const articles = [
   },
   {
     slug: "lineaire-geleiding",
+    basis:
+      "Statisch krachten-/momentenevenwicht (F = m·g, M = F·a), fysica. Vereenvoudigd vlak model — geen fabrikant-draaggetal-, stijfheids- of levensduurberekening.",
+    reviewedDate: "17 sept 2026",
     category: "Lineaire beweging",
     title: "Een geleiding draagt meer dan alleen gewicht.",
     intro:
@@ -120,6 +135,9 @@ export const articles = [
   },
   {
     slug: "frame-en-maakbaarheid",
+    basis:
+      "Euler-Bernoulli doorbuiging δ = F·L³/(3·E·I) voor een ingeklemde balk met puntlast, fysica. Geldig voor kleine elastische vervorming onder ideale ondersteuning — geen verbindings-, lasvervormings- of trillingsanalyse.",
+    reviewedDate: "17 sept 2026",
     category: "Machineframes",
     title: "Een goed frame begint bij de krachtweg.",
     intro: "Een frame moet belastingen voorspelbaar afvoeren én praktisch te bouwen zijn.",
@@ -147,6 +165,9 @@ export const articles = [
   },
   {
     slug: "toleranties-en-assemblage",
+    basis:
+      "Lineaire worst-case tolerantiestapeling van maatgrenzen, rekenregel. Geen vorm-, ligging-, temperatuur- of vervormingseffecten — claimt geen normconformiteit voor een specifieke passing.",
+    reviewedDate: "17 sept 2026",
     category: "Toleranties & assemblage",
     title: "Toleranties die de montage helpen.",
     intro: "Specificeer nauwkeurigheid waar de functie die nodig heeft. Geef de rest ruimte.",
@@ -157,7 +178,7 @@ export const articles = [
     sections: [
       [
         "Begin bij de functionele maat",
-        "Bepaal eerst wat moet passen, bewegen of afdichten. Kies referentievlakken die aansluiten bij de werking en de meetmethode. Vermijd een keten van maten wanneer één gemeenschappelijke referentie de functie direct kan vastleggen. Een mooi nominale CAD-assembly bewijst niet dat alle geproduceerde onderdelen passen.",
+        "Bepaal eerst wat moet passen, bewegen of afdichten. Kies referentievlakken die aansluiten bij de werking en de meetmethode. Vermijd een keten van maten wanneer één gemeenschappelijke referentie de functie direct kan vastleggen. Een nominaal kloppende CAD-assembly bewijst niet dat alle geproduceerde onderdelen passen.",
       ],
       [
         "Een eenvoudige worst-case stapel",
@@ -175,6 +196,9 @@ export const articles = [
   },
   {
     slug: "parametrisch-ontwerpen",
+    basis:
+      "Praktische CAD-modelleerstrategie (SolidWorks-configuraties, Inventor-parameters), ontwerprichtlijn. Geen directe softwarekoppeling of automatische tekening-/stuklijstvalidatie.",
+    reviewedDate: "17 sept 2026",
     category: "CAD-workflows",
     title: "Modelleer de bedoeling, niet alleen de vorm.",
     intro:

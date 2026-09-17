@@ -1146,6 +1146,31 @@ footer {
   font-size: 20px;
   margin: 27px 0 45px;
 }
+.article-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 40px;
+  margin: 0 0 45px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.article-provenance > div {
+  min-width: 200px;
+  max-width: 420px;
+}
+.article-provenance dt {
+  font: 11px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7a9698;
+  margin-bottom: 6px;
+}
+.article-provenance dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #b7c2c4;
+}
 .article-layout {
   display: grid;
   grid-template-columns: 26% minmax(0, 1fr);
