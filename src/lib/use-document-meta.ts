@@ -84,10 +84,11 @@ export function useFaqJsonLd(items: { q: string; a: string }[] | undefined) {
  * Sets title, description, canonical URL, OG/Twitter tags and a per-page
  * JSON-LD block for the current route. Pass `{ noindex: true }` for pages
  * that render at any URL but aren't real content — currently just the 404
- * page: every unmatched path is served the SPA shell with a 200 status (no
- * per-route static file, no server to answer with a real 404), so without
- * this a bad or stale link could get a "Page not found" page indexed as if
- * it were normal content.
+ * page. P1.2: a fresh request to an unmatched path now gets a real HTTP 404
+ * from Vercel (vercel.json's catch-all rewrite was removed), so this is
+ * defense-in-depth for the one remaining path there — a stale/broken
+ * internal <Link> triggering the "*" route during client-side SPA
+ * navigation, which never hits the server at all.
  */
 export function useDocumentMeta(title: string, description: string, opts?: { noindex?: boolean }) {
   const noindex = opts?.noindex ?? false;

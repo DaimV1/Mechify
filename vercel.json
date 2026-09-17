@@ -21,6 +21,14 @@
       "destination": "/toolkit.html"
     },
     {
+      "source": "/toolkit/:slug",
+      "destination": "/toolkit.html"
+    },
+    {
+      "source": "/over",
+      "destination": "/about.html"
+    },
+    {
       "source": "/topics",
       "destination": "/topics.html"
     },
@@ -51,10 +59,6 @@
     {
       "source": "/cad",
       "destination": "/cad.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ],
   "framework": "vite",
