@@ -1,17 +1,18 @@
 /**
- * Theoretical pneumatic cylinder force. F = p·A, gauge pressure.
- * ISO 15552 / ISO 6432 basic piston-rod diameters (not oversized rods).
- * No friction, no Festo/SMC type code.
+ * Theoretical pneumatic cylinder force. F = p·A, gauge pressure. No
+ * friction, no Festo/SMC type code.
  *
- * E10 (16 sept 2026 review): at bore Ø200/250/320 this table's basic rod
- * (40/50/63) does not match calculators/pneumatic.ts's table (50/63/80) for
- * the same nominal bores. Neither file names a specific manufacturer/type
- * code per row, so which supplier variant each represents was not
- * established — treat this as ONE possible "basic rod" convention, not a
- * verified universal catalogue. For an actual order, use the rod diameter
- * from a named cylinder family's own datasheet.
+ * ENG-004 (audit, 17 sept 2026): this used to keep its own separate bore/rod
+ * table, which disagreed with calculators/pneumatic.ts's table at bore
+ * Ø200/250/320 (40/50/63 here vs 50/63/80 there) — neither was tied to a
+ * named manufacturer/type code, so there was no way to tell which was
+ * "right". Now derived from that one canonical table (ALL_BORES) instead of
+ * keeping an independent copy, using each bore's first/basic listed rod —
+ * see pneumatic.ts's own doc comment for the sourcing caveat that still
+ * applies (a manufacturer may offer other rod diameters per bore).
  */
 import { columnCapacity, END_CONDITIONS } from "../calculators/knik.ts";
+import { ALL_BORES } from "../calculators/pneumatic.ts";
 
 /** 1 bar (gauge) = 0,1 N/mm². */
 export const BAR_N_PER_MM2 = 0.1;
@@ -25,32 +26,16 @@ export type CylinderRow = {
   rod: number;
 };
 
-/** ISO 15552 profile cylinders, basic rod. Ø 32–320 mm. */
-export const ISO_15552: readonly CylinderRow[] = [
-  { series: "iso15552", bore: 32, rod: 12 },
-  { series: "iso15552", bore: 40, rod: 16 },
-  { series: "iso15552", bore: 50, rod: 20 },
-  { series: "iso15552", bore: 63, rod: 20 },
-  { series: "iso15552", bore: 80, rod: 25 },
-  { series: "iso15552", bore: 100, rod: 25 },
-  { series: "iso15552", bore: 125, rod: 32 },
-  { series: "iso15552", bore: 160, rod: 40 },
-  { series: "iso15552", bore: 200, rod: 40 },
-  { series: "iso15552", bore: 250, rod: 50 },
-  { series: "iso15552", bore: 320, rod: 63 },
-];
+function toSeriesId(series: "ISO 15552" | "ISO 6432"): SeriesId {
+  return series === "ISO 15552" ? "iso15552" : "iso6432";
+}
 
-export const ISO_6432: readonly CylinderRow[] = [
-  { series: "iso6432", bore: 8, rod: 4 },
-  { series: "iso6432", bore: 10, rod: 4 },
-  { series: "iso6432", bore: 12, rod: 6 },
-  { series: "iso6432", bore: 16, rod: 6 },
-  { series: "iso6432", bore: 20, rod: 8 },
-  { series: "iso6432", bore: 25, rod: 10 },
-];
-
-/** Mini first (Ø8–25), then profile (Ø32–320). Bore is the result; series follows. */
-export const CATALOG: readonly CylinderRow[] = [...ISO_6432, ...ISO_15552];
+/** Derived from calculators/pneumatic.ts's ALL_BORES — one row per bore, using its first/basic rod option. Ø8–320 mm, ISO 6432 first then ISO 15552. */
+export const CATALOG: readonly CylinderRow[] = ALL_BORES.map((row) => ({
+  series: toSeriesId(row.series),
+  bore: row.bore,
+  rod: row.rods[0],
+}));
 
 export function pistonAreaMm2(bore: number) {
   return (Math.PI * bore * bore) / 4;

@@ -10,15 +10,17 @@ export type CylinderRow = { series: "ISO 15552" | "ISO 6432"; bore: number; rods
  * trek, dikke voor druk/uitknikvastheid) — de eerste is de meest gangbare.
  * Controleer de fabrikant-catalogus voor de volledige set opties.
  *
- * E10 (16 sept 2026 review): deze tabel en de aparte tabel in
- * toolkit/cylinder.ts geven bij Ø200/250/320 een ANDERE basis-stangdiameter
- * (hier 50/63/80, daar 40/50/63). Geen van beide bronbestanden noemt een
- * specifiek fabrikant/typenummer per rij, dus welke variant elke rij precies
- * representeert kon niet worden vastgesteld — reken dit niet als één
- * geverifieerde catalogus. Voor een echte bestelling: kies één met naam
- * genoemde cilinderfamilie (bijv. Festo DSBC-...-Ø200-...-PPVA) en gebruik
- * de stangdiameter uit die specifieke catalogus, niet uit deze generieke
- * tabel.
+ * ENG-004 (audit, 17 sept 2026): dit is nu de ENIGE bron voor boring/
+ * stangdiameter-combinaties in de app — toolkit/cylinder.ts leidt zijn eigen
+ * tabel hiervan af in plaats van een eigen, onafhankelijk afwijkende kopie
+ * bij te houden (voorheen gaf het bij Ø200/250/320 een andere basis-
+ * stangdiameter: 40/50/63 daar tegenover 50/63/80 hier). Geen van beide
+ * bronnen noemt een specifiek fabrikant/typenummer per rij, dus welke
+ * variant elke rij precies representeert is niet vastgesteld — reken dit
+ * niet als één geverifieerde catalogus. Voor een echte bestelling: kies één
+ * met naam genoemde cilinderfamilie (bijv. Festo DSBC-...-Ø200-...-PPVA) en
+ * gebruik de stangdiameter uit die specifieke catalogus, niet uit deze
+ * generieke tabel.
  */
 export const ISO6432_BORES: CylinderRow[] = [
   { series: "ISO 6432", bore: 8, rods: [4] },

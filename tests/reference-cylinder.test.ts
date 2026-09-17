@@ -1,18 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  CATALOG,
   cycleLiters,
   forceN,
   forcesAt,
-  ISO_15552,
   minPistonMm,
   pistonAreaMm2,
   sizeCylinder,
 } from "../src/lib/toolkit/cylinder.ts";
 
+const iso15552 = CATALOG.filter((r) => r.series === "iso15552");
+
 describe("pneumatische cilinder", () => {
   it("Ø32 at 6 bar is 482,5 N out, 414,7 N in (rod 12)", () => {
-    const row = ISO_15552[0];
+    const row = iso15552[0];
     assert.equal(row.bore, 32);
     assert.equal(row.rod, 12);
     const f = forcesAt(row, 6);
@@ -79,7 +81,7 @@ describe("pneumatische cilinder", () => {
   });
 
   it("cycle liters is (A+Aann)·s·(p+1)/1e6", () => {
-    const row = ISO_15552[0];
+    const row = iso15552[0];
     const A = pistonAreaMm2(32);
     const Aann = pistonAreaMm2(32) - pistonAreaMm2(12);
     const expected = ((A + Aann) * 100 * 7) / 1e6;

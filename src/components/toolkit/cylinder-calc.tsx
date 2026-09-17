@@ -283,15 +283,8 @@ export function CylinderCalc() {
         <Note>
           {tx(
             locale,
-            "F_uit = p·A_zuiger, F_in = p·A_ring. Geen wrijving. Stang = ISO-basis. Actieve rij is de gekozen boring.",
-            "F_extend = p·A_piston, F_retract = p·A_annulus. No friction. Rod = ISO basic. Active row is the selected bore.",
-          )}
-        </Note>
-        <Note>
-          {tx(
-            locale,
-            'Bij Ø200/250/320 wijkt de stangdiameter hier af van de standaard-rekenhulp ("ISO-boring bij een last") — geen van beide is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.',
-            'At Ø200/250/320 the rod diameter here differs from the default tool ("ISO bore for a load") — neither is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.',
+            "F_uit = p·A_zuiger, F_in = p·A_ring. Geen wrijving. Stang = ISO-basis (dezelfde tabel als de standaard-rekenhulp). Actieve rij is de gekozen boring. Geen rij is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.",
+            "F_extend = p·A_piston, F_retract = p·A_annulus. No friction. Rod = ISO basic (same table as the default tool). Active row is the selected bore. No row is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.",
           )}
         </Note>
         <div className="table-scroll mt-4" tabIndex={0}>

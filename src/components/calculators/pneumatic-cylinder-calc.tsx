@@ -90,7 +90,7 @@ const T = {
     thRod: "Zuigerstang",
     thExtendAt: (p: string) => `Uittrekkracht @ ${p} bar`,
     sourceBadge:
-      'Boring/zuigerstang-combinaties volgens de gangbare cilindercatalogi (Festo DSBC/DNC, SMC CA2/CQ2) die ISO 15552 en ISO 6432 volgen. Sommige boringen hebben meerdere standaard stangdiameters; controleer de fabrikant-catalogus voor de volledige set. Bij Ø200/250/320 wijkt de stangdiameter hier af van de aanvullende rekenhulp ("Lastfactor & luchtverbruik") — geen van beide is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.',
+      "Boring/zuigerstang-combinaties volgens de gangbare cilindercatalogi (Festo DSBC/DNC, SMC CA2/CQ2) die ISO 15552 en ISO 6432 volgen — dezelfde tabel gebruikt de aanvullende rekenhulp (\"Lastfactor & luchtverbruik\"). Sommige boringen hebben meerdere standaard stangdiameters; controleer de fabrikant-catalogus voor de volledige set. Geen enkele rij is aan een genoemd fabrikant-typenummer gekoppeld; gebruik voor een bestelling de datasheet van één met naam genoemde cilinderfamilie.",
     sourceWiki: "Wikipedia — Pneumatic cylinder",
     copyLoad: (F: string, p: string) => `Last ${F} N bij ${p} bar`,
     copyBore: (bore: number, series: string) => `Aanbevolen boring: Ø${bore} mm (${series})`,
@@ -150,7 +150,7 @@ const T = {
     thRod: "Rod",
     thExtendAt: (p: string) => `Extend force @ ${p} bar`,
     sourceBadge:
-      'Bore/rod combinations per common cylinder catalogs (Festo DSBC/DNC, SMC CA2/CQ2) following ISO 15552 and ISO 6432. Some bores have several standard rod diameters; check the manufacturer catalog for the full set. At Ø200/250/320 the rod diameter here differs from the supplementary tool ("Load factor & air use") — neither is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.',
+      "Bore/rod combinations per common cylinder catalogs (Festo DSBC/DNC, SMC CA2/CQ2) following ISO 15552 and ISO 6432 — the same table the supplementary tool (\"Load factor & air use\") uses. Some bores have several standard rod diameters; check the manufacturer catalog for the full set. No row is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.",
     sourceWiki: "Wikipedia — Pneumatic cylinder",
     copyLoad: (F: string, p: string) => `Load ${F} N at ${p} bar`,
     copyBore: (bore: number, series: string) => `Recommended bore: Ø${bore} mm (${series})`,
