@@ -79,3 +79,46 @@ export function minBoreFor(
 export function fmtN0(n: number): string {
   return n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
 }
+
+/**
+ * PNEU-001: F = p*A is the theoretical force with no losses. Real cylinders
+ * lose 5-20% to seal/piston friction depending on seal type, lubrication
+ * and wear — commonly cited manufacturer application-guide figures put a
+ * well-lubricated, new standard double-acting cylinder at eta ~ 0.90-0.95,
+ * degrading toward 0.80-0.85 for worn/dry seals. This is a heuristic
+ * derating, not a catalogue guarantee for any specific cylinder.
+ */
+export function effectiveForce(theoreticalN: number, efficiency: number): number {
+  return theoreticalN * efficiency;
+}
+
+const ATMOSPHERIC_BAR = 1.013;
+
+/**
+ * Free-air (Normal-liter) consumption for one full extend+retract cycle,
+ * isothermal ideal-gas approximation: the compressed-air volume in the
+ * cylinder chamber, referenced back to atmospheric pressure via the
+ * absolute pressure ratio. This is the standard pneumatics
+ * application-engineering formula (Festo/SMC/Parker sizing guides), not an
+ * ISO-standard formula — it ignores line/valve pressure drop, dead volume
+ * in fittings and hoses, and any leakage.
+ */
+export function airConsumptionPerCycleL(
+  boreMm: number,
+  rodMm: number,
+  strokeMm: number,
+  pBarGauge: number,
+): number {
+  const ratio = (pBarGauge + ATMOSPHERIC_BAR) / ATMOSPHERIC_BAR;
+  const extendVolumeL = (circleArea(boreMm) * strokeMm) / 1e6;
+  const retractVolumeL = (annulusArea(boreMm, rodMm) * strokeMm) / 1e6;
+  return (extendVolumeL + retractVolumeL) * ratio;
+}
+
+export function airConsumptionPerMinuteL(qCycleL: number, cyclesPerMin: number): number {
+  return qCycleL * cyclesPerMin;
+}
+
+export function fmtAir(n: number, digits = 2): string {
+  return n.toLocaleString("nl-NL", { maximumFractionDigits: digits });
+}

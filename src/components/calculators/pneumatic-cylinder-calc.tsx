@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
+  airConsumptionPerCycleL,
+  airConsumptionPerMinuteL,
   ALL_BORES,
+  effectiveForce,
   extendForce,
+  fmtAir,
   fmtN0,
   minBoreFor,
   retractForce,
@@ -43,8 +47,8 @@ const CYLINDER_META: EngineeringSourceMeta = {
   checkedDate: "2026-09-17",
   validityRange: { nl: "Boring tot Ø320 mm", en: "Bore up to Ø320 mm" },
   assumptions: {
-    nl: "ISO 15552/6432 zijn interwisselbaarheid-/montagemaatnormen, geen krachtprestatiegarantie. F = p·A is theoretisch: geen wrijving, echt drukverlies, snelheids-/debietlimieten of demping zijn inbegrepen — reken zelf een veiligheidsfactor.",
-    en: "ISO 15552/6432 are interchangeability/mounting-dimension standards, not a force-performance guarantee. F = p*A is theoretical: no friction, real pressure drop, speed/flow limits or cushioning are included — add your own safety factor.",
+    nl: "ISO 15552/6432 zijn interwisselbaarheid-/montagemaatnormen, geen krachtprestatiegarantie. F = p·A hierboven is theoretisch (geen wrijving); een wrijvingsrendement en het luchtverbruik staan als optionele controle onderaan. Leidingdrukverlies, snelheids-/debietlimieten en demping zitten niet in dit model — reken zelf een veiligheidsfactor.",
+    en: "ISO 15552/6432 are interchangeability/mounting-dimension standards, not a force-performance guarantee. F = p*A above is theoretical (no friction); a friction efficiency and air consumption are available as an optional check below. Line pressure drop, speed/flow limits and cushioning are not modelled — add your own safety factor.",
   },
   sourceUrl: "https://committee.iso.org/standard/66921.html?browse=ics",
 };
@@ -94,6 +98,21 @@ const T = {
     copyExtend: (n: string) => `Uittrekkracht ${n} N`,
     copyBuckling: (fcr: string, s: string) =>
       `Uitknik zuigerstang (o.b.v. F_uit, geblokkeerd geval): F_cr = ${fcr} N, S = ${s}`,
+    hideAir: "Verberg rendement en luchtverbruik",
+    showAir: "Rendement en luchtverbruik (optioneel)",
+    airIntro:
+      "F = p·A is theoretisch: wrijving in zuiger- en stangafdichtingen kost typisch 5-20% van de theoretische kracht. Het luchtverbruik is de vrije-luchthoeveelheid (bij atmosferische druk) die de compressor per cyclus/minuut moet leveren — een gangbare pneumatiek-vuistregelformule, geen ISO-norm.",
+    efficiencyLabel: "Cilinderrendement η (0-1)",
+    cyclesLabel: "Cycli per minuut",
+    effExtendForce: "Effectieve uittrekkracht (met wrijving)",
+    effRetractForce: "Effectieve intrekkracht (met wrijving)",
+    airPerCycle: "Luchtverbruik per cyclus",
+    airPerMinute: "Luchtverbruik per minuut",
+    fillAir: "Vul rendement, slag en cycli per minuut in (alle groter dan 0).",
+    copyEfficiency: (eta: string, effUit: string, effIn: string) =>
+      `Rendement η=${eta}: effectieve uittrekkracht ${effUit} N, intrekkracht ${effIn} N`,
+    copyAir: (perCycle: string, perMin: string) =>
+      `Luchtverbruik: ${perCycle} Nl/cyclus, ${perMin} Nl/min`,
   },
   en: {
     heading: "ISO bore for a load",
@@ -139,6 +158,21 @@ const T = {
     copyExtend: (n: string) => `Extend force ${n} N`,
     copyBuckling: (fcr: string, s: string) =>
       `Rod buckling (based on F_uit, blocked case): F_cr = ${fcr} N, S = ${s}`,
+    hideAir: "Hide efficiency and air consumption",
+    showAir: "Efficiency and air consumption (optional)",
+    airIntro:
+      "F = p*A is theoretical: piston/rod seal friction typically costs 5-20% of the theoretical force. Air consumption is the free-air volume (at atmospheric pressure) the compressor must supply per cycle/minute — a common pneumatics rule-of-thumb formula, not an ISO standard.",
+    efficiencyLabel: "Cylinder efficiency η (0-1)",
+    cyclesLabel: "Cycles per minute",
+    effExtendForce: "Effective extend force (with friction)",
+    effRetractForce: "Effective retract force (with friction)",
+    airPerCycle: "Air consumption per cycle",
+    airPerMinute: "Air consumption per minute",
+    fillAir: "Enter efficiency, stroke and cycles per minute (all greater than 0).",
+    copyEfficiency: (eta: string, effUit: string, effIn: string) =>
+      `Efficiency eta=${eta}: effective extend force ${effUit} N, retract force ${effIn} N`,
+    copyAir: (perCycle: string, perMin: string) =>
+      `Air consumption: ${perCycle} Nl/cycle, ${perMin} Nl/min`,
   },
 };
 
@@ -154,6 +188,9 @@ export function PneumaticCylinderCalc() {
   );
   const [materialId, setMaterialId] = useState(search.get("material") ?? "staal");
   const [showBuckling, setShowBuckling] = useState(false);
+  const [efficiency, setEfficiency] = useState(search.get("eta") ?? "0.9");
+  const [cyclesPerMin, setCyclesPerMin] = useState(search.get("cpm") ?? "10");
+  const [showAir, setShowAir] = useState(false);
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -163,9 +200,11 @@ export function PneumaticCylinderCalc() {
     set("l", stroke);
     next.set("end", endCondition);
     next.set("material", materialId);
+    set("eta", efficiency);
+    set("cpm", cyclesPerMin);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [force, pressure, stroke, endCondition, materialId]);
+  }, [force, pressure, stroke, endCondition, materialId, efficiency, cyclesPerMin]);
 
   const F = parseNum(force);
   const p = parseNum(pressure);
@@ -195,6 +234,18 @@ export function PneumaticCylinderCalc() {
     });
   }, [recommended, rod, L, p, endCondition, materialId]);
 
+  const etaVal = parseNum(efficiency);
+  const cyclesVal = parseNum(cyclesPerMin);
+  const airResult = useMemo(() => {
+    if (!recommended || rod == null || p == null || L == null || !(L > 0)) return null;
+    if (etaVal == null || !(etaVal > 0) || cyclesVal == null || !(cyclesVal > 0)) return null;
+    const effUit = effectiveForce(extendForce(recommended.bore, p), etaVal);
+    const effIn = effectiveForce(retractForce(recommended.bore, rod, p), etaVal);
+    const qCycle = airConsumptionPerCycleL(recommended.bore, rod, L, p);
+    const qMin = airConsumptionPerMinuteL(qCycle, cyclesVal);
+    return { effUit, effIn, qCycle, qMin };
+  }, [recommended, rod, p, L, etaVal, cyclesVal]);
+
   const copy = useMemo(() => {
     if (!recommended || F == null || p == null) return "";
     const extend = extendForce(recommended.bore, p);
@@ -206,10 +257,14 @@ export function PneumaticCylinderCalc() {
     ];
     if (buckling)
       lines.push(t.copyBuckling(fmtN0(buckling.Fcr), fmtDotComma(buckling.safety ?? 0, 2)));
+    if (airResult) {
+      lines.push(t.copyEfficiency(efficiency, fmtN0(airResult.effUit), fmtN0(airResult.effIn)));
+      lines.push(t.copyAir(fmtAir(airResult.qCycle), fmtAir(airResult.qMin)));
+    }
     lines.push(metaCopyLine(CYLINDER_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recommended, F, p, rod, buckling, locale]);
+  }, [recommended, F, p, rod, buckling, airResult, efficiency, locale]);
 
   return (
     <>
@@ -322,6 +377,42 @@ export function PneumaticCylinderCalc() {
                   </>
                 ) : (
                   <p className="mt-4 text-sm text-muted">{t.fillLength}</p>
+                )}
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => setShowAir((s) => !s)}
+              className="mt-3 text-sm font-medium text-ink underline decoration-border-strong underline-offset-4 hover:decoration-ink"
+            >
+              {showAir ? t.hideAir : t.showAir}
+            </button>
+            {showAir ? (
+              <div className="mt-4 rounded-lg border border-border bg-bg p-4">
+                <Note>{t.airIntro}</Note>
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <Field label={t.strokeLabel}>
+                    <NumInput id="pneu-air-stroke" value={stroke} onChange={setStroke} />
+                  </Field>
+                  <Field label={t.efficiencyLabel}>
+                    <NumInput id="pneu-efficiency" value={efficiency} onChange={setEfficiency} />
+                  </Field>
+                  <Field label={t.cyclesLabel}>
+                    <NumInput id="pneu-cycles" value={cyclesPerMin} onChange={setCyclesPerMin} />
+                  </Field>
+                </div>
+                {airResult ? (
+                  <ResultGrid
+                    items={[
+                      { label: t.effExtendForce, value: `${fmtN0(airResult.effUit)} N` },
+                      { label: t.effRetractForce, value: `${fmtN0(airResult.effIn)} N` },
+                      { label: t.airPerCycle, value: `${fmtAir(airResult.qCycle)} Nl` },
+                      { label: t.airPerMinute, value: `${fmtAir(airResult.qMin)} Nl/min` },
+                    ]}
+                  />
+                ) : (
+                  <p className="mt-4 text-sm text-muted">{t.fillAir}</p>
                 )}
               </div>
             ) : null}

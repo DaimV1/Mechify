@@ -36,6 +36,13 @@ import {
   clampStatus,
   computeBoltedJoint,
 } from "../src/lib/calculators/bolted-joint.ts";
+import {
+  airConsumptionPerCycleL,
+  airConsumptionPerMinuteL,
+  annulusArea,
+  circleArea,
+  effectiveForce,
+} from "../src/lib/calculators/pneumatic.ts";
 
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
@@ -405,5 +412,35 @@ describe("Bolted joint (VDI 2230-lite static verification)", () => {
     const r = computeBoltedJoint({ As: 36.6, Rp: 720, FV: 5, FZ: 0.5, phi: 0.3, FA: 200, FKreq: 3 });
     assert.equal(clampStatus(r.fKR, 3), "fail");
     assert.equal(boltSafetyStatus(r.safetyFactor), "fail");
+  });
+});
+
+// PNEU-001 — friction-derated force and free-air consumption.
+describe("Pneumatic cylinder: efficiency and air consumption (PNEU-001)", () => {
+  it("effective force is the theoretical force scaled by the efficiency factor", () => {
+    close(effectiveForce(1000, 0.9), 900);
+    close(effectiveForce(1000, 1), 1000);
+  });
+
+  it("air consumption per cycle matches (A_extend+A_retract)*stroke*(p+1.013)/1.013, in liters", () => {
+    const bore = 32;
+    const rod = 12;
+    const stroke = 100;
+    const pBar = 6;
+    const expected =
+      ((circleArea(bore) + annulusArea(bore, rod)) * stroke * ((pBar + 1.013) / 1.013)) / 1e6;
+    close(airConsumptionPerCycleL(bore, rod, stroke, pBar), expected, 1e-9);
+  });
+
+  it("air consumption scales linearly with cycle rate", () => {
+    const perCycle = airConsumptionPerCycleL(32, 12, 100, 6);
+    close(airConsumptionPerMinuteL(perCycle, 10), perCycle * 10);
+    close(airConsumptionPerMinuteL(perCycle, 0), 0);
+  });
+
+  it("higher pressure increases air consumption for the same geometry", () => {
+    const low = airConsumptionPerCycleL(32, 12, 100, 4);
+    const high = airConsumptionPerCycleL(32, 12, 100, 8);
+    assert.ok(high > low);
   });
 });
