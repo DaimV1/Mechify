@@ -240,16 +240,16 @@ export function BoltSection({ row, hole }: { row: FastenerRow | null; hole: numb
         {plate}
       </text>
       {/* clearance D */}
-      <rect x="140" y="96" width="56" height="76" fill="var(--paper)" />
+      <rect x="140" y="96" width="56" height="76" fill="var(--color-paper)" />
       {/* shank d, flush between head and nut */}
-      <rect x="150" y="96" width="36" height="76" fill="var(--accent)" />
+      <rect x="150" y="96" width="36" height="76" fill="var(--color-accent)" />
       {/* hex head, flush against the top plate */}
       <rect
         x="122"
         y="64"
         width="92"
         height="32"
-        fill="var(--accent)"
+        fill="var(--color-accent)"
         stroke="currentColor"
         strokeWidth="1"
       />
@@ -259,11 +259,11 @@ export function BoltSection({ row, hole }: { row: FastenerRow | null; hole: numb
         y="172"
         width="92"
         height="24"
-        fill="var(--paper)"
+        fill="var(--color-paper)"
         stroke="currentColor"
         strokeWidth="1.2"
       />
-      <rect x="150" y="172" width="36" height="24" fill="var(--accent)" />
+      <rect x="150" y="172" width="36" height="24" fill="var(--color-accent)" />
 
       <Ext x1={122} y1={64} x2={122} y2={40} />
       <Ext x1={214} y1={64} x2={214} y2={40} />
@@ -320,7 +320,7 @@ export function KeywaySection({
     >
       <HatchDefs uid={uid} />
       <circle cx={cx} cy={cy} r={rHub} fill={`url(#${uid}-a)`} stroke="currentColor" />
-      <circle cx={cx} cy={cy} r={rShaft} fill="var(--paper)" stroke="none" />
+      <circle cx={cx} cy={cy} r={rShaft} fill="var(--color-paper)" stroke="none" />
       <circle cx={cx} cy={cy} r={rShaft} fill={`url(#${uid}-b)`} stroke="currentColor" />
       {/* key sits in both grooves */}
       <rect
@@ -329,7 +329,7 @@ export function KeywaySection({
         width={bw}
         height={t1 + t2}
         rx="1.5"
-        fill="var(--accent)"
+        fill="var(--color-accent)"
         stroke="currentColor"
         strokeWidth="1"
       />
@@ -440,27 +440,27 @@ export function CirclipSection({
             stroke="currentColor"
           />
           {/* OD grooves: notches into the shaft */}
-          <rect x={grooveX} y={bodyY} width={grooveW} height={grooveD} fill="var(--paper)" />
+          <rect x={grooveX} y={bodyY} width={grooveW} height={grooveD} fill="var(--color-paper)" />
           <rect
             x={grooveX}
             y={bodyY + bodyH - grooveD}
             width={grooveW}
             height={grooveD}
-            fill="var(--paper)"
+            fill="var(--color-paper)"
           />
           <rect
             x={grooveX + 3}
             y={bodyY + 2}
             width={grooveW - 6}
             height={grooveD - 2}
-            fill="var(--accent)"
+            fill="var(--color-accent)"
           />
           <rect
             x={grooveX + 3}
             y={bodyY + bodyH - grooveD}
             width={grooveW - 6}
             height={grooveD - 2}
-            fill="var(--accent)"
+            fill="var(--color-accent)"
           />
         </>
       ) : (
@@ -478,7 +478,7 @@ export function CirclipSection({
             y={bodyY}
             width={bodyW}
             height={bodyH}
-            fill="var(--paper)"
+            fill="var(--color-paper)"
             stroke="currentColor"
           />
           {/* ID grooves: notches into the housing wall */}
@@ -487,7 +487,7 @@ export function CirclipSection({
             y={bodyY - grooveD}
             width={grooveW}
             height={grooveD}
-            fill="var(--paper)"
+            fill="var(--color-paper)"
             stroke="currentColor"
           />
           <rect
@@ -495,7 +495,7 @@ export function CirclipSection({
             y={bodyY + bodyH}
             width={grooveW}
             height={grooveD}
-            fill="var(--paper)"
+            fill="var(--color-paper)"
             stroke="currentColor"
           />
           <rect
@@ -503,14 +503,14 @@ export function CirclipSection({
             y={bodyY - grooveD}
             width={grooveW - 6}
             height={grooveD}
-            fill="var(--accent)"
+            fill="var(--color-accent)"
           />
           <rect
             x={grooveX + 3}
             y={bodyY + bodyH}
             width={grooveW - 6}
             height={grooveD}
-            fill="var(--accent)"
+            fill="var(--color-accent)"
           />
         </>
       )}
@@ -527,7 +527,7 @@ export function CirclipSection({
       <text
         x={grooveX + grooveW + 8}
         y={asShaft ? bodyY + 12 : bodyY - grooveD - 8}
-        fill="var(--accent)"
+        fill="var(--color-accent)"
         fontSize="11"
         fontFamily={FONT}
       >
@@ -671,7 +671,7 @@ export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: n
             fill={`url(#${uid}-a)`}
             stroke="currentColor"
           />
-          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--paper)" />
+          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--color-paper)" />
           <line
             x1={grooveX}
             y1="150"
@@ -692,7 +692,7 @@ export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: n
             cx="220"
             cy="133"
             r="43"
-            fill="var(--accent)"
+            fill="var(--color-accent)"
             stroke="currentColor"
             strokeWidth="1.5"
           />
@@ -723,7 +723,7 @@ export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: n
             fill={`url(#${uid}-a)`}
             stroke="currentColor"
           />
-          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--paper)" />
+          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--color-paper)" />
           <line
             x1={grooveX}
             y1="150"
@@ -744,7 +744,7 @@ export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: n
             cx="220"
             cy="143"
             r="34"
-            fill="var(--accent)"
+            fill="var(--color-accent)"
             stroke="currentColor"
             strokeWidth="1.5"
           />
@@ -838,7 +838,7 @@ export function BendSection({
       <HatchDefs uid={uid} />
       {/* die */}
       <rect x="40" y="190" width="360" height="54" fill={`url(#${uid}-a)`} stroke="currentColor" />
-      <path d={`M186,190 L${bendX},224 L254,190 Z`} fill="var(--paper)" />
+      <path d={`M186,190 L${bendX},224 L254,190 Z`} fill="var(--color-paper)" />
       <text x="56" y="228" fill="currentColor" fontSize="12" fontFamily={FONT}>
         {tx(locale, "matrijs", "die")}
       </text>
@@ -855,7 +855,7 @@ export function BendSection({
       <path
         d={path}
         fill="none"
-        stroke="var(--accent)"
+        stroke="var(--color-accent)"
         strokeWidth={accentW}
         strokeLinecap="butt"
         strokeLinejoin="round"
@@ -953,7 +953,7 @@ function BuckleSupportH({
   if (kind === "fixed") return <GroundHatchH x={x} y={y} dir={dir} />;
   return (
     <>
-      <circle cx={x} cy={y} r="4" fill="var(--paper)" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx={x} cy={y} r="4" fill="var(--color-paper)" stroke="currentColor" strokeWidth="1.2" />
       <GroundHatchH x={x + dir * 11} y={y} dir={dir} />
     </>
   );
@@ -1007,7 +1007,7 @@ export function BucklingModes({ active }: { active: EndConditionId }) {
         strokeDasharray="3 4"
         opacity="0.3"
       />
-      <path d={d} fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
+      <path d={d} fill="none" stroke="var(--color-accent)" strokeWidth="3" strokeLinecap="round" />
       <BuckleSupportH kind={c.near} x={x0} y={cy} dir={-1} />
       <BuckleSupportH kind={c.far} x={x1} y={cy} dir={1} />
       <line
@@ -1030,7 +1030,7 @@ export function BucklingModes({ active }: { active: EndConditionId }) {
         x={(x0 + x1) / 2}
         y={172}
         textAnchor="middle"
-        fill="var(--accent)"
+        fill="var(--color-accent)"
         fontSize="13"
         fontFamily={FONT}
         fontWeight={500}
@@ -1122,7 +1122,7 @@ export function BeamDeflection({
         strokeDasharray="3 4"
         opacity="0.4"
       />
-      <path d={curve} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d={curve} fill="none" stroke="var(--color-accent)" strokeWidth="2.5" strokeLinecap="round" />
       {end === "ss" ? (
         <>
           <BuckleSupportH kind="pin" x={x0} y={cy} dir={-1} />
@@ -1132,11 +1132,11 @@ export function BeamDeflection({
         <BuckleSupportH kind="fixed" x={x0} y={cy} dir={-1} />
       )}
 
-      <line x1={loadX} y1={cy - 40} x2={loadX} y2={cy - 6} stroke="var(--accent)" strokeWidth="2" />
+      <line x1={loadX} y1={cy - 40} x2={loadX} y2={cy - 6} stroke="var(--color-accent)" strokeWidth="2" />
       <path
         d={`M${loadX - 5},${cy - 12} L${loadX},${cy - 4} L${loadX + 5},${cy - 12}`}
         fill="none"
-        stroke="var(--accent)"
+        stroke="var(--color-accent)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -1145,7 +1145,7 @@ export function BeamDeflection({
         x={loadX}
         y={cy - 46}
         textAnchor="middle"
-        fill="var(--accent)"
+        fill="var(--color-accent)"
         fontSize="13"
         fontFamily={FONT}
         fontWeight={500}
@@ -1168,7 +1168,7 @@ export function BeamDeflection({
             x={loadX}
             y={cy + amp + 28}
             textAnchor="middle"
-            fill="var(--accent)"
+            fill="var(--color-accent)"
             fontSize="11"
             fontFamily={FONT}
           >
@@ -1190,7 +1190,7 @@ export function BeamDeflection({
           x={loadX}
           y={cy + amp + 28}
           textAnchor="middle"
-          fill="var(--accent)"
+          fill="var(--color-accent)"
           fontSize="11"
           fontFamily={FONT}
         >
@@ -1329,7 +1329,7 @@ export function BearingFitChart({
         y={shaftTop}
         width={housingW}
         height={shaftBot - shaftTop}
-        fill="var(--accent)"
+        fill="var(--color-accent)"
       />
 
       {/* rolling elements */}
@@ -1337,14 +1337,14 @@ export function BearingFitChart({
         cx={ballCx}
         cy={ballTopCy}
         r={ballR}
-        fill="color-mix(in oklab, var(--accent) 35%, var(--paper))"
+        fill="color-mix(in oklab, var(--color-accent) 35%, var(--color-paper))"
         stroke="currentColor"
       />
       <circle
         cx={ballCx}
         cy={ballBotCy}
         r={ballR}
-        fill="color-mix(in oklab, var(--accent) 35%, var(--paper))"
+        fill="color-mix(in oklab, var(--color-accent) 35%, var(--color-paper))"
         stroke="currentColor"
       />
 
