@@ -7,7 +7,9 @@ import {
   computeBeam,
   DEFLECTION_GUIDELINES,
   fmtBeamNum,
+  LOAD_KINDS,
   type BeamType,
+  type LoadKind,
 } from "@/lib/calculators/beam";
 import {
   eFor,
@@ -37,20 +39,21 @@ import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta
 
 const BEAM_META: EngineeringSourceMeta = {
   basisType: "physics",
-  reference: "Euler-Bernoulli beam theory, single point load (Roark)",
+  reference: "Euler-Bernoulli beam theory, one point load or one full-span UDL (Roark)",
   status: "current",
   checkedDate: "2026-09-17",
   assumptions: {
-    nl: "Lineair-elastisch, kleine doorbuigingen, alleen één puntlast — geen verdeelde last, meerdere lasten of oplegreacties. Geen vervanging van een sterkteberekening volgens EN 1993-1-1 bij kritieke constructies.",
-    en: "Linear-elastic, small deflections, one point load only — no UDL, multiple loads, or reactions. Not a substitute for a strength calculation per EN 1993-1-1 on critical structures.",
+    nl: "Lineair-elastisch, kleine doorbuigingen. Eén enkele last per berekening — óf één puntlast óf één gelijkmatig verdeelde last over de volledige overspanning — geen combinaties of meerdere afzonderlijke lasten (superpositie). Oplegreacties zijn inbegrepen. Geen vervanging van een sterkteberekening volgens EN 1993-1-1 bij kritieke constructies.",
+    en: "Linear-elastic, small deflections. One single load per calculation — either one point load or one full-span uniformly distributed load — no combinations or multiple separate loads (superposition). Support reactions are included. Not a substitute for a strength calculation per EN 1993-1-1 on critical structures.",
   },
 };
 
 const T = {
   nl: {
-    heading: "Doorbuiging onder puntlast",
+    heading: "Doorbuiging onder puntlast of verdeelde last",
     intro:
-      "Euler-Bernoulli balktheorie, één puntlast. Vrij opgelegd: a is de afstand van de last tot de linker oplegging. Uitkraging: a is de afstand van de last tot de inklemming (tip bij a = L). Toont zowel de doorbuiging onder de last als de werkelijke maximale doorbuiging — bij een niet-gecentreerde last vallen die niet samen.",
+      "Euler-Bernoulli balktheorie, één puntlast óf één gelijkmatig verdeelde last over de volledige overspanning. Vrij opgelegd: a is de afstand van de puntlast tot de linker oplegging. Uitkraging: a is de afstand van de puntlast tot de inklemming (tip bij a = L). Toont zowel de doorbuiging onder de last als de werkelijke maximale doorbuiging (bij een niet-gecentreerde puntlast vallen die niet samen) en de oplegreacties.",
+    loadKind: "Soort last",
     beamType: "Balktype",
     section: "Doorsnede",
     axis: "Buigas",
@@ -61,6 +64,7 @@ const T = {
     span: "Overspanning / lengte L (mm)",
     loadPosition: "Positie last a (mm)",
     pointLoad: "Puntlast F (N)",
+    udlLoad: "Verdeelde last w (N/mm)",
     material: "Materiaal",
     diameterD: "Diameter D (mm)",
     outerD: "Buitendiameter D (mm)",
@@ -73,12 +77,17 @@ const T = {
     fillDims: "Vul geldige afmetingen in voor de gekozen doorsnede.",
     fillSpan:
       "Vul een overspanning L en een lastpositie a in (0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging).",
+    fillSpanUDL: "Vul een overspanning L groter dan 0 in.",
     deflectionAtLoad: "Doorbuiging onder de last δ(a)",
     deflectionMax: "Maximale doorbuiging δ_max",
     xMax: "Positie x (δ_max)",
     moment: "Moment M_max",
     sigmaMax: "σ_max",
     ratio: "L / δ_max",
+    reactionA: "Oplegreactie A",
+    reactionB: "Oplegreactie B",
+    reactionFixed: "Reactie bij inklemming",
+    reactionFree: "Reactie bij vrij uiteinde",
     sameNote:
       "Gecentreerde last of uitkraging: δ(a) en δ_max vallen hier samen (het maximum ligt bij de last resp. bij de tip).",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
@@ -94,11 +103,15 @@ const T = {
     thRatio: "Verhouding",
     thUse: "Typische toepassing",
     source: "Engineering ToolBox — Beam deflection and stress",
+    diagramFillPrompt: "Vul geldige balkgegevens in om het schema te tonen.",
+    diagramUnavailableUDL:
+      "Schematisch diagram is alleen beschikbaar voor een puntlast; de resultaten hierboven gelden wel voor de verdeelde last.",
   },
   en: {
-    heading: "Deflection under point load",
+    heading: "Deflection under point load or distributed load",
     intro:
-      "Euler-Bernoulli beam theory, one point load. Simply supported: a is the distance from the load to the left support. Cantilever: a is the distance from the load to the fixed support (tip at a = L). Shows both the deflection at the load and the actual maximum deflection — for an off-centre load these are not the same.",
+      "Euler-Bernoulli beam theory, one point load or one uniformly distributed load over the full span. Simply supported: a is the distance from the point load to the left support. Cantilever: a is the distance from the point load to the fixed support (tip at a = L). Shows both the deflection at the load and the actual maximum deflection (for an off-centre point load these are not the same) and the support reactions.",
+    loadKind: "Load type",
     beamType: "Beam type",
     section: "Cross-section",
     axis: "Bending axis",
@@ -109,6 +122,7 @@ const T = {
     span: "Span / length L (mm)",
     loadPosition: "Load position a (mm)",
     pointLoad: "Point load F (N)",
+    udlLoad: "Distributed load w (N/mm)",
     material: "Material",
     diameterD: "Diameter D (mm)",
     outerD: "Outer diameter D (mm)",
@@ -121,12 +135,17 @@ const T = {
     fillDims: "Enter valid dimensions for the selected cross-section.",
     fillSpan:
       "Enter a span L and a load position a (0 < a < L for simply supported, 0 < a ≤ L for cantilever).",
+    fillSpanUDL: "Enter a span L greater than 0.",
     deflectionAtLoad: "Deflection at the load δ(a)",
     deflectionMax: "Maximum deflection δ_max",
     xMax: "Position x (δ_max)",
     moment: "Moment M_max",
     sigmaMax: "σ_max",
     ratio: "L / δ_max",
+    reactionA: "Support reaction A",
+    reactionB: "Support reaction B",
+    reactionFixed: "Reaction at the fixed support",
+    reactionFree: "Reaction at the free end",
     sameNote:
       "Centred load or cantilever: δ(a) and δ_max coincide here (the maximum is at the load, or at the tip).",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
@@ -142,6 +161,9 @@ const T = {
     thRatio: "Ratio",
     thUse: "Typical use",
     source: "Engineering ToolBox — Beam deflection and stress",
+    diagramFillPrompt: "Enter valid beam data to show the diagram.",
+    diagramUnavailableUDL:
+      "The schematic diagram is only available for a point load; the results above are still valid for the distributed load.",
   },
 };
 
@@ -151,6 +173,9 @@ export function BeamDeflectionCalc() {
   const [search, setSearch] = useSearchParams();
   const [beamType, setBeamType] = useState<BeamType>(
     (search.get("type") as BeamType) ?? "opgelegd",
+  );
+  const [loadKind, setLoadKind] = useState<LoadKind>(
+    (search.get("loadKind") as LoadKind) ?? "puntlast",
   );
   const [sectionKind, setSectionKind] = useState<SectionKind>(
     (search.get("section") as SectionKind) ?? "rechthoek",
@@ -164,6 +189,7 @@ export function BeamDeflectionCalc() {
   const [L, setL] = useState(search.get("L") ?? "1000");
   const [posA, setPosA] = useState(search.get("posA") ?? "500");
   const [force, setForce] = useState(search.get("f") ?? "500");
+  const [udl, setUdl] = useState(search.get("w") ?? "1");
   const [materialId, setMaterialId] = useState(search.get("material") ?? "staal");
   const [axis, setAxis] = useState<"weak" | "strong">(
     (search.get("axis") as "weak" | "strong") ?? "strong",
@@ -174,6 +200,7 @@ export function BeamDeflectionCalc() {
     const next = new URLSearchParams(search);
     const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
     next.set("type", beamType);
+    next.set("loadKind", loadKind);
     next.set("section", sectionKind);
     set("D", D);
     set("dIn", dIn);
@@ -184,12 +211,30 @@ export function BeamDeflectionCalc() {
     set("L", L);
     set("posA", posA);
     set("f", force);
+    set("w", udl);
     next.set("material", materialId);
     next.set("axis", axis);
     set("allow", allowable);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [beamType, sectionKind, D, dIn, b, h, a, t2, L, posA, force, materialId, axis, allowable]);
+  }, [
+    beamType,
+    loadKind,
+    sectionKind,
+    D,
+    dIn,
+    b,
+    h,
+    a,
+    t2,
+    L,
+    posA,
+    force,
+    udl,
+    materialId,
+    axis,
+    allowable,
+  ]);
 
   const dims = useMemo(() => {
     switch (sectionKind) {
@@ -222,36 +267,46 @@ export function BeamDeflectionCalc() {
   const Lraw = parseNum(L);
   const posARaw = parseNum(posA);
   const Fraw = parseNum(force);
+  const udlRaw = parseNum(udl);
   const allowableRaw = parseNum(allowable);
   const E = eFor(materialId);
   const rp02 = rp02For(materialId);
   const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
+  const isUDL = loadKind === "verdeeld";
 
   const result =
-    section && Lraw != null && posARaw != null && Fraw != null
-      ? computeBeam({ type: beamType, F: Fraw, L: Lraw, a: posARaw, E, I: section.I })
+    section && Lraw != null && (isUDL ? udlRaw != null : posARaw != null && Fraw != null)
+      ? isUDL
+        ? computeBeam({ kind: "verdeeld", type: beamType, w: udlRaw!, L: Lraw, E, I: section.I })
+        : computeBeam({ type: beamType, F: Fraw!, L: Lraw, a: posARaw!, E, I: section.I })
       : null;
 
   const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
   const overYield = sigma != null && sigma > rp02;
   const sameLocation =
-    result != null && Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
+    result != null &&
+    !isUDL &&
+    Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
   const ratio = result && result.deflectionMax > 0 && Lraw ? Lraw / result.deflectionMax : null;
   const allowableOk =
     result != null && allowableRaw != null && allowableRaw > 0
       ? result.deflectionMax <= allowableRaw
       : null;
+  const reactionALabel = isUDL || beamType === "opgelegd" ? t.reactionA : t.reactionFixed;
+  const reactionBLabel = isUDL || beamType === "opgelegd" ? t.reactionB : t.reactionFree;
 
   const copy = useMemo(() => {
     if (!result) return "";
     const beamLabel = BEAM_TYPES.find((bt) => bt.id === beamType);
     const beamLabelText = beamLabel ? label(beamLabel) : "";
+    const loadText = isUDL ? `w=${udl} N/mm` : `a=${posA} mm, F=${force} N`;
     return [
-      `${beamLabelText}, L=${L} mm, a=${posA} mm, F=${force} N, ${label(material)}, ${axisApplies ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
-      `δ(a) = ${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
+      `${beamLabelText}, L=${L} mm, ${loadText}, ${label(material)}, ${axisApplies ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
+      isUDL ? "" : `δ(a) = ${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
       `δ_max = ${fmtBeamNum(result.deflectionMax, 3)} mm bij x=${fmtBeamNum(result.xMax, 0)} mm`,
       `M_max = ${fmtBeamNum(result.momentMax, 0)} N·mm`,
+      `${reactionALabel} = ${fmtBeamNum(result.reactionA, 0)} N, ${reactionBLabel} = ${fmtBeamNum(result.reactionB, 0)} N`,
       sigma != null ? `σ_max = ${fmtBeamNum(sigma, 1)} N/mm²` : "",
       ratio != null ? `L/δ_max ≈ ${fmtBeamNum(ratio, 0)}` : "",
       allowableOk != null
@@ -267,14 +322,18 @@ export function BeamDeflectionCalc() {
   }, [
     result,
     beamType,
+    isUDL,
     L,
     posA,
     force,
+    udl,
     material,
     ratio,
     sigma,
     allowableOk,
     allowable,
+    reactionALabel,
+    reactionBLabel,
     axis,
     axisApplies,
     locale,
@@ -290,6 +349,15 @@ export function BeamDeflectionCalc() {
         <Note>{t.intro}</Note>
         <SourceMetaBadge meta={BEAM_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Field label={t.loadKind}>
+            <SelectInput value={loadKind} onChange={(v) => setLoadKind(v as LoadKind)}>
+              {LOAD_KINDS.map((lk) => (
+                <option key={lk.id} value={lk.id}>
+                  {label(lk)}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
           <Field label={t.beamType}>
             <SelectInput value={beamType} onChange={(v) => setBeamType(v as BeamType)}>
               {BEAM_TYPES.map((bt) => (
@@ -311,12 +379,20 @@ export function BeamDeflectionCalc() {
           <Field label={t.span}>
             <NumInput id="beam-L" value={L} onChange={setL} />
           </Field>
-          <Field label={t.loadPosition}>
-            <NumInput id="beam-a" value={posA} onChange={setPosA} />
-          </Field>
-          <Field label={t.pointLoad}>
-            <NumInput id="beam-force" value={force} onChange={setForce} />
-          </Field>
+          {isUDL ? (
+            <Field label={t.udlLoad}>
+              <NumInput id="beam-udl" value={udl} onChange={setUdl} />
+            </Field>
+          ) : (
+            <>
+              <Field label={t.loadPosition}>
+                <NumInput id="beam-a" value={posA} onChange={setPosA} />
+              </Field>
+              <Field label={t.pointLoad}>
+                <NumInput id="beam-force" value={force} onChange={setForce} />
+              </Field>
+            </>
+          )}
           <Field label={t.material}>
             <SelectInput value={materialId} onChange={setMaterialId}>
               {MATERIALS_E.map((m) => (
@@ -387,19 +463,23 @@ export function BeamDeflectionCalc() {
         {!section ? (
           <p className="mt-5 text-sm text-muted">{t.fillDims}</p>
         ) : !result ? (
-          <p className="mt-5 text-sm text-muted">{t.fillSpan}</p>
+          <p className="mt-5 text-sm text-muted">{isUDL ? t.fillSpanUDL : t.fillSpan}</p>
         ) : (
           <>
             <ResultGrid
               items={
                 [
-                  {
-                    label: t.deflectionAtLoad,
-                    value: `${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
-                  },
+                  isUDL
+                    ? null
+                    : {
+                        label: t.deflectionAtLoad,
+                        value: `${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
+                      },
                   { label: t.deflectionMax, value: `${fmtBeamNum(result.deflectionMax, 3)} mm` },
                   { label: t.xMax, value: `${fmtBeamNum(result.xMax, 0)} mm` },
                   { label: t.moment, value: `${fmtBeamNum(result.momentMax, 0)} N·mm` },
+                  { label: reactionALabel, value: `${fmtBeamNum(result.reactionA, 0)} N` },
+                  { label: reactionBLabel, value: `${fmtBeamNum(result.reactionB, 0)} N` },
                   sigma != null
                     ? { label: t.sigmaMax, value: `${fmtBeamNum(sigma, 1)} N/mm²` }
                     : null,
@@ -437,7 +517,9 @@ export function BeamDeflectionCalc() {
         )}
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
-        {result && Lraw != null && posARaw != null && Fraw != null && section ? (
+        {isUDL ? (
+          <p>{t.diagramUnavailableUDL}</p>
+        ) : result && Lraw != null && posARaw != null && Fraw != null && section ? (
           <BeamDeflection
             end={beamType === "opgelegd" ? "ss" : "cant"}
             L={Lraw}
@@ -447,7 +529,7 @@ export function BeamDeflectionCalc() {
             I={section.I}
           />
         ) : (
-          <p>Vul geldige balkgegevens in om het schema te tonen.</p>
+          <p>{t.diagramFillPrompt}</p>
         )}
       </SchemaPanel>
 

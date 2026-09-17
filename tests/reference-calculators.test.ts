@@ -294,6 +294,67 @@ describe("Beam deflection: at-load vs true maximum", () => {
     close(r.deflectionAtLoad, r.deflectionMax, 1e-9);
     assert.equal(r.xMax, 800);
   });
+
+  it("point-load reactions split by the lever rule (R_A = F*b/L, R_B = F*a/L)", () => {
+    const r = computeBeam({ type: "opgelegd", F: 1000, L: 1000, a: 200, E: 210000, I: 1e6 });
+    assert.ok(r);
+    close(r.reactionA, 800);
+    close(r.reactionB, 200);
+    close(r.reactionA + r.reactionB, 1000);
+  });
+
+  it("a cantilever's fixed end carries the full point load, the free end carries none", () => {
+    const r = computeBeam({ type: "uitkraging", F: 500, L: 800, a: 300, E: 210000, I: 5e5 });
+    assert.ok(r);
+    assert.equal(r.reactionA, 500);
+    assert.equal(r.reactionB, 0);
+  });
+});
+
+// STRUCT-001 — uniformly distributed load (UDL), full-span, both support conditions.
+describe("Beam deflection: uniformly distributed load (STRUCT-001)", () => {
+  it("simply supported, w=2 N/mm, L=1000mm, E=210000, I=1e6: matches 5wL^4/384EI and wL^2/8", () => {
+    const w = 2;
+    const L = 1000;
+    const E = 210000;
+    const I = 1e6;
+    const r = computeBeam({ kind: "verdeeld", type: "opgelegd", w, L, E, I });
+    assert.ok(r);
+    close(r.deflectionMax, (5 * w * L ** 4) / (384 * E * I));
+    close(r.momentMax, (w * L ** 2) / 8);
+    close(r.xMax, L / 2);
+    close(r.reactionA, (w * L) / 2);
+    close(r.reactionB, (w * L) / 2);
+    close(r.deflectionAtLoad, r.deflectionMax);
+  });
+
+  it("cantilever, w=2 N/mm, L=800mm: matches wL^4/8EI and wL^2/2, all reaction at the fixed end", () => {
+    const w = 2;
+    const L = 800;
+    const E = 210000;
+    const I = 5e5;
+    const r = computeBeam({ kind: "verdeeld", type: "uitkraging", w, L, E, I });
+    assert.ok(r);
+    close(r.deflectionMax, (w * L ** 4) / (8 * E * I));
+    close(r.momentMax, (w * L ** 2) / 2);
+    close(r.xMax, L);
+    close(r.reactionA, w * L);
+    assert.equal(r.reactionB, 0);
+  });
+
+  it("a UDL's total reaction always equals the total load w*L, for either support condition", () => {
+    const w = 3.5;
+    const L = 1200;
+    const ss = computeBeam({ kind: "verdeeld", type: "opgelegd", w, L, E: 210000, I: 1e6 })!;
+    const cant = computeBeam({ kind: "verdeeld", type: "uitkraging", w, L, E: 210000, I: 1e6 })!;
+    close(ss.reactionA + ss.reactionB, w * L);
+    close(cant.reactionA + cant.reactionB, w * L);
+  });
+
+  it("invalid inputs (negative w, non-positive L/E/I) return null", () => {
+    assert.equal(computeBeam({ kind: "verdeeld", type: "opgelegd", w: -1, L: 1000, E: 210000, I: 1e6 }), null);
+    assert.equal(computeBeam({ kind: "verdeeld", type: "opgelegd", w: 2, L: 0, E: 210000, I: 1e6 }), null);
+  });
 });
 
 // E11 — bending axis selection: a rectangle's strong- and weak-axis I must
