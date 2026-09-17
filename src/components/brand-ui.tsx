@@ -41,6 +41,7 @@ export function Closing() {
   );
 }
 export function readFavorites(): string[] {
+  if (typeof window === "undefined") return [];
   try {
     const value = JSON.parse(localStorage.getItem("mechify.favorites") || "[]");
     return Array.isArray(value) ? value.filter((v) => typeof v === "string") : [];

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "Mechify";
-const SITE_URL = "https://mechify.nl";
+const SITE_URL = "https://www.mechify.nl";
 const JSONLD_ID = "page-jsonld";
 const FAQ_JSONLD_ID = "faq-jsonld";
 

@@ -18,7 +18,17 @@ function readStoredLocale(): Locale {
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(readStoredLocale);
+  // P0.2: always start at "nl" so the first client render matches the
+  // prerendered (server) HTML exactly — reading localStorage here would
+  // desync from the static "nl" markup for a returning English-preference
+  // visitor and trigger a hydration mismatch. The correction below runs
+  // once, after mount, client-only.
+  const [locale, setLocale] = useState<Locale>("nl");
+
+  useEffect(() => {
+    const stored = readStoredLocale();
+    if (stored !== "nl") setLocale(stored);
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;

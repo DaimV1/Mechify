@@ -19,6 +19,16 @@ export function Logo({ className, size = "sm" }: { className?: string; size?: "s
         alt=""
         aria-hidden="true"
         decoding="async"
+        // P0.2: react-dom's server renderer auto-generates an image preload
+        // <link> for any eager <img>, meant to be hoisted into a real
+        // <head>. Our prerender only renders the app fragment (no <head> in
+        // the rendered tree), so the hint gets emitted inline instead —
+        // then the client, hydrating against a real document, tries to
+        // hoist it into <head>, a structural mismatch that fails hydration
+        // on every route (this logo is in the header on all of them).
+        // fetchPriority="low" is one of the documented conditions that
+        // skips this auto-preload path entirely.
+        fetchPriority="low"
       />
     </Link>
   );

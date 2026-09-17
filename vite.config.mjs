@@ -4,34 +4,12 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import fs from "node:fs";
-import { SECTIONS, TOOLS, toolHref } from "./src/lib/tools.ts";
+import { TOOLS, toolHref } from "./src/lib/tools.ts";
+import { getAllRoutes } from "./src/lib/all-routes.ts";
 import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const SITE_URL = "https://mechify.nl";
-
-/** Static (non-tool) routes registered in src/app.tsx, kept in sync by hand — there are only a handful. */
-const STATIC_ROUTES = [
-  "/",
-  "/tools",
-  "/calculators",
-  "/cad",
-  "/tables",
-  "/materials",
-  "/about",
-  "/toolkit",
-  "/topics",
-  "/cad-workflows",
-  ...[
-    "koppel-en-toerental",
-    "overbrenging-kiezen",
-    "pneumatische-cilinder",
-    "lineaire-geleiding",
-    "frame-en-maakbaarheid",
-    "toleranties-en-assemblage",
-    "parametrisch-ontwerpen",
-  ].map((s) => "/topics/" + s),
-];
+const SITE_URL = "https://www.mechify.nl";
 
 /** Emits robots.txt and sitemap.xml from the same tool/section data the app renders, so they can't drift. */
 function sitemapPlugin() {
@@ -39,9 +17,7 @@ function sitemapPlugin() {
     name: "mechify-sitemap",
     apply: "build",
     closeBundle() {
-      const sectionRoutes = SECTIONS.map((s) => s.href);
-      const toolRoutes = TOOLS.map((t) => toolHref(t));
-      const routes = Array.from(new Set([...STATIC_ROUTES, ...sectionRoutes, ...toolRoutes]));
+      const routes = getAllRoutes();
 
       const template = fs.readFileSync(path.resolve(__dirname, "dist/index.html"), "utf8");
       const escape = (s) =>

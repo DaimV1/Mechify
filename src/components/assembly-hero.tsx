@@ -32,6 +32,10 @@ export function AssemblyHero() {
         height="580"
         alt=""
         aria-hidden
+        // P0.2: see the matching comment in layout/logo.tsx — avoids a
+        // server/client hoisting mismatch for react-dom's automatic image
+        // preload hint under fragment-only SSR.
+        fetchPriority="low"
       />
       <canvas
         id="assembly"
