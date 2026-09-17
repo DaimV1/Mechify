@@ -20,10 +20,12 @@ const T = {
     ),
     p2: (
       <>
-        De referentietools verwijzen naar standaarden zoals ISO 286, ISO 2768 en DIN 6885. De
-        rekenmodules tonen hun aannames en toepassingsgrenzen. Waar tabeldata niet beschikbaar is,
-        verschijnt geen afgeleide schatting. Vrije ontwerpmodellen en tabelmodellen zijn
-        afzonderlijk herkenbaar.
+        Mechify maakt onderscheid tussen normtabellen, fabrikantgegevens, natuurkundige
+        rekenmodellen en praktische ontwerpbenaderingen. Bij norm- en tabeldata worden alleen
+        vastgelegde waarden getoond; ontbrekende tabelwaarden worden niet stil geïnterpoleerd.
+        Schattingsmodellen — zoals een aandraaimoment via een moerfactor, een eerste
+        O-ringgroefschatting of een motordimensionering — worden expliciet als indicatief
+        gemarkeerd en tonen hun aannames en toepassingsgrenzen naast het resultaat.
       </>
     ),
     p3: (
@@ -51,9 +53,12 @@ const T = {
     ),
     p2: (
       <>
-        Every tool is built around a specific standard (ISO 286, ISO 2768, DIN 6885, and more) and
-        shows where its data comes from and up to which limit it's valid. No black box: if a value
-        hasn't been verified against a primary source, it shows a dash instead of a guess.
+        Mechify distinguishes standards tables, manufacturer data, physics-based calculations and
+        practical design estimates. Standard and table data shows only recorded values — missing
+        tabulated values are never silently interpolated. Estimate models — a tightening torque
+        from a nut factor, a preliminary O-ring groove sizing, a motor sizing — are explicitly
+        labelled as indicative and show their assumptions and applicability limits alongside the
+        result.
       </>
     ),
     p3: (
