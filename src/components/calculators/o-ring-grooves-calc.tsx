@@ -56,7 +56,7 @@ const ORING_META: EngineeringSourceMeta = {
 
 const T = {
   nl: {
-    heading: "O-ringgroef bij koorddiameter",
+    heading: "Voorontwerp O-ringgroef bij koorddiameter",
     intro:
       "Groefdiepte = koord × (1 − squeeze%). Groefbreedte = koord × breedtefactor (ruimte voor volumeverplaatsing en thermische uitzetting). Ontwerpregel, geen ISO 3601-2 gland-tabel — controleer de definitieve maat tegen de norm of fabrikant-designgids vóór productie.",
     cordDiameter: "Koorddiameter (mm)",
@@ -97,7 +97,7 @@ const T = {
       ].join("\n"),
   },
   en: {
-    heading: "O-ring groove at cord diameter",
+    heading: "Preliminary O-ring groove design at cord diameter",
     intro:
       "Groove depth = cord × (1 − squeeze%). Groove width = cord × width factor (room for volume displacement and thermal expansion). Design rule, not an ISO 3601-2 gland table — check the final dimension against the standard or manufacturer design guide before production.",
     cordDiameter: "Cord diameter (mm)",
