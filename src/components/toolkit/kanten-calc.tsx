@@ -230,7 +230,7 @@ export function KantenCalc() {
             "Every thickness from the 247 tables for this material/bend combination, so the underlying data can be checked without operating the calculator.",
           )}
         </Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

@@ -434,7 +434,7 @@ export function BucklingCalc() {
           {t.casesTitle}
         </h2>
         <Note>{t.casesNote}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -466,7 +466,7 @@ export function BucklingCalc() {
           {t.modulusTitle}
         </h2>
         <Note>{t.modulusNote}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

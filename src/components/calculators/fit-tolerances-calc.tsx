@@ -70,6 +70,7 @@ const T = {
     fitLabel: "Passing",
     upTo50: " (t/m 50 mm)",
     fillDiameter: "Vul een nominale Ø in.",
+    fillPositive: "Vul een nominale Ø groter dan 0 in.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
         {fitId} heeft geen formule voor c, k, n, p of s en is alleen beschikbaar t/m 50 mm. Ø {d} mm
@@ -126,6 +127,7 @@ const T = {
     fitLabel: "Fit",
     upTo50: " (up to 50 mm)",
     fillDiameter: "Enter a nominal Ø.",
+    fillPositive: "Enter a nominal Ø greater than 0.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
         {fitId} has no formula for c, k, n, p or s and is only available up to 50 mm. Ø {d} mm falls
@@ -250,6 +252,8 @@ export function FitTolerancesCalc() {
 
         {isEmpty ? (
           <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
+        ) : dRaw != null && dRaw <= 0 ? (
+          <p className="mt-5 text-sm text-muted">{t.fillPositive}</p>
         ) : fitOutOfBandRange ? (
           <p className="mt-5 text-sm text-muted">
             {t.noFormula(fitId, d, BANDS[activeBand] ? bandLabel(BANDS[activeBand]) : "")}
@@ -298,7 +302,7 @@ export function FitTolerancesCalc() {
           {t.sec1Title}
         </h2>
         <Note>{t.sec1Note}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -359,7 +363,7 @@ export function FitTolerancesCalc() {
           {t.sec2Title}
         </h2>
         <Note>{t.sec2Note}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -396,7 +400,7 @@ export function FitTolerancesCalc() {
           {t.sec3Title}
         </h2>
         <Note>{t.sec3Note}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

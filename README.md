@@ -16,7 +16,10 @@ npm run lint
 npm run build
 npm run preview
 # http://127.0.0.1:8081
+npm run test:e2e
 ```
+
+`npm run test:e2e` (Playwright, config in `playwright.config.ts`) draait naast `npm test` — het dekt browserwerking die node-tests niet zien: elke live tool laadt zonder consolefouten (desktop + mobiel), taalwissel vertaalt zichtbare tekst, invoerstate blijft in de URL na een reload, ongeldige invoer geeft een nette melding (nooit NaN/Infinity), "kopieer resultaat" zet de volledige tekst incl. bronmetadata op het klembord, axe-scans zonder serieuze/kritieke a11y-bevindingen op elke tool, en schermafbeelding-basislijnen voor de reactieve SVG-technische-schema's in `e2e/__screenshots__/`. Na een bewuste wijziging aan een schema: `npm run test:e2e:update-snapshots`. CI (`.github/workflows/ci.yml`) draait typecheck/lint/tests/build en de volledige Playwright-suite op elke push/PR.
 
 ## Structuur
 

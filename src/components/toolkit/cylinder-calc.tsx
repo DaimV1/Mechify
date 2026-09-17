@@ -294,7 +294,7 @@ export function CylinderCalc() {
             'At Ø200/250/320 the rod diameter here differs from the default tool ("ISO bore for a load") — neither is tied to a named manufacturer type code; for an order, use the datasheet of one named cylinder family.',
           )}
         </Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

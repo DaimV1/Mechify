@@ -446,7 +446,7 @@ export function BeamDeflectionCalc() {
           {t.guidelinesTitle}
         </h2>
         <Note>{t.guidelinesNote}</Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

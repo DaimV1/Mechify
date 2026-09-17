@@ -304,7 +304,7 @@ export function Iso2768Calc() {
           <CopyLink />
         </div>
 
-        <div className="table-scroll mt-8">
+        <div className="table-scroll mt-8" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -332,7 +332,7 @@ export function Iso2768Calc() {
         </div>
         <p className="mt-2 text-xs text-subtle">{t.table1Note(linearClass)}</p>
 
-        <div className="table-scroll mt-6">
+        <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -360,7 +360,7 @@ export function Iso2768Calc() {
         </div>
         <p className="mt-2 text-xs text-subtle">{t.table2Note}</p>
 
-        <div className="table-scroll mt-6">
+        <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -432,7 +432,7 @@ export function Iso2768Calc() {
           </div>
         ) : null}
 
-        <div className="table-scroll mt-6">
+        <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -457,7 +457,7 @@ export function Iso2768Calc() {
           </table>
         </div>
 
-        <div className="table-scroll mt-6">
+        <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -482,7 +482,7 @@ export function Iso2768Calc() {
           </table>
         </div>
 
-        <div className="table-scroll mt-6">
+        <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

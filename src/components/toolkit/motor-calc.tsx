@@ -332,7 +332,7 @@ export function MotorCalc() {
             "SI internally. n_rol = v / (π D), T = F · D/2, P_as = F · v, P_motor = P_as / η · f_b. Optionally + m a.",
           )}
         </Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -383,7 +383,7 @@ export function MotorCalc() {
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
           {tx(locale, "IEC 60034 kW-stappen", "IEC 60034 kW steps")}
         </h2>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

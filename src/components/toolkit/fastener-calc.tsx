@@ -173,7 +173,7 @@ export function FastenerCalc() {
             "Clearance and head (ISO 273 / 4014 / 4762)",
           )}
         </h2>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -238,7 +238,7 @@ export function FastenerCalc() {
             "Source: Würth's rendering of VDI 2230-1 table A1, not the primary standard.",
           )}
         </SourceBadge>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

@@ -167,7 +167,7 @@ export function OringCalc() {
             "All five cords and all three installation types, so the full groove table can be checked without operating the calculator.",
           )}
         </Note>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

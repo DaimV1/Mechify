@@ -271,7 +271,7 @@ export function BearingFitsCalc() {
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
           {t.guideTitle}
         </h2>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>
@@ -297,7 +297,7 @@ export function BearingFitsCalc() {
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0}>
             <table className="ref-table">
               <thead>
                 <tr>
@@ -320,7 +320,7 @@ export function BearingFitsCalc() {
               </tbody>
             </table>
           </div>
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0}>
             <table className="ref-table">
               <thead>
                 <tr>

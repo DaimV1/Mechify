@@ -236,7 +236,7 @@ export function EenhedenCalc() {
           )}
         </h2>
         <p className="mt-2 text-sm text-muted">{category.note}</p>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

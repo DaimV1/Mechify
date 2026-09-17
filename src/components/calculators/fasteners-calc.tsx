@@ -222,7 +222,7 @@ export function FastenersCalc() {
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
           {t.torquePerSize(String(kVal))}
         </h2>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

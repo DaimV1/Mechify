@@ -192,7 +192,7 @@ export function UnitsCalc() {
             categoryLabel(category.id),
           )}
         </h2>
-        <div className="table-scroll mt-4">
+        <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
             <thead>
               <tr>

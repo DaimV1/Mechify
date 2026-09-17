@@ -113,7 +113,12 @@ function MacroBlock({ macro, locale }: { macro: Macro; locale: Locale }) {
           </a>
         </div>
       </div>
-      <pre className="table-scroll mt-3 rounded-md border border-border-strong bg-bg p-3 font-mono text-xs leading-relaxed text-ink">
+      <pre
+        className="table-scroll mt-3 rounded-md border border-border-strong bg-bg p-3 font-mono text-xs leading-relaxed text-ink"
+        tabIndex={0}
+        role="region"
+        aria-label={macro.title[locale]}
+      >
         <code>{macro.code}</code>
       </pre>
     </div>
