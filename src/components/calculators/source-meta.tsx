@@ -10,6 +10,20 @@ const TONE_CLASS: Record<ReturnType<typeof metaTone>, string> = {
   neutral: "border-border-strong bg-bg text-muted",
 };
 
+/**
+ * Just the text color, for elements (like the heading <p> below) that need
+ * it applied directly — brand.css's global `p { color: ... }` is unlayered
+ * plain CSS and always outranks an *inherited* Tailwind text-color utility
+ * on a <p>, so relying on inheritance from the wrapping tone-colored div
+ * silently loses. See the fix note in src/styles/index.css.
+ */
+const TONE_TEXT_CLASS: Record<ReturnType<typeof metaTone>, string> = {
+  ok: "text-success",
+  warn: "text-warning",
+  danger: "text-danger",
+  neutral: "text-muted",
+};
+
 const TONE_ICON: Record<ReturnType<typeof metaTone>, typeof CheckCircle2> = {
   ok: CheckCircle2,
   warn: AlertTriangle,
@@ -48,7 +62,12 @@ export function SourceMetaBadge({ meta }: { meta: EngineeringSourceMeta }) {
     <div
       className={cn("mt-3 rounded-md border px-3 py-2.5 text-xs leading-relaxed", TONE_CLASS[tone])}
     >
-      <p className="flex items-start gap-1.5 font-semibold uppercase tracking-wide">
+      <p
+        className={cn(
+          "flex items-start gap-1.5 font-semibold uppercase tracking-wide",
+          TONE_TEXT_CLASS[tone],
+        )}
+      >
         <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
         <span>{metaLabel(meta, locale)}</span>
       </p>

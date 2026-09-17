@@ -23,6 +23,19 @@ import { isVerifiedSeeger } from "../src/lib/toolkit/seeger.ts";
 import { columnCapacity, extremeFiber, sectionProps } from "../src/lib/calculators/knik.ts";
 import { rodBucklingCheck } from "../src/lib/toolkit/cylinder.ts";
 import { bendingStress, computeBeam } from "../src/lib/calculators/beam.ts";
+import {
+  a1For,
+  adjustedLife,
+  l10Hours,
+  l10Millions,
+  staticSafetyFactor,
+  staticSafetyStatus,
+} from "../src/lib/calculators/bearing-life.ts";
+import {
+  boltSafetyStatus,
+  clampStatus,
+  computeBoltedJoint,
+} from "../src/lib/calculators/bolted-joint.ts";
 
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
@@ -306,5 +319,91 @@ describe("Beam bending axis selection", () => {
       sectionProps("rechthoek", dims, "strong")!.I,
     );
     assert.ok(strongSigma < weakSigma);
+  });
+});
+
+// ROAD-001 — bearing life (L10/L10h) per ISO 281.
+describe("Bearing life (L10/L10h, ISO 281)", () => {
+  it("C=10 kN, P=2 kN, ball bearing: L10 = (10/2)^3 = 125 million revolutions", () => {
+    const l10M = l10Millions(10, 2, "ball");
+    assert.ok(l10M != null);
+    close(l10M, 125);
+  });
+
+  it("125 million rev at 1500 rpm gives L10h = 1388.9 h", () => {
+    const l10h = l10Hours(125, 1500);
+    assert.ok(l10h != null);
+    close(l10h, 1388.888889, 1e-3);
+  });
+
+  it("roller bearings use a different life exponent (10/3) than ball bearings (3), so life diverges once C/P != 1", () => {
+    const ball = l10Millions(10, 2, "ball");
+    const roller = l10Millions(10, 2, "roller");
+    assert.ok(ball != null && roller != null);
+    assert.notEqual(roller, ball);
+    // C/P = 5 > 1, and 10/3 > 3, so the larger exponent predicts the longer life here.
+    assert.ok(roller > ball);
+  });
+
+  it("95% reliability (a1=0.62) shortens the adjusted life proportionally", () => {
+    const l10M = l10Millions(10, 2, "ball")!;
+    assert.equal(a1For("95"), 0.62);
+    close(adjustedLife(l10M, a1For("95")), 125 * 0.62);
+  });
+
+  it("static safety factor S0 = C0/P0 and its status bands", () => {
+    assert.equal(staticSafetyFactor(8, 3), 8 / 3);
+    assert.equal(staticSafetyStatus(0.8), "fail");
+    assert.equal(staticSafetyStatus(1.2), "caution");
+    assert.equal(staticSafetyStatus(2.5), "ok");
+  });
+
+  it("invalid inputs (zero/negative load or speed) return null, not Infinity/NaN", () => {
+    assert.equal(l10Millions(10, 0, "ball"), null);
+    assert.equal(l10Millions(0, 2, "ball"), null);
+    assert.equal(l10Hours(125, 0), null);
+    assert.equal(staticSafetyFactor(8, 0), null);
+  });
+});
+
+// ROAD-001 — bolted-joint static verification, VDI 2230-lite.
+describe("Bolted joint (VDI 2230-lite static verification)", () => {
+  it("no external load: residual clamp load equals preload minus embedding loss, bolt force equals that too", () => {
+    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 0, FKreq: 10 });
+    close(r.fVRest, 19);
+    close(r.fKR, 19);
+    close(r.fSmax, 19);
+  });
+
+  it("external load splits by the load factor phi between clamp-load loss and bolt-force increase", () => {
+    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 8, FKreq: 10 });
+    // F_KR = 19 - (1-0.25)*8 = 19 - 6 = 13
+    close(r.fKR, 13);
+    // F_Smax = 19 + 0.25*8 = 21
+    close(r.fSmax, 21);
+  });
+
+  it("bolt stress and safety factor follow from F_Smax / As and Rp/sigma", () => {
+    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 8, FKreq: 10 });
+    close(r.sigmaS, (21 * 1000) / 84.3, 1e-6);
+    close(r.safetyFactor, 900 / r.sigmaS, 1e-6);
+  });
+
+  it("clamp status fails once F_KR drops below the required minimum, cautions within 10% margin", () => {
+    assert.equal(clampStatus(9, 10), "fail");
+    assert.equal(clampStatus(10.5, 10), "caution");
+    assert.equal(clampStatus(12, 10), "ok");
+  });
+
+  it("bolt safety status follows the VDI 2230-style 1.0/1.2 bands", () => {
+    assert.equal(boltSafetyStatus(0.9), "fail");
+    assert.equal(boltSafetyStatus(1.1), "caution");
+    assert.equal(boltSafetyStatus(1.5), "ok");
+  });
+
+  it("a heavily overloaded joint (F_A far exceeding F_V) both loses clamp and yields the bolt", () => {
+    const r = computeBoltedJoint({ As: 36.6, Rp: 720, FV: 5, FZ: 0.5, phi: 0.3, FA: 200, FKreq: 3 });
+    assert.equal(clampStatus(r.fKR, 3), "fail");
+    assert.equal(boltSafetyStatus(r.safetyFactor), "fail");
   });
 });

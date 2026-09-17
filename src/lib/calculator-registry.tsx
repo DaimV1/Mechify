@@ -29,6 +29,16 @@ const BeamDeflectionCalc = lazy(() =>
     default: m.BeamDeflectionCalc,
   })),
 );
+const BearingLifeCalc = lazy(() =>
+  import("@/components/calculators/bearing-life-calc").then((m) => ({
+    default: m.BearingLifeCalc,
+  })),
+);
+const BoltedJointCalc = lazy(() =>
+  import("@/components/calculators/bolted-joint-calc").then((m) => ({
+    default: m.BoltedJointCalc,
+  })),
+);
 const EdgesCalc = lazy(() =>
   import("@/components/calculators/edges-calc").then((m) => ({ default: m.EdgesCalc })),
 );
@@ -73,6 +83,8 @@ export const CALCULATOR_REGISTRY: Record<string, ComponentType> = {
   "pneumatic-cylinder": PneumaticCylinderCalc,
   "motor-specification": MotorSpecificationCalc,
   "beam-deflection": BeamDeflectionCalc,
+  "bearing-life": BearingLifeCalc,
+  "bolted-joint": BoltedJointCalc,
   edges: EdgesCalc,
   "iso-2768": Iso2768Calc,
   "bearing-fits": BearingFitsCalc,

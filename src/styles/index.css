@@ -215,3 +215,27 @@
 }
 
 @import "./brand.css";
+
+/*
+ * brand.css sets a global `p { color: var(--muted) }` as plain, unlayered
+ * CSS. Per the cascade-layers spec, unlayered CSS always outranks anything
+ * declared inside a named layer — including Tailwind's `.text-danger` /
+ * `.text-warning` / `.text-success` / `.text-ink` utilities, which live in
+ * Tailwind's `utilities` layer — regardless of selector specificity or
+ * source order. That silently greyed out every status/tone message built
+ * with these utilities on a <p> element. Restoring them here (also
+ * unlayered) lets normal specificity decide: a class selector beats the
+ * bare `p` element selector.
+ */
+.text-danger {
+  color: var(--color-danger);
+}
+.text-warning {
+  color: var(--color-warning);
+}
+.text-success {
+  color: var(--color-success);
+}
+.text-ink {
+  color: var(--color-ink);
+}
