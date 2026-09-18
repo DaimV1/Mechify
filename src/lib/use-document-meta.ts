@@ -25,7 +25,22 @@ function setCanonical(href: string) {
   tag.setAttribute("href", href);
 }
 
-function setPageJsonLd(title: string, description: string, url: string) {
+export type PageSchema = {
+  /** Defaults to "WebPage" when omitted. */
+  type?: "WebPage" | "TechArticle" | "SoftwareApplication";
+  /** Extra schema.org fields merged onto the page's own JSON-LD object. */
+  extra?: Record<string, unknown>;
+  /** Ancestor path segments (name + site-relative path); the current page is appended automatically. */
+  breadcrumbs?: { name: string; path: string }[];
+};
+
+function setPageJsonLd(
+  title: string,
+  description: string,
+  url: string,
+  schema?: PageSchema,
+  shortTitle?: string,
+) {
   let tag = document.getElementById(JSONLD_ID) as HTMLScriptElement | null;
   if (!tag) {
     tag = document.createElement("script");
@@ -33,13 +48,34 @@ function setPageJsonLd(title: string, description: string, url: string) {
     tag.type = "application/ld+json";
     document.head.appendChild(tag);
   }
-  tag.textContent = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
+  const page = {
+    "@type": schema?.type ?? "WebPage",
     name: title,
     description,
     url,
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+    ...schema?.extra,
+  };
+  if (!schema?.breadcrumbs || schema.breadcrumbs.length === 0) {
+    tag.textContent = JSON.stringify({ "@context": "https://schema.org", ...page });
+    return;
+  }
+  const crumbs = [
+    ...schema.breadcrumbs,
+    { name: shortTitle ?? title, path: url.slice(SITE_URL.length) || "/" },
+  ];
+  const breadcrumbList = {
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: `${SITE_URL}${c.path}`,
+    })),
+  };
+  tag.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [page, breadcrumbList],
   });
 }
 
@@ -90,8 +126,17 @@ export function useFaqJsonLd(items: { q: string; a: string }[] | undefined) {
  * internal <Link> triggering the "*" route during client-side SPA
  * navigation, which never hits the server at all.
  */
-export function useDocumentMeta(title: string, description: string, opts?: { noindex?: boolean }) {
+export function useDocumentMeta(
+  title: string,
+  description: string,
+  opts?: { noindex?: boolean; schema?: PageSchema },
+) {
   const noindex = opts?.noindex ?? false;
+  const schema = opts?.schema;
+  // Stable-by-content key: `schema` is typically a fresh object literal on
+  // every render, and this effect must not re-run (and re-run window.scrollTo)
+  // just because of that.
+  const schemaKey = schema ? JSON.stringify(schema) : "";
   useEffect(() => {
     const previousTitle = document.title;
     const isHome = title === SITE_NAME;
@@ -111,12 +156,13 @@ export function useDocumentMeta(title: string, description: string, opts?: { noi
     } else {
       document.querySelector('meta[name="robots"]')?.remove();
     }
-    setPageJsonLd(fullTitle, description, url);
+    setPageJsonLd(fullTitle, description, url, schema, title);
 
     window.scrollTo({ top: 0 });
     return () => {
       document.title = previousTitle;
       if (noindex) document.querySelector('meta[name="robots"]')?.remove();
     };
-  }, [title, description, noindex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- schemaKey is schema's content-stable proxy
+  }, [title, description, noindex, schemaKey]);
 }

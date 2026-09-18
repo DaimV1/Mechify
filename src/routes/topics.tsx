@@ -1,7 +1,7 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow, Action } from "@/components/brand-ui";
-import { ARTICLE_AUTHOR, articles } from "@/lib/articles";
+import { ARTICLE_AUTHOR, ARTICLE_REVIEWED_DATE_ISO, articles } from "@/lib/articles";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { NotFound } from "./not-found";
 const toolLinks: Record<string, string> = {
@@ -84,7 +84,22 @@ export function Topics() {
 export function TopicArticle() {
   const { slug } = useParams();
   const a = articles.find((a) => a.slug === slug);
-  useDocumentMeta(a?.title || "Artikel niet gevonden", a?.intro || "Dit artikel bestaat niet.");
+  useDocumentMeta(a?.title || "Artikel niet gevonden", a?.intro || "Dit artikel bestaat niet.", {
+    schema: a
+      ? {
+          type: "TechArticle",
+          extra: {
+            author: { "@type": "Person", name: ARTICLE_AUTHOR },
+            dateModified: ARTICLE_REVIEWED_DATE_ISO,
+            articleSection: a.category,
+          },
+          breadcrumbs: [
+            { name: "Mechify", path: "/" },
+            { name: "Engineeringtopics", path: "/topics" },
+          ],
+        }
+      : undefined,
+  });
   if (!a) return <NotFound />;
   return (
     <PageShell>

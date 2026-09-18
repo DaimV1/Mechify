@@ -1,4 +1,4 @@
-import { articles } from "./src/lib/articles.ts";
+import { ARTICLE_AUTHOR, ARTICLE_REVIEWED_DATE_ISO, articles } from "./src/lib/articles.ts";
 import { defineConfig } from "vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -36,14 +36,14 @@ function sitemapPlugin() {
           "/calculators": "Rekenmodules",
           "/cad": "CAD-bibliotheken en macro’s",
         };
-        const title = escape(
-          (tool?.title.nl || article?.title || labels[route] || "Mechify") + " — Mechify",
-        );
-        const description = escape(
+        const shortTitle = tool?.title.nl || article?.title || labels[route] || "Mechify";
+        const rawTitle = shortTitle + " — Mechify";
+        const rawDescription =
           tool?.blurb.nl ||
-            article?.intro ||
-            "Praktische engineeringkennis en rekentools voor machinebouwers.",
-        );
+          article?.intro ||
+          "Praktische engineeringkennis en rekentools voor machinebouwers.";
+        const title = escape(rawTitle);
+        const description = escape(rawDescription);
         let html = template.replace(/<title>[\s\S]*?<\/title>/, "<title>" + title + "</title>");
         html = html
           .replace(
@@ -56,6 +56,11 @@ function sitemapPlugin() {
           )
           .replace(/(<link rel="canonical" href=")[^"]*/, "$1" + SITE_URL + route)
           .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + SITE_URL + route);
+        const pageJsonLd = buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, shortTitle });
+        html = html.replace(
+          "</head>",
+          `<script id="page-jsonld" type="application/ld+json">${pageJsonLd}</script>\n  </head>`,
+        );
         const destination = path.resolve(__dirname, "dist" + route + ".html");
         fs.mkdirSync(path.dirname(destination), { recursive: true });
         fs.writeFileSync(destination, html);
@@ -72,6 +77,74 @@ function sitemapPlugin() {
       fs.writeFileSync(path.resolve(__dirname, "dist/llms.txt"), buildLlmsTxt());
     },
   };
+}
+
+/**
+ * SEO-004 (audit, 17 sept 2026): mirrors src/lib/use-document-meta.ts's
+ * client-side setPageJsonLd()/PageSchema shape so the same WebPage/
+ * TechArticle/SoftwareApplication + BreadcrumbList block a crawler would see
+ * after hydration is already present in the static HTML — a crawler that
+ * doesn't execute JS still gets it. Keep the two in sync by hand: a Node
+ * build script and a browser module can't share one function here (see the
+ * `@/`-alias note on all-routes.ts imports above).
+ */
+function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, shortTitle }) {
+  const url = SITE_URL + route;
+  let type = "WebPage";
+  let extra;
+  let breadcrumbs;
+  if (tool) {
+    type = "SoftwareApplication";
+    extra = {
+      applicationCategory: "EngineeringApplication",
+      operatingSystem: "Any (web)",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+    };
+    const section = SECTIONS.find((s) => s.id === tool.section);
+    breadcrumbs = [{ name: "Mechify", path: "/" }];
+    if (section) breadcrumbs.push({ name: section.label.nl, path: section.href });
+  } else if (article) {
+    type = "TechArticle";
+    extra = {
+      author: { "@type": "Person", name: ARTICLE_AUTHOR },
+      dateModified: ARTICLE_REVIEWED_DATE_ISO,
+      articleSection: article.category,
+    };
+    breadcrumbs = [
+      { name: "Mechify", path: "/" },
+      { name: "Engineeringtopics", path: "/topics" },
+    ];
+  }
+  const page = {
+    "@type": type,
+    name: rawTitle,
+    description: rawDescription,
+    url,
+    isPartOf: { "@type": "WebSite", name: "Mechify", url: SITE_URL },
+    ...extra,
+  };
+  let json;
+  if (!breadcrumbs) {
+    json = { "@context": "https://schema.org", ...page };
+  } else {
+    const crumbs = [...breadcrumbs, { name: shortTitle, path: route }];
+    json = {
+      "@context": "https://schema.org",
+      "@graph": [
+        page,
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: crumbs.map((c, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: c.name,
+            item: SITE_URL + c.path,
+          })),
+        },
+      ],
+    };
+  }
+  return JSON.stringify(json).replaceAll("</script", "<\\/script");
 }
 
 /**

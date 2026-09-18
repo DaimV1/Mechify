@@ -1,5 +1,7 @@
 /** P1.8 (audit, 17 sept 2026): every article now carries its own provenance — author, technical basis and a review date — instead of requiring a reader to inspect source code to know whether a claim came from physics, a standard, a manufacturer catalogue or a design rule of thumb. */
 export const ARTICLE_AUTHOR = "Damian Vink";
+/** ISO 8601 form of every article's current `reviewedDate` ("17 sept 2026"), for schema.org dateModified. */
+export const ARTICLE_REVIEWED_DATE_ISO = "2026-09-17";
 
 export const articles = [
   {

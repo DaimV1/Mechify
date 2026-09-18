@@ -4,7 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow } from "@/components/brand-ui";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
-import { findTool, type ToolSection } from "@/lib/tools";
+import { findTool, SECTIONS, type ToolSection } from "@/lib/tools";
 import { EXTRA_MODELS, SOURCE_KEYS } from "@/lib/migration-models";
 import { toolkitCopy } from "@/lib/i18n/toolkit-pages";
 import { Faq } from "@/components/toolkit/calc-ui";
@@ -25,10 +25,23 @@ export function ToolDetail({ section }: { section: ToolSection }) {
   const copy = sourceKey
     ? toolkitCopy(sourceKey as Parameters<typeof toolkitCopy>[0], locale)
     : null;
-  useDocumentMeta(
-    tool?.title[locale] || "Niet gevonden",
-    tool?.blurb[locale] || "Deze tool bestaat niet.",
-  );
+  const sectionMeta = tool ? SECTIONS.find((s) => s.id === tool.section) : undefined;
+  useDocumentMeta(tool?.title[locale] || "Niet gevonden", tool?.blurb[locale] || "Deze tool bestaat niet.", {
+    schema: tool
+      ? {
+          type: "SoftwareApplication",
+          extra: {
+            applicationCategory: "EngineeringApplication",
+            operatingSystem: "Any (web)",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+          },
+          breadcrumbs: [
+            { name: "Mechify", path: "/" },
+            ...(sectionMeta ? [{ name: sectionMeta.label[locale], path: sectionMeta.href }] : []),
+          ],
+        }
+      : undefined,
+  });
   useFaqJsonLd(copy?.faq);
   if (!tool || !Calculator) return <NotFound />;
   const Alternate = extra?.component;
