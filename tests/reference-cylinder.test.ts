@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { loadFixture } from "./fixtures/load.ts";
 import {
   CATALOG,
   cycleLiters,
@@ -12,14 +13,27 @@ import {
 
 const iso15552 = CATALOG.filter((r) => r.series === "iso15552");
 
+type PneumaticCylinderFixture = {
+  bore32rod12at6bar: {
+    bore: number;
+    rod: number;
+    pBar: number;
+    forceOut: number;
+    forceIn: number;
+    tolerance: number;
+  };
+};
+const cylinderFixture = loadFixture<PneumaticCylinderFixture>("pneumatic-cylinder");
+
 describe("pneumatische cilinder", () => {
   it("Ø32 at 6 bar is 482,5 N out, 414,7 N in (rod 12)", () => {
+    const c = cylinderFixture.bore32rod12at6bar;
     const row = iso15552[0];
-    assert.equal(row.bore, 32);
-    assert.equal(row.rod, 12);
-    const f = forcesAt(row, 6);
-    assert.ok(Math.abs(f.F_uit - 482.55) < 0.05);
-    assert.ok(Math.abs(f.F_in - 414.69) < 0.05);
+    assert.equal(row.bore, c.bore);
+    assert.equal(row.rod, c.rod);
+    const f = forcesAt(row, c.pBar);
+    assert.ok(Math.abs(f.F_uit - c.forceOut) < c.tolerance);
+    assert.ok(Math.abs(f.F_in - c.forceIn) < c.tolerance);
   });
 
   it("1 bar · 1 mm² = 0,1 N", () => {

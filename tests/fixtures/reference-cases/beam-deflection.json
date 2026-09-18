@@ -1,0 +1,26 @@
+{
+  "source": "BEAM-001 (audit, 17 sept 2026) worked examples: point-load deflection at-load vs true maximum",
+  "simplySupportedOffCentre": {
+    "F": 1000,
+    "L": 1000,
+    "a": 200,
+    "E": 210000,
+    "I": 1e6,
+    "deflectionAtLoad": 0.040635,
+    "deflectionMax": 0.057466,
+    "xMax": 434.315,
+    "tolerance": 1e-5,
+    "xMaxTolerance": 1e-2
+  },
+  "cantileverAuditExample": {
+    "F": 500,
+    "L": 800,
+    "a": 300,
+    "E": 210000,
+    "I": 5e5,
+    "deflectionAtLoad": 0.042857,
+    "deflectionMax": 0.15,
+    "xMax": 800,
+    "tolerance": 1e-5
+  }
+}

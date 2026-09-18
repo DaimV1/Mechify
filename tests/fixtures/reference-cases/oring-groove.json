@@ -1,0 +1,17 @@
+{
+  "source": "Audit worked example (17 sept 2026): O-ring groove nominal cross-section fill check",
+  "overfilled": {
+    "cordDiameter": 3.55,
+    "squeezePercent": 30,
+    "widthFactor": 1.1,
+    "fillPercent": 102.0,
+    "fillPercentTolerance": 0.2,
+    "overfilled": true
+  },
+  "generousWidthFactor": {
+    "cordDiameter": 3.55,
+    "squeezePercent": 20,
+    "widthFactor": 1.4,
+    "overfilled": false
+  }
+}

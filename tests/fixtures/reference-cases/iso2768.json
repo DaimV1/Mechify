@@ -1,0 +1,9 @@
+{
+  "source": "ISO 2768-1 linear/angular tolerance tables",
+  "linearSpotChecks": [
+    { "size": 42, "class": "m", "expected": 0.3 },
+    { "size": 6, "class": "f", "expected": 0.05 },
+    { "size": 8, "class": "v", "expected": 1.0 }
+  ],
+  "runoutByClass": { "H": 0.1, "K": 0.2, "L": 0.5 }
+}

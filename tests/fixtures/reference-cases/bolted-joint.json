@@ -1,0 +1,35 @@
+{
+  "source": "VDI 2230-lite worked cases (ROAD-001, audit)",
+  "noExternalLoad": {
+    "As": 84.3,
+    "Rp": 900,
+    "FV": 20,
+    "FZ": 1,
+    "phi": 0.25,
+    "FA": 0,
+    "FKreq": 10,
+    "fVRest": 19,
+    "fKR": 19,
+    "fSmax": 19
+  },
+  "withExternalLoad": {
+    "As": 84.3,
+    "Rp": 900,
+    "FV": 20,
+    "FZ": 1,
+    "phi": 0.25,
+    "FA": 8,
+    "FKreq": 10,
+    "fKR": 13,
+    "fSmax": 21
+  },
+  "overloadedJoint": {
+    "As": 36.6,
+    "Rp": 720,
+    "FV": 5,
+    "FZ": 0.5,
+    "phi": 0.3,
+    "FA": 200,
+    "FKreq": 3
+  }
+}

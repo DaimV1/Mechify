@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { loadFixture } from "./fixtures/load.ts";
 import { computeGroove, nearestStandardSizes } from "../src/lib/calculators/circlip.ts";
 import {
   housingFitAt,
@@ -47,24 +48,39 @@ import {
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
+type CirclipFixture = {
+  externalRing20: {
+    diameter: number;
+    grooveDiameter: number;
+    grooveWidth: number;
+    grooveDepth: number;
+    verified: boolean;
+  };
+  internalRing20: { diameter: number; grooveDiameter: number; grooveWidth: number; verified: boolean };
+  unverifiedRing30: { diameter: number; verified: boolean };
+};
+const circlipFixture = loadFixture<CirclipFixture>("circlip");
+
 // E01/E02 — circlip groove: catalogue lookup, not the sqrt/percentage estimate.
 describe("Circlip groove (active default tool)", () => {
   it("external 20 mm ring matches the verified DSH-20-style record", () => {
-    const r = computeGroove("as", 20);
+    const c = circlipFixture.externalRing20;
+    const r = computeGroove("as", c.diameter);
     assert.ok(r);
-    close(r.grooveDiameter, 19.0);
-    close(r.grooveWidth, 1.3);
-    close(r.grooveDepth, 0.5);
-    assert.equal(r.verified, true);
+    close(r.grooveDiameter, c.grooveDiameter);
+    close(r.grooveWidth, c.grooveWidth);
+    close(r.grooveDepth, c.grooveDepth);
+    assert.equal(r.verified, c.verified);
   });
 
   it("internal 20 mm ring uses its own width, not the external ring's", () => {
-    const r = computeGroove("boring", 20);
+    const c = circlipFixture.internalRing20;
+    const r = computeGroove("boring", c.diameter);
     assert.ok(r);
-    close(r.grooveDiameter, 21.0);
-    close(r.grooveWidth, 1.1);
-    assert.notEqual(r.grooveWidth, computeGroove("as", 20)?.grooveWidth);
-    assert.equal(r.verified, true);
+    close(r.grooveDiameter, c.grooveDiameter);
+    close(r.grooveWidth, c.grooveWidth);
+    assert.notEqual(r.grooveWidth, computeGroove("as", c.diameter)?.grooveWidth);
+    assert.equal(r.verified, c.verified);
   });
 
   // Tolerance info (h11/H11 groove class, groove width class, depth
@@ -83,10 +99,11 @@ describe("Circlip groove (active default tool)", () => {
   });
 
   it("unverified sizes are flagged as such", () => {
-    const r = computeGroove("as", 30);
+    const c = circlipFixture.unverifiedRing30;
+    const r = computeGroove("as", c.diameter);
     assert.ok(r);
-    assert.equal(r.verified, false);
-    assert.equal(isVerifiedSeeger(30), false);
+    assert.equal(r.verified, c.verified);
+    assert.equal(isVerifiedSeeger(c.diameter), c.verified);
   });
 
   it("returns null (no silent estimate) for a diameter with no standard ring", () => {
@@ -110,6 +127,12 @@ describe("Bearing fits: shaft d vs housing D", () => {
   });
 });
 
+type Iso2768Fixture = {
+  linearSpotChecks: { size: number; class: "f" | "m" | "c" | "v"; expected: number }[];
+  runoutByClass: Record<string, number>;
+};
+const iso2768Fixture = loadFixture<Iso2768Fixture>("iso2768");
+
 // E05/E06 — ISO 2768: geometric zone values must not carry a ± prefix, and the 0.5 mm floor must be enforced.
 describe("ISO 2768 (active default tool)", () => {
   it("0.4 mm is out of scope for linear/radius tolerances", () => {
@@ -130,16 +153,10 @@ describe("ISO 2768 (active default tool)", () => {
 
   // Ported from the now-deleted toolkit/iso2768.ts's dead-code test suite —
   // same underlying ISO 2768-1 data, exercised here against the live module.
-  it("42 mm class m is ±0.3 linear", () => {
-    assert.equal(lookupLinear(42)?.m, 0.3);
-  });
-
-  it("6 mm class f is ±0.05 linear", () => {
-    assert.equal(lookupLinear(6)?.f, 0.05);
-  });
-
-  it("8 mm class v is ±1.0 linear", () => {
-    assert.equal(lookupLinear(8)?.v, 1.0);
+  it("linear tolerance spot-checks match the ISO 2768-1 table", () => {
+    for (const c of iso2768Fixture.linearSpotChecks) {
+      assert.equal(lookupLinear(c.size)?.[c.class], c.expected, `${c.size}mm class ${c.class}`);
+    }
   });
 
   it("class v has no defined value in the first band (2 mm), unlike f/m/c", () => {
@@ -150,26 +167,46 @@ describe("ISO 2768 (active default tool)", () => {
   });
 
   it("circular run-out is a flat per-class value, independent of size", () => {
-    assert.equal(RUNOUT.H, 0.1);
-    assert.equal(RUNOUT.K, 0.2);
-    assert.equal(RUNOUT.L, 0.5);
+    for (const [cls, expected] of Object.entries(iso2768Fixture.runoutByClass)) {
+      assert.equal(RUNOUT[cls as keyof typeof RUNOUT], expected, `class ${cls}`);
+    }
   });
 });
+
+type OringFixture = {
+  overfilled: {
+    cordDiameter: number;
+    squeezePercent: number;
+    widthFactor: number;
+    fillPercent: number;
+    fillPercentTolerance: number;
+    overfilled: boolean;
+  };
+  generousWidthFactor: {
+    cordDiameter: number;
+    squeezePercent: number;
+    widthFactor: number;
+    overfilled: boolean;
+  };
+};
+const oringFixture = loadFixture<OringFixture>("oring-groove");
 
 // E07 — O-ring groove: nominal cross-section fill must be checked, not just squeeze%.
 describe("O-ring groove fill", () => {
   it("cord 3.55 mm, squeeze 30%, width factor 1.1 is overfilled (~102%)", () => {
-    const r = computeOringGroove(3.55, 30, 1.1);
+    const c = oringFixture.overfilled;
+    const r = computeOringGroove(c.cordDiameter, c.squeezePercent, c.widthFactor);
     assert.ok(r);
     assert.ok(r.fillPercent > 100, `expected >100%, got ${r.fillPercent}`);
-    close(r.fillPercent, 102.0, 0.2);
-    assert.equal(r.overfilled, true);
+    close(r.fillPercent, c.fillPercent, c.fillPercentTolerance);
+    assert.equal(r.overfilled, c.overfilled);
   });
 
   it("a generous width factor is not overfilled", () => {
-    const r = computeOringGroove(3.55, 20, 1.4);
+    const c = oringFixture.generousWidthFactor;
+    const r = computeOringGroove(c.cordDiameter, c.squeezePercent, c.widthFactor);
     assert.ok(r);
-    assert.equal(r.overfilled, false);
+    assert.equal(r.overfilled, c.overfilled);
   });
 });
 
@@ -271,13 +308,41 @@ describe("Pneumatic rod buckling: protrusion is not a worst-case default", () =>
 
 // E11 — the beam tool must separately report deflection AT the load and the
 // true maximum (with location), matching the review's worked example.
+type BeamFixture = {
+  simplySupportedOffCentre: {
+    F: number;
+    L: number;
+    a: number;
+    E: number;
+    I: number;
+    deflectionAtLoad: number;
+    deflectionMax: number;
+    xMax: number;
+    tolerance: number;
+    xMaxTolerance: number;
+  };
+  cantileverAuditExample: {
+    F: number;
+    L: number;
+    a: number;
+    E: number;
+    I: number;
+    deflectionAtLoad: number;
+    deflectionMax: number;
+    xMax: number;
+    tolerance: number;
+  };
+};
+const beamFixture = loadFixture<BeamFixture>("beam-deflection");
+
 describe("Beam deflection: at-load vs true maximum", () => {
   it("F=1000N, L=1000mm, a=200mm, E=210000, I=1e6: at-load 0.040635mm, max 0.057466mm at x=434.315mm", () => {
-    const r = computeBeam({ type: "opgelegd", F: 1000, L: 1000, a: 200, E: 210000, I: 1e6 });
+    const c = beamFixture.simplySupportedOffCentre;
+    const r = computeBeam({ type: "opgelegd", F: c.F, L: c.L, a: c.a, E: c.E, I: c.I });
     assert.ok(r);
-    close(r.deflectionAtLoad, 0.040635, 1e-5);
-    close(r.deflectionMax, 0.057466, 1e-5);
-    close(r.xMax, 434.315, 1e-2);
+    close(r.deflectionAtLoad, c.deflectionAtLoad, c.tolerance);
+    close(r.deflectionMax, c.deflectionMax, c.tolerance);
+    close(r.xMax, c.xMax, c.xMaxTolerance);
     assert.ok(r.deflectionMax > r.deflectionAtLoad);
   });
 
@@ -289,11 +354,12 @@ describe("Beam deflection: at-load vs true maximum", () => {
   });
 
   it("BEAM-001 (audit worked example): F=500N, L=800mm, a=300mm, E=210000, I=5e5 — at-load 0.04286mm, tip max 0.15000mm, NOT equal", () => {
-    const r = computeBeam({ type: "uitkraging", F: 500, L: 800, a: 300, E: 210000, I: 5e5 });
+    const c = beamFixture.cantileverAuditExample;
+    const r = computeBeam({ type: "uitkraging", F: c.F, L: c.L, a: c.a, E: c.E, I: c.I });
     assert.ok(r);
-    close(r.deflectionAtLoad, 0.042857, 1e-5);
-    close(r.deflectionMax, 0.15, 1e-5);
-    assert.equal(r.xMax, 800);
+    close(r.deflectionAtLoad, c.deflectionAtLoad, c.tolerance);
+    close(r.deflectionMax, c.deflectionMax, c.tolerance);
+    assert.equal(r.xMax, c.xMax);
     assert.ok(r.deflectionMax > r.deflectionAtLoad);
   });
 
@@ -418,17 +484,26 @@ describe("Beam bending axis selection", () => {
 });
 
 // ROAD-001 — bearing life (L10/L10h) per ISO 281.
+type BearingLifeFixture = {
+  ballBearing: { C: number; P: number; type: "ball"; l10Millions: number };
+  l10Hours: { l10Millions: number; rpm: number; hours: number; tolerance: number };
+  reliability95: { a1: number };
+};
+const bearingLifeFixture = loadFixture<BearingLifeFixture>("bearing-life");
+
 describe("Bearing life (L10/L10h, ISO 281)", () => {
   it("C=10 kN, P=2 kN, ball bearing: L10 = (10/2)^3 = 125 million revolutions", () => {
-    const l10M = l10Millions(10, 2, "ball");
+    const c = bearingLifeFixture.ballBearing;
+    const l10M = l10Millions(c.C, c.P, c.type);
     assert.ok(l10M != null);
-    close(l10M, 125);
+    close(l10M, c.l10Millions);
   });
 
   it("125 million rev at 1500 rpm gives L10h = 1388.9 h", () => {
-    const l10h = l10Hours(125, 1500);
+    const c = bearingLifeFixture.l10Hours;
+    const l10h = l10Hours(c.l10Millions, c.rpm);
     assert.ok(l10h != null);
-    close(l10h, 1388.888889, 1e-3);
+    close(l10h, c.hours, c.tolerance);
   });
 
   it("roller bearings use a different life exponent (10/3) than ball bearings (3), so life diverges once C/P != 1", () => {
@@ -442,8 +517,9 @@ describe("Bearing life (L10/L10h, ISO 281)", () => {
 
   it("95% reliability (a1=0.62) shortens the adjusted life proportionally", () => {
     const l10M = l10Millions(10, 2, "ball")!;
-    assert.equal(a1For("95"), 0.62);
-    close(adjustedLife(l10M, a1For("95")), 125 * 0.62);
+    const a1 = bearingLifeFixture.reliability95.a1;
+    assert.equal(a1For("95"), a1);
+    close(adjustedLife(l10M, a1For("95")), 125 * a1);
   });
 
   it("static safety factor S0 = C0/P0 and its status bands", () => {
@@ -461,27 +537,66 @@ describe("Bearing life (L10/L10h, ISO 281)", () => {
   });
 });
 
+type BoltedJointFixture = {
+  noExternalLoad: {
+    As: number;
+    Rp: number;
+    FV: number;
+    FZ: number;
+    phi: number;
+    FA: number;
+    FKreq: number;
+    fVRest: number;
+    fKR: number;
+    fSmax: number;
+  };
+  withExternalLoad: {
+    As: number;
+    Rp: number;
+    FV: number;
+    FZ: number;
+    phi: number;
+    FA: number;
+    FKreq: number;
+    fKR: number;
+    fSmax: number;
+  };
+  overloadedJoint: {
+    As: number;
+    Rp: number;
+    FV: number;
+    FZ: number;
+    phi: number;
+    FA: number;
+    FKreq: number;
+  };
+};
+const boltedJointFixture = loadFixture<BoltedJointFixture>("bolted-joint");
+
 // ROAD-001 — bolted-joint static verification, VDI 2230-lite.
 describe("Bolted joint (VDI 2230-lite static verification)", () => {
   it("no external load: residual clamp load equals preload minus embedding loss, bolt force equals that too", () => {
-    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 0, FKreq: 10 });
-    close(r.fVRest, 19);
-    close(r.fKR, 19);
-    close(r.fSmax, 19);
+    const c = boltedJointFixture.noExternalLoad;
+    const r = computeBoltedJoint(c);
+    close(r.fVRest, c.fVRest);
+    close(r.fKR, c.fKR);
+    close(r.fSmax, c.fSmax);
   });
 
   it("external load splits by the load factor phi between clamp-load loss and bolt-force increase", () => {
-    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 8, FKreq: 10 });
+    const c = boltedJointFixture.withExternalLoad;
+    const r = computeBoltedJoint(c);
     // F_KR = 19 - (1-0.25)*8 = 19 - 6 = 13
-    close(r.fKR, 13);
+    close(r.fKR, c.fKR);
     // F_Smax = 19 + 0.25*8 = 21
-    close(r.fSmax, 21);
+    close(r.fSmax, c.fSmax);
   });
 
   it("bolt stress and safety factor follow from F_Smax / As and Rp/sigma", () => {
-    const r = computeBoltedJoint({ As: 84.3, Rp: 900, FV: 20, FZ: 1, phi: 0.25, FA: 8, FKreq: 10 });
-    close(r.sigmaS, (21 * 1000) / 84.3, 1e-6);
-    close(r.safetyFactor, 900 / r.sigmaS, 1e-6);
+    const c = boltedJointFixture.withExternalLoad;
+    const r = computeBoltedJoint(c);
+    close(r.sigmaS, (c.fSmax * 1000) / c.As, 1e-6);
+    close(r.safetyFactor, c.Rp / r.sigmaS, 1e-6);
   });
 
   it("clamp status fails once F_KR drops below the required minimum, cautions within 10% margin", () => {
@@ -497,8 +612,9 @@ describe("Bolted joint (VDI 2230-lite static verification)", () => {
   });
 
   it("a heavily overloaded joint (F_A far exceeding F_V) both loses clamp and yields the bolt", () => {
-    const r = computeBoltedJoint({ As: 36.6, Rp: 720, FV: 5, FZ: 0.5, phi: 0.3, FA: 200, FKreq: 3 });
-    assert.equal(clampStatus(r.fKR, 3), "fail");
+    const c = boltedJointFixture.overloadedJoint;
+    const r = computeBoltedJoint(c);
+    assert.equal(clampStatus(r.fKR, c.FKreq), "fail");
     assert.equal(boltSafetyStatus(r.safetyFactor), "fail");
   });
 });
