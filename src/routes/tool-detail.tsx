@@ -1,4 +1,6 @@
 import { useLocale } from "@/lib/i18n/locale-context";
+import { tx } from "@/lib/i18n/locale";
+import { COMMON } from "@/lib/i18n/common";
 import { Suspense } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
@@ -26,22 +28,28 @@ export function ToolDetail({ section }: { section: ToolSection }) {
     ? toolkitCopy(sourceKey as Parameters<typeof toolkitCopy>[0], locale)
     : null;
   const sectionMeta = tool ? SECTIONS.find((s) => s.id === tool.section) : undefined;
-  useDocumentMeta(tool?.title[locale] || "Niet gevonden", tool?.blurb[locale] || "Deze tool bestaat niet.", {
-    schema: tool
-      ? {
-          type: "SoftwareApplication",
-          extra: {
-            applicationCategory: "EngineeringApplication",
-            operatingSystem: "Any (web)",
-            offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
-          },
-          breadcrumbs: [
-            { name: "Mechify", path: "/" },
-            ...(sectionMeta ? [{ name: sectionMeta.label[locale], path: sectionMeta.href }] : []),
-          ],
-        }
-      : undefined,
-  });
+  useDocumentMeta(
+    tool?.title[locale] || tx(locale, "Niet gevonden", "Not found"),
+    tool?.blurb[locale] || tx(locale, "Deze tool bestaat niet.", "This tool does not exist."),
+    {
+      schema: tool
+        ? {
+            type: "SoftwareApplication",
+            extra: {
+              applicationCategory: "EngineeringApplication",
+              operatingSystem: "Any (web)",
+              offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+            },
+            breadcrumbs: [
+              { name: "Mechify", path: "/" },
+              ...(sectionMeta
+                ? [{ name: sectionMeta.label[locale], path: sectionMeta.href }]
+                : []),
+            ],
+          }
+        : undefined,
+    },
+  );
   useFaqJsonLd(copy?.faq);
   if (!tool || !Calculator) return <NotFound />;
   const Alternate = extra?.component;
@@ -54,7 +62,7 @@ export function ToolDetail({ section }: { section: ToolSection }) {
     <PageShell>
       <section className="wrap tool-layout-header">
         <Link className="back" to="/toolkit">
-          ← Alle tools
+          ← {tx(locale, "Alle tools", "All tools")}
         </Link>
         <Eyebrow>{tool.standard}</Eyebrow>
         <h1>{tool.title[locale]}</h1>
@@ -62,11 +70,17 @@ export function ToolDetail({ section }: { section: ToolSection }) {
       </section>
       <section className="wrap listing migration-tool">
         <div className="tool-toolbar">
-          <span className="mono muted">DIRECT BEREKEND · FORMULE & AANNAMES IN BEELD</span>
+          <span className="mono muted">
+            {tx(
+              locale,
+              "DIRECT BEREKEND · FORMULE & AANNAMES IN BEELD",
+              "CALCULATED LIVE · FORMULA & ASSUMPTIONS IN VIEW",
+            )}
+          </span>
           <label className="mono">
-            Rekenhulp:{" "}
+            {COMMON[locale].calcHelper}:{" "}
             <select
-              aria-label="Taal rekenhulp"
+              aria-label={tx(locale, "Taal rekenhulp", "Calculator language")}
               value={locale}
               onChange={(e) => setLocale(e.target.value as "nl" | "en")}
             >
@@ -74,14 +88,14 @@ export function ToolDetail({ section }: { section: ToolSection }) {
               <option value="en">EN</option>
             </select>
           </label>
-          <button onClick={reset}>↺ Reset invoer</button>
+          <button onClick={reset}>↺ {tx(locale, "Reset invoer", "Reset input")}</button>
         </div>
         {extra ? (
           <div className="model-switch">
             <label>
-              Rekenmodel
+              {tx(locale, "Rekenmodel", "Calculation model")}
               <select
-                aria-label="Rekenmodel"
+                aria-label={tx(locale, "Rekenmodel", "Calculation model")}
                 value={model}
                 onChange={(e) => {
                   setParams(e.target.value === "basis" ? {} : { model: e.target.value }, {
@@ -92,7 +106,9 @@ export function ToolDetail({ section }: { section: ToolSection }) {
                 <option value="basis">{extra.original}</option>
                 <option value="referentie">{extra.label}</option>
                 {tool.id === "pneumatic-cylinder" ? (
-                  <option value="kracht">Kracht bij gegeven diameter</option>
+                  <option value="kracht">
+                    {tx(locale, "Kracht bij gegeven diameter", "Force at a given diameter")}
+                  </option>
                 ) : null}
               </select>
             </label>
@@ -102,7 +118,7 @@ export function ToolDetail({ section }: { section: ToolSection }) {
         <Suspense
           fallback={
             <p className="tool-loading" role="status">
-              Rekenmodel wordt geladen…
+              {tx(locale, "Rekenmodel wordt geladen…", "Loading calculation model…")}
             </p>
           }
         >
@@ -118,10 +134,13 @@ export function ToolDetail({ section }: { section: ToolSection }) {
         </Suspense>
         {tool.id === "macros" ? (
           <>
-            <h2 className="mt-12">Downloadbare macro’s</h2>
+            <h2 className="mt-12">{tx(locale, "Downloadbare macro’s", "Downloadable macros")}</h2>
             <p>
-              VBA-modules en aanvullende rapportmacro’s voor SolidWorks en Inventor. Inspecteer de
-              code en test op een kopie; Mechify voert deze bestanden niet uit.
+              {tx(
+                locale,
+                "VBA-modules en aanvullende rapportmacro’s voor SolidWorks en Inventor. Inspecteer de code en test op een kopie; Mechify voert deze bestanden niet uit.",
+                "VBA modules and additional report macros for SolidWorks and Inventor. Inspect the code and test on a copy; Mechify never runs these files.",
+              )}
             </p>
             <MacroDownloads />
           </>

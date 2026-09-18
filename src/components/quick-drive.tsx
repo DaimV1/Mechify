@@ -1,29 +1,41 @@
 import { CalculationVisual } from "./calculation-visual";
 import { useState } from "react";
 import { driveResult, ratioResult, forceResult, type Values } from "@/lib/calculators/drive";
-const definitions: Record<string, Record<string, [string, string, string]>> = {
+import { tx, useLocale, type Locale } from "@/lib/i18n/locale";
+
+type Bilingual = Record<Locale, string>;
+type FieldDef = [Bilingual, Bilingual, string];
+
+const RPM: Bilingual = { nl: "omw/min", en: "rpm" };
+const SAME = (s: string): Bilingual => ({ nl: s, en: s });
+
+const definitions: Record<string, Record<string, FieldDef>> = {
   drive: {
-    power: ["Vermogen", "kW", "0.75"],
-    speed: ["Toerental", "omw/min", "1500"],
-    torque: ["Koppel", "N·m", "4.775"],
+    power: [{ nl: "Vermogen", en: "Power" }, SAME("kW"), "0.75"],
+    speed: [{ nl: "Toerental", en: "Speed" }, RPM, "1500"],
+    torque: [{ nl: "Koppel", en: "Torque" }, SAME("N·m"), "4.775"],
   },
   ratio: {
-    speed: ["Ingaand toerental", "omw/min", "1500"],
-    torque: ["Ingaand koppel", "N·m", "8"],
-    ratio: ["Verhouding i = n₁ / n₂", "—", "10"],
-    efficiency: ["Rendement", "%", "92"],
+    speed: [{ nl: "Ingaand toerental", en: "Input speed" }, RPM, "1500"],
+    torque: [{ nl: "Ingaand koppel", en: "Input torque" }, SAME("N·m"), "8"],
+    ratio: [{ nl: "Verhouding i = n₁ / n₂", en: "Ratio i = n₁ / n₂" }, SAME("—"), "10"],
+    efficiency: [{ nl: "Rendement", en: "Efficiency" }, SAME("%"), "92"],
   },
   force: {
-    pressure: ["Overdruk", "bar", "6"],
-    diameter: ["Zuigerdiameter", "mm", "50"],
-    rod: ["Stangdiameter", "mm", "20"],
-    efficiency: ["Krachtfactor na verliezen", "%", "90"],
+    pressure: [{ nl: "Overdruk", en: "Gauge pressure" }, SAME("bar"), "6"],
+    diameter: [{ nl: "Zuigerdiameter", en: "Piston diameter" }, SAME("mm"), "50"],
+    rod: [{ nl: "Stangdiameter", en: "Rod diameter" }, SAME("mm"), "20"],
+    efficiency: [
+      { nl: "Krachtfactor na verliezen", en: "Force factor after losses" },
+      SAME("%"),
+      "90",
+    ],
   },
 };
-const titles: Record<string, string> = {
-  drive: "Koppel, vermogen & toerental",
-  ratio: "Overbrengingsverhouding",
-  force: "Kracht bij een gegeven cilinder",
+const titles: Record<string, Record<Locale, string>> = {
+  drive: { nl: "Koppel, vermogen & toerental", en: "Torque, power & speed" },
+  ratio: { nl: "Overbrengingsverhouding", en: "Transmission ratio" },
+  force: { nl: "Kracht bij een gegeven cilinder", en: "Force for a given cylinder" },
 };
 const format = (n: number) =>
   n.toLocaleString("nl-NL", {
@@ -36,6 +48,7 @@ export function QuickDrive({
   compact?: boolean;
   kind?: string;
 }) {
+  const { locale } = useLocale();
   const fields = definitions[kind];
   const initial = () => Object.fromEntries(Object.entries(fields).map(([k, f]) => [k, f[2]]));
   const [v, setV] = useState<Values>(initial);
@@ -45,27 +58,35 @@ export function QuickDrive({
   let results: [string, number, string][] = [];
   try {
     if (kind === "drive") {
-      const labels: Record<string, [string, string]> = {
-        torque: ["Beschikbaar koppel", "N·m"],
-        power: ["Mechanisch vermogen", "kW"],
-        speed: ["Toerental", "omw/min"],
+      const labels: Record<string, [Bilingual, Bilingual]> = {
+        torque: [{ nl: "Beschikbaar koppel", en: "Available torque" }, SAME("N·m")],
+        power: [{ nl: "Mechanisch vermogen", en: "Mechanical power" }, SAME("kW")],
+        speed: [{ nl: "Toerental", en: "Speed" }, RPM],
       };
-      results = [[labels[target][0], driveResult(target, v), labels[target][1]]];
+      results = [
+        [labels[target][0][locale], driveResult(target, v), labels[target][1][locale]],
+      ];
     } else if (kind === "ratio") {
       const r = ratioResult(v);
       results = [
-        ["Uitgaand toerental", r.speed, "omw/min"],
-        ["Uitgaand koppel", r.torque, "N·m"],
+        [tx(locale, "Uitgaand toerental", "Output speed"), r.speed, RPM[locale]],
+        [tx(locale, "Uitgaand koppel", "Output torque"), r.torque, "N·m"],
       ];
     } else {
       const r = forceResult(v);
       results = [
-        ["Uitgaande kracht", r.extend, "N"],
-        ["Ingaande kracht", r.retract, "N"],
+        [tx(locale, "Uitgaande kracht", "Extend force"), r.extend, "N"],
+        [tx(locale, "Ingaande kracht", "Retract force"), r.retract, "N"],
       ];
     }
     if (results.some((r) => !Number.isFinite(r[1]) || Math.abs(r[1]) > 1e15))
-      throw Error("Het resultaat is buiten het rekenbereik. Controleer de invoer.");
+      throw Error(
+        tx(
+          locale,
+          "Het resultaat is buiten het rekenbereik. Controleer de invoer.",
+          "The result is outside the calculation range. Check the input.",
+        ),
+      );
   } catch (e) {
     error = (e as Error).message;
   }
@@ -77,14 +98,20 @@ export function QuickDrive({
         : "Fuit = p · πD² / 4 · η; Fin = p · π(D² − d²) / 4 · η";
   return (
     <div className={"calculator " + (compact ? "compact" : "")}>
-      <h3>{titles[kind]}</h3>
+      <h3>{titles[kind][locale]}</h3>
       {kind === "drive" ? (
-        <div className="calc-tabs" role="group" aria-label="Te berekenen grootheid">
-          {[
-            ["torque", "Koppel"],
-            ["power", "Vermogen"],
-            ["speed", "Toerental"],
-          ].map(([id, label]) => (
+        <div
+          className="calc-tabs"
+          role="group"
+          aria-label={tx(locale, "Te berekenen grootheid", "Quantity to calculate")}
+        >
+          {(
+            [
+              ["torque", tx(locale, "Koppel", "Torque")],
+              ["power", tx(locale, "Vermogen", "Power")],
+              ["speed", tx(locale, "Toerental", "Speed")],
+            ] as [string, string][]
+          ).map(([id, label]) => (
             <button
               key={id}
               aria-pressed={target === id}
@@ -103,7 +130,7 @@ export function QuickDrive({
           .filter(([key]) => kind !== "drive" || key !== target)
           .map(([key, [label, unit]]) => (
             <label className="field" key={key}>
-              {label}
+              {label[locale]}
               <div className="input-unit">
                 <input
                   inputMode="decimal"
@@ -114,7 +141,7 @@ export function QuickDrive({
                     setStatus("");
                   }}
                 />
-                <span>{unit}</span>
+                <span>{unit[locale]}</span>
               </div>
             </label>
           ))}
@@ -144,7 +171,7 @@ export function QuickDrive({
             setStatus("");
           }}
         >
-          ↺ Reset
+          ↺ {tx(locale, "Reset", "Reset")}
         </button>
         <button
           className="copy"
@@ -153,23 +180,27 @@ export function QuickDrive({
             try {
               await navigator.clipboard.writeText(
                 [
-                  titles[kind],
+                  titles[kind][locale],
                   ...Object.entries(v)
                     .filter(([k]) => kind !== "drive" || k !== target)
-                    .map(([k, n]) => `${fields[k][0]}: ${n} ${fields[k][1]}`),
+                    .map(([k, n]) => `${fields[k][0][locale]}: ${n} ${fields[k][1][locale]}`),
                   ...results.map(([l, n, u]) => `${l}: ${format(n)} ${u}`),
                   formula,
                 ].join("\n"),
               );
-              setStatus("Gekopieerd");
+              setStatus(tx(locale, "Gekopieerd", "Copied"));
             } catch {
               setStatus(
-                "Kopiëren niet toegestaan. Selecteer het resultaat om handmatig te kopiëren.",
+                tx(
+                  locale,
+                  "Kopiëren niet toegestaan. Selecteer het resultaat om handmatig te kopiëren.",
+                  "Copying isn't allowed. Select the result to copy it manually.",
+                ),
               );
             }
           }}
         >
-          Kopieer resultaat ⧉
+          {tx(locale, "Kopieer resultaat", "Copy result")} ⧉
         </button>
         <span className="copy-status" role="status">
           {status}
@@ -177,15 +208,27 @@ export function QuickDrive({
       </div>
       <details className="formula" open={!compact}>
         <summary>
-          Formule & aannames <span>+</span>
+          {tx(locale, "Formule & aannames", "Formula & assumptions")} <span>+</span>
         </summary>
         <code>{formula}</code>
         <p>
           {kind === "drive"
-            ? "P in kW, T in N·m, n in omw/min. Stationair mechanisch asvermogen; geen elektrisch opgenomen vermogen, versnelling of motorselectie."
+            ? tx(
+                locale,
+                "P in kW, T in N·m, n in omw/min. Stationair mechanisch asvermogen; geen elektrisch opgenomen vermogen, versnelling of motorselectie.",
+                "P in kW, T in N·m, n in rpm. Steady-state mechanical shaft power; no electrical input power, acceleration or motor selection.",
+              )
             : kind === "ratio"
-              ? "i = n₁/n₂. i > 1 is een reductie. η = rendement/100. Constant rendement, energiestroom van ingang naar uitgang. Geen piekbelasting of terugaandrijving."
-              : "p in N/mm² = bar × 0,1. D en d in mm. Ontluchtende zijde op atmosferische druk. Krachtfactor is een gekozen verliesfactor; geen knik-, snelheid- of dynamische controle."}
+              ? tx(
+                  locale,
+                  "i = n₁/n₂. i > 1 is een reductie. η = rendement/100. Constant rendement, energiestroom van ingang naar uitgang. Geen piekbelasting of terugaandrijving.",
+                  "i = n₁/n₂. i > 1 is a reduction. η = efficiency/100. Constant efficiency, energy flow from input to output. No peak load or back-driving.",
+                )
+              : tx(
+                  locale,
+                  "p in N/mm² = bar × 0,1. D en d in mm. Ontluchtende zijde op atmosferische druk. Krachtfactor is een gekozen verliesfactor; geen knik-, snelheid- of dynamische controle.",
+                  "p in N/mm² = bar × 0.1. D and d in mm. Vented side at atmospheric pressure. Force factor is a chosen loss factor; no buckling, speed or dynamic check.",
+                )}
         </p>
       </details>
     </div>

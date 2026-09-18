@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
+import { tx, useLocale } from "@/lib/i18n/locale";
 export function AssemblyHero() {
   const ref = useRef<HTMLCanvasElement>(null);
+  const { locale } = useLocale();
   useEffect(() => {
     let dispose: (() => void) | undefined;
     let active = true;
@@ -40,7 +42,11 @@ export function AssemblyHero() {
       <canvas
         id="assembly"
         ref={ref}
-        aria-label="Isometrische exploded view van een aandrijving, koppeling en lagerflens"
+        aria-label={tx(
+          locale,
+          "Isometrische exploded view van een aandrijving, koppeling en lagerflens",
+          "Isometric exploded view of a drive, coupling and bearing flange",
+        )}
         role="img"
       />
       <div className="assembly-controls">
@@ -48,14 +54,15 @@ export function AssemblyHero() {
           EXPLODED VIEW
         </span>
         <label htmlFor="explode" className="sr-only">
-          Montageafstand assembly
+          {tx(locale, "Montageafstand assembly", "Assembly explosion distance")}
         </label>
         <span>−</span>
         <input id="explode" type="range" min="0" max="100" defaultValue="65" />
         <span>+</span>
       </div>
       <div className="visual-caption mono">
-        SCHEMATISCHE STUDIE <span>VERSLEEP OM TE ONTDEKKEN ↔</span>
+        {tx(locale, "SCHEMATISCHE STUDIE", "SCHEMATIC STUDY")}{" "}
+        <span>{tx(locale, "VERSLEEP OM TE ONTDEKKEN ↔", "DRAG TO EXPLORE ↔")}</span>
       </div>
     </div>
   );

@@ -4,10 +4,16 @@ import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow, ToolTile, readFavorites } from "@/components/brand-ui";
 import { matchTools } from "@/lib/tools";
 import { useDocumentMeta } from "@/lib/use-document-meta";
+import { tx, useLocale } from "@/lib/i18n/locale";
 export function Toolkit() {
+  const { locale } = useLocale();
   useDocumentMeta(
-    "Engineeringtoolkit",
-    "De complete Mechify-toolkit: toleranties, verbindingen, aandrijvingen, sterkteberekeningen en CAD.",
+    tx(locale, "Engineeringtoolkit", "Engineering toolkit"),
+    tx(
+      locale,
+      "De complete Mechify-toolkit: toleranties, verbindingen, aandrijvingen, sterkteberekeningen en CAD.",
+      "The complete Mechify toolkit: tolerances, connections, drives, strength calculations and CAD.",
+    ),
   );
   const [search, setSearch] = useSearchParams();
   const [, refresh] = useState(0);
@@ -15,10 +21,10 @@ export function Toolkit() {
     category = search.get("categorie") || "Alle",
     favorites = search.get("favorieten") === "1";
   const categories: Record<string, string> = {
-    Alle: "Alle",
-    tools: "Maatvoering & verbindingen",
-    calculators: "Rekenmodules",
-    cad: "CAD & naslag",
+    Alle: tx(locale, "Alle", "All"),
+    tools: tx(locale, "Maatvoering & verbindingen", "Dimensions & connections"),
+    calculators: tx(locale, "Rekenmodules", "Calculators"),
+    cad: tx(locale, "CAD & naslag", "CAD & reference"),
   };
   function update(key: string, v: string) {
     setSearch(
@@ -39,21 +45,32 @@ export function Toolkit() {
   return (
     <PageShell>
       <section className="wrap page-intro">
-        <Eyebrow>JE DIGITALE WERKBANK</Eyebrow>
+        <Eyebrow>{tx(locale, "JE DIGITALE WERKBANK", "YOUR DIGITAL WORKBENCH")}</Eyebrow>
         <h1>
-          De engineering<span>toolkit.</span>
+          {tx(locale, "De engineering", "The engineering")}
+          <span>toolkit.</span>
         </h1>
-        <p>Van passing tot aandrijving. Direct antwoord, met de berekening erbij.</p>
+        <p>
+          {tx(
+            locale,
+            "Van passing tot aandrijving. Direct antwoord, met de berekening erbij.",
+            "From fit to drive. A direct answer, with the calculation alongside it.",
+          )}
+        </p>
       </section>
       <section className="wrap listing">
         <div className="search-row">
           <label className="search">
             <span aria-hidden>⌕</span>
-            <span className="sr-only">Zoek tools</span>
+            <span className="sr-only">{tx(locale, "Zoek tools", "Search tools")}</span>
             <input
               type="search"
               value={query}
-              placeholder="Zoek een tool, norm of grootheid…"
+              placeholder={tx(
+                locale,
+                "Zoek een tool, norm of grootheid…",
+                "Search a tool, standard or quantity…",
+              )}
               onChange={(e) => update("q", e.target.value)}
             />
           </label>
@@ -62,7 +79,7 @@ export function Toolkit() {
             aria-pressed={favorites}
             onClick={() => update("favorieten", favorites ? "" : "1")}
           >
-            ☆ Mijn favorieten
+            ☆ {tx(locale, "Mijn favorieten", "My favorites")}
           </button>
         </div>
         <div className="filters">
@@ -80,7 +97,9 @@ export function Toolkit() {
           <span role="status">
             {list.length} {list.length === 1 ? "tool" : "tools"}
           </span>
-          <button onClick={() => setSearch({}, { replace: true })}>Wis filters ↺</button>
+          <button onClick={() => setSearch({}, { replace: true })}>
+            {tx(locale, "Wis filters", "Clear filters")} ↺
+          </button>
         </div>
         <div className="tool-grid full-grid">
           {list.length ? (
@@ -90,14 +109,32 @@ export function Toolkit() {
           ) : (
             <div className="empty">
               <span>⌕</span>
-              <h2>Geen {favorites ? "favorieten" : "resultaten"} gevonden.</h2>
-              <p>Probeer een andere zoekterm of wis de filters.</p>
+              <h2>
+                {tx(
+                  locale,
+                  `Geen ${favorites ? "favorieten" : "resultaten"} gevonden.`,
+                  `No ${favorites ? "favorites" : "results"} found.`,
+                )}
+              </h2>
+              <p>
+                {tx(
+                  locale,
+                  "Probeer een andere zoekterm of wis de filters.",
+                  "Try a different search term or clear the filters.",
+                )}
+              </p>
             </div>
           )}
         </div>
         <p className="local-note">
-          Favorieten blijven in deze browser. Zoekopdracht en filters zijn deelbaar via de URL.{" "}
-          <Link to="/tables">Bekijk ook de referentietabellen ↗</Link>
+          {tx(
+            locale,
+            "Favorieten blijven in deze browser. Zoekopdracht en filters zijn deelbaar via de URL.",
+            "Favorites stay in this browser. Search and filters are shareable via the URL.",
+          )}{" "}
+          <Link to="/tables">
+            {tx(locale, "Bekijk ook de referentietabellen", "Also see the reference tables")} ↗
+          </Link>
         </p>
       </section>
     </PageShell>
