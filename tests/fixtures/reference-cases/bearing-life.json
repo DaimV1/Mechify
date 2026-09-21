@@ -1,0 +1,18 @@
+{
+  "source": "ISO 281 bearing life (L10/L10h) reference formulas",
+  "ballBearing": {
+    "C": 10,
+    "P": 2,
+    "type": "ball",
+    "l10Millions": 125
+  },
+  "l10Hours": {
+    "l10Millions": 125,
+    "rpm": 1500,
+    "hours": 1388.888889,
+    "tolerance": 1e-3
+  },
+  "reliability95": {
+    "a1": 0.62
+  }
+}

@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { toolHref, type Tool } from "@/lib/tools";
+import { useLocale } from "@/lib/i18n/locale-context";
+import { COMMON } from "@/lib/i18n/common";
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <div className="eyebrow">
@@ -26,17 +28,20 @@ export function Action({
   );
 }
 export function Closing() {
+  const { locale } = useLocale();
+  const t = COMMON[locale];
   return (
     <section className="closing wrap">
       <div>
-        <Eyebrow>DE VOLGENDE STAP IS AAN JOU</Eyebrow>
+        <Eyebrow>{t.closingEyebrow}</Eyebrow>
         <h2>
-          Van goed idee.
+          {t.closingHeadline1}
           <br />
-          Naar <span>goed uitgewerkt.</span>
+          {t.closingConnector}
+          <span>{t.closingHeadline2}</span>
         </h2>
       </div>
-      <Action to="/toolkit">Aan de slag met de toolkit</Action>
+      <Action to="/toolkit">{t.closingCta}</Action>
     </section>
   );
 }
@@ -51,6 +56,8 @@ export function readFavorites(): string[] {
 }
 export function ToolTile({ tool, onFavorite }: { tool: Tool; onFavorite?: () => void }) {
   const [favorite, setFavorite] = useState(() => readFavorites().includes(tool.id));
+  const { locale } = useLocale();
+  const t = COMMON[locale];
   return (
     <article className="tool-card">
       <div className="tool-top">
@@ -59,7 +66,7 @@ export function ToolTile({ tool, onFavorite }: { tool: Tool; onFavorite?: () => 
         </span>
         <button
           className="favorite"
-          aria-label={`${tool.title.nl} als favoriet`}
+          aria-label={t.favoriteAria(tool.title[locale])}
           aria-pressed={favorite}
           onClick={() => {
             const ids = readFavorites();
@@ -80,11 +87,11 @@ export function ToolTile({ tool, onFavorite }: { tool: Tool; onFavorite?: () => 
       </div>
       <span className="mono muted">{tool.standard}</span>
       <h3>
-        <Link to={toolHref(tool)}>{tool.title.nl}</Link>
+        <Link to={toolHref(tool)}>{tool.title[locale]}</Link>
       </h3>
-      <p>{tool.blurb.nl}</p>
+      <p>{tool.blurb[locale]}</p>
       <Link className="text-link" to={toolHref(tool)}>
-        Open tool <span>↗</span>
+        {t.openTool} <span>↗</span>
       </Link>
     </article>
   );

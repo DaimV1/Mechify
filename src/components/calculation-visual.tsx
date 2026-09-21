@@ -1,5 +1,7 @@
 import type { Values } from "@/lib/calculators/drive";
+import { tx, useLocale } from "@/lib/i18n/locale";
 export function CalculationVisual({ kind, values }: { kind: string; values: Values }) {
+  const { locale } = useLocale();
   const n = (key: string, fallback: number) => {
     const v = Number(values[key]?.replace(",", "."));
     return Number.isFinite(v) && v >= 0 ? v : fallback;
@@ -14,7 +16,11 @@ export function CalculationVisual({ kind, values }: { kind: string; values: Valu
         <svg
           viewBox="0 0 460 180"
           role="img"
-          aria-label={`Cilinderdoorsnede: zuiger ${D} mm, stang ${d} mm`}
+          aria-label={tx(
+            locale,
+            `Cilinderdoorsnede: zuiger ${D} mm, stang ${d} mm`,
+            `Cylinder cross-section: piston ${D} mm, rod ${d} mm`,
+          )}
         >
           <path
             d={`M80 ${90 - h / 2}H350V${90 + h / 2}H80Z`}
@@ -44,11 +50,15 @@ export function CalculationVisual({ kind, values }: { kind: string; values: Valu
             {values.pressure} bar →
           </text>
           <text x="320" y="155" fill="currentColor" fontSize="12">
-            Stang Ø {d} mm
+            {tx(locale, "Stang", "Rod")} Ø {d} mm
           </text>
         </svg>
         <figcaption>
-          Doorsnede · verhoudingen begrensd voor leesbaarheid · krachtfactor {values.efficiency}%
+          {tx(
+            locale,
+            `Doorsnede · verhoudingen begrensd voor leesbaarheid · krachtfactor ${values.efficiency}%`,
+            `Cross-section · proportions clamped for readability · force factor ${values.efficiency}%`,
+          )}
         </figcaption>
       </figure>
     );
@@ -62,8 +72,12 @@ export function CalculationVisual({ kind, values }: { kind: string; values: Valu
         role="img"
         aria-label={
           kind === "ratio"
-            ? `Overbrenging met verhouding ${ratio}`
-            : "Mechanisch asvermogen, koppel en toerental"
+            ? tx(locale, `Overbrenging met verhouding ${ratio}`, `Transmission with ratio ${ratio}`)
+            : tx(
+                locale,
+                "Mechanisch asvermogen, koppel en toerental",
+                "Mechanical shaft power, torque and speed",
+              )
         }
       >
         <path d="M30 80H430" stroke="currentColor" strokeDasharray="4 6" opacity=".3" />
@@ -84,16 +98,20 @@ export function CalculationVisual({ kind, values }: { kind: string; values: Valu
           strokeWidth="2"
         />
         <text x="80" y="160" fill="currentColor" fontSize="12">
-          {kind === "ratio" ? "INGANG" : "KOPPEL T"}
+          {kind === "ratio" ? tx(locale, "INGANG", "INPUT") : tx(locale, "KOPPEL T", "TORQUE T")}
         </text>
         <text x="270" y="160" fill="currentColor" fontSize="12">
-          {kind === "ratio" ? `i = ${values.ratio}` : "TOERENTAL n"}
+          {kind === "ratio" ? `i = ${values.ratio}` : tx(locale, "TOERENTAL n", "SPEED n")}
         </text>
       </svg>
       <figcaption>
         {kind === "ratio"
-          ? `Schematische transmissie · rendement ${values.efficiency}% · geen tandgeometrie`
-          : "Stationair asvermogen P = T · ω"}
+          ? tx(
+              locale,
+              `Schematische transmissie · rendement ${values.efficiency}% · geen tandgeometrie`,
+              `Schematic transmission · efficiency ${values.efficiency}% · no gear geometry`,
+            )
+          : tx(locale, "Stationair asvermogen P = T · ω", "Steady-state shaft power P = T · ω")}
       </figcaption>
     </figure>
   );

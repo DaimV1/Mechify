@@ -12,23 +12,30 @@ export type CommonStrings = {
   noToolsFound: (q: string) => string;
   openTool: string;
   viewPlan: string;
-  navTools: string;
-  navCalculators: string;
-  navTables: string;
-  navMaterials: string;
-  navCad: string;
+  favoriteAria: (title: string) => string;
+  closingEyebrow: string;
+  closingHeadline1: string;
+  closingConnector: string;
+  closingHeadline2: string;
+  closingCta: string;
+  skipToContent: string;
+  navTopics: string;
+  navToolkit: string;
+  navCadWorkflows: string;
   navAbout: string;
+  headerCta: string;
   mainNav: string;
-  mobileNav: string;
   openMenu: string;
   closeMenu: string;
   breadcrumbNav: string;
   footerTagline: string;
-  footerPlatform: string;
+  footerWorkLink: string;
   footerTablesNorms: string;
   footerMaterials: string;
-  footerMechify: string;
-  footerAbout: string;
+  footerCadLibraries: string;
+  footerMacros: string;
+  footerIndependent: string;
+  footerAboutModels: string;
   footerCopyright: (year: number) => string;
 };
 
@@ -46,26 +53,31 @@ export const COMMON: Record<Locale, CommonStrings> = {
     noToolsFound: (q: string) => `Geen tools gevonden voor "${q}".`,
     openTool: "Open tool",
     viewPlan: "Bekijk plan",
-    navTools: "Tools",
-    navCalculators: "Rekenmodules",
-    navTables: "Tabellen",
-    navMaterials: "Materialen",
-    navCad: "CAD",
+    favoriteAria: (title: string) => `${title} als favoriet`,
+    closingEyebrow: "DE VOLGENDE STAP IS AAN JOU",
+    closingHeadline1: "Van goed idee.",
+    closingConnector: "Naar ",
+    closingHeadline2: "goed uitgewerkt.",
+    closingCta: "Aan de slag met de toolkit",
+    skipToContent: "Naar inhoud",
+    navTopics: "Engineeringtopics",
+    navToolkit: "Toolkit",
+    navCadWorkflows: "CAD-workflows",
     navAbout: "Over Mechify",
+    headerCta: "Open de toolkit",
     mainNav: "Hoofdnavigatie",
-    mobileNav: "Mobiele navigatie",
-    openMenu: "Open menu",
-    closeMenu: "Sluit menu",
+    openMenu: "Menu openen",
+    closeMenu: "Menu sluiten",
     breadcrumbNav: "Kruimelpad",
-    footerTagline:
-      "Praktische engineering tools, rekenmodules en normtabellen voor werktuigbouwkundigen, constructeurs en ontwerpers. Ontworpen om nauwkeurig en snel te werken op de werkvloer.",
-    footerPlatform: "Platform",
+    footerTagline: "Voor de mensen die machines maken.",
+    footerWorkLink: "Aan het werk",
     footerTablesNorms: "Tabellen & normen",
     footerMaterials: "Materialen",
-    footerMechify: "Mechify",
-    footerAbout: "Over Mechify",
-    footerCopyright: (year: number) =>
-      `© ${year} Mechify. Referentiewaarden zonder garantie — controleer kritieke maten altijd tegen de actuele norm.`,
+    footerCadLibraries: "CAD-bibliotheken",
+    footerMacros: "Macro’s",
+    footerIndependent: "Onafhankelijke kennis & tools · Geen CAD-koppeling",
+    footerAboutModels: "Over de rekenmodellen",
+    footerCopyright: (year: number) => `© ${year} Mechify`,
   },
   en: {
     calcHelper: "Calculator",
@@ -79,25 +91,30 @@ export const COMMON: Record<Locale, CommonStrings> = {
     noToolsFound: (q: string) => `No tools found for "${q}".`,
     openTool: "Open tool",
     viewPlan: "View plan",
-    navTools: "Tools",
-    navCalculators: "Calculators",
-    navTables: "Tables",
-    navMaterials: "Materials",
-    navCad: "CAD",
+    favoriteAria: (title: string) => `${title} as favorite`,
+    closingEyebrow: "THE NEXT STEP IS YOURS",
+    closingHeadline1: "From a good idea.",
+    closingConnector: "To ",
+    closingHeadline2: "well executed.",
+    closingCta: "Get started with the toolkit",
+    skipToContent: "Skip to content",
+    navTopics: "Engineering topics",
+    navToolkit: "Toolkit",
+    navCadWorkflows: "CAD workflows",
     navAbout: "About Mechify",
+    headerCta: "Open the toolkit",
     mainNav: "Main navigation",
-    mobileNav: "Mobile navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     breadcrumbNav: "Breadcrumb",
-    footerTagline:
-      "Practical engineering tools, calculators and standard tables for mechanical engineers, designers and machine builders. Built to work accurately and fast on the shop floor.",
-    footerPlatform: "Platform",
+    footerTagline: "For the people who make machines.",
+    footerWorkLink: "Get to work",
     footerTablesNorms: "Tables & standards",
     footerMaterials: "Materials",
-    footerMechify: "Mechify",
-    footerAbout: "About Mechify",
-    footerCopyright: (year: number) =>
-      `© ${year} Mechify. Reference values without warranty — always check critical dimensions against the current standard.`,
+    footerCadLibraries: "CAD libraries",
+    footerMacros: "Macros",
+    footerIndependent: "Independent knowledge & tools · No CAD integration",
+    footerAboutModels: "About the calculation models",
+    footerCopyright: (year: number) => `© ${year} Mechify`,
   },
 };

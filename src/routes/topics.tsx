@@ -1,8 +1,15 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow, Action } from "@/components/brand-ui";
-import { ARTICLE_AUTHOR, ARTICLE_REVIEWED_DATE_ISO, articles } from "@/lib/articles";
+import {
+  ARTICLE_AUTHOR,
+  ARTICLE_REVIEWED_DATE,
+  ARTICLE_REVIEWED_DATE_ISO,
+  CATEGORY_LABELS,
+  articles,
+} from "@/lib/articles";
 import { useDocumentMeta } from "@/lib/use-document-meta";
+import { tx, useLocale } from "@/lib/i18n/locale";
 import { NotFound } from "./not-found";
 const toolLinks: Record<string, string> = {
   koppel: "/calculators/drive-power",
@@ -11,35 +18,47 @@ const toolLinks: Record<string, string> = {
   converter: "/calculators/units",
 };
 export function Topics() {
+  const { locale } = useLocale();
   const [p, setP] = useSearchParams(),
     q = p.get("q") || "",
     c = p.get("categorie") || "Alle";
   useDocumentMeta(
-    "Engineeringtopics",
-    "Praktische uitleg voor de keuzes die je machine beter maken.",
+    tx(locale, "Engineeringtopics", "Engineering topics"),
+    tx(
+      locale,
+      "Praktische uitleg voor de keuzes die je machine beter maken.",
+      "Practical explanations for the choices that make your machine better.",
+    ),
   );
   const list = articles.filter(
     (a) =>
       (c === "Alle" || a.category === c) &&
-      `${a.title} ${a.intro} ${a.category}`.toLowerCase().includes(q.toLowerCase()),
+      `${a.title[locale]} ${a.intro[locale]} ${a.category}`.toLowerCase().includes(q.toLowerCase()),
   );
   return (
     <PageShell>
       <section className="wrap page-intro">
-        <Eyebrow>KENNIS VOOR DE PRAKTIJK</Eyebrow>
+        <Eyebrow>{tx(locale, "KENNIS VOOR DE PRAKTIJK", "KNOWLEDGE FOR THE SHOP FLOOR")}</Eyebrow>
         <h1>
-          Van inzicht naar<span>beter ontwerp.</span>
+          {tx(locale, "Van inzicht naar", "From insight to")}
+          <span>{tx(locale, "beter ontwerp.", "better design.")}</span>
         </h1>
-        <p>Praktische uitleg voor de keuzes die je machine beter maken.</p>
+        <p>
+          {tx(
+            locale,
+            "Praktische uitleg voor de keuzes die je machine beter maken.",
+            "Practical explanations for the choices that make your machine better.",
+          )}
+        </p>
       </section>
       <section className="wrap listing">
         <label className="search">
           <span>⌕</span>
-          <span className="sr-only">Zoek onderwerpen</span>
+          <span className="sr-only">{tx(locale, "Zoek onderwerpen", "Search topics")}</span>
           <input
             type="search"
             value={q}
-            placeholder="Zoek een onderwerp…"
+            placeholder={tx(locale, "Zoek een onderwerp…", "Search a topic…")}
             onChange={(e) => setP({ q: e.target.value, categorie: c }, { replace: true })}
           />
         </label>
@@ -50,13 +69,17 @@ export function Topics() {
               aria-pressed={c === cat}
               onClick={() => setP({ q, categorie: cat }, { replace: true })}
             >
-              {cat}
+              {cat === "Alle" ? tx(locale, "Alle", "All") : CATEGORY_LABELS[cat][locale]}
             </button>
           ))}
         </div>
         <div className="listing-meta mono">
-          <span role="status">{list.length} artikelen</span>
-          <button onClick={() => setP({}, { replace: true })}>Wis filters ↺</button>
+          <span role="status">
+            {list.length} {tx(locale, "artikelen", "articles")}
+          </span>
+          <button onClick={() => setP({}, { replace: true })}>
+            {tx(locale, "Wis filters", "Clear filters")} ↺
+          </button>
         </div>
         {list.length ? (
           list.map((a, i) => (
@@ -64,17 +87,23 @@ export function Topics() {
               <span className="row-index">0{i + 1}</span>
               <div>
                 <span className="mono muted">
-                  {a.category} · {a.time}
+                  {CATEGORY_LABELS[a.category][locale]} · {a.time}
                 </span>
-                <h3>{a.title}</h3>
+                <h3>{a.title[locale]}</h3>
               </div>
               <span>↗</span>
             </Link>
           ))
         ) : (
           <div className="empty">
-            <h2>Geen artikelen gevonden.</h2>
-            <p>Wis de filters of probeer een andere zoekterm.</p>
+            <h2>{tx(locale, "Geen artikelen gevonden.", "No articles found.")}</h2>
+            <p>
+              {tx(
+                locale,
+                "Wis de filters of probeer een andere zoekterm.",
+                "Clear the filters or try a different search term.",
+              )}
+            </p>
           </div>
         )}
       </section>
@@ -82,85 +111,92 @@ export function Topics() {
   );
 }
 export function TopicArticle() {
+  const { locale } = useLocale();
   const { slug } = useParams();
   const a = articles.find((a) => a.slug === slug);
-  useDocumentMeta(a?.title || "Artikel niet gevonden", a?.intro || "Dit artikel bestaat niet.", {
-    schema: a
-      ? {
-          type: "TechArticle",
-          extra: {
-            author: { "@type": "Person", name: ARTICLE_AUTHOR },
-            dateModified: ARTICLE_REVIEWED_DATE_ISO,
-            articleSection: a.category,
-          },
-          breadcrumbs: [
-            { name: "Mechify", path: "/" },
-            { name: "Engineeringtopics", path: "/topics" },
-          ],
-        }
-      : undefined,
-  });
+  useDocumentMeta(
+    a?.title[locale] || tx(locale, "Artikel niet gevonden", "Article not found"),
+    a?.intro[locale] || tx(locale, "Dit artikel bestaat niet.", "This article does not exist."),
+    {
+      schema: a
+        ? {
+            type: "TechArticle",
+            extra: {
+              author: { "@type": "Person", name: ARTICLE_AUTHOR },
+              dateModified: ARTICLE_REVIEWED_DATE_ISO,
+              articleSection: a.category,
+            },
+            breadcrumbs: [
+              { name: "Mechify", path: "/" },
+              { name: "Engineeringtopics", path: "/topics" },
+            ],
+          }
+        : undefined,
+    },
+  );
   if (!a) return <NotFound />;
   return (
     <PageShell>
       <article className="wrap article brand-article">
         <Link className="back" to="/topics">
-          ← Alle engineeringtopics
+          ← {tx(locale, "Alle engineeringtopics", "All engineering topics")}
         </Link>
         <header className="article-header">
           <Eyebrow>
-            {a.category.toUpperCase()} / {a.time.toUpperCase()}
+            {CATEGORY_LABELS[a.category][locale].toUpperCase()} / {a.time.toUpperCase()}
           </Eyebrow>
-          <h1>{a.title}</h1>
-          <p>{a.intro}</p>
+          <h1>{a.title[locale]}</h1>
+          <p>{a.intro[locale]}</p>
           <dl className="article-provenance">
             <div>
-              <dt>Geschreven door</dt>
+              <dt>{tx(locale, "Geschreven door", "Written by")}</dt>
               <dd>{ARTICLE_AUTHOR}</dd>
             </div>
             <div>
-              <dt>Laatst gecontroleerd</dt>
-              <dd>{a.reviewedDate}</dd>
+              <dt>{tx(locale, "Laatst gecontroleerd", "Last checked")}</dt>
+              <dd>{ARTICLE_REVIEWED_DATE[locale]}</dd>
             </div>
             <div>
-              <dt>Technische basis</dt>
-              <dd>{a.basis}</dd>
+              <dt>{tx(locale, "Technische basis", "Technical basis")}</dt>
+              <dd>{a.basis[locale]}</dd>
             </div>
           </dl>
         </header>
         <div className="article-layout">
           <aside className="article-toc">
-            <span className="mono muted">IN DIT ARTIKEL</span>
+            <span className="mono muted">{tx(locale, "IN DIT ARTIKEL", "IN THIS ARTICLE")}</span>
             {a.sections.map(([title], i) => (
-              <a href={"#deel-" + i} key={title}>
-                0{i + 1} {title}
+              <a href={"#deel-" + i} key={title.nl}>
+                0{i + 1} {title[locale]}
               </a>
             ))}
-            <Action to={toolLinks[a.tool]}>Bijbehorende tool</Action>
+            <Action to={toolLinks[a.tool]}>{tx(locale, "Bijbehorende tool", "Related tool")}</Action>
           </aside>
           <div className="article-body">
             <div className="practice">
-              <span className="mono cyan">DE PRAKTIJKVRAAG</span>
-              <p>{a.question}</p>
+              <span className="mono cyan">{tx(locale, "DE PRAKTIJKVRAAG", "THE PRACTICAL QUESTION")}</span>
+              <p>{a.question[locale]}</p>
             </div>
             {a.sections.map(([title, text], i) => (
-              <section id={"deel-" + i} key={title}>
+              <section id={"deel-" + i} key={title.nl}>
                 <span className="mono muted">0{i + 1}</span>
-                <h2>{title}</h2>
-                <p>{text}</p>
+                <h2>{title[locale]}</h2>
+                <p>{text[locale]}</p>
               </section>
             ))}
             {a.source ? (
               <p className="source">
-                Verder lezen:{" "}
+                {tx(locale, "Verder lezen:", "Further reading:")}{" "}
                 <a href={a.source[1]} target="_blank" rel="noreferrer">
                   {a.source[0]} ↗
                 </a>
               </p>
             ) : null}
             <div className="article-next">
-              <h3>Breng de uitleg in praktijk.</h3>
-              <Action to={toolLinks[a.tool]}>Open de bijbehorende tool</Action>
+              <h3>{tx(locale, "Breng de uitleg in praktijk.", "Put the explanation into practice.")}</h3>
+              <Action to={toolLinks[a.tool]}>
+                {tx(locale, "Open de bijbehorende tool", "Open the related tool")}
+              </Action>
             </div>
           </div>
         </div>

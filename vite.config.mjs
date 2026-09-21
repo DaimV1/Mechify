@@ -36,11 +36,11 @@ function sitemapPlugin() {
           "/calculators": "Rekenmodules",
           "/cad": "CAD-bibliotheken en macro’s",
         };
-        const shortTitle = tool?.title.nl || article?.title || labels[route] || "Mechify";
+        const shortTitle = tool?.title.nl || article?.title.nl || labels[route] || "Mechify";
         const rawTitle = shortTitle + " — Mechify";
         const rawDescription =
           tool?.blurb.nl ||
-          article?.intro ||
+          article?.intro.nl ||
           "Praktische engineeringkennis en rekentools voor machinebouwers.";
         const title = escape(rawTitle);
         const description = escape(rawDescription);
@@ -180,7 +180,7 @@ function buildLlmsTxt() {
 
   lines.push("## Engineering articles", "");
   for (const article of articles) {
-    lines.push(`- [${article.title}](${SITE_URL}/topics/${article.slug}): ${article.intro}`);
+    lines.push(`- [${article.title.en}](${SITE_URL}/topics/${article.slug}): ${article.intro.en}`);
   }
   lines.push("");
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { additionalMacros } from "@/lib/additional-macros";
 import { Download } from "lucide-react";
 import { CopyResult } from "@/components/toolkit/calc-ui";
@@ -139,6 +140,45 @@ function groups(locale: Locale) {
   ];
 }
 
+/**
+ * Audit (17 sept 2026, security section): shows a SHA-256 of the exact
+ * macro source bundled into this page, computed live in the browser from
+ * the same string the "Download .bas" link and the visible code block use
+ * — so it can never drift from either. Lets a cautious user diff the
+ * downloaded file against a hash they trust before running VBA against
+ * their CAD documents; it can't prove the server itself is honest (a
+ * compromised server could serve a matching bad file+hash together), only
+ * that download and page agree, which is what a self-hosted checksum can
+ * ever promise.
+ */
+function useSha256Hex(text: string): string | null {
+  const [hash, setHash] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setHash(null);
+    crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then((digest) => {
+      if (cancelled) return;
+      const hex = Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      setHash(hex);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [text]);
+  return hash;
+}
+
+function MacroChecksum({ code }: { code: string }) {
+  const hash = useSha256Hex(code);
+  return (
+    <p className="mono muted text-sm">
+      SHA-256: <code>{hash ?? "…"}</code>
+    </p>
+  );
+}
+
 export function MacroDownloads() {
   const { locale } = useLocale();
   return (
@@ -184,6 +224,7 @@ export function MacroDownloads() {
                   <Download size={16} />
                   Download .bas
                 </a>
+                <MacroChecksum code={m.code} />
                 <CopyResult text={m.code} />
                 <details>
                   <summary>Bekijk de VBA-code</summary>

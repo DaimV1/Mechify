@@ -1,0 +1,11 @@
+{
+  "source": "ISO 15552 catalogue record: Ø32 bore / Ø12 rod force at 6 bar",
+  "bore32rod12at6bar": {
+    "bore": 32,
+    "rod": 12,
+    "pBar": 6,
+    "forceOut": 482.55,
+    "forceIn": 414.69,
+    "tolerance": 0.05
+  }
+}
