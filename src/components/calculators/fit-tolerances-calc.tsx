@@ -97,6 +97,8 @@ const T = {
       "Boven 50 mm: de IT-breedte komt uit de ISO 286-1-tabel (exact), de fundamentele afwijking van G/F/D en g/f/d uit de formule — boven Ø400 kan die 1 µm van de tabelwaarde verschillen.",
     disputedP6Note:
       "Betwiste waarde in deze band (>0–≤3 mm): p6 hier is afgeleid (niet uit een tabel overgenomen). Een andere geïndexeerde bron vermeldt mogelijk es=+12/ei=+6 µm i.p.v. de +16/+10 hier — als dat klopt wordt H7/p6 in deze band een overgangspassing, geen lijnpassing. Controleer tegen een primaire ISO 286-2-tabel vóór gebruik.",
+    disputedP6ShortNote:
+      "Betwiste waarde in deze band (>0–≤3 mm) — zie † bij de astolerantietabel hieronder voor details.",
     copyLine: (d: number, fitId: string, bandLabel: string) =>
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Voorkeurpassingen",
@@ -156,6 +158,8 @@ const T = {
       "Above 50 mm: the IT width comes from the ISO 286-1 table (exact), the fundamental deviation of G/F/D and g/f/d from the formula — above Ø400 it can differ by 1 µm from the table value.",
     disputedP6Note:
       "Disputed value in this band (>0–≤3 mm): p6 here is derived (not transcribed from a table). Another indexed source reportedly lists es=+12/ei=+6 µm instead of the +16/+10 used here — if that's correct, H7/p6 in this band becomes a transition fit, not a line fit. Verify against a primary ISO 286-2 table before use.",
+    disputedP6ShortNote:
+      "Disputed value in this band (>0–≤3 mm) — see † at the shaft-tolerance table below for details.",
     copyLine: (d: number, fitId: string, bandLabel: string) =>
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Preferred fits",
@@ -311,7 +315,7 @@ export function FitTolerancesCalc() {
             ) : null}
             <p className="mt-4 text-sm leading-relaxed text-muted">{fitUse(result.fit)}</p>
             {activeBandExtended ? <Note>{t.extendedNote}</Note> : null}
-            {disputedP6 ? <Note>{t.disputedP6Note}</Note> : null}
+            {disputedP6 ? <Note>{t.disputedP6ShortNote}</Note> : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
               <CopyLink />
