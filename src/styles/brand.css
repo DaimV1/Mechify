@@ -473,7 +473,7 @@ canvas {
 .calculator {
   padding: 27px 30px;
 }
-.calculator h3 {
+.calculator h2 {
   font-size: 22px;
   margin-bottom: 24px;
 }
@@ -1826,7 +1826,7 @@ footer {
   .calculator {
     padding: 23px 20px;
   }
-  .calculator h3 {
+  .calculator h2 {
     font-size: 20px;
   }
   .panel-title {

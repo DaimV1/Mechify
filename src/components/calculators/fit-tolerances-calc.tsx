@@ -260,15 +260,21 @@ export function FitTolerancesCalc() {
         </div>
 
         {isEmpty ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDiameter}
+          </p>
         ) : dRaw != null && dRaw <= 0 ? (
-          <p className="mt-5 text-sm text-muted">{t.fillPositive}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillPositive}
+          </p>
         ) : fitOutOfBandRange ? (
-          <p className="mt-5 text-sm text-muted">
+          <p className="mt-5 text-sm text-muted" role="status">
             {t.noFormula(fitId, d, BANDS[activeBand] ? bandLabel(BANDS[activeBand]) : "")}
           </p>
         ) : !result ? (
-          <p className="mt-5 text-sm text-muted">{t.noBand(fitId, d)}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.noBand(fitId, d)}
+          </p>
         ) : (
           <>
             <p className="mt-5 flex flex-wrap items-center gap-2 text-sm text-muted">

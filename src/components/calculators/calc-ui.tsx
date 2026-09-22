@@ -139,7 +139,7 @@ export function SelectInput({
 
 export function ResultGrid({ items }: { items: { label: ReactNode; value: string }[] }) {
   return (
-    <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+    <dl className="mt-5 grid gap-3 sm:grid-cols-2" aria-live="polite" aria-atomic="true">
       {items.map((item, i) => (
         <div key={i} className="rounded-md border border-border bg-bg px-4 py-3">
           <dt className="text-xs uppercase tracking-wide text-muted">{item.label}</dt>
