@@ -16,6 +16,10 @@ const toolLinks: Record<string, string> = {
   overbrenging: "/calculators/transmission",
   cilinder: "/calculators/pneumatic-cylinder",
   converter: "/calculators/units",
+  spiebanen: "/tools/keyways",
+  lagerpassing: "/tools/bearing-fits",
+  knik: "/calculators/buckling",
+  lagerlevensduur: "/calculators/bearing-life",
 };
 export function Topics() {
   const { locale } = useLocale();

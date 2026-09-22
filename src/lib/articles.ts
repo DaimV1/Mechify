@@ -388,4 +388,212 @@ export const articles = [
       "https://help.solidworks.com/2024/English/solidworks/sldworks/c_Configurations_Overview.htm",
     ],
   },
+  {
+    slug: "spiebaan-toleranties-kiezen",
+    basis: {
+      nl: "Spiebaanmaten uit DIN 6885-1 (b/h/t1/t2 per asdiameter) en breedtetoleranties uit ISO 286-2, norm. Alleen parallelle spiebanen tot Ø110 mm — geen sterkteberekening van de verbinding, geen spanningsconcentratie in de hoeken.",
+      en: "Keyway dimensions from DIN 6885-1 (b/h/t1/t2 per shaft diameter) and width tolerances from ISO 286-2, standard. Parallel keyways only, up to Ø110 mm — no strength calculation of the joint, no stress concentration at the corners.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een spiebaan is een tolerantiekeuze, geen vast recept.",
+      en: "A keyway is a tolerance choice, not a fixed recipe.",
+    },
+    intro: {
+      nl: "Breedte, diepte en pasvorm bepalen samen of een spiebaanverbinding speling heeft of vastklemt — en dat is een bewuste keuze per toepassing.",
+      en: "Width, depth and fit class together decide whether a keyway joint has clearance or clamps tight — and that's a deliberate choice per application.",
+    },
+    time: "5 min",
+    tool: "spiebanen",
+    question: {
+      nl: "Een as van Ø25 mm krijgt een vaste naaf zonder axiale verschuiving. Welke spiebaanmaten en welke breedtepassing horen daarbij?",
+      en: "A Ø25 mm shaft gets a fixed hub with no axial sliding. What keyway dimensions and width fit belong to it?",
+    },
+    sections: [
+      [
+        { nl: "Maat volgt uit de asdiameter", en: "Size follows from the shaft diameter" },
+        {
+          nl: "DIN 6885-1 geeft spiebreedte b, spiehoogte h en insteekdieptes t1 (as) en t2 (naaf) per bereik van de asdiameter, niet als vloeiende formule. Voor Ø25 mm valt de as in het bereik >22 tot 30 mm: b = 8 mm, h = 7 mm, t1 = 4,0 mm en t2 = 3,3 mm, met een diepte-tolerantie van ±0,2 mm. Lees de tabel op basis van de werkelijke asdiameter, niet op een afgeronde CAD-maat.",
+          en: "DIN 6885-1 gives key width b, key height h and the seating depths t1 (shaft) and t2 (hub) per shaft-diameter range, not as a smooth formula. For Ø25 mm the shaft falls in the >22 to 30 mm range: b = 8 mm, h = 7 mm, t1 = 4.0 mm and t2 = 3.3 mm, with a ±0.2 mm depth tolerance. Read the table from the actual shaft diameter, not a rounded CAD dimension.",
+        },
+      ],
+      [
+        { nl: "Breedte bepaalt de pasvorm, niet de diepte", en: "Width sets the fit, not the depth" },
+        {
+          nl: "De insteekdieptes t1/t2 hebben maar één, vaste tolerantie. De pasvorm zit in de breedte b: dezelfde sleufbreedte krijgt in as en naaf elk een eigen toleranzeklasse. P9 geeft een vaste, klemmende zitting zonder relatieve beweging; N9 is vast maar iets losser voor eenvoudiger montage; JS9 is symmetrisch en geschikt voor een lichte schuifzitting; H9 is een geleidespie die axiaal moet kunnen verschuiven; D10 hoort bij een spie die al vastzit in de as en los in de naaf moet vallen.",
+          en: "The seating depths t1/t2 carry just one fixed tolerance. The fit lives in the width b: the same slot width gets its own tolerance class in the shaft and in the hub. P9 gives a tight, clamping fit with no relative motion; N9 is fixed but a little looser for easier assembly; JS9 is symmetric and suited to a light sliding fit; H9 is a guiding key that must be able to slide axially; D10 belongs to a key that is already fixed in the shaft and must sit loose in the hub.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: P9 op b = 8 mm", en: "Worked example: P9 on b = 8 mm" },
+        {
+          nl: "Voor b = 8 mm geeft ISO 286-2 een IT9-veld van 36 µm en een P-afwijking van −15 µm. De sleufbreedte voor P9 ligt dan tussen −0,015 en −0,051 mm ten opzichte van de nominale 8 mm — de sleuf is altijd smaller dan nominaal, wat de klemming geeft. Vergelijk dat met H9, waar de sleuf tussen 0 en +0,036 mm ligt en er standaard speling overblijft.",
+          en: "For b = 8 mm, ISO 286-2 gives an IT9 grade of 36 µm and a P deviation of −15 µm. The slot width for P9 then falls between −0.015 and −0.051 mm relative to the nominal 8 mm — the slot is always narrower than nominal, which produces the clamping. Compare that with H9, where the slot falls between 0 and +0.036 mm and clearance remains by default.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De tabel dekt parallelle spiebanen tot Ø110 mm; spline- en Woodruff-verbindingen vallen erbuiten. Er wordt geen afschuiv- of afplattingssterkte van de spie zelf berekend en geen spanningsconcentratie bij de sleufhoeken beoordeeld. Controleer die belasting apart bij hoge koppels of schokbelasting.",
+          en: "The table covers parallel keyways up to Ø110 mm; spline and Woodruff joints fall outside it. No shear or bearing strength of the key itself is calculated, and no stress concentration at the slot corners is assessed. Check that loading separately for high torque or shock loads.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "lagerpassing-kiezen",
+    basis: {
+      nl: "SKF-achtige selectierichtlijn voor groefkogellagers (cilindrische boring, roterende binnenring, stilstaande buitenring) gecombineerd met ISO 286-2 toleranties, vuistregel/norm. Geldig tot Ø50 mm — geen rekening met asmateriaal, warmteontwikkeling of een meeroterende buitenring.",
+      en: "SKF-style selection guideline for deep-groove ball bearings (cylindrical bore, rotating inner ring, stationary outer ring) combined with ISO 286-2 tolerances, rule of thumb/standard. Valid up to Ø50 mm — no allowance for shaft material, heat generation, or a co-rotating outer ring.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een lagerpassing kies je op belasting, niet op gevoel.",
+      en: "A bearing fit is chosen by load, not by feel.",
+    },
+    intro: {
+      nl: "Een roterende binnenring die te los zit, kruipt op de as en slijt. Kies de aspassing op belastingsklasse, niet op een vast 'gebruikelijk' getal.",
+      en: "A rotating inner ring that fits too loose creeps on the shaft and wears. Choose the shaft fit by load class, not by a fixed 'usual' number.",
+    },
+    time: "5 min",
+    tool: "lagerpassing",
+    question: {
+      nl: "Een roterende as van Ø30 mm draagt een normale, stationaire belasting. Welke passing hoort bij de as en welke bij het huis?",
+      en: "A rotating Ø30 mm shaft carries a normal, stationary load. What fit belongs to the shaft, and what fit belongs to the housing?",
+    },
+    sections: [
+      [
+        { nl: "De roterende ring heeft klemming nodig", en: "The rotating ring needs a grip" },
+        {
+          nl: "Bij het gangbare geval — binnenring roteert mee met de as, buitenring staat stil in een puntbelast huis — moet de as-passing voorkomen dat de binnenring relatief tot de as kruipt. Kruipen veroorzaakt wrijvingscorrosie en speling die groeit. De buitenring in het stilstaande huis mag losser zitten, zolang die zijde ook echt stilstaat.",
+          en: "In the common case — inner ring rotates with the shaft, outer ring is stationary in a point-loaded housing — the shaft fit must stop the inner ring from creeping relative to the shaft. Creep causes fretting corrosion and clearance that keeps growing. The outer ring in the stationary housing may sit looser, as long as that side genuinely stays stationary.",
+        },
+      ],
+      [
+        { nl: "Belastingsklasse bepaalt de asklasse", en: "Load class sets the shaft class" },
+        {
+          nl: "Licht (P ≤ 0,06 C) hoort bij j6. Normaal (0,06 C < P ≤ 0,12 C) hoort bij k5 tot en met Ø18 mm en bij k6 daarboven. Zwaar (P > 0,12 C) hoort bij n6. Voor Ø30 mm bij normale belasting geeft dat, omdat 30 mm boven de 18 mm-grens ligt, k6 — niet k5.",
+          en: "Light (P ≤ 0.06 C) belongs with j6. Normal (0.06 C < P ≤ 0.12 C) belongs with k5 up to and including Ø18 mm, and with k6 above that. Heavy (P > 0.12 C) belongs with n6. For Ø30 mm under normal load, because 30 mm is above the 18 mm boundary, that gives k6 — not k5.",
+        },
+      ],
+      [
+        { nl: "Vaste en losse zijde in het huis", en: "Fixed and floating side in the housing" },
+        {
+          nl: "De losse zijde krijgt altijd H7, ongeacht de belasting: die zijde moet axiaal kunnen schuiven om thermische uitzetting en tolerantiestapeling op te vangen. De vaste zijde volgt de belasting: J7 bij licht, K7 bij normaal, M7 bij zwaar. Voor het Ø30 mm-voorbeeld met een vaste, normaal belaste zijde geeft dat K7.",
+          en: "The floating side always gets H7, regardless of load: that side must be able to slide axially to absorb thermal expansion and tolerance stack-up. The fixed side follows the load: J7 for light, K7 for normal, M7 for heavy. For the Ø30 mm example with a fixed, normally loaded side, that gives K7.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Deze richtlijn geldt tot Ø50 mm, voor groefkogellagers met cilindrische boring en het gangbare belastingsgeval. Een holle as, sterke warmteontwikkeling of een meeroterende buitenring vragen een andere passing dan hier gegeven. Raadpleeg voor kritieke of afwijkende toepassingen de volledige selectietabel van de lagerfabrikant.",
+          en: "This guideline holds up to Ø50 mm, for deep-groove ball bearings with a cylindrical bore and the common loading case. A hollow shaft, significant heat generation or a co-rotating outer ring call for a different fit than given here. For critical or deviating applications, consult the bearing manufacturer's full selection table.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "knik-en-slankheid",
+    basis: {
+      nl: "Euler-knikformule F_cr = π²EI/L_eff² met eindvoorwaardefactor k (AISC/Shigley-ontwerpwaarden) en een grensslankheid λ_grens = π√(E/Rp0,2), fysica. Geldig in het elastische (Euler-)gebied; onder die grens is het gerapporteerde F_cr een bovengrens, geen geverifieerde kolomcapaciteit.",
+      en: "Euler buckling formula F_cr = π²EI/L_eff² with an end-condition factor k (AISC/Shigley design values) and a limiting slenderness λ_limit = π√(E/Rp0.2), physics. Valid in the elastic (Euler) regime; below that limit, the reported F_cr is an upper bound, not a verified column capacity.",
+    },
+    category: "Machineframes",
+    title: {
+      nl: "Een slanke staaf faalt door knikken, niet door vloeien — tot die grens verschuift.",
+      en: "A slender bar fails by buckling, not by yielding — until that boundary shifts.",
+    },
+    intro: {
+      nl: "Een dunne kolom onder druk bezwijkt vaak lang voordat het materiaal vloeit. Ken de slankheid van de staaf voordat je de sterkte beoordeelt.",
+      en: "A thin column under compression often fails long before the material yields. Know the bar's slenderness before you judge its strength.",
+    },
+    time: "6 min",
+    tool: "knik",
+    question: {
+      nl: "Een stalen ronde staaf Ø20 mm, 800 mm lang, scharnierend aan beide zijden, draagt 5 kN drukkracht. Is dat veilig tegen knikken?",
+      en: "A steel round bar Ø20 mm, 800 mm long, pinned at both ends, carries 5 kN of compressive load. Is that safe against buckling?",
+    },
+    sections: [
+      [
+        { nl: "Slankheid, niet dikte, bepaalt het gedrag", en: "Slenderness, not thickness, sets the behaviour" },
+        {
+          nl: "De slankheid λ = L_eff / i, met traagheidsstraal i = √(I/A) en effectieve lengte L_eff = k · L. De eindvoorwaardefactor k hangt af van hoe de staaf is ingeklemd: scharnier-scharnier k = 1, ingeklemd-vrij k ≈ 2,1, ingeklemd-ingeklemd k ≈ 0,65. Deze ontwerpwaarden (AISC/Shigley) liggen iets minder gunstig dan de theoretisch ideale waarden, omdat volledige inklemming in de praktijk niet bestaat.",
+          en: "Slenderness λ = L_eff / i, with radius of gyration i = √(I/A) and effective length L_eff = k · L. The end-condition factor k depends on how the bar is clamped: pinned-pinned k = 1, fixed-free k ≈ 2.1, fixed-fixed k ≈ 0.65. These design values (AISC/Shigley) sit slightly less favourably than the theoretically ideal ones, because perfect fixity doesn't exist in practice.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld Ø20 mm, 800 mm, scharnier-scharnier", en: "Worked example Ø20 mm, 800 mm, pinned-pinned" },
+        {
+          nl: "Voor een massieve ronde staaf is i = D/4, dus i = 5 mm en λ = 800/5 = 160. Met I = π·20⁴/64 = 7.854 mm⁴, E = 210.000 N/mm² en L_eff = 800 mm geeft F_cr = π²EI/L_eff² ≈ 25,4 kN. Bij een belasting van 5 kN is de veiligheid F_cr/F ≈ 5,1 — ruim voldoende in dit elastische regime.",
+          en: "For a solid round bar, i = D/4, so i = 5 mm and λ = 800/5 = 160. With I = π·20⁴/64 = 7,854 mm⁴, E = 210,000 N/mm² and L_eff = 800 mm, F_cr = π²EI/L_eff² ≈ 25.4 kN. At a 5 kN load, the safety factor F_cr/F ≈ 5.1 — ample margin in this elastic regime.",
+        },
+      ],
+      [
+        { nl: "Ken de grens waar Euler niet meer geldt", en: "Know where Euler stops applying" },
+        {
+          nl: "De grensslankheid λ_grens = π·√(E/Rp0,2) markeert waar de staaf vloeit vóórdat hij elastisch knikt. Voor staal (E = 210.000, Rp0,2 = 235) ligt die grens rond 94. Met λ = 160 zit dit voorbeeld daar ruim boven: het Euler-resultaat is een geverifieerde capaciteit. Onder de grens rapporteert Mechify een bovengrens (A·Rp0,2) in plaats van een pas/faal-antwoord — dat vraagt een aparte kolomcontrole zoals een Johnson-parabool, Tetmajer of een nationale ontwerpnorm.",
+          en: "The limiting slenderness λ_limit = π·√(E/Rp0.2) marks where the bar yields before it buckles elastically. For steel (E = 210,000, Rp0.2 = 235), that limit sits around 94. With λ = 160, this example sits well above it: the Euler result is a verified capacity. Below the limit, Mechify reports an upper bound (A·Rp0.2) instead of a pass/fail answer — that calls for a separate column check such as a Johnson parabola, Tetmajer, or a national design standard.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Het model gaat uit van een ideaal rechte staaf onder centrische belasting, zonder initiële kromming of excentriciteit. Lokale plooiing van dunwandige doorsneden, dynamische belasting en vermoeiing zijn niet inbegrepen. Gebruik de ontwerpwaarden van k, niet de theoretisch ideale, omdat die rekening houden met onvolmaakte inklemming.",
+          en: "The model assumes an ideally straight bar under centric loading, with no initial curvature or eccentricity. Local buckling of thin-walled sections, dynamic loading and fatigue are not included. Use the design values of k, not the theoretically ideal ones, since they account for imperfect fixity.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "lagerlevensduur-berekenen",
+    basis: {
+      nl: "ISO 281 — basis dynamische kentallevensduur L10/L10h en de a1-betrouwbaarheidsfactor, norm. Neemt draaggetal C en equivalente belasting P als gegeven aan; geen a_ISO-smerings-/verontreinigingsfactor en geen X/Y-belastingsomrekening.",
+      en: "ISO 281 — basic dynamic rating life L10/L10h and the a1 reliability factor, standard. Takes the dynamic load rating C and equivalent load P as given; no a_ISO lubrication/contamination factor and no X/Y load conversion.",
+    },
+    category: "Aandrijftechniek",
+    title: {
+      nl: "L10 is een statistische levensduur, geen garantie per lager.",
+      en: "L10 is a statistical life, not a per-bearing guarantee.",
+    },
+    intro: {
+      nl: "90% van een groep identieke lagers haalt de L10-levensduur of meer. Dat zegt niets zeker over het ene lager in jouw machine.",
+      en: "90% of a batch of identical bearings reaches the L10 life or more. That says nothing certain about the one bearing in your machine.",
+    },
+    time: "5 min",
+    tool: "lagerlevensduur",
+    question: {
+      nl: "Een kogellager met C = 25 kN draait bij 750 omw/min onder een equivalente belasting van 4 kN. Hoeveel bedrijfsuren mag je verwachten?",
+      en: "A ball bearing with C = 25 kN runs at 750 rpm under an equivalent load of 4 kN. How many operating hours can you expect?",
+    },
+    sections: [
+      [
+        { nl: "L10 komt uit een vermoeiingsrelatie", en: "L10 comes from a fatigue relation" },
+        {
+          nl: "L10 = (C/P)^p, uitgedrukt in miljoenen omwentelingen, met p = 3 voor kogellagers en p = 10/3 voor rollagers. De formule beschrijft materiaalvermoeiing van het rolcontact, geen slijtage door verontreiniging of gebrekkige smering. L10 is de levensduur die 90% van een groep identieke lagers onder dezelfde omstandigheden minstens haalt.",
+          en: "L10 = (C/P)^p, expressed in millions of revolutions, with p = 3 for ball bearings and p = 10/3 for roller bearings. The formula describes rolling-contact fatigue of the material, not wear from contamination or poor lubrication. L10 is the life that 90% of a batch of identical bearings under the same conditions reaches at minimum.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: kogellager, C = 25 kN, P = 4 kN", en: "Worked example: ball bearing, C = 25 kN, P = 4 kN" },
+        {
+          nl: "L10 = (25/4)³ = 244,1 miljoen omwentelingen. Bij een constant toerental van 750 omw/min volgt L10h = L10 · 10⁶ / (60 · n) ≈ 5.425 bedrijfsuren. Dat is de dynamische kentallevensduur bij 90% betrouwbaarheid — niet de gegarandeerde levensduur van dit specifieke lager.",
+          en: "L10 = (25/4)³ = 244.1 million revolutions. At a constant speed of 750 rpm, L10h = L10 · 10⁶ / (60 · n) ≈ 5,425 operating hours. That is the basic dynamic rating life at 90% reliability — not the guaranteed life of this specific bearing.",
+        },
+      ],
+      [
+        { nl: "Betrouwbaarheid boven 90% kost levensduur", en: "Reliability above 90% costs life" },
+        {
+          nl: "De a1-factor schaalt L10 naar een hogere betrouwbaarheid: a1 = 0,62 bij 95%. Voor dit voorbeeld geeft dat L10h,95 ≈ 5.425 · 0,62 ≈ 3.364 uur. Het lager verandert niet; de rapportage wordt strenger. Kies de betrouwbaarheid op basis van de gevolgen van een storing, niet standaard de hoogste waarde.",
+          en: "The a1 factor scales L10 to a higher reliability: a1 = 0.62 at 95%. For this example that gives L10h,95 ≈ 5,425 · 0.62 ≈ 3,364 hours. The bearing itself doesn't change; the reporting gets stricter. Choose the reliability level based on the consequences of a failure, not by default the highest value.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Deze berekening neemt C en P als gegeven aan; de equivalente belasting P volgt normaal uit een aparte X/Y-berekening op basis van de werkelijke radiale/axiale belastingsverhouding, hier niet gemodelleerd. De smerings- en verontreinigingsinvloed (a_ISO uit ISO 281:2007) ontbreekt. Controleer daarnaast de statische veiligheid S0 = C0/P0 apart — bijvoorbeeld C0 = 20 kN en P0 = 4 kN geeft S0 = 5, ruim boven de aanbevolen minimum van 1 voor rustig draaiende lagers.",
+          en: "This calculation takes C and P as given; the equivalent load P normally follows from a separate X/Y calculation based on the actual radial/axial load ratio, not modelled here. Lubrication and contamination influence (a_ISO from ISO 281:2007) is not included. Also check the static safety factor S0 = C0/P0 separately — for example, C0 = 20 kN and P0 = 4 kN gives S0 = 5, well above the recommended minimum of 1 for smoothly running bearings.",
+        },
+      ],
+    ],
+  },
 ];
