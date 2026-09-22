@@ -222,7 +222,16 @@ export function KantenCalc() {
         )}
       </CalcPanel>
 
-      <BendClearance row={row} />
+      <details className="mt-8">
+        <summary className="cursor-pointer font-display text-xl font-semibold tracking-tight text-ink">
+          {tx(
+            locale,
+            "Extra controle: gat of sleuf nabij de zetting",
+            "Additional check: hole or slot near the bend",
+          )}
+        </summary>
+        <BendClearance row={row} />
+      </details>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">

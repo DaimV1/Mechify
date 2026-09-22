@@ -65,10 +65,7 @@ export function BendClearance({ row }: { row: KantenRow | null }) {
               "Enter a valid diameter and hole-edge distance to check.",
             );
   return (
-    <CalcPanel className="mt-8">
-      <h2 className="font-display text-2xl font-semibold text-ink">
-        {tx(locale, "Beenlengte en gat tot zetting", "Leg length and hole-to-bend clearance")}
-      </h2>
+    <CalcPanel className="mt-4">
       <Note>
         {tx(
           locale,
