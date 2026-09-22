@@ -63,6 +63,11 @@ const OringGroovesCalc = lazy(() =>
     default: m.OringGroovesCalc,
   })),
 );
+const ShaftDiameterCalc = lazy(() =>
+  import("@/components/calculators/shaft-diameter-calc").then((m) => ({
+    default: m.ShaftDiameterCalc,
+  })),
+);
 const CadResourcesCalc = lazy(() =>
   import("@/components/calculators/cad-resources-calc").then((m) => ({
     default: m.CadResourcesCalc,
@@ -91,6 +96,7 @@ export const CALCULATOR_REGISTRY: Record<string, ComponentType> = {
   "seeger-grooves": SeegerGroovesCalc,
   fasteners: FastenersCalc,
   "o-ring-grooves": OringGroovesCalc,
+  "shaft-diameter": ShaftDiameterCalc,
   "cad-resources": CadResourcesCalc,
   macros: MacrosCalc,
 };

@@ -1,0 +1,15 @@
+{
+  "source": "Solid round shaft, pure torsion: tau = 16T/(pi*d^3), Roark's Formulas for Stress and Strain",
+  "worked": {
+    "torque": 50,
+    "tauAllow": 40,
+    "diameterMm": 18.533610896304253,
+    "tolerance": 1e-6
+  },
+  "stressCheck": {
+    "torque": 50,
+    "diameterMm": 18.533610896304253,
+    "expectedStress": 40,
+    "tolerance": 1e-6
+  }
+}

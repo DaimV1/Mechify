@@ -44,6 +44,11 @@ import {
   circleArea,
   effectiveForce,
 } from "../src/lib/calculators/pneumatic.ts";
+import {
+  shaftDiameterForTorque,
+  shaftSafetyStatus,
+  shaftTorsionStress,
+} from "../src/lib/calculators/shaft.ts";
 
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
@@ -646,5 +651,47 @@ describe("Pneumatic cylinder: efficiency and air consumption (PNEU-001)", () => 
     const low = airConsumptionPerCycleL(32, 12, 100, 4);
     const high = airConsumptionPerCycleL(32, 12, 100, 8);
     assert.ok(high > low);
+  });
+});
+
+type ShaftTorsionFixture = {
+  worked: { torque: number; tauAllow: number; diameterMm: number; tolerance: number };
+  stressCheck: { torque: number; diameterMm: number; expectedStress: number; tolerance: number };
+};
+const shaftFixture = loadFixture<ShaftTorsionFixture>("shaft-torsion");
+
+describe("Shaft diameter under torsion (tau = 16T/(pi*d^3))", () => {
+  it("T=50 N.m, tau_allow=40 N/mm^2 gives d_min matching the closed-form solution", () => {
+    const c = shaftFixture.worked;
+    const d = shaftDiameterForTorque(c.torque, c.tauAllow);
+    assert.ok(d != null);
+    close(d, c.diameterMm, c.tolerance);
+  });
+
+  it("the resulting stress at d_min equals the allowable stress exactly (round trip)", () => {
+    const c = shaftFixture.stressCheck;
+    const stress = shaftTorsionStress(c.torque, c.diameterMm);
+    assert.ok(stress != null);
+    close(stress, c.expectedStress, c.tolerance);
+  });
+
+  it("a larger diameter carrying the same torque has lower stress", () => {
+    const small = shaftTorsionStress(50, 15);
+    const large = shaftTorsionStress(50, 25);
+    assert.ok(small != null && large != null);
+    assert.ok(large < small);
+  });
+
+  it("invalid inputs (zero/negative torque or stress/diameter) return null", () => {
+    assert.equal(shaftDiameterForTorque(0, 40), null);
+    assert.equal(shaftDiameterForTorque(50, 0), null);
+    assert.equal(shaftDiameterForTorque(-10, 40), null);
+    assert.equal(shaftTorsionStress(50, 0), null);
+  });
+
+  it("safety status follows the 1.0/1.2 screening bands", () => {
+    assert.equal(shaftSafetyStatus(0.9), "fail");
+    assert.equal(shaftSafetyStatus(1.1), "caution");
+    assert.equal(shaftSafetyStatus(1.5), "ok");
   });
 });
