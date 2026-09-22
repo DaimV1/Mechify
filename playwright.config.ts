@@ -40,7 +40,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run preview",
+    // scripts/check.mjs runs `npm run build` itself immediately before this
+    // and sets SKIP_BUILD=1 so the webServer doesn't redundantly rebuild
+    // (tsc + vite build + prerender) a dist/ that's already fresh. Anyone
+    // running `npm run test:e2e` on its own still gets a build here, so the
+    // command is safe to run in isolation.
+    command: process.env.SKIP_BUILD ? "npm run preview" : "npm run build && npm run preview",
     url: "http://127.0.0.1:8081",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
