@@ -83,6 +83,7 @@ const T = {
     xMax: "Positie x (δ_max)",
     moment: "Moment M_max",
     sigmaMax: "σ_max",
+    momentOfInertia: "Traagheidsmoment I",
     ratio: "L / δ_max",
     reactionA: "Oplegreactie A",
     reactionB: "Oplegreactie B",
@@ -141,6 +142,7 @@ const T = {
     xMax: "Position x (δ_max)",
     moment: "Moment M_max",
     sigmaMax: "σ_max",
+    momentOfInertia: "Moment of inertia I",
     ratio: "L / δ_max",
     reactionA: "Support reaction A",
     reactionB: "Support reaction B",
@@ -487,7 +489,7 @@ export function BeamDeflectionCalc() {
                   sigma != null
                     ? { label: t.sigmaMax, value: `${fmtBeamNum(sigma, 1)} N/mm²` }
                     : null,
-                  { label: "I", value: `${fmtBeamNum(section.I, 0)} mm⁴` },
+                  { label: t.momentOfInertia, value: `${fmtBeamNum(section.I, 0)} mm⁴` },
                   ratio != null ? { label: t.ratio, value: `≈ ${fmtBeamNum(ratio, 0)}` } : null,
                 ].filter(Boolean) as { label: string; value: string }[]
               }

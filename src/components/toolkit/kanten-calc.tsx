@@ -171,13 +171,13 @@ export function KantenCalc() {
               copyText={`t${dashMm(t)} mm, ${tx(locale, materialLabel, materialLabelEn)}, ${tx(locale, kindLabel, kindLabelEn)} — Ri ${dashMm(row.ri)} mm, s ${dashMm(row.s)} mm, w ${dashMm(row.w)} mm, x ${dashMm(row.x)} mm (${KANTEN_SOURCE})`}
             />
             {kind === "haaks" && kFactor == null ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {tx(
                   locale,
                   "Vul een K-factor in groter dan 0 en maximaal 0,5.",
                   "Enter a K-factor greater than 0 and at most 0.5.",
                 )}
-              </Note>
+              </p>
             ) : null}
             {bendMath ? (
               <Note>
@@ -189,22 +189,22 @@ export function KantenCalc() {
               </Note>
             ) : null}
             {row.thickPlate ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {tx(
                   locale,
                   "10 en 12 mm: niet over de volle plaatlengte. Check de actuele 247-pagina.",
                   "10 and 12 mm: not over the full plate length. Check the current 247 page.",
                 )}
-              </Note>
+              </p>
             ) : null}
             {!row.thickPlate && row.w == null && row.s != null ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {tx(
                   locale,
                   "w ontbreekt op de 247-pagina bij deze combinatie, terwijl s wel is opgegeven. Geen naburige rij gebruiken — check de actuele 247-pagina.",
                   "w is missing on the 247 page for this combination, while s is given. Do not use a neighboring row — check the current 247 page.",
                 )}
-              </Note>
+              </p>
             ) : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
@@ -212,7 +212,7 @@ export function KantenCalc() {
             </div>
           </>
         ) : (
-          <p className="mt-5 text-sm text-muted">
+          <p className="mt-5 text-sm text-muted" role="status">
             {tx(
               locale,
               "Deze dikte staat niet in de 247-tabellen voor deze combinatie. Geen naburige rij gebruiken.",
@@ -222,7 +222,16 @@ export function KantenCalc() {
         )}
       </CalcPanel>
 
-      <BendClearance row={row} />
+      <details className="mt-8">
+        <summary className="cursor-pointer font-display text-xl font-semibold tracking-tight text-ink">
+          {tx(
+            locale,
+            "Extra controle: gat of sleuf nabij de zetting",
+            "Additional check: hole or slot near the bend",
+          )}
+        </summary>
+        <BendClearance row={row} />
+      </details>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
