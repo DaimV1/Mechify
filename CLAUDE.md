@@ -6,13 +6,13 @@ accounts, no environment secrets.
 
 ## Stack
 
-- React 19 + React Router 7, TypeScript, Vite 7 (`vite.config.mjs` is the
+- React 19 + React Router 7, TypeScript, Vite 8 (`vite.config.mjs` is the
   active config; `vite.config.ts` is not used for build/dev/preview).
 - Tailwind CSS 4 (`src/styles/brand.css` holds the Mechify identity/responsive
   rules).
 - Node.js >=22.18 (Vercel deploys on 24.x). Deployed on Vercel; `vercel.json`
-  handles routing, `scripts/prerender.mjs` generates sitemap/robots/per-route
-  metadata at build time.
+  handles routing. `vite.config.mjs` generates sitemap, robots and per-route
+  metadata; `scripts/prerender.mjs` renders route HTML at build time.
 
 ## Running locally
 
@@ -63,8 +63,9 @@ its baseline with `npm run test:e2e:update-snapshots` (screenshots live in
 **Calculator output must stay verifiable against its original reference
 table or worked example.** Any change to a calculator in `src/lib/calculators/`
 or `src/lib/toolkit/` must keep passing (or be re-verified and re-recorded in)
-the matching fixture in `tests/fixtures/reference-cases/`. Don't add a
-calculator result that isn't backed by a catalogue value, standard formula, or
-sourced supplier table — return `null` for out-of-scope/unverified input
-rather than an unsourced estimate (see e.g. the circlip and buckling tests in
-`tests/reference-calculators.test.ts`).
+the matching fixture in `tests/fixtures/reference-cases/`. Distinguish normative/catalogue data from estimates. Normative results need a
+traceable catalogue value, standard formula or supplier table; return `null`
+when that model or verified data does not cover the input. Existing heuristic
+models may provide explicitly labelled preliminary estimates with documented
+assumptions and applicability limits. Never present those estimates as verified
+standard values or design approval.
