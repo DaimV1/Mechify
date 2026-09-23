@@ -103,8 +103,6 @@ const T = {
     geoHeading: "Geometrische toleranties (ISO 2768-2:1989 — vervallen)",
     geoIntro:
       "Rechtheid/vlakheid, loodrechtheid, symmetrie en rondloop zonder individuele aanduiding — klassen H, K, L.",
-    iso22081Notice:
-      "ISO 2768-2:1989 is ingetrokken. ISO wijst ISO 22081:2021 aan als de huidige algemene GPS-richtlijn. Gebruik H/K/L hieronder alleen om bestaande tekeningen te interpreteren, niet als aanbeveling voor nieuw werk.",
     geoZoneNote:
       "Deze waarden zijn de totale breedte van de tolerantiezone, geen ±afwijking — een vlakheid van 0,2 mm betekent dat het hele oppervlak binnen een zone van 0,2 mm dik moet liggen, niet ±0,2 mm rond een nominale waarde.",
     classLabel: "Klasse",
@@ -156,8 +154,6 @@ const T = {
     geoHeading: "Geometric tolerances (ISO 2768-2:1989 — withdrawn)",
     geoIntro:
       "Straightness/flatness, perpendicularity, symmetry and circular run-out without individual indication — classes H, K, L.",
-    iso22081Notice:
-      "ISO 2768-2:1989 is withdrawn. ISO points to ISO 22081:2021 as the current general GPS guidance. Use H/K/L below only to interpret existing drawings, not as a recommendation for new work.",
     geoZoneNote:
       "These values are the total width of the tolerance zone, not a ± deviation — a flatness of 0.2 mm means the whole surface must lie within a 0.2 mm thick zone, not ±0.2 mm around a nominal value.",
     classLabel: "Class",
@@ -395,7 +391,6 @@ export function Iso2768Calc() {
         </h2>
         <Note>{t.geoIntro}</Note>
         <SourceMetaBadge meta={GEOMETRIC_META} />
-        <Note>{t.iso22081Notice}</Note>
         <Note>{t.geoZoneNote}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={t.classLabel}>
