@@ -596,4 +596,316 @@ export const articles = [
       ],
     ],
   },
+  {
+    slug: "asdiameter-bij-torsie",
+    basis: {
+      nl: "τ = 16T/(πd³), fysica (Roark's Formulas for Stress and Strain / Shigley). Zuivere torsie op een massieve ronde as — geen buiging, dwarskracht, spanningsconcentratie, vermoeiing of stijfheid.",
+      en: "τ = 16T/(πd³), physics (Roark's Formulas for Stress and Strain / Shigley). Pure torsion on a solid round shaft — no bending, transverse shear, stress concentration, fatigue or stiffness.",
+    },
+    category: "Machineframes",
+    title: {
+      nl: "Een asdiameter is een startpunt, geen eindantwoord.",
+      en: "A shaft diameter is a starting point, not a final answer.",
+    },
+    intro: {
+      nl: "Torsie alleen vertelt je de minimale diameter. De meeste assen dragen meer dan dat.",
+      en: "Torsion alone tells you the minimum diameter. Most shafts carry more than that.",
+    },
+    time: "5 min",
+    tool: "shaft-diameter",
+    question: {
+      nl: "Een as moet 50 N·m overbrengen; het materiaal staat 40 N/mm² schuifspanning toe. Welke minimale diameter is veilig?",
+      en: "A shaft must transmit 50 N·m; the material allows 40 N/mm² shear stress. What minimum diameter is safe?",
+    },
+    sections: [
+      [
+        { nl: "Spanning zit aan de buitenrand", en: "Stress lives at the outer edge" },
+        {
+          nl: "Bij torsie op een massieve ronde as is de schuifspanning τ = T·r/J, met J = π·d⁴/32 en r = d/2. De spanning is nul in het hart en maximaal aan de buitenrand. Oplossen naar d geeft d = ∛(16T/(π·τ_toel)) — de kleinste diameter die de toegestane spanning niet overschrijdt.",
+          en: "Under torsion on a solid round shaft, the shear stress is τ = T·r/J, with J = π·d⁴/32 and r = d/2. Stress is zero at the core and maximum at the outer edge. Solving for d gives d = ∛(16T/(π·τ_allow)) — the smallest diameter that doesn't exceed the allowed stress.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: 50 N·m bij 40 N/mm²", en: "Worked example: 50 N·m at 40 N/mm²" },
+        {
+          nl: "Met T = 50 N·m (50.000 N·mm) en τ_toel = 40 N/mm² geeft d = ∛(16 · 50.000 / (π · 40)) ≈ 18,53 mm. Terugrekenen bevestigt het: bij Ø18,53 mm levert 50 N·m precies 40 N/mm² op. Een kleinere as overschrijdt de toegestane spanning; een grotere as heeft marge over.",
+          en: "With T = 50 N·m (50,000 N·mm) and τ_allow = 40 N/mm², d = ∛(16 · 50,000 / (π · 40)) ≈ 18.53 mm. Working backwards confirms it: at Ø18.53 mm, 50 N·m produces exactly 40 N/mm². A smaller shaft exceeds the allowed stress; a larger one has margin to spare.",
+        },
+      ],
+      [
+        { nl: "Torsie is zelden de enige belasting", en: "Torsion is rarely the only load" },
+        {
+          nl: "Een tandwiel, poelie of ketting introduceert ook buiging en dwarskracht op de as — bij de meeste assen is dat de dominante belasting, niet zuivere torsie. Spanningsconcentratie bij spiebanen, schouders en gaten verhoogt de lokale spanning verder. Een roterende as onder wisselende buiging is bovendien een vermoeiingsprobleem, geen statisch probleem. Mechify's veiligheidsband (< 1,0 is onveilig, 1,0–1,2 is een waarschuwingszone) is een screeningsdrempel, geen normwaarde uit een ontwerpcode.",
+          en: "A gear, pulley or sprocket also introduces bending and transverse shear on the shaft — for most shafts that dominates, not pure torsion. Stress concentration at keyways, shoulders and holes raises the local stress further. A rotating shaft under alternating bending is also a fatigue problem, not a static one. Mechify's safety band (below 1.0 is unsafe, 1.0-1.2 is a caution zone) is a screening threshold, not a value from a design code.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Het model rekent alleen zuivere torsie op een massieve ronde as. Gecombineerde belasting, spanningsconcentratie, vermoeiing, stijfheid (torsiehoek, doorbuiging, kritisch toerental) en holle assen vallen erbuiten. Gebruik voor een werkelijke as met keyways en wisselende belasting een volledige sterkte- en vermoeiingsanalyse.",
+          en: "The model calculates pure torsion on a solid round shaft only. Combined loading, stress concentration, fatigue, stiffness (twist angle, deflection, critical speed) and hollow shafts fall outside it. For a real shaft with keyways and alternating loads, use a full strength and fatigue analysis.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "boutverbinding-controleren",
+    basis: {
+      nl: "VDI 2230-lite: twee grensgevallen (restklemkracht en maximale boutkracht) van een concentrisch, statisch belaste boutverbinding, norm. Geen excentrische belasting, dwarskracht/wrijvingsgrip, vermoeiing of insteekverlies-tabel.",
+      en: "VDI 2230-lite: two boundary cases (residual clamp force and maximum bolt force) of a concentrically loaded, static bolted joint, standard. No eccentric loading, transverse/friction-grip check, fatigue or embedding-loss table.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een boutverbinding kan op twee manieren falen.",
+      en: "A bolted joint can fail in two different ways.",
+    },
+    intro: {
+      nl: "Te weinig restklemkracht en de voeg gaat open. Te veel boutkracht en de bout vloeit. Controleer beide grensgevallen, niet maar één.",
+      en: "Too little residual clamp force and the joint opens. Too much bolt force and the bolt yields. Check both boundary cases, not just one.",
+    },
+    time: "6 min",
+    tool: "bolted-joint",
+    question: {
+      nl: "Een bout met een voorspanning van 20 kN moet een uitwendige belasting van 8 kN per bout opvangen zonder dat de voeg opent. Houdt de verbinding stand?",
+      en: "A bolt with 20 kN of preload must absorb an 8 kN external load per bolt without the joint opening. Does the joint hold?",
+    },
+    sections: [
+      [
+        { nl: "Twee grenzen, niet één", en: "Two boundaries, not one" },
+        {
+          nl: "Na montage verliest een bout een deel van zijn voorspanning aan insteekverlies F_Z: F_V,rest = F_V − F_Z. Onder de volle werklast splitst de belasting zich via de belastingsfactor φ: de restklemkracht daalt tot F_KR = F_V,rest − (1 − φ)·F_A, terwijl de boutkracht stijgt tot F_S,max = F_V,rest + φ·F_A. Beide grensgevallen moeten kloppen — de een beschermt de voeg tegen openen, de ander beschermt de bout tegen vloeien.",
+          en: "After assembly, a bolt loses part of its preload to embedding loss F_Z: F_V,rest = F_V − F_Z. Under full working load, the resilience factor φ splits the load: the residual clamp force drops to F_KR = F_V,rest − (1 − φ)·F_A, while the bolt force rises to F_S,max = F_V,rest + φ·F_A. Both boundary cases have to hold — one protects the joint against opening, the other protects the bolt against yielding.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: voorspanning 20 kN, last 8 kN", en: "Worked example: 20 kN preload, 8 kN load" },
+        {
+          nl: "Met A_s = 84,3 mm², Rp0,2 = 900 N/mm², F_V = 20 kN, F_Z = 1 kN, φ = 0,25 en F_A = 8 kN volgt F_V,rest = 19 kN. Onder volle last: F_KR = 19 − 0,75·8 = 13 kN (boven de vereiste 10 kN, dus de voeg blijft dicht) en F_S,max = 19 + 0,25·8 = 21 kN, wat σ_S = 21.000/84,3 ≈ 249,1 N/mm² geeft — een statische veiligheid van 900/249,1 ≈ 3,6. Beide grenzen zijn ruim veilig.",
+          en: "With A_s = 84.3 mm², Rp0.2 = 900 N/mm², F_V = 20 kN, F_Z = 1 kN, φ = 0.25 and F_A = 8 kN, F_V,rest = 19 kN follows. Under full load: F_KR = 19 − 0.75·8 = 13 kN (above the required 10 kN, so the joint stays closed) and F_S,max = 19 + 0.25·8 = 21 kN, giving σ_S = 21,000/84.3 ≈ 249.1 N/mm² — a static safety factor of 900/249.1 ≈ 3.6. Both boundaries hold with ample margin.",
+        },
+      ],
+      [
+        { nl: "Wanneer beide grenzen tegelijk falen", en: "When both boundaries fail together" },
+        {
+          nl: "Een onderdimensioneerde bout laat zien waarom je beide checks nodig hebt: met A_s = 36,6 mm², Rp0,2 = 720 N/mm², F_V = 5 kN, F_Z = 0,5 kN, φ = 0,3 en F_A = 200 kN wordt F_V,rest = 4,5 kN. F_KR = 4,5 − 0,7·200 = −135,5 kN — de voeg is allang open — terwijl F_S,max = 64,5 kN neerkomt op σ_S ≈ 1.762 N/mm², ver boven Rp0,2. De veiligheidsfactor 720/1.762 ≈ 0,41 bevestigt dat de bout ook vloeit. Eén van de twee checks alleen bekijken had dit gemist kunnen laten lijken zolang de andere nog hield.",
+          en: "An undersized bolt shows why you need both checks: with A_s = 36.6 mm², Rp0.2 = 720 N/mm², F_V = 5 kN, F_Z = 0.5 kN, φ = 0.3 and F_A = 200 kN, F_V,rest = 4.5 kN. F_KR = 4.5 − 0.7·200 = −135.5 kN — the joint has long since opened — while F_S,max = 64.5 kN works out to σ_S ≈ 1,762 N/mm², far above Rp0.2. The safety factor 720/1,762 ≈ 0.41 confirms the bolt yields too. Looking at only one of the two checks could have made this look fine as long as the other still held.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Dit is de 'lite' scope van VDI 2230: een concentrisch, statisch belaste voeg. Excentrische of buigende belasting, dwarskracht met de bijbehorende wrijvingsgrip-check, vermoeiing/wisselspanning, de insteekverlies-tabel (F_Z wordt hier als invoer aangenomen) en torsiespanning tijdens het aandraaien vallen buiten dit model. Gebruik voor kritieke of dynamisch belaste verbindingen de volledige VDI 2230.",
+          en: "This is VDI 2230's 'lite' scope: a concentrically loaded, static joint. Eccentric or bending loads, transverse load with its friction-grip check, fatigue/alternating stress, the embedding-loss table (F_Z is taken as input here) and torsional stress during tightening fall outside this model. For critical or dynamically loaded joints, use the full VDI 2230.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "o-ringgroef-ontwerpen",
+    basis: {
+      nl: "Ontwerpregel op basis van ISO 3601-1 koorddiameters — percentage samendrukking (squeeze) en breedtefactor — geen reproductie van de ISO 3601-2 glandtabel. Indicatief voor een eerste ontwerp.",
+      en: "A design rule based on ISO 3601-1 cord diameters — squeeze percentage and width factor — not a reproduction of the ISO 3601-2 gland table. Indicative for a first design.",
+    },
+    category: "Pneumatiek",
+    title: {
+      nl: "Een O-ringgroef moet passen vóórdat hij afdicht.",
+      en: "An O-ring groove has to fit before it can seal.",
+    },
+    intro: {
+      nl: "Genoeg samendrukking voor afdichting, genoeg ruimte voor het verdrongen volume. Beide maten komen uit dezelfde koorddiameter.",
+      en: "Enough squeeze to seal, enough room for the displaced volume. Both dimensions come from the same cord diameter.",
+    },
+    time: "5 min",
+    tool: "o-ring-grooves",
+    question: {
+      nl: "Een statische afdichting gebruikt een O-ring met koorddiameter 3,55 mm bij 20% samendrukking. Past de ring in de groef?",
+      en: "A static seal uses an O-ring with a 3.55 mm cord diameter at 20% squeeze. Does the ring fit the groove?",
+    },
+    sections: [
+      [
+        { nl: "Diepte en breedte hebben elk hun eigen rol", en: "Depth and width each do a different job" },
+        {
+          nl: "De groefdiepte volgt uit de samendrukking: diepte = koorddiameter × (1 − squeeze%). Statische afdichtingen gebruiken doorgaans 15–30% (standaard 20%); dynamische afdichtingen minder, 10–16% (standaard 12%), om wrijving en slijtage te beperken. De groefbreedte, dwars op de samendrukkingsrichting, krijgt ruimte voor het verdrongen volume en thermische uitzetting: breedte = koorddiameter × breedtefactor, doorgaans 1,3–1,4×.",
+          en: "Groove depth follows from the squeeze: depth = cord diameter × (1 − squeeze%). Static seals typically use 15-30% (default 20%); dynamic seals use less, 10-16% (default 12%), to limit friction and wear. Groove width, across the squeeze direction, gives room for the displaced volume and thermal expansion: width = cord diameter × width factor, typically 1.3-1.4×.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: koorddiameter 3,55 mm, 20% squeeze", en: "Worked example: 3.55 mm cord, 20% squeeze" },
+        {
+          nl: "Met een breedtefactor van 1,4 geeft dit een diepte van 3,55 × 0,8 = 2,84 mm en een breedte van 3,55 × 1,4 = 4,97 mm. Het O-ring-oppervlak is π·3,55²/4 ≈ 9,90 mm²; het groefoppervlak is 2,84 × 4,97 ≈ 14,11 mm². De vulling komt daarmee op ongeveer 70% — ruim onder de 100%, dus de ring past fysiek met marge voor zwelling en toleranties.",
+          en: "With a width factor of 1.4, this gives a depth of 3.55 × 0.8 = 2.84 mm and a width of 3.55 × 1.4 = 4.97 mm. The O-ring's cross-section is π·3.55²/4 ≈ 9.90 mm²; the groove's cross-section is 2.84 × 4.97 ≈ 14.11 mm². The fill comes out to about 70% — well under 100%, so the ring physically fits with margin for swelling and tolerances.",
+        },
+      ],
+      [
+        { nl: "Wanneer de ring niet past", en: "When the ring doesn't fit" },
+        {
+          nl: "Neem dezelfde koorddiameter met 30% squeeze en een krappe breedtefactor van 1,1: diepte 2,485 mm, breedte 3,905 mm, vulling ≈ 102%. Dat is geen krappe marge maar een fysiek ongeldige geometrie — het nominale O-ring-oppervlak past niet in de groef, nog vóórdat zwelling, toleranties of thermische uitzetting worden meegerekend. Mechify's `overfilled`-vlag vangt precies dit geval; alleen het squeeze-percentage binnen de aanbevolen range controleren was niet genoeg om dit te ontdekken.",
+          en: "Take the same cord diameter with 30% squeeze and a tight 1.1 width factor: depth 2.485 mm, width 3.905 mm, fill ≈ 102%. That isn't a tight margin — it's a physically invalid geometry: the O-ring's nominal cross-section doesn't fit in the groove, before swelling, tolerances or thermal expansion are even factored in. Mechify's `overfilled` flag catches exactly this case; checking only whether the squeeze percentage fell in the recommended range wasn't enough to catch it.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "ISO 3601-2 publiceert gedetailleerde glandtabellen per toepassing en koorddiameter; deze tool rekent in plaats daarvan met de onderliggende ontwerpregel. Dat is indicatief voor een eerste ontwerp. Controleer de definitieve groefmaat tegen ISO 3601-2 of een fabrikant-designgids (Parker, Trelleborg) vóór productie, zeker bij dynamische afdichtingen.",
+          en: "ISO 3601-2 publishes detailed gland tables per application and cord diameter; this tool calculates from the underlying design rule instead. That's indicative for a first design. Check the final groove dimensions against ISO 3601-2 or a manufacturer design guide (Parker, Trelleborg) before production, especially for dynamic seals.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "algemene-toleranties-iso-2768",
+    basis: {
+      nl: "ISO 2768-1 (lineaire/hoekmaten, klassen f/m/c/v) en ISO 2768-2 (geometrische toleranties, klassen H/K/L), norm. Tabelwaarden getranscribeerd van veelgebruikte publieke samenvattingen — verifieer tegen de originele norm voor contractueel bindende tekeningen.",
+      en: "ISO 2768-1 (linear/angular dimensions, classes f/m/c/v) and ISO 2768-2 (geometric tolerances, classes H/K/L), standard. Table values transcribed from widely used public summaries — verify against the original standard for contractually binding drawings.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Eén tolerantieklasse in plaats van honderd individuele maten.",
+      en: "One tolerance class instead of a hundred individual dimensions.",
+    },
+    intro: {
+      nl: "ISO 2768 dekt elke maat zonder eigen toleranceaanduiding. Ken je de klasse, dan ken je de afwijking — mits je de juiste tabel gebruikt.",
+      en: "ISO 2768 covers every dimension with no tolerance of its own. Know the class, and you know the deviation — as long as you use the right table.",
+    },
+    time: "5 min",
+    tool: "iso-2768",
+    question: {
+      nl: "Een tekening specificeert klasse m (middel) volgens ISO 2768-1, zonder individuele toleranties. Welke afwijking geldt dan voor een maat van 42 mm?",
+      en: "A drawing specifies class m (medium) per ISO 2768-1, with no individual tolerances. What deviation then applies to a 42 mm dimension?",
+    },
+    sections: [
+      [
+        { nl: "Eén klasse dekt de hele tekening", en: "One class covers the whole drawing" },
+        {
+          nl: "ISO 2768-1 geeft vier klassen — f (fijn), m (middel), c (grof), v (zeer grof) — elk met een tabel van toegestane afwijking per maatbereik. In plaats van elke maat afzonderlijk te tolerantiëren, verwijst de tekening één keer naar de norm en de klasse; elke niet-getolereerde maat valt daaronder. ISO 2768-2 doet hetzelfde voor vorm- en plaatstoleranties (rechtheid, vlakheid, loodrechtheid, symmetrie, rondloop) met klassen H, K en L.",
+          en: "ISO 2768-1 gives four classes — f (fine), m (medium), c (coarse), v (very coarse) — each with a table of allowed deviation per size range. Instead of tolerancing every dimension individually, the drawing references the standard and the class once; every non-toleranced dimension falls under it. ISO 2768-2 does the same for form and position tolerances (straightness, flatness, perpendicularity, symmetry, run-out) with classes H, K and L.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: 42 mm, klasse m", en: "Worked example: 42 mm, class m" },
+        {
+          nl: "42 mm valt in het bereik >30–120 mm; klasse m geeft daar ±0,3 mm. De tabel is niet lineair schalend maar stapsgewijs per bereik: 6 mm in klasse f valt in het bereik >3–6 mm en geeft ±0,05 mm, terwijl 8 mm in klasse v in het bereik >6–30 mm valt en ±1,0 mm geeft. Lees de tabel altijd op het werkelijke maatbereik — twee maten net over een grens kunnen een andere afwijking krijgen dan hun onderlinge verschil doet vermoeden.",
+          en: "42 mm falls in the >30-120 mm range; class m gives ±0.3 mm there. The table doesn't scale linearly but steps per range: 6 mm in class f falls in the >3-6 mm range and gives ±0.05 mm, while 8 mm in class v falls in the >6-30 mm range and gives ±1.0 mm. Always read the table from the actual size range — two dimensions just either side of a boundary can get a different deviation than their small difference would suggest.",
+        },
+      ],
+      [
+        { nl: "Geometrische afwijkingen zijn geen ±", en: "Geometric deviations aren't a ±" },
+        {
+          nl: "ISO 2768-2's tabellen geven de totale breedte van de tolerantiezone, geen afwijking rond een nominale waarde. Klasse K rondloop is bijvoorbeeld 0,2 mm — de volledige zone, niet ±0,2 mm. Die twee lezen alsof ze hetzelfde zeggen, maar een ±-teken ervoor zou de zone ten onrechte twee keer zo ruim maken en kan bij inspectie een factor-twee fout veroorzaken. Mechify toont lineaire/hoekafwijkingen daarom met een ±-teken en geometrische zones zonder.",
+          en: "ISO 2768-2's tables give the total width of the tolerance zone, not a deviation around a nominal value. Class K run-out, for example, is 0.2 mm — the full zone, not ±0.2 mm. The two read as if they say the same thing, but a ± sign in front would wrongly make the zone twice as permissive and can cause a factor-of-two inspection error. Mechify therefore shows linear/angular deviations with a ± sign and geometric zones without one.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De tabelwaarden zijn getranscribeerd van veelgebruikte, publiek gepubliceerde samenvattingen van ISO 2768-1/-2. Voor contractueel bindende tekeningen: verifieer tegen de originele ISO-norm. De lineaire tabellen beginnen pas bij 0,5 mm; kleinere maten vallen buiten de scope van deze klasse-indeling.",
+          en: "The table values are transcribed from widely used, publicly published summaries of ISO 2768-1/-2. For contractually binding drawings: verify against the original ISO standard. The linear tables only start at 0.5 mm; smaller dimensions fall outside the scope of this class system.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "randen-en-flenzen-in-plaatwerk",
+    basis: {
+      nl: "Binnenstraal, beenlengte en groefbreedte per plaatdikte en materiaal, fabrikantrichtlijn (247TailorSteel). Bend allowance/deduction via de standaardformule BA = (π/2)·(Ri + K·t) met een richtwaarde K-factor (0,3–0,5) — geen normconformiteit voor een specifieke buigmachine.",
+      en: "Inside radius, leg length and groove width per plate thickness and material, manufacturer guideline (247TailorSteel). Bend allowance/deduction via the standard formula BA = (π/2)·(Ri + K·t) with a rule-of-thumb K-factor (0.3-0.5) — no standard-conformance claim for a specific bending machine.",
+    },
+    category: "Machineframes",
+    title: {
+      nl: "Een gezette rand begint bij de binnenstraal, niet bij de plaatdikte.",
+      en: "A bent edge starts with the inside radius, not the plate thickness.",
+    },
+    intro: {
+      nl: "De minimale binnenstraal, beenlengte en groefbreedte verschillen per materiaal en plaatdikte — en bepalen samen of een tekening maakbaar is.",
+      en: "The minimum inside radius, leg length and groove width differ by material and plate thickness — and together decide whether a drawing is actually buildable.",
+    },
+    time: "5 min",
+    tool: "edges",
+    question: {
+      nl: "Een plaat van 3 mm staal krijgt een haakse (90°) zetting. Welke binnenstraal en beenlengte horen daarbij, en hoeveel platte lengte moet je aftrekken van de buitenmaten?",
+      en: "A 3 mm steel plate gets a right-angle (90°) bend. What inside radius and leg length belong to it, and how much flat length do you subtract from the outside dimensions?",
+    },
+    sections: [
+      [
+        { nl: "De tabel bepaalt de maakbaarheid, niet de tekenaar", en: "The table decides buildability, not the drafter" },
+        {
+          nl: "Voor elke combinatie van materiaal, plaatdikte en zettype geeft de tabel drie maten: de minimale binnenstraal Ri die de zetbank haalt, de minimale beenlengte s (hoe dicht een gat of rand bij de zetlijn mag komen) en de groefbreedte w van het gebruikte gereedschap. Dit zijn geen vrije CAD-keuzes — ze volgen uit de combinatie van plaatdikte, materiaal en het gereedschap dat de leverancier daadwerkelijk gebruikt.",
+          en: "For every combination of material, plate thickness and bend type, the table gives three dimensions: the minimum inside radius Ri the press brake can achieve, the minimum leg length s (how close a hole or edge may sit to the bend line) and the groove width w of the tooling used. These aren't free CAD choices — they follow from the combination of plate thickness, material and the tooling the supplier actually runs.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: 3 mm staal, haaks", en: "Worked example: 3 mm steel, right angle" },
+        {
+          nl: "Voor 3 mm staal met een haakse zetting geeft de tabel Ri = 2,75 mm, een groefbreedte w = 16 mm en een minimale beenlengte s = 12,4 mm. Een gat of rand die dichter dan 12,4 mm bij de zetlijn ligt, valt in de zone die apart beoordeeld moet worden — niet automatisch afgekeurd, maar niet zonder controle vrijgegeven.",
+          en: "For 3 mm steel with a right-angle bend, the table gives Ri = 2.75 mm, a groove width w = 16 mm and a minimum leg length s = 12.4 mm. A hole or edge closer than 12.4 mm to the bend line falls in the zone that needs separate review — not automatically rejected, but not released without a check either.",
+        },
+      ],
+      [
+        { nl: "Van binnenstraal naar platte lengte", en: "From inside radius to flat length" },
+        {
+          nl: "Om de platte plaat vóór het zetten te bepalen, gebruik je de bend allowance BA = (π/2)·(Ri + K·t) — de booglengte van de neutrale lijn — en de bend deduction BD = 2·(Ri + t) − BA, hoeveel korter de platte lengte is dan de som van de buitenmaten. Met Ri = 2,75 mm, t = 3 mm en een richtwaarde K = 0,33 geeft dat BA ≈ 5,87 mm en BD ≈ 5,63 mm. De K-factor is een vuistregel die varieert van 0,3 tot 0,5 met materiaal en Ri/t-verhouding — dit is een schatting, geen tabelwaarde, en verdient controle tegen de eigen zetbank bij een kritieke maat.",
+          en: "To determine the flat pattern before bending, use the bend allowance BA = (π/2)·(Ri + K·t) — the arc length of the neutral line — and the bend deduction BD = 2·(Ri + t) − BA, how much shorter the flat length is than the sum of the outside dimensions. With Ri = 2.75 mm, t = 3 mm and a rule-of-thumb K = 0.33, that gives BA ≈ 5.87 mm and BD ≈ 5.63 mm. The K-factor is a rule of thumb that varies from 0.3 to 0.5 with material and the Ri/t ratio — this is an estimate, not a table value, and is worth checking against your own press brake for a critical dimension.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De Ri/w/s-waarden zijn letterlijk overgenomen van de 247TailorSteel-richtlijnen en gelden voor die leverancier en tooling — niet als universele norm voor elke zetbank. Sommige cellen stijgen niet monotoon met de plaatdikte; voor RVS haaks daalt Ri bijvoorbeeld van 11,91 mm bij 6 mm naar 11,64 mm bij 8 mm. Dat is geen invoerfout maar een letterlijke overname van de brontabel. Verifieer kritieke maten altijd bij de daadwerkelijke plaatwerker vóór productie.",
+          en: "The Ri/w/s values are transcribed literally from the 247TailorSteel guidelines and hold for that supplier and tooling — not as a universal standard for every press brake. Some cells don't rise monotonically with plate thickness; for right-angle RVS (stainless), for instance, Ri drops from 11.91 mm at 6 mm to 11.64 mm at 8 mm. That's not a data-entry error but a literal transcription of the source table. Always verify critical dimensions with the actual sheet-metal shop before production.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "bevestigingsmateriaal-kiezen",
+    basis: {
+      nl: "Doorlaatmaten ISO 273, sleutelmaten ISO 4014/4017 (zeskant) en ISO 4762/DIN 912 (inbus), spanningsdoorsnede en klasse-indeling ISO 898-1, norm. Aandraaimoment via T = K·F_voorspankracht·d met K ≈ 0,2 (moerfactor-vuistregel) en 75% utilisatie van Rp0,2 — geen normverplichting, pas K aan bij smering of RVS.",
+      en: "Clearance holes ISO 273, wrench sizes ISO 4014/4017 (hex) and ISO 4762/DIN 912 (socket), stress area and property classes ISO 898-1, standard. Tightening torque via T = K·F_preload·d with K ≈ 0.2 (nut-factor rule of thumb) and 75% utilisation of Rp0.2 — not a standard requirement, adjust K for lubrication or stainless steel.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een bout kiezen is drie tabellen tegelijk raadplegen.",
+      en: "Choosing a bolt means consulting three tables at once.",
+    },
+    intro: {
+      nl: "Doorlaatmaat, sleutelmaat en aandraaimoment volgen alle drie uit dezelfde draadmaat — maar geen ervan volgt uit de andere twee.",
+      en: "Clearance hole, wrench size and tightening torque all follow from the same thread size — but none of them follows from the other two.",
+    },
+    time: "5 min",
+    tool: "fasteners",
+    question: {
+      nl: "Een M10-bout van klasse 8.8 moet een plaat monteren. Welke doorlaatmaat, sleutelmaat en aandraaimoment horen daarbij?",
+      en: "An M10 bolt of property class 8.8 needs to mount a plate. What clearance hole, wrench size and tightening torque belong to it?",
+    },
+    sections: [
+      [
+        { nl: "Drie onafhankelijke keuzes per draadmaat", en: "Three independent choices per thread size" },
+        {
+          nl: "De doorlaatmaat (ISO 273) bepaalt hoe ruim het gat in de te bevestigen plaat is — fijn, middel of grof, afhankelijk van de gewenste positioneernauwkeurigheid. De sleutelmaat (ISO 4014/4017 voor zeskant, ISO 4762/DIN 912 voor inbus) bepaalt welk gereedschap past. Beide volgen direct uit de draadmaat, maar zijn onafhankelijke tabellen — de ene voorspelt de andere niet.",
+          en: "The clearance hole (ISO 273) sets how roomy the hole in the part being fastened is — fine, medium or coarse, depending on the positioning accuracy needed. The wrench size (ISO 4014/4017 for hex, ISO 4762/DIN 912 for socket) sets which tool fits. Both follow directly from the thread size, but they're independent tables — one doesn't predict the other.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: M10, klasse 8.8", en: "Worked example: M10, class 8.8" },
+        {
+          nl: "Voor M10 geeft de doorlaattabel 10,5 mm (fijn), 11,0 mm (middel) of 12,0 mm (grof); de sleutelmaat is 16 mm (zeskant) of 8 mm (inbus). De spanningsdoorsnede A_s is 58,0 mm². Klasse 8.8 heeft een vloeigrens Rp0,2 = 800 × 0,8 = 640 N/mm². Bij 75% utilisatie is de voorspankracht 0,75 × 640 × 58,0 ≈ 27.840 N. Met een moerfactor K = 0,2 volgt het aandraaimoment T = 0,2 × 27.840 × 10 / 1000 ≈ 55,7 N·m.",
+          en: "For M10, the clearance table gives 10.5 mm (fine), 11.0 mm (medium) or 12.0 mm (coarse); the wrench size is 16 mm (hex) or 8 mm (socket). The stress area A_s is 58.0 mm². Class 8.8 has a yield strength Rp0.2 = 800 × 0.8 = 640 N/mm². At 75% utilisation, the preload is 0.75 × 640 × 58.0 ≈ 27,840 N. With a nut factor K = 0.2, the tightening torque follows as T = 0.2 × 27,840 × 10 / 1000 ≈ 55.7 N·m.",
+        },
+      ],
+      [
+        { nl: "De moerfactor is een aanname, geen constante", en: "The nut factor is an assumption, not a constant" },
+        {
+          nl: "K ≈ 0,2 is de gangbare vuistregel voor niet-gesmeerde, zwart- of fosfaat-afgewerkte stalen bevestigers. Bij vet, MoS₂-coating of roestvast staal kan K dalen naar 0,10–0,20 — een lagere K bij hetzelfde moment betekent een hogere werkelijke voorspankracht, wat een bout kan overbelasten als je de tabel-K blijft gebruiken. Pas K aan zodra de oppervlaktebehandeling of smering bekend is, in plaats van standaard 0,2 aan te houden.",
+          en: "K ≈ 0.2 is the common rule of thumb for unlubricated, black- or phosphate-finished steel fasteners. With grease, MoS₂ coating or stainless steel, K can drop to 0.10-0.20 — a lower K at the same torque means a higher actual preload, which can overload a bolt if you keep using the table K. Adjust K as soon as the surface treatment or lubrication is known, instead of defaulting to 0.2.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De doorlaat-, sleutelmaat- en spanningsdoorsnedetabellen zijn normwaarden (ISO 273, ISO 4014/4017, ISO 4762/DIN 912, ISO 898-1). Het aandraaimoment is een vuistregelberekening — geen normverplichting — die geen rekening houdt met wrijvingsvariatie tussen bouten, hergebruik, dynamische belasting of een specifiek aandraaiprocedé (hoek-, momentbegrensd). Voor kritieke verbindingen: gebruik de daadwerkelijke K-factor van de gebruikte coating en verifieer met een momentsleutel.",
+          en: "The clearance, wrench-size and stress-area tables are standard values (ISO 273, ISO 4014/4017, ISO 4762/DIN 912, ISO 898-1). The tightening torque is a rule-of-thumb calculation — not a standard requirement — that doesn't account for friction variation between bolts, reuse, dynamic loading or a specific tightening procedure (angle-controlled, torque-limited). For critical joints: use the actual K-factor of the coating used and verify with a torque wrench.",
+        },
+      ],
+    ],
+  },
 ];

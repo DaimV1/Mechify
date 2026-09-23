@@ -1,0 +1,16 @@
+{
+  "source": "ISO 273 (clearance holes), ISO 4014/4017 hex + ISO 4762/DIN 912 socket (wrench sizes), ISO 898-1 (stress area / property class) as transcribed in src/lib/calculators/fasteners.ts; torque worked case is Mechify's own K=0.2/utilization=0.75 rule-of-thumb case, computed via computeTorque()",
+  "clearanceM10": { "fine": 10.5, "medium": 11.0, "coarse": 12.0 },
+  "wrenchM10": { "hex": 16, "socket": 8 },
+  "torqueM10_8dot8": {
+    "size": "M10",
+    "propertyClass": "8.8",
+    "K": 0.2,
+    "utilization": 0.75,
+    "As": 58.0,
+    "Rp": 640,
+    "preload": 27840,
+    "torque": 55.68,
+    "tolerance": 1e-6
+  }
+}
