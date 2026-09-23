@@ -20,6 +20,10 @@ const toolLinks: Record<string, string> = {
   lagerpassing: "/tools/bearing-fits",
   knik: "/calculators/buckling",
   lagerlevensduur: "/calculators/bearing-life",
+  "shaft-diameter": "/calculators/shaft-diameter",
+  "bolted-joint": "/calculators/bolted-joint",
+  "o-ring-grooves": "/tools/o-ring-grooves",
+  "iso-2768": "/tools/iso-2768",
 };
 export function Topics() {
   const { locale } = useLocale();
