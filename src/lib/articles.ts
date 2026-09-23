@@ -804,4 +804,108 @@ export const articles = [
       ],
     ],
   },
+  {
+    slug: "randen-en-flenzen-in-plaatwerk",
+    basis: {
+      nl: "Binnenstraal, beenlengte en groefbreedte per plaatdikte en materiaal, fabrikantrichtlijn (247TailorSteel). Bend allowance/deduction via de standaardformule BA = (π/2)·(Ri + K·t) met een richtwaarde K-factor (0,3–0,5) — geen normconformiteit voor een specifieke buigmachine.",
+      en: "Inside radius, leg length and groove width per plate thickness and material, manufacturer guideline (247TailorSteel). Bend allowance/deduction via the standard formula BA = (π/2)·(Ri + K·t) with a rule-of-thumb K-factor (0.3-0.5) — no standard-conformance claim for a specific bending machine.",
+    },
+    category: "Machineframes",
+    title: {
+      nl: "Een gezette rand begint bij de binnenstraal, niet bij de plaatdikte.",
+      en: "A bent edge starts with the inside radius, not the plate thickness.",
+    },
+    intro: {
+      nl: "De minimale binnenstraal, beenlengte en groefbreedte verschillen per materiaal en plaatdikte — en bepalen samen of een tekening maakbaar is.",
+      en: "The minimum inside radius, leg length and groove width differ by material and plate thickness — and together decide whether a drawing is actually buildable.",
+    },
+    time: "5 min",
+    tool: "edges",
+    question: {
+      nl: "Een plaat van 3 mm staal krijgt een haakse (90°) zetting. Welke binnenstraal en beenlengte horen daarbij, en hoeveel platte lengte moet je aftrekken van de buitenmaten?",
+      en: "A 3 mm steel plate gets a right-angle (90°) bend. What inside radius and leg length belong to it, and how much flat length do you subtract from the outside dimensions?",
+    },
+    sections: [
+      [
+        { nl: "De tabel bepaalt de maakbaarheid, niet de tekenaar", en: "The table decides buildability, not the drafter" },
+        {
+          nl: "Voor elke combinatie van materiaal, plaatdikte en zettype geeft de tabel drie maten: de minimale binnenstraal Ri die de zetbank haalt, de minimale beenlengte s (hoe dicht een gat of rand bij de zetlijn mag komen) en de groefbreedte w van het gebruikte gereedschap. Dit zijn geen vrije CAD-keuzes — ze volgen uit de combinatie van plaatdikte, materiaal en het gereedschap dat de leverancier daadwerkelijk gebruikt.",
+          en: "For every combination of material, plate thickness and bend type, the table gives three dimensions: the minimum inside radius Ri the press brake can achieve, the minimum leg length s (how close a hole or edge may sit to the bend line) and the groove width w of the tooling used. These aren't free CAD choices — they follow from the combination of plate thickness, material and the tooling the supplier actually runs.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: 3 mm staal, haaks", en: "Worked example: 3 mm steel, right angle" },
+        {
+          nl: "Voor 3 mm staal met een haakse zetting geeft de tabel Ri = 2,75 mm, een groefbreedte w = 16 mm en een minimale beenlengte s = 12,4 mm. Een gat of rand die dichter dan 12,4 mm bij de zetlijn ligt, valt in de zone die apart beoordeeld moet worden — niet automatisch afgekeurd, maar niet zonder controle vrijgegeven.",
+          en: "For 3 mm steel with a right-angle bend, the table gives Ri = 2.75 mm, a groove width w = 16 mm and a minimum leg length s = 12.4 mm. A hole or edge closer than 12.4 mm to the bend line falls in the zone that needs separate review — not automatically rejected, but not released without a check either.",
+        },
+      ],
+      [
+        { nl: "Van binnenstraal naar platte lengte", en: "From inside radius to flat length" },
+        {
+          nl: "Om de platte plaat vóór het zetten te bepalen, gebruik je de bend allowance BA = (π/2)·(Ri + K·t) — de booglengte van de neutrale lijn — en de bend deduction BD = 2·(Ri + t) − BA, hoeveel korter de platte lengte is dan de som van de buitenmaten. Met Ri = 2,75 mm, t = 3 mm en een richtwaarde K = 0,33 geeft dat BA ≈ 5,87 mm en BD ≈ 5,63 mm. De K-factor is een vuistregel die varieert van 0,3 tot 0,5 met materiaal en Ri/t-verhouding — dit is een schatting, geen tabelwaarde, en verdient controle tegen de eigen zetbank bij een kritieke maat.",
+          en: "To determine the flat pattern before bending, use the bend allowance BA = (π/2)·(Ri + K·t) — the arc length of the neutral line — and the bend deduction BD = 2·(Ri + t) − BA, how much shorter the flat length is than the sum of the outside dimensions. With Ri = 2.75 mm, t = 3 mm and a rule-of-thumb K = 0.33, that gives BA ≈ 5.87 mm and BD ≈ 5.63 mm. The K-factor is a rule of thumb that varies from 0.3 to 0.5 with material and the Ri/t ratio — this is an estimate, not a table value, and is worth checking against your own press brake for a critical dimension.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De Ri/w/s-waarden zijn letterlijk overgenomen van de 247TailorSteel-richtlijnen en gelden voor die leverancier en tooling — niet als universele norm voor elke zetbank. Sommige cellen stijgen niet monotoon met de plaatdikte; voor RVS haaks daalt Ri bijvoorbeeld van 11,91 mm bij 6 mm naar 11,64 mm bij 8 mm. Dat is geen invoerfout maar een letterlijke overname van de brontabel. Verifieer kritieke maten altijd bij de daadwerkelijke plaatwerker vóór productie.",
+          en: "The Ri/w/s values are transcribed literally from the 247TailorSteel guidelines and hold for that supplier and tooling — not as a universal standard for every press brake. Some cells don't rise monotonically with plate thickness; for right-angle RVS (stainless), for instance, Ri drops from 11.91 mm at 6 mm to 11.64 mm at 8 mm. That's not a data-entry error but a literal transcription of the source table. Always verify critical dimensions with the actual sheet-metal shop before production.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "bevestigingsmateriaal-kiezen",
+    basis: {
+      nl: "Doorlaatmaten ISO 273, sleutelmaten ISO 4014/4017 (zeskant) en ISO 4762/DIN 912 (inbus), spanningsdoorsnede en klasse-indeling ISO 898-1, norm. Aandraaimoment via T = K·F_voorspankracht·d met K ≈ 0,2 (moerfactor-vuistregel) en 75% utilisatie van Rp0,2 — geen normverplichting, pas K aan bij smering of RVS.",
+      en: "Clearance holes ISO 273, wrench sizes ISO 4014/4017 (hex) and ISO 4762/DIN 912 (socket), stress area and property classes ISO 898-1, standard. Tightening torque via T = K·F_preload·d with K ≈ 0.2 (nut-factor rule of thumb) and 75% utilisation of Rp0.2 — not a standard requirement, adjust K for lubrication or stainless steel.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een bout kiezen is drie tabellen tegelijk raadplegen.",
+      en: "Choosing a bolt means consulting three tables at once.",
+    },
+    intro: {
+      nl: "Doorlaatmaat, sleutelmaat en aandraaimoment volgen alle drie uit dezelfde draadmaat — maar geen ervan volgt uit de andere twee.",
+      en: "Clearance hole, wrench size and tightening torque all follow from the same thread size — but none of them follows from the other two.",
+    },
+    time: "5 min",
+    tool: "fasteners",
+    question: {
+      nl: "Een M10-bout van klasse 8.8 moet een plaat monteren. Welke doorlaatmaat, sleutelmaat en aandraaimoment horen daarbij?",
+      en: "An M10 bolt of property class 8.8 needs to mount a plate. What clearance hole, wrench size and tightening torque belong to it?",
+    },
+    sections: [
+      [
+        { nl: "Drie onafhankelijke keuzes per draadmaat", en: "Three independent choices per thread size" },
+        {
+          nl: "De doorlaatmaat (ISO 273) bepaalt hoe ruim het gat in de te bevestigen plaat is — fijn, middel of grof, afhankelijk van de gewenste positioneernauwkeurigheid. De sleutelmaat (ISO 4014/4017 voor zeskant, ISO 4762/DIN 912 voor inbus) bepaalt welk gereedschap past. Beide volgen direct uit de draadmaat, maar zijn onafhankelijke tabellen — de ene voorspelt de andere niet.",
+          en: "The clearance hole (ISO 273) sets how roomy the hole in the part being fastened is — fine, medium or coarse, depending on the positioning accuracy needed. The wrench size (ISO 4014/4017 for hex, ISO 4762/DIN 912 for socket) sets which tool fits. Both follow directly from the thread size, but they're independent tables — one doesn't predict the other.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: M10, klasse 8.8", en: "Worked example: M10, class 8.8" },
+        {
+          nl: "Voor M10 geeft de doorlaattabel 10,5 mm (fijn), 11,0 mm (middel) of 12,0 mm (grof); de sleutelmaat is 16 mm (zeskant) of 8 mm (inbus). De spanningsdoorsnede A_s is 58,0 mm². Klasse 8.8 heeft een vloeigrens Rp0,2 = 800 × 0,8 = 640 N/mm². Bij 75% utilisatie is de voorspankracht 0,75 × 640 × 58,0 ≈ 27.840 N. Met een moerfactor K = 0,2 volgt het aandraaimoment T = 0,2 × 27.840 × 10 / 1000 ≈ 55,7 N·m.",
+          en: "For M10, the clearance table gives 10.5 mm (fine), 11.0 mm (medium) or 12.0 mm (coarse); the wrench size is 16 mm (hex) or 8 mm (socket). The stress area A_s is 58.0 mm². Class 8.8 has a yield strength Rp0.2 = 800 × 0.8 = 640 N/mm². At 75% utilisation, the preload is 0.75 × 640 × 58.0 ≈ 27,840 N. With a nut factor K = 0.2, the tightening torque follows as T = 0.2 × 27,840 × 10 / 1000 ≈ 55.7 N·m.",
+        },
+      ],
+      [
+        { nl: "De moerfactor is een aanname, geen constante", en: "The nut factor is an assumption, not a constant" },
+        {
+          nl: "K ≈ 0,2 is de gangbare vuistregel voor niet-gesmeerde, zwart- of fosfaat-afgewerkte stalen bevestigers. Bij vet, MoS₂-coating of roestvast staal kan K dalen naar 0,10–0,20 — een lagere K bij hetzelfde moment betekent een hogere werkelijke voorspankracht, wat een bout kan overbelasten als je de tabel-K blijft gebruiken. Pas K aan zodra de oppervlaktebehandeling of smering bekend is, in plaats van standaard 0,2 aan te houden.",
+          en: "K ≈ 0.2 is the common rule of thumb for unlubricated, black- or phosphate-finished steel fasteners. With grease, MoS₂ coating or stainless steel, K can drop to 0.10-0.20 — a lower K at the same torque means a higher actual preload, which can overload a bolt if you keep using the table K. Adjust K as soon as the surface treatment or lubrication is known, instead of defaulting to 0.2.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De doorlaat-, sleutelmaat- en spanningsdoorsnedetabellen zijn normwaarden (ISO 273, ISO 4014/4017, ISO 4762/DIN 912, ISO 898-1). Het aandraaimoment is een vuistregelberekening — geen normverplichting — die geen rekening houdt met wrijvingsvariatie tussen bouten, hergebruik, dynamische belasting of een specifiek aandraaiprocedé (hoek-, momentbegrensd). Voor kritieke verbindingen: gebruik de daadwerkelijke K-factor van de gebruikte coating en verifieer met een momentsleutel.",
+          en: "The clearance, wrench-size and stress-area tables are standard values (ISO 273, ISO 4014/4017, ISO 4762/DIN 912, ISO 898-1). The tightening torque is a rule-of-thumb calculation — not a standard requirement — that doesn't account for friction variation between bolts, reuse, dynamic loading or a specific tightening procedure (angle-controlled, torque-limited). For critical joints: use the actual K-factor of the coating used and verify with a torque wrench.",
+        },
+      ],
+    ],
+  },
 ];

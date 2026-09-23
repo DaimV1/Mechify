@@ -49,6 +49,13 @@ import {
   shaftSafetyStatus,
   shaftTorsionStress,
 } from "../src/lib/calculators/shaft.ts";
+import {
+  CLEARANCE_HOLES,
+  computeTorque,
+  PROPERTY_CLASSES,
+  STRESS_AREA,
+  WRENCH_SIZES,
+} from "../src/lib/calculators/fasteners.ts";
 
 const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
@@ -693,5 +700,44 @@ describe("Shaft diameter under torsion (tau = 16T/(pi*d^3))", () => {
     assert.equal(shaftSafetyStatus(0.9), "fail");
     assert.equal(shaftSafetyStatus(1.1), "caution");
     assert.equal(shaftSafetyStatus(1.5), "ok");
+  });
+});
+
+type FastenersFixture = {
+  clearanceM10: { fine: number; medium: number; coarse: number };
+  wrenchM10: { hex: number; socket: number };
+  torqueM10_8dot8: {
+    size: "M10";
+    propertyClass: string;
+    K: number;
+    utilization: number;
+    As: number;
+    Rp: number;
+    preload: number;
+    torque: number;
+    tolerance: number;
+  };
+};
+const fastenersFixture = loadFixture<FastenersFixture>("fasteners");
+
+describe("Fasteners (ISO 273 clearance / ISO 4014-4017/4762 wrench / ISO 898-1 torque)", () => {
+  it("M10 clearance holes match ISO 273 fine/medium/coarse", () => {
+    assert.deepEqual(CLEARANCE_HOLES.M10, fastenersFixture.clearanceM10);
+  });
+
+  it("M10 wrench sizes match ISO 4014/4017 (hex) and ISO 4762/DIN 912 (socket)", () => {
+    assert.deepEqual(WRENCH_SIZES.M10, fastenersFixture.wrenchM10);
+  });
+
+  it("M10 class 8.8 torque at K=0.2, utilization=0.75 matches the worked case", () => {
+    const c = fastenersFixture.torqueM10_8dot8;
+    const cls = PROPERTY_CLASSES.find((p) => p.id === c.propertyClass);
+    assert.ok(cls);
+    const r = computeTorque(c.size, cls, c.K, c.utilization);
+    assert.equal(r.As, STRESS_AREA.M10);
+    close(r.As, c.As, c.tolerance);
+    close(r.Rp, c.Rp, c.tolerance);
+    close(r.preload, c.preload, c.tolerance);
+    close(r.torque, c.torque, c.tolerance);
   });
 });
