@@ -166,7 +166,9 @@ export function EdgesCalc() {
           </div>
 
           {!valid ? (
-            <p className="mt-5 text-sm text-muted">{t.fillValid}</p>
+            <p className="mt-5 text-sm text-muted" role="status">
+              {t.fillValid}
+            </p>
           ) : (
             <>
               <ResultGrid

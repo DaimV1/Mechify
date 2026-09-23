@@ -180,7 +180,9 @@ export function UnitsCalc() {
             </div>
           </>
         ) : (
-          <p className="mt-5 text-sm text-muted">{t.fillValue}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillValue}
+          </p>
         )}
       </CalcPanel>
 

@@ -461,9 +461,13 @@ export function BeamDeflectionCalc() {
         {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
         {!section ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDims}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDims}
+          </p>
         ) : !result ? (
-          <p className="mt-5 text-sm text-muted">{isUDL ? t.fillSpanUDL : t.fillSpan}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {isUDL ? t.fillSpanUDL : t.fillSpan}
+          </p>
         ) : (
           <>
             <ResultGrid
@@ -488,18 +492,22 @@ export function BeamDeflectionCalc() {
                 ].filter(Boolean) as { label: string; value: string }[]
               }
             />
-            {sameLocation ? <Note>{t.sameNote}</Note> : null}
+            {sameLocation ? (
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+                {t.sameNote}
+              </p>
+            ) : null}
             {overYield ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {t.overYieldNote(fmtBeamNum(sigma ?? 0, 1), fmtBeamNum(rp02, 0), label(material))}
-              </Note>
+              </p>
             ) : null}
             {allowableOk != null ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {allowableOk
                   ? t.allowablePassNote(fmtBeamNum(result.deflectionMax, 3), allowable)
                   : t.allowableFailNote(fmtBeamNum(result.deflectionMax, 3), allowable)}
-              </Note>
+              </p>
             ) : null}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />

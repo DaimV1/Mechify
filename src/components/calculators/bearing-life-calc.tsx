@@ -256,7 +256,9 @@ export function BearingLifeCalc() {
         </div>
 
         {l10M == null || l10h == null ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDynamic}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDynamic}
+          </p>
         ) : (
           <>
             <ResultGrid
@@ -274,7 +276,11 @@ export function BearingLifeCalc() {
                   : null,
               ].filter(Boolean) as { label: string; value: string }[]}
             />
-            {highSpeedWarning ? <Note>{t.speedWarning}</Note> : null}
+            {highSpeedWarning ? (
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+                {t.speedWarning}
+              </p>
+            ) : null}
           </>
         )}
 
@@ -288,7 +294,9 @@ export function BearingLifeCalc() {
           </Field>
         </div>
         {S0 == null ? (
-          <p className="mt-5 text-sm text-muted">{t.fillStatic}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillStatic}
+          </p>
         ) : (
           <>
             <ResultGrid items={[{ label: t.resultS0, value: fmtBearingLife(S0, 2) }]} />
@@ -300,6 +308,7 @@ export function BearingLifeCalc() {
                     ? "text-warning"
                     : "text-success"
               }`}
+              role="status"
             >
               {s0Status === "fail" ? t.s0Fail : s0Status === "caution" ? t.s0Caution : t.s0Ok}
             </p>

@@ -258,11 +258,17 @@ export function BearingFitsCalc() {
         <p className="mt-2 text-xs text-subtle">{t.housingDiameterHint}</p>
 
         {parsed.status === "empty" || parsedHousing.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDiameter}
+          </p>
         ) : !shaftFit ? (
-          <p className="mt-5 text-sm text-muted">{t.noData(d)}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.noData(d)}
+          </p>
         ) : !housingFit ? (
-          <p className="mt-5 text-sm text-muted">{t.noDataHousing(D)}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.noDataHousing(D)}
+          </p>
         ) : (
           <>
             <ResultGrid

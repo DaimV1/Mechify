@@ -261,7 +261,9 @@ export function BoltedJointCalc() {
 
         <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.resultsSection}</h3>
         {!result ? (
-          <p className="mt-5 text-sm text-muted">{t.fill}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fill}
+          </p>
         ) : (
           <>
             <ResultGrid
@@ -286,6 +288,7 @@ export function BoltedJointCalc() {
                     ? "text-warning"
                     : "text-success"
               }`}
+              role="status"
             >
               {cStatus === "fail"
                 ? t.clampFail
@@ -301,6 +304,7 @@ export function BoltedJointCalc() {
                     ? "text-warning"
                     : "text-success"
               }`}
+              role="status"
             >
               {sfStatus === "fail" ? t.sfFail : sfStatus === "caution" ? t.sfCaution : t.sfOk}
             </p>
