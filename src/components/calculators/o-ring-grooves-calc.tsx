@@ -244,17 +244,19 @@ export function OringGroovesCalc() {
         </div>
 
         {!result ? (
-          <p className="mt-5 text-sm text-muted">{t.fillValid}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillValid}
+          </p>
         ) : (
           <>
             {result.overfilled ? (
-              <p className="mt-3 text-sm font-medium leading-relaxed text-danger">
+              <p className="mt-3 text-sm font-medium leading-relaxed text-danger" role="alert">
                 {t.overfilled(fmtOring(result.fillPercent, 0))}
               </p>
             ) : outOfRange ? (
-              <Note>
+              <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                 {t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))}
-              </Note>
+              </p>
             ) : null}
             <ResultGrid
               items={[

@@ -245,9 +245,13 @@ export function MotorSpecificationCalc() {
             </div>
           </>
         ) : eta > 0 && eta <= 1 ? (
-          <p className="mt-5 text-sm text-muted">{t.fillFields}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillFields}
+          </p>
         ) : (
-          <p className="mt-5 text-sm text-muted">{t.etaOutOfRange}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.etaOutOfRange}
+          </p>
         )}
       </CalcPanel>
 

@@ -285,9 +285,13 @@ export function PneumaticCylinderCalc() {
         </div>
 
         {F == null || p == null || F <= 0 || p <= 0 ? (
-          <p className="mt-5 text-sm text-muted">{t.fillForcePressure}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillForcePressure}
+          </p>
         ) : !recommended ? (
-          <p className="mt-5 text-sm text-muted">{t.noBore(String(p))}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.noBore(String(p))}
+          </p>
         ) : (
           <>
             <p className="mt-5 text-sm text-muted">

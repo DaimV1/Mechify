@@ -98,7 +98,7 @@ export function QuickDrive({
         : "Fuit = p · πD² / 4 · η; Fin = p · π(D² − d²) / 4 · η";
   return (
     <div className={"calculator " + (compact ? "compact" : "")}>
-      <h3>{titles[kind][locale]}</h3>
+      <h2>{titles[kind][locale]}</h2>
       {kind === "drive" ? (
         <div
           className="calc-tabs"

@@ -399,11 +399,17 @@ export function BucklingCalc() {
                   ].filter(Boolean) as { label: string; value: string }[]
                 }
               />
-              {!result.verifiedCapacity ? <Note>{t.additionalCheckNote}</Note> : null}
+              {!result.verifiedCapacity ? (
+                <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+                  {t.additionalCheckNote}
+                </p>
+              ) : null}
               {unsafe ? (
-                <Note>{t.unsafeNote}</Note>
+                <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+                  {t.unsafeNote}
+                </p>
               ) : lowLambda ? (
-                <Note>
+                <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                   {t.lowLambdaNote(
                     fmtDotComma(result.lambda, 1),
                     fmtDotComma(lambdaWarn, 0),
@@ -411,7 +417,7 @@ export function BucklingCalc() {
                     fmtN(result.squashLoad),
                     fmtN((Math.PI ** 2 * E * result.I) / result.Leff ** 2),
                   )}
-                </Note>
+                </p>
               ) : null}
               <div className="flex flex-wrap gap-2">
                 <CopyResult text={copy} />
@@ -419,10 +425,14 @@ export function BucklingCalc() {
               </div>
             </>
           ) : (
-            <p className="mt-5 text-sm text-muted">{t.fillLength}</p>
+            <p className="mt-5 text-sm text-muted" role="status">
+              {t.fillLength}
+            </p>
           )
         ) : (
-          <p className="mt-5 text-sm text-muted">{t.fillValidDims}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillValidDims}
+          </p>
         )}
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">

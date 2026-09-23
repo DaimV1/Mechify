@@ -168,17 +168,22 @@ export function SeegerGroovesCalc() {
         </div>
 
         {parsed.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDiameter}
+          </p>
         ) : !Number.isFinite(d) || d <= 0 ? (
-          <p className="mt-5 text-sm text-muted">{t.fillPositive}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillPositive}
+          </p>
         ) : !result ? (
-          <p className="mt-5 text-sm text-muted">
+          <p className="mt-5 text-sm text-muted" role="status">
             {t.noRing(d, nearest?.lower ?? null, nearest?.upper ?? null)}
           </p>
         ) : (
           <>
             <p
               className={`mt-5 text-sm font-medium ${result.verified ? "text-ink" : "text-danger"}`}
+              role="status"
             >
               {result.verified ? t.verified : t.notVerified}
             </p>

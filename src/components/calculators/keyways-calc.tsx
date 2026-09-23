@@ -173,9 +173,13 @@ export function KeywaysCalc() {
           </Field>
         </div>
         {parsed.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted">{t.fillDiameter}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.fillDiameter}
+          </p>
         ) : !row ? (
-          <p className="mt-5 text-sm text-muted">{t.noRow(d)}</p>
+          <p className="mt-5 text-sm text-muted" role="status">
+            {t.noRow(d)}
+          </p>
         ) : (
           <>
             <p className="mt-5 text-sm text-muted">
@@ -294,7 +298,9 @@ export function KeywaysCalc() {
             <p className="mt-2 text-xs text-subtle">{t.forB(row.b, d)}</p>
           </div>
         ) : (
-          <p className="mt-6 text-sm text-muted">{t.fillForTable}</p>
+          <p className="mt-6 text-sm text-muted" role="status">
+            {t.fillForTable}
+          </p>
         )}
 
         <SourceLink href="https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf">
