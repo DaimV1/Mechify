@@ -908,4 +908,108 @@ export const articles = [
       ],
     ],
   },
+  {
+    slug: "motor-kiezen-van-last-naar-ieckw",
+    basis: {
+      nl: "Vereenvoudigd mechanica-model (F, n, T, P) voor een eerste dimensionering, fysica; IEC 60072-voorkeursreeks vermogens, norm. Geen volledige DIN 22101/FEM-methode voor bandtransporteurs en geen elektrisch/thermisch motormodel.",
+      en: "Simplified mechanics model (F, n, T, P) for a first-pass sizing, physics; IEC 60072 preferred power series, standard. No full DIN 22101/FEM method for belt conveyors and no electrical/thermal motor model.",
+    },
+    category: "Aandrijftechniek",
+    title: {
+      nl: "Van last naar motor gaat via vier stappen, niet één formule.",
+      en: "From load to motor takes four steps, not one formula.",
+    },
+    intro: {
+      nl: "Kracht, toerental, koppel en vermogen volgen na elkaar uit de toepassing — en de motor die je uiteindelijk bestelt is nog een stap groter dan wat je berekent.",
+      en: "Force, speed, torque and power follow one another from the application — and the motor you actually order is still a step larger than what you calculate.",
+    },
+    time: "6 min",
+    tool: "motor-specification",
+    question: {
+      nl: "Een hijsinstallatie tilt 50 kg met 0,2 m/s aan een trommel van Ø200 mm, bij 85% rendement en 1,1 veiligheidsfactor. Welke IEC-motor hoort daarbij?",
+      en: "A hoist lifts 50 kg at 0.2 m/s on a Ø200 mm drum, at 85% efficiency and a 1.1 safety factor. What IEC motor belongs to it?",
+    },
+    sections: [
+      [
+        { nl: "Vier stappen van toepassing naar vermogen", en: "Four steps from application to power" },
+        {
+          nl: "De benodigde kracht F volgt uit het type toepassing: bij hijsen alleen het gewicht (F = m·g), bij een rollenbaan of band alleen wrijving (F = μ·m·g), bij een hellingbaan zwaartekracht én wrijving samen (F = m·g·(sinθ + μ·cosθ)). Daarna volgt het toerental uit de omtreksnelheid en wieldiameter (n = v·60/(π·D)), het koppel uit T = F·D/2, en het asvermogen uit P = F·v/η. Dit is een vereenvoudigd model voor een eerste dimensionering — geen volledige DIN 22101/FEM-berekening voor bandtransporteurs, die ook versnelling en meerdere deelweerstanden meeneemt.",
+          en: "The required force F follows from the application type: for hoisting, just the weight (F = m·g); for a roller or belt conveyor, just friction (F = μ·m·g); for an incline, gravity and friction together (F = m·g·(sinθ + μ·cosθ)). From there, speed follows from the surface speed and wheel diameter (n = v·60/(π·D)), torque from T = F·D/2, and shaft power from P = F·v/η. This is a simplified model for a first-pass sizing — not a full DIN 22101/FEM calculation for belt conveyors, which also accounts for acceleration and multiple partial resistances.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: hijsen, 50 kg bij 0,2 m/s", en: "Worked example: hoisting, 50 kg at 0.2 m/s" },
+        {
+          nl: "De kracht is F = 50 × 9,81 = 490,5 N. Met een trommel van Ø200 mm volgt n ≈ 19,1 omw/min en T = 490,5 × 0,1 = 49,05 N·m. Het asvermogen is P = 490,5 × 0,2 / 0,85 ≈ 115,4 W. Met een veiligheidsfactor van 1,1 wordt het ontwerpvermogen ≈ 127,0 W — en dat rondt de IEC 60072-reeks af naar boven, naar de eerstvolgende voorkeursmaat van 0,18 kW.",
+          en: "The force is F = 50 × 9.81 = 490.5 N. With a Ø200 mm drum, n ≈ 19.1 rpm and T = 490.5 × 0.1 = 49.05 N·m follow. Shaft power is P = 490.5 × 0.2 / 0.85 ≈ 115.4 W. With a 1.1 safety factor, the design power becomes ≈ 127.0 W — and the IEC 60072 series rounds that up to the next preferred size, 0.18 kW.",
+        },
+      ],
+      [
+        { nl: "Twee marges, geen dubbele veiligheid", en: "Two margins, not double safety" },
+        {
+          nl: "De veiligheidsfactor (hier 1,1) en de afronding naar de IEC-reeks doen ander werk. De veiligheidsfactor dekt onzekerheid in de berekening en opstartcondities. De IEC-afronding is geen marge maar een catalogusbeperking: motoren bestaan alleen in vaste voorkeurmaten (IEC 60072), dus 127 W wordt altijd 180 W, nooit iets ertussenin. Samen geeft dat in dit voorbeeld 0,18/0,115 ≈ 57% marge boven het kale asvermogen — reken dat niet dubbel mee als extra veiligheid bovenop de 1,1-factor.",
+          en: "The safety factor (here 1.1) and the rounding to the IEC series do different jobs. The safety factor covers uncertainty in the calculation and starting conditions. The IEC rounding isn't a margin but a catalogue constraint: motors only exist in fixed preferred sizes (IEC 60072), so 127 W always becomes 180 W, never something in between. Together that gives about 0.18/0.115 ≈ 57% margin above the bare shaft power in this example — don't count that twice as extra safety on top of the 1.1 factor.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Het model beschrijft een stationair mechanisch werkpunt met een enkele, vereenvoudigde weerstandsformule per toepassing. Versnelling, traagheid, elektrisch opgenomen vermogen, motor- en regelaarverliezen en de beschikbaarheid van een vermogen per polental/frame bij een specifieke fabrikant vallen erbuiten. Controleer bij bandtransporteurs de volledige DIN 22101/FEM-weerstanden en verifieer de uiteindelijke motorkeuze altijd tegen de fabrikantcatalogus.",
+          en: "The model describes a steady-state mechanical operating point with a single, simplified resistance formula per application. Acceleration, inertia, electrical input power, motor and drive losses, and a specific manufacturer's power availability per pole count/frame fall outside it. For belt conveyors, check the full DIN 22101/FEM resistances, and always verify the final motor choice against the manufacturer's catalogue.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "doorbuiging-waar-zit-het-maximum",
+    basis: {
+      nl: "Euler-Bernoulli doorbuiging voor puntlast en gelijkmatig verdeelde last, vrij opgelegd en ingeklemd (uitkraging), fysica (Roark/Shigley). Kleine elastische vervorming, enkele last per berekening — geen combinatie van lasten, afschuifvervorming of dynamica.",
+      en: "Euler-Bernoulli deflection for a point load and a uniformly distributed load, simply supported and cantilevered, physics (Roark/Shigley). Small elastic deformation, a single load per calculation — no combined loads, shear deformation or dynamics.",
+    },
+    category: "Machineframes",
+    title: {
+      nl: "De grootste doorbuiging zit niet altijd onder de last.",
+      en: "The largest deflection isn't always under the load.",
+    },
+    intro: {
+      nl: "Bij een last uit het midden ligt het werkelijke maximum ergens anders op de balk — en bij een uitkraging is de tip altijd erger dan de last zelf.",
+      en: "With an off-centre load, the true maximum sits somewhere else on the beam — and on a cantilever, the tip always deflects more than the load point itself.",
+    },
+    time: "6 min",
+    tool: "beam-deflection",
+    question: {
+      nl: "Een vrij opgelegde balk van 1.000 mm draagt een puntlast van 1.000 N op 200 mm vanaf de linker oplegging. Is de doorbuiging onder de last ook de maximale doorbuiging?",
+      en: "A simply supported 1,000 mm beam carries a 1,000 N point load 200 mm from the left support. Is the deflection under the load also the maximum deflection?",
+    },
+    sections: [
+      [
+        { nl: "Onder de last is niet altijd het maximum", en: "Under the load isn't always the maximum" },
+        {
+          nl: "Voor een vrij opgelegde balk met puntlast F op afstand a van de linker oplegging (b = L − a) geldt de doorbuiging onder de last δ(a) = F·a²·b² / (3·E·I·L). Staat de last niet in het midden (a ≠ b), dan ligt de werkelijke maximale doorbuiging elders op de balk, dichter naar het midden toe vanaf de korte zijde. Alleen bij een gecentreerde last (a = b = L/2) vallen 'onder de last' en 'maximum' samen.",
+          en: "For a simply supported beam with a point load F at distance a from the left support (b = L − a), the deflection under the load is δ(a) = F·a²·b² / (3·E·I·L). When the load isn't centred (a ≠ b), the true maximum deflection sits elsewhere on the beam, closer to midspan from the short side. Only with a centred load (a = b = L/2) do 'under the load' and 'maximum' coincide.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: last op 200 mm van 1.000 mm", en: "Worked example: load at 200 mm of 1,000 mm" },
+        {
+          nl: "Met F = 1.000 N, L = 1.000 mm, a = 200 mm, E = 210.000 N/mm² en I = 1.000.000 mm⁴ is de doorbuiging onder de last ≈ 0,0406 mm. De werkelijke maximale doorbuiging is groter: ≈ 0,0575 mm, op x ≈ 434,3 mm vanaf de oplegging het dichtst bij de last. Wie alleen 'onder de last' controleert, onderschat hier de doorbuiging met ongeveer 42%.",
+          en: "With F = 1,000 N, L = 1,000 mm, a = 200 mm, E = 210,000 N/mm² and I = 1,000,000 mm⁴, the deflection under the load is ≈ 0.0406 mm. The true maximum deflection is larger: ≈ 0.0575 mm, at x ≈ 434.3 mm from the support nearest the load. Checking only 'under the load' here underestimates the deflection by about 42%.",
+        },
+      ],
+      [
+        { nl: "Een uitkraging maakt het verschil nog groter", en: "A cantilever makes the gap even bigger" },
+        {
+          nl: "Bij een uitkraging (ingeklemd bij x = 0) met een last F op afstand a van de inklemming draagt het stuk voorbij de last geen extra moment meer en blijft het recht onder de hoek die bij x = a is opgebouwd — de tip beweegt daardoor verder mee dan het punt onder de last zelf. Met F = 500 N, L = 800 mm, a = 300 mm, E = 210.000 N/mm² en I = 500.000 mm⁴ is de doorbuiging onder de last ≈ 0,0429 mm, maar bij de vrije tip ≈ 0,150 mm — 3,5 keer zoveel. Het maximummoment (bij de inklemming, M = F·a) blijft in beide gevallen hetzelfde; alleen de doorbuiging verschilt.",
+          en: "On a cantilever (fixed at x = 0) with a load F at distance a from the fixed end, the segment beyond the load carries no further moment and stays straight at the slope reached at x = a — so the tip translates further than the point under the load itself. With F = 500 N, L = 800 mm, a = 300 mm, E = 210,000 N/mm² and I = 500,000 mm⁴, the deflection under the load is ≈ 0.0429 mm, but at the free tip ≈ 0.150 mm — 3.5 times as much. The maximum moment (at the fixed end, M = F·a) stays the same either way; only the deflection differs.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Het model rekent met kleine elastische vervorming volgens Euler-Bernoulli, één puntlast óf één gelijkmatig verdeelde last per berekening — niet gecombineerd. Afschuifvervorming, dynamica/trilling en niet-ideale opleggingen vallen erbuiten. Of een uitkomst acceptabel is, hangt af van de toepassing: de tool geeft generieke richtwaarden (L/180 tot L/750) als oriëntatie, geen vervanging van de toepasselijke norm (Eurocode 3, VDI 2230/machinerichtlijnen, FEM 1.001 voor kraanbanen).",
+          en: "The model calculates small elastic deformation per Euler-Bernoulli, a single point load or a single uniformly distributed load per calculation — not combined. Shear deformation, dynamics/vibration and non-ideal supports fall outside it. Whether a result is acceptable depends on the application: the tool gives generic guideline ratios (L/180 to L/750) as orientation, not a replacement for the applicable standard (Eurocode 3, VDI 2230/machinery directives, FEM 1.001 for crane runways).",
+        },
+      ],
+    ],
+  },
 ];
