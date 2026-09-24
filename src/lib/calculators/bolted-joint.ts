@@ -38,21 +38,40 @@ export type BoltedJointResult = {
   /** Residual clamp load under full working load (minimum boundary case). */
   fKR: number;
   /** Maximum bolt force under full working load (maximum boundary case). */
-  fSmax: number;
+  fSmax: number | null;
   /** Bolt stress under F_Smax. */
-  sigmaS: number;
+  sigmaS: number | null;
   /** Static safety factor against yielding, Rp0.2 / sigma_S. */
-  safetyFactor: number;
+  safetyFactor: number | null;
+  separated: boolean;
 };
 
-export function computeBoltedJoint(input: BoltedJointInput): BoltedJointResult {
-  const { As, Rp, FV, FZ, phi, FA } = input;
+export function computeBoltedJoint(input: BoltedJointInput): BoltedJointResult | null {
+  const { As, Rp, FV, FZ, phi, FA, FKreq } = input;
+  if (
+    ![As, Rp, FV, FZ, phi, FA, FKreq].every(Number.isFinite) ||
+    As <= 0 ||
+    Rp <= 0 ||
+    FV <= 0 ||
+    FZ < 0 ||
+    FZ > FV ||
+    phi < 0 ||
+    phi > 1 ||
+    FA < 0 ||
+    FKreq < 0
+  )
+    return null;
   const fVRest = FV - FZ;
   const fKR = fVRest - (1 - phi) * FA;
+  // Zero is the onset of separation. A negative balance is diagnostic only,
+  // not a physical tensile clamp load. Do not extrapolate the closed model.
+  if (fKR <= 0)
+    return { fVRest, fKR, separated: true, fSmax: null, sigmaS: null, safetyFactor: null };
   const fSmax = fVRest + phi * FA;
   const sigmaS = (fSmax * 1000) / As;
-  const safetyFactor = sigmaS > 0 ? Rp / sigmaS : Infinity;
-  return { fVRest, fKR, fSmax, sigmaS, safetyFactor };
+  const safetyFactor = Rp / sigmaS;
+  if (![fVRest, fKR, fSmax, sigmaS, safetyFactor].every(Number.isFinite)) return null;
+  return { fVRest, fKR, fSmax, sigmaS, safetyFactor, separated: false };
 }
 
 export type JointStatus = "fail" | "caution" | "ok";
@@ -65,6 +84,7 @@ export type JointStatus = "fail" | "caution" | "ok";
  * where the real margin decision belongs).
  */
 export function clampStatus(fKR: number, fKreq: number): JointStatus {
+  if (!Number.isFinite(fKR) || !Number.isFinite(fKreq) || fKreq < 0 || fKR <= 0) return "fail";
   if (fKR < fKreq) return "fail";
   if (fKR < fKreq * 1.1) return "caution";
   return "ok";
@@ -78,7 +98,8 @@ export function clampStatus(fKR: number, fKreq: number): JointStatus {
  * the working load is known — it is not a specific VDI 2230 clause value;
  * VDI 2230 itself does not mandate one fixed safety factor.
  */
-export function boltSafetyStatus(sf: number): JointStatus {
+export function boltSafetyStatus(sf: number | null): JointStatus {
+  if (sf === null || !Number.isFinite(sf)) return "fail";
   if (sf < 1.0) return "fail";
   if (sf < 1.2) return "caution";
   return "ok";

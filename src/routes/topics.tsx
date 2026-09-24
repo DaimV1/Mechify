@@ -1,13 +1,7 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow, Action } from "@/components/brand-ui";
-import {
-  ARTICLE_AUTHOR,
-  ARTICLE_REVIEWED_DATE,
-  ARTICLE_REVIEWED_DATE_ISO,
-  CATEGORY_LABELS,
-  articles,
-} from "@/lib/articles";
+import { ARTICLE_AUTHOR, CATEGORY_LABELS, articles } from "@/lib/articles";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import { NotFound } from "./not-found";
@@ -133,7 +127,7 @@ export function TopicArticle() {
             type: "TechArticle",
             extra: {
               author: { "@type": "Person", name: ARTICLE_AUTHOR },
-              dateModified: ARTICLE_REVIEWED_DATE_ISO,
+              dateModified: a.reviewedDateIso,
               articleSection: a.category,
             },
             breadcrumbs: [
@@ -164,11 +158,25 @@ export function TopicArticle() {
             </div>
             <div>
               <dt>{tx(locale, "Laatst gecontroleerd", "Last checked")}</dt>
-              <dd>{ARTICLE_REVIEWED_DATE[locale]}</dd>
+              <dd>{a.reviewedDate[locale]}</dd>
             </div>
             <div>
               <dt>{tx(locale, "Technische basis", "Technical basis")}</dt>
               <dd>{a.basis[locale]}</dd>
+              {a.slug === "spiebaan-toleranties-kiezen" && (
+                <dd>
+                  <a href="https://test-katalog.ganternorm.com/pdf/ganter/en/6885-1.pdf">
+                    Ganter DIN 6885-1
+                  </a>
+                </dd>
+              )}
+              {a.slug === "lagerpassing-kiezen" && (
+                <dd>
+                  <a href="https://cdn.skfmediahub.skf.com/api/public/0947488ecec83348/pdf_preview_medium/0947488ecec83348_pdf_preview_medium.pdf">
+                    SKF: bearing fits and arrangements
+                  </a>
+                </dd>
+              )}
             </div>
           </dl>
         </header>
@@ -180,11 +188,15 @@ export function TopicArticle() {
                 0{i + 1} {title[locale]}
               </a>
             ))}
-            <Action to={toolLinks[a.tool]}>{tx(locale, "Bijbehorende tool", "Related tool")}</Action>
+            <Action to={toolLinks[a.tool]}>
+              {tx(locale, "Bijbehorende tool", "Related tool")}
+            </Action>
           </aside>
           <div className="article-body">
             <div className="practice">
-              <span className="mono cyan">{tx(locale, "DE PRAKTIJKVRAAG", "THE PRACTICAL QUESTION")}</span>
+              <span className="mono cyan">
+                {tx(locale, "DE PRAKTIJKVRAAG", "THE PRACTICAL QUESTION")}
+              </span>
               <p>{a.question[locale]}</p>
             </div>
             {a.sections.map(([title, text], i) => (
@@ -203,7 +215,9 @@ export function TopicArticle() {
               </p>
             ) : null}
             <div className="article-next">
-              <h3>{tx(locale, "Breng de uitleg in praktijk.", "Put the explanation into practice.")}</h3>
+              <h3>
+                {tx(locale, "Breng de uitleg in praktijk.", "Put the explanation into practice.")}
+              </h3>
               <Action to={toolLinks[a.tool]}>
                 {tx(locale, "Open de bijbehorende tool", "Open the related tool")}
               </Action>
