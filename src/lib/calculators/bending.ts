@@ -31,6 +31,36 @@ export function flatLength(legs: number[], BD: number): number {
   return legs.reduce((a, b) => a + b, 0) - BD;
 }
 
+/** Two outside legs must extend to the outer virtual sharp intersection.
+ * Equality gives a zero straight segment; this geometry check is not a tooling check.
+ */
+export function singleBendFlatLength(
+  legs: [number | null, number | null],
+  angleDeg: number,
+  Ri: number,
+  T: number,
+  K: number,
+): number | null {
+  if (
+    ![angleDeg, Ri, T, K].every(Number.isFinite) ||
+    angleDeg <= 0 ||
+    angleDeg >= 180 ||
+    Ri < 0 ||
+    T <= 0 ||
+    K < 0 ||
+    K > 1
+  )
+    return null;
+  const setback = (Ri + T) * Math.tan((angleDeg * Math.PI) / 360);
+  if (
+    !Number.isFinite(setback) ||
+    legs.some((leg) => leg == null || !Number.isFinite(leg) || leg <= 0 || leg < setback)
+  )
+    return null;
+  const flat = flatLength(legs as [number, number], bendDeduction(angleDeg, Ri, T, K));
+  return Number.isFinite(flat) && flat > 0 ? flat : null;
+}
+
 export type MaterialClass = { id: string; label: string; labelEn: string; rminFactor: number };
 
 /**
