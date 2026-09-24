@@ -28,6 +28,8 @@ const toolLinks: Record<string, string> = {
   fasteners: "/tools/fasteners",
   "motor-specification": "/calculators/motor-specification",
   "beam-deflection": "/calculators/beam-deflection",
+  "fit-tolerances": "/tools/fit-tolerances",
+  "seeger-grooves": "/tools/seeger-grooves",
 };
 export function Topics() {
   const { locale } = useLocale();

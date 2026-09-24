@@ -1012,4 +1012,108 @@ export const articles = [
       ],
     ],
   },
+  {
+    slug: "h7g6-passing-verandert-met-de-diameter",
+    basis: {
+      nl: "ISO 286-1/-2 passingenstelsel: handmatig geverifieerde tabel 0–50 mm, formules (gevalideerd tegen die tabel) voor H/h/JS/js/G/g/F/f/D/d boven 50 mm. Overige klassen (j/k/m/n/p/s) blijven tabelgebonden tot 50 mm; enkele cellen bij >0–3 mm en de eerste band van H7/p6 zijn nog niet bevestigd.",
+      en: "ISO 286-1/-2 fit system: hand-verified table for 0–50 mm, formulas (validated against that table) for H/h/JS/js/G/g/F/f/D/d above 50 mm. Other classes (j/k/m/n/p/s) stay table-bound up to 50 mm; a few cells at >0–3 mm and the first band of H7/p6 are still unconfirmed.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een passingcode zegt pas iets zodra je de diameter kent.",
+      en: "A fit code only means something once you know the diameter.",
+    },
+    intro: {
+      nl: "H7/g6 is geen vaste speling in µm. Dezelfde code geeft bij elke diameterband een andere klemming of speling.",
+      en: "H7/g6 isn't a fixed clearance in µm. The same code gives a different clearance or clamping at every diameter band.",
+    },
+    time: "5 min",
+    tool: "fit-tolerances",
+    question: {
+      nl: "Een as en naaf krijgen de passing H7/g6 bij Ø25 mm. Hoeveel speling zit daar precies tussen?",
+      en: "A shaft and hub get the H7/g6 fit at Ø25 mm. How much clearance is actually between them?",
+    },
+    sections: [
+      [
+        { nl: "Eén code, oneindig veel maten", en: "One code, infinitely many dimensions" },
+        {
+          nl: "Een ISO 286-passing bestaat uit twee delen: een boringsklasse (hoofdletter + kwaliteitsgetal, bv. H7) en een asklasse (kleine letter + kwaliteitsgetal, bv. g6). Beide klassen beschrijven een afwijking ten opzichte van de nominale maat, maar die afwijking is uitgedrukt in µm en hangt af van de diameterband waarin de maat valt — grotere diameters krijgen een breder tolerantieveld, ook bij dezelfde letter en hetzelfde kwaliteitsgetal. H7/g6 zegt dus iets over de vorm van de passing (hier: altijd speling, nooit klemming), maar de werkelijke speling in µm lees je pas af zodra je weet in welke band (bv. >18–≤30 mm) de nominale diameter valt.",
+          en: "An ISO 286 fit has two parts: a hole class (capital letter + grade, e.g. H7) and a shaft class (lowercase letter + grade, e.g. g6). Both describe a deviation from the nominal size, but that deviation is expressed in µm and depends on the diameter band the size falls in — larger diameters get a wider tolerance field, even for the same letter and the same grade. So H7/g6 tells you the shape of the fit (here: always clearance, never clamping), but you only read off the actual clearance in µm once you know which band (e.g. >18–≤30 mm) the nominal diameter falls in.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: H7/g6 bij Ø25 mm", en: "Worked example: H7/g6 at Ø25 mm" },
+        {
+          nl: "Bij Ø25 mm valt de maat in de band >18–≤30 mm. Daar geeft H7 een boringsafwijking van ES = +21 µm, EI = 0 µm; g6 geeft een asafwijking van es = −7 µm, ei = −20 µm. De boring wordt dus 25,000 tot 25,021 mm, de as 24,980 tot 24,993 mm. De speling ligt daarmee tussen 7 µm (minimaal) en 41 µm (maximaal) — altijd speling, passend bij het gebruik als nauwkeurig glijdende centrumpassing.",
+          en: "At Ø25 mm the size falls in the >18–≤30 mm band. There, H7 gives a hole deviation of ES = +21 µm, EI = 0 µm; g6 gives a shaft deviation of es = −7 µm, ei = −20 µm. The hole is therefore 25.000 to 25.021 mm, the shaft 24.980 to 24.993 mm. The clearance is between 7 µm (minimum) and 41 µm (maximum) — always clearance, matching its use as a precise sliding location fit.",
+        },
+      ],
+      [
+        { nl: "Reken de afwijking om naar een echte maat", en: "Convert the deviation to a real dimension" },
+        {
+          nl: "+21/0 µm is correct, maar is een extra rekenstap verwijderd van wat er op de tekening en op de machine gebeurt. Tel de afwijking op bij de nominale diameter en je krijgt de twee absolute grensmaten die daadwerkelijk verspaand worden: 25,000–25,021 mm voor de boring, 24,980–24,993 mm voor de as. Die absolute maten zijn wat een operator controleert, niet het afwijkingspaar zelf.",
+          en: "+21/0 µm is correct, but it's one arithmetic step removed from what happens on the drawing and on the machine. Add the deviation to the nominal diameter and you get the two absolute limit dimensions actually machined: 25.000–25.021 mm for the hole, 24.980–24.993 mm for the shaft. Those absolute dimensions are what an operator checks, not the deviation pair itself.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "De tabel voor 0–50 mm is handmatig geverifieerd per klasse; buiten 50 mm rekent de tool met de ISO 286-1-formules, maar alleen voor de klassen H, h, JS, js, G, g, F, f, D en d — die zijn tegen de geverifieerde tabel gevalideerd. Klassen als j, k, m, n, p en s hebben geen bruikbare gesloten formule en blijven daarom beperkt tot 50 mm. Bij de kleinste band (>0–3 mm) ontbreken meerdere klassen nog volledig (de tool toont dan '—') omdat er geen bevestigde brontabel beschikbaar was; en de eerste band van H7/p6 staat gemarkeerd als betwist totdat een primaire ISO 286-2-tabel dat bevestigt of weerlegt. Controleer de tool-melding voor de gekozen combinatie.",
+          en: "The 0–50 mm table is hand-verified per class; beyond 50 mm the tool uses the ISO 286-1 formulas, but only for classes H, h, JS, js, G, g, F, f, D and d — those were validated against the verified table. Classes like j, k, m, n, p and s have no usable closed-form formula and stay limited to 50 mm. At the smallest band (>0–3 mm), several classes are still entirely missing (the tool shows '—') because no confirmed source table was available, and the first band of H7/p6 is flagged as disputed until a primary ISO 286-2 table confirms or refutes it. Check the tool's own notice for the combination you chose.",
+        },
+      ],
+    ],
+  },
+  {
+    slug: "borgveer-twee-groeven-niet-een",
+    basis: {
+      nl: "DIN 471 (as) / DIN 472 (boring) workshoptabel met ISO 286-1 IT11-tolerantie voor de groefdiameter, norm + workshop-praktijk. Alleen d1 = 20 mm is onafhankelijk geverifieerd tegen een fabrikantendatasheet; overige maten zijn ongewijzigde pre-auditwaarden.",
+      en: "DIN 471 (shaft) / DIN 472 (bore) workshop table with an ISO 286-1 IT11 tolerance on the groove diameter, standard + workshop practice. Only d1 = 20 mm is independently verified against a manufacturer datasheet; other sizes are unchanged pre-audit values.",
+    },
+    category: "Toleranties & assemblage",
+    title: {
+      nl: "Een borgveer heeft twee groeven, niet één.",
+      en: "A circlip has two grooves, not one.",
+    },
+    intro: {
+      nl: "Dezelfde as-diameter geeft een andere groef op een as dan in een boring — breedte, diameter en zelfs de tolerantieklasse verschillen per kant.",
+      en: "The same shaft diameter gives a different groove on a shaft than in a bore — width, diameter and even the tolerance class differ per side.",
+    },
+    time: "5 min",
+    tool: "seeger-grooves",
+    question: {
+      nl: "Een as van Ø20 mm krijgt een borgring aan de buitenkant en een naaf een borgring aan de binnenkant. Zijn dat dezelfde groefmaten?",
+      en: "A Ø20 mm shaft gets an external retaining ring and a hub gets an internal one. Are those the same groove dimensions?",
+    },
+    sections: [
+      [
+        { nl: "DIN 471 (as) en DIN 472 (boring) zijn twee normen", en: "DIN 471 (shaft) and DIN 472 (bore) are two standards" },
+        {
+          nl: "Een uitwendige borgring (DIN 471) zit in een groef die in een as gedraaid is; een inwendige borgring (DIN 472) zit in een groef die in een boring gestoken is. Bij dezelfde nominale maat d1 zijn de groefdiameter d2, de groefbreedte b en de tolerantieklasse van d2 (h11 op de as, H11 in de boring) voor beide kanten apart vastgelegd — het zijn geen spiegelbeelden van elkaar. Tot een audit in september 2026 deelde de brontabel van deze tool één gemeenschappelijke breedtekolom voor beide kanten; bij Ø20 mm bleek dat mis: de externe groef (DSH-20) is 1,3 mm breed, de interne groef (DHO-20) 1,1 mm.",
+          en: "An external retaining ring (DIN 471) sits in a groove turned into a shaft; an internal retaining ring (DIN 472) sits in a groove cut into a bore. At the same nominal size d1, the groove diameter d2, the groove width b, and the tolerance class of d2 (h11 on the shaft, H11 in the bore) are each specified separately for the two sides — they aren't mirror images of each other. Until a September 2026 audit, this tool's source table shared a single width column for both sides; at Ø20 mm that turned out to be wrong: the external groove (DSH-20) is 1.3 mm wide, the internal groove (DHO-20) 1.1 mm.",
+        },
+      ],
+      [
+        { nl: "Rekenvoorbeeld: Ø20 mm, het enige geverifieerde punt", en: "Worked example: Ø20 mm, the one verified point" },
+        {
+          nl: "Bij d1 = 20 mm geeft de externe groef (as) d2 = 19 mm (h11), b = 1,3 mm (H13) en een groefdiepte t = 0,5 mm. De interne groef (boring) geeft d2 = 21 mm (H11), b = 1,1 mm (H13) en dezelfde diepte t = 0,5 mm. Beide waarden zijn onafhankelijk gecontroleerd tegen een fabrikantendatasheet (Rotor Clip) — dit is de enige maat in de tabel waarvoor dat is gebeurd.",
+          en: "At d1 = 20 mm, the external groove (shaft) gives d2 = 19 mm (h11), b = 1.3 mm (H13) and a groove depth t = 0.5 mm. The internal groove (bore) gives d2 = 21 mm (H11), b = 1.1 mm (H13) and the same depth t = 0.5 mm. Both values were independently checked against a manufacturer datasheet (Rotor Clip) — this is the only size in the table for which that has been done.",
+        },
+      ],
+      [
+        { nl: "De diepte volgt uit d1 en d2, plus een ISO-tolerantie", en: "Depth follows from d1 and d2, plus an ISO tolerance" },
+        {
+          nl: "De groefdiepte t is niet zelf getabelleerd: hij volgt uit t = |d1 − d2| / 2. Zelf krijgt d2 een ISO 286-1 IT11-tolerantie volgens de kant: h11 op de as (0 tot −0,13 mm) of H11 in de boring (0 tot +0,13 mm) — bij Ø19 en Ø21 mm is dat 0,13 mm breed. Op de afgeleide diepte t staat daarnaast een eigen, eenzijdige marge van de helft daarvan: +0,065 mm, mag dieper, niet ondieper. De groefbreedte b heeft een vaste tolerantieklasse H13, onafhankelijk van de maat. Zo blijft elke groef traceerbaar naar een formule of een norm, niet naar een los ingeschat getal.",
+          en: "The groove depth t isn't tabulated on its own: it follows from t = |d1 − d2| / 2. d2 itself gets an ISO 286-1 IT11 tolerance keyed to the side: h11 on the shaft (0 to −0.13mm) or H11 in the bore (0 to +0.13mm) — for Ø19 and Ø21mm that's 0.13mm wide. The derived depth t then carries its own, one-sided margin of half that: +0.065mm, allowed to go deeper, not shallower. The groove width b has a fixed tolerance class H13, independent of size. That keeps every groove traceable to a formula or a standard, not a loosely estimated number.",
+        },
+      ],
+      [
+        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
+        {
+          nl: "Alleen d1 = 20 mm is voor beide kolommen onafhankelijk geverifieerd. Elke andere maat in de tabel draagt nog zijn ongewijzigde waarde van vóór de audit — niet herafgeleid, en dus met hetzelfde risico dat bij Ø20 mm al één keer een echte fout opleverde. Gebruik deze tool voor een eerste dimensionering, maar bevestig de gekozen maat altijd tegen DIN 471/472 of de catalogus van de ringfabrikant voordat die naar productie gaat.",
+          en: "Only d1 = 20 mm has been independently verified for both columns. Every other size in the table still carries its unchanged pre-audit value — not re-derived, and so carrying the same risk that already produced a real error at Ø20 mm. Use this tool for a first-pass sizing, but always confirm the chosen size against DIN 471/472 or the ring manufacturer's catalogue before it goes to production.",
+        },
+      ],
+    ],
+  },
 ];
