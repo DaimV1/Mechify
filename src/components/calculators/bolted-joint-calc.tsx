@@ -68,13 +68,17 @@ const T = {
     resultFSmax: "F_S,max (max. boutkracht)",
     resultSigma: "σ_S (boutspanning)",
     resultSF: "Veiligheid tegen vloeien S_F",
-    clampFail: "F_KR < F_Kerf — de verbinding komt los onder volle bedrijfslast.",
+    clampFail:
+      "F_KR < F_Kerf — vereiste restklemkracht niet gehaald; dit betekent niet automatisch loskomen.",
+    separated:
+      "F_KR ≤ 0 — grens van loskomen bereikt of overschreden. Boutkracht, spanning en veiligheid niet bepaald: het gesloten-verbindingsmodel is niet geldig. Negatieve F_KR is alleen een rekenkundige balans.",
+    unavailable: "Niet bepaald",
     clampCaution: "F_KR net boven F_Kerf (<10% marge) — weinig reserve.",
     clampOk: "F_KR ≥ F_Kerf met voldoende marge — verbinding blijft geklemd.",
     sfFail: "S_F < 1,0 — de bout vloeit onder de maximale bedrijfslast.",
     sfCaution: "S_F tussen 1,0 en 1,2 — krap, controleer belastingaannames.",
     sfOk: "S_F ≥ 1,2 — voldoende marge tegen vloeien.",
-    fill: "Vul F_V, Φ, F_A en F_Kerf in (F_V en F_Kerf groter dan 0).",
+    fill: "Vul alle velden geldig in: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A en F_Kerf ≥ 0. Alleen eindige waarden.",
     chainToFasteners: "Gebruik de bevestigingsmateriaal-tool voor aandraaimoment en A_s/Rp0,2 →",
     copy: (
       size: string,
@@ -111,13 +115,17 @@ const T = {
     resultFSmax: "F_S,max (max. bolt force)",
     resultSigma: "σ_S (bolt stress)",
     resultSF: "Static safety against yield S_F",
-    clampFail: "F_KR < F_Kerf — the joint separates under full working load.",
+    clampFail:
+      "F_KR < F_Kerf — required residual clamp load not met; this does not necessarily mean separation.",
+    separated:
+      "F_KR ≤ 0 — separation threshold reached or exceeded. Bolt force, stress and safety are not determined: the closed-joint model is not valid. Negative F_KR is only a calculated balance.",
+    unavailable: "Not determined",
     clampCaution: "F_KR just above F_Kerf (<10% margin) — little reserve.",
     clampOk: "F_KR ≥ F_Kerf with adequate margin — joint stays clamped.",
     sfFail: "S_F < 1.0 — the bolt yields under the maximum working load.",
     sfCaution: "S_F between 1.0 and 1.2 — tight, check the load assumptions.",
     sfOk: "S_F ≥ 1.2 — adequate margin against yielding.",
-    fill: "Enter F_V, Φ, F_A and F_Kerf (F_V and F_Kerf greater than 0).",
+    fill: "Enter every field correctly: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A and F_Kerf ≥ 0. Finite values only.",
     chainToFasteners: "Use the fasteners tool for tightening torque and A_s/Rp0.2 →",
     copy: (
       size: string,
@@ -143,9 +151,11 @@ export function BoltedJointCalc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [size, setSize] = useState<ThreadSize>(
-    (search.get("m") && search.get("m")! in STRESS_AREA ? search.get("m") : "M10") as ThreadSize,
+    (THREAD_SIZES.includes(search.get("m") as ThreadSize) ? search.get("m") : "M10") as ThreadSize,
   );
-  const [classId, setClassId] = useState(search.get("c") ?? "8.8");
+  const [classId, setClassId] = useState(
+    PROPERTY_CLASSES.some((c) => c.id === search.get("c")) ? search.get("c")! : "8.8",
+  );
   const [fv, setFv] = useState(search.get("fv") ?? "20");
   const [fz, setFz] = useState(search.get("fz") ?? "1");
   const [phi, setPhi] = useState(search.get("phi") ?? "0.25");
@@ -171,13 +181,13 @@ export function BoltedJointCalc() {
   const Rp = yieldStress(cls);
 
   const fvVal = parseNum(fv);
-  const fzVal = parseNum(fz) ?? 0;
+  const fzVal = parseNum(fz);
   const phiVal = parseNum(phi);
-  const faVal = parseNum(fa) ?? 0;
+  const faVal = parseNum(fa);
   const fkreqVal = parseNum(fkreq);
 
   const result =
-    fvVal != null && fvVal > 0 && phiVal != null && fkreqVal != null && fkreqVal > 0
+    fvVal != null && fzVal != null && faVal != null && phiVal != null && fkreqVal != null
       ? computeBoltedJoint({
           As,
           Rp,
@@ -203,10 +213,21 @@ export function BoltedJointCalc() {
         phi,
         fa,
         fmtBoltedJoint(result.fKR),
-        fmtBoltedJoint(result.fSmax),
-        fmtBoltedJoint(result.sigmaS, 1),
-        fmtBoltedJoint(result.safetyFactor),
+        result.fSmax == null ? t.unavailable : fmtBoltedJoint(result.fSmax),
+        result.sigmaS == null ? t.unavailable : fmtBoltedJoint(result.sigmaS, 1),
+        result.safetyFactor == null ? t.unavailable : fmtBoltedJoint(result.safetyFactor),
       ),
+      `F_Kerf = ${fkreq} kN`,
+      result.separated
+        ? t.separated
+        : cStatus === "fail"
+          ? t.clampFail
+          : cStatus === "caution"
+            ? t.clampCaution
+            : t.clampOk,
+      ...(result.separated
+        ? []
+        : [sfStatus === "fail" ? t.sfFail : sfStatus === "caution" ? t.sfCaution : t.sfOk]),
       metaCopyLine(BOLTED_JOINT_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,13 +291,24 @@ export function BoltedJointCalc() {
               items={[
                 { label: t.resultFVRest, value: `${fmtBoltedJoint(result.fVRest)} kN` },
                 { label: t.resultFKR, value: `${fmtBoltedJoint(result.fKR)} kN` },
-                { label: t.resultFSmax, value: `${fmtBoltedJoint(result.fSmax)} kN` },
-                { label: t.resultSigma, value: `${fmtBoltedJoint(result.sigmaS, 1)} N/mm²` },
+                {
+                  label: t.resultFSmax,
+                  value:
+                    result.fSmax == null ? t.unavailable : `${fmtBoltedJoint(result.fSmax)} kN`,
+                },
+                {
+                  label: t.resultSigma,
+                  value:
+                    result.sigmaS == null
+                      ? t.unavailable
+                      : `${fmtBoltedJoint(result.sigmaS, 1)} N/mm²`,
+                },
                 {
                   label: t.resultSF,
-                  value: Number.isFinite(result.safetyFactor)
-                    ? fmtBoltedJoint(result.safetyFactor)
-                    : "∞",
+                  value:
+                    result.safetyFactor != null
+                      ? fmtBoltedJoint(result.safetyFactor)
+                      : t.unavailable,
                 },
               ]}
             />
@@ -290,29 +322,33 @@ export function BoltedJointCalc() {
               }`}
               role="status"
             >
-              {cStatus === "fail"
-                ? t.clampFail
-                : cStatus === "caution"
-                  ? t.clampCaution
-                  : t.clampOk}
+              {result.separated
+                ? t.separated
+                : cStatus === "fail"
+                  ? t.clampFail
+                  : cStatus === "caution"
+                    ? t.clampCaution
+                    : t.clampOk}
             </p>
-            <p
-              className={`mt-1 text-sm font-medium ${
-                sfStatus === "fail"
-                  ? "text-danger"
-                  : sfStatus === "caution"
-                    ? "text-warning"
-                    : "text-success"
-              }`}
-              role="status"
-            >
-              {sfStatus === "fail" ? t.sfFail : sfStatus === "caution" ? t.sfCaution : t.sfOk}
-            </p>
+            {!result.separated && (
+              <p
+                className={`mt-1 text-sm font-medium ${
+                  sfStatus === "fail"
+                    ? "text-danger"
+                    : sfStatus === "caution"
+                      ? "text-warning"
+                      : "text-success"
+                }`}
+                role="status"
+              >
+                {sfStatus === "fail" ? t.sfFail : sfStatus === "caution" ? t.sfCaution : t.sfOk}
+              </p>
+            )}
           </>
         )}
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <CopyResult text={copy} />
+          {result && <CopyResult text={copy} />}
           <CopyLink />
         </div>
         <p className="mt-4 text-sm">

@@ -68,7 +68,12 @@ type CirclipFixture = {
     grooveDepth: number;
     verified: boolean;
   };
-  internalRing20: { diameter: number; grooveDiameter: number; grooveWidth: number; verified: boolean };
+  internalRing20: {
+    diameter: number;
+    grooveDiameter: number;
+    grooveWidth: number;
+    verified: boolean;
+  };
   unverifiedRing30: { diameter: number; verified: boolean };
 };
 const circlipFixture = loadFixture<CirclipFixture>("circlip");
@@ -457,8 +462,14 @@ describe("Beam deflection: uniformly distributed load (STRUCT-001)", () => {
   });
 
   it("invalid inputs (negative w, non-positive L/E/I) return null", () => {
-    assert.equal(computeBeam({ kind: "verdeeld", type: "opgelegd", w: -1, L: 1000, E: 210000, I: 1e6 }), null);
-    assert.equal(computeBeam({ kind: "verdeeld", type: "opgelegd", w: 2, L: 0, E: 210000, I: 1e6 }), null);
+    assert.equal(
+      computeBeam({ kind: "verdeeld", type: "opgelegd", w: -1, L: 1000, E: 210000, I: 1e6 }),
+      null,
+    );
+    assert.equal(
+      computeBeam({ kind: "verdeeld", type: "opgelegd", w: 2, L: 0, E: 210000, I: 1e6 }),
+      null,
+    );
   });
 });
 
@@ -590,23 +601,26 @@ describe("Bolted joint (VDI 2230-lite static verification)", () => {
   it("no external load: residual clamp load equals preload minus embedding loss, bolt force equals that too", () => {
     const c = boltedJointFixture.noExternalLoad;
     const r = computeBoltedJoint(c);
+    assert.ok(r);
     close(r.fVRest, c.fVRest);
     close(r.fKR, c.fKR);
-    close(r.fSmax, c.fSmax);
+    close(r.fSmax!, c.fSmax);
   });
 
   it("external load splits by the load factor phi between clamp-load loss and bolt-force increase", () => {
     const c = boltedJointFixture.withExternalLoad;
     const r = computeBoltedJoint(c);
     // F_KR = 19 - (1-0.25)*8 = 19 - 6 = 13
+    assert.ok(r);
     close(r.fKR, c.fKR);
     // F_Smax = 19 + 0.25*8 = 21
-    close(r.fSmax, c.fSmax);
+    close(r.fSmax!, c.fSmax);
   });
 
   it("bolt stress and safety factor follow from F_Smax / As and Rp/sigma", () => {
     const c = boltedJointFixture.withExternalLoad;
     const r = computeBoltedJoint(c);
+    assert.ok(r && r.sigmaS != null && r.safetyFactor != null);
     close(r.sigmaS, (c.fSmax * 1000) / c.As, 1e-6);
     close(r.safetyFactor, c.Rp / r.sigmaS, 1e-6);
   });
@@ -623,11 +637,41 @@ describe("Bolted joint (VDI 2230-lite static verification)", () => {
     assert.equal(boltSafetyStatus(1.5), "ok");
   });
 
-  it("a heavily overloaded joint (F_A far exceeding F_V) both loses clamp and yields the bolt", () => {
+  it("a separated joint suppresses the closed-joint bolt force, stress and safety", () => {
     const c = boltedJointFixture.overloadedJoint;
     const r = computeBoltedJoint(c);
+    assert.ok(r);
+    assert.equal(r.separated, true);
+    assert.equal(r.fSmax, null);
+    assert.equal(r.sigmaS, null);
+    assert.equal(r.safetyFactor, null);
     assert.equal(clampStatus(r.fKR, c.FKreq), "fail");
     assert.equal(boltSafetyStatus(r.safetyFactor), "fail");
+  });
+
+  it("rejects nonfinite and physically invalid input for every field", () => {
+    const base = boltedJointFixture.withExternalLoad;
+    for (const key of ["As", "Rp", "FV", "FZ", "phi", "FA", "FKreq"]) {
+      for (const value of [NaN, Infinity, -Infinity, -1]) {
+        assert.equal(computeBoltedJoint({ ...base, [key]: value }), null, `${key}=${value}`);
+      }
+    }
+    for (const patch of [{ As: 0 }, { Rp: 0 }, { FV: 0 }, { phi: 1.01 }, { FZ: 21 }]) {
+      assert.equal(computeBoltedJoint({ ...base, ...patch }), null);
+    }
+  });
+
+  it("handles separation boundary, zero demand, and phi endpoints", () => {
+    const base = { ...boltedJointFixture.withExternalLoad, FV: 20, FZ: 0, phi: 0.5, FKreq: 0 };
+    assert.equal(computeBoltedJoint({ ...base, FA: 39 })?.separated, false);
+    assert.equal(computeBoltedJoint({ ...base, FA: 40 })?.separated, true);
+    assert.equal(computeBoltedJoint({ ...base, FA: 41 })?.separated, true);
+    assert.equal(computeBoltedJoint({ ...base, FA: 0, FZ: 20 })?.separated, true);
+    assert.equal(computeBoltedJoint({ ...base, phi: 0, FA: 5 })?.fSmax, 20);
+    assert.equal(computeBoltedJoint({ ...base, phi: 1, FA: 5 })?.fSmax, 25);
+    assert.equal(clampStatus(0, 0), "fail");
+    assert.equal(clampStatus(NaN, 0), "fail");
+    assert.equal(boltSafetyStatus(Infinity), "fail");
   });
 });
 
