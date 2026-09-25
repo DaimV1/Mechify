@@ -5,6 +5,7 @@ import { CATEGORIES, categoryById, convert, unitById } from "../src/lib/toolkit/
 import { bendDeduction } from "../src/lib/calculators/bending.ts";
 import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { computeBeam } from "../src/lib/calculators/beam.ts";
+import { computeDeflection } from "../src/lib/toolkit/deflection.ts";
 const close = (a: number, b: number) =>
   assert.ok(Math.abs(a - b) < 1e-8 * Math.max(1, Math.abs(b)), `${a} != ${b}`);
 test("Drive: all three unknowns and comma decimals", () => {
@@ -68,4 +69,23 @@ test("Beam load and tip formulas with off-centre and zero load", () => {
   );
   assert.equal(computeBeam({ ...args, a: 0 }), null);
   assert.equal(computeBeam({ ...args, F: 0 })!.deflectionAtLoad, 0);
+});
+test("beam-deflection.ts and the schema diagram's toolkit/deflection.ts agree on point loads", () => {
+  // src/components/toolkit/schema.tsx draws the beam-deflection SVG diagram from
+  // toolkit/deflection.ts's own point-load formulas, independently of the
+  // calculators/beam.ts formulas that drive the displayed numeric result. Both
+  // must keep agreeing for the same input, or the diagram would silently show
+  // a different beam than the numbers next to it.
+  for (const [end, type] of [
+    ["ss", "opgelegd"],
+    ["cant", "uitkraging"],
+  ] as const) {
+    for (const a of [200, 500, 800]) {
+      const beam = computeBeam({ type, F: 1000, L: 1000, a, E: 200000, I: 10000 })!;
+      const toolkit = computeDeflection({ end, L: 1000, a, E: 200000, I: 10000, P: 1000 })!;
+      close(beam.deflectionAtLoad, toolkit.deltaAtLoad);
+      close(beam.deflectionMax, toolkit.deltaMax);
+      close(beam.xMax, toolkit.xMax);
+    }
+  }
 });
