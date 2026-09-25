@@ -38,7 +38,9 @@ const TXT = {
   nl: {
     heading: "Buigtoeslag (K-factor)",
     intro:
-      "BA = θ·(Ri + K·T), BD = 2·(Ri+T)·tan(θ/2) − BA. K volgt hier automatisch uit de vuistregel Ri/T: <1 → 0,33, 1–<3 → 0,40, ≥3 → 0,50. Kalibreer op de eigen kantpers voor kritieke toleranties — dit is een praktijkbenadering, geen gemeten materiaalwaarde. Let op: de rekentool hierboven gebruikt een handmatig ingevulde K (standaard 0,33) in plaats van deze automatische Ri/T-regel — bij dezelfde 90°-buiging kunnen de twee tools dus een ander getal geven als je Ri/T-verhouding niet rond 1 ligt.",
+      "BA = θ·(Ri + K·T), BD = 2·(Ri+T)·tan(θ/2) − BA. K volgt hier automatisch uit de vuistregel Ri/T: <1 → 0,33, 1–<3 → 0,40, ≥3 → 0,50. Kalibreer op de eigen kantpers voor kritieke toleranties — dit is een praktijkbenadering, geen gemeten materiaalwaarde.",
+    differsFromMain:
+      "Let op: de rekentool hierboven gebruikt een handmatig ingevulde K (standaard 0,33) in plaats van deze automatische Ri/T-regel — bij dezelfde 90°-buiging kunnen de twee tools dus een ander getal geven als je Ri/T-verhouding niet rond 1 ligt.",
     thickness: "Plaatdikte T (mm)",
     innerRadius: "Binnenstraal Ri (mm)",
     bendAngle: "Buighoek θ (° vanuit vlak; 90° = haaks)",
@@ -56,7 +58,9 @@ const TXT = {
   en: {
     heading: "Bend allowance (K-factor)",
     intro:
-      "BA = θ·(Ri + K·T), BD = 2·(Ri+T)·tan(θ/2) − BA. K here follows automatically from the rule of thumb Ri/T: <1 → 0.33, 1–<3 → 0.40, ≥3 → 0.50. Calibrate on your own press brake for critical tolerances — this is a practical approximation, not a measured material value. Note: the tool above uses a manually entered K (default 0.33) instead of this automatic Ri/T rule — for the same 90° bend the two tools can give a different number if your Ri/T ratio isn't close to 1.",
+      "BA = θ·(Ri + K·T), BD = 2·(Ri+T)·tan(θ/2) − BA. K here follows automatically from the rule of thumb Ri/T: <1 → 0.33, 1–<3 → 0.40, ≥3 → 0.50. Calibrate on your own press brake for critical tolerances — this is a practical approximation, not a measured material value.",
+    differsFromMain:
+      "Note: the tool above uses a manually entered K (default 0.33) instead of this automatic Ri/T rule — for the same 90° bend the two tools can give a different number if your Ri/T ratio isn't close to 1.",
     thickness: "Sheet thickness T (mm)",
     innerRadius: "Inside radius Ri (mm)",
     bendAngle: "Bend angle θ (° from flat; 90° = right angle)",
@@ -149,6 +153,7 @@ export function EdgesCalc() {
             {t.heading}
           </h2>
           <Note>{t.intro}</Note>
+          <Note>{t.differsFromMain}</Note>
           <SourceMetaBadge meta={KFACTOR_META} />
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <Field label={t.thickness}>
