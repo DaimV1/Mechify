@@ -16,7 +16,7 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 | [Bevestigingsmateriaal](/tools/fasteners) | Moerfactor behouden; groef-/bouttabel en wrijving als aanvullend model | BoltSection | Gereed |
 | [O-ringgroef](/tools/o-ring-grooves) | Vrije compressie/breedtefactor behouden; originele groeftabel als aanvullend model | OringGroove | Gereed |
 | [Kanten](/tools/edges) | Vrije buigberekening behouden; materiaal/haaks/scherp-richtlijnen als aanvullend model | BendSection | Gereed |
-| [Eenheden](/calculators/units) | Alle oude categorieën, tweerichtingsconverter als aanvullend model, vermogen toegevoegd | Geen losse bronvisual | Gereed |
+| [Eenheden](/calculators/units) | Alle oude categorieën, tweerichtingsconverter als enige model (eenrichtingsvariant verwijderd), vermogen toegevoegd | Geen losse bronvisual | Gereed |
 | [Motorspecificatie](/calculators/motor-specification) | Stationair model behouden; versnelling, rollenmassa en uitgebreid werkpunt toegevoegd | Geen losse bronvisual | Gereed |
 | [Pneumatische cilinder](/calculators/pneumatic-cylinder) | Boring/knik behouden; lastfactor, duwen/trekken, luchtverbruik; extra krachtmodel | Eigen SVG bij gegeven diameter | Gereed |
 | [Knikberekening](/calculators/buckling) | Alle doorsneden, inklemmingen, materialen, last en grensslankheid behouden | BucklingModes | Gereed |
