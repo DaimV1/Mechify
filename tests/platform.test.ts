@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { driveResult, ratioResult, forceResult } from "../src/lib/calculators/drive.ts";
-import { convert, findCategory, UNIT_CATEGORIES } from "../src/lib/calculators/units.ts";
+import { CATEGORIES, categoryById, convert, unitById } from "../src/lib/toolkit/units.ts";
 import { bendDeduction } from "../src/lib/calculators/bending.ts";
 import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { computeBeam } from "../src/lib/calculators/beam.ts";
@@ -33,17 +33,21 @@ test("Cylinder areas and explicit efficiency", () => {
     assert.throws(() => forceResult({ pressure: "6", diameter: "50", rod, efficiency: "90" }));
 });
 test("SI/imperial conversion fixtures", () => {
-  close(convert(1, findCategory("length"), "inch", "mm"), 25.4);
-  close(convert(1, findCategory("power"), "kw", "w"), 1000);
-  close(convert(-40, findCategory("temperature"), "c", "f"), -40);
-  close(convert(1, findCategory("pressure"), "bar", "pa"), 100000);
+  const conv = (catId: Parameters<typeof categoryById>[0], fromId: string, toId: string, v: number) => {
+    const cat = categoryById(catId);
+    return convert(v, unitById(cat, fromId), unitById(cat, toId));
+  };
+  close(conv("lengte", "in", "mm", 1), 25.4);
+  close(conv("vermogen", "kw", "w", 1), 1000);
+  close(conv("temperatuur", "c", "f", -40), -40);
+  close(conv("druk", "bar", "pa", 1), 100000);
 });
 test("Every converter pair roundtrips signed values", () => {
-  for (const c of UNIT_CATEGORIES)
+  for (const c of CATEGORIES)
     for (const a of c.units)
       for (const b of c.units)
         for (const v of [-40, 0, 1, 123.45])
-          close(convert(convert(v, c, a.id, b.id), c, b.id, a.id), v);
+          close(convert(convert(v, a, b), b, a), v);
 });
 test("180 degree bending is excluded; regular cases unchanged", () => {
   assert.ok(Number.isNaN(bendDeduction(180, 2, 2, 0.4)));

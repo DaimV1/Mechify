@@ -12,7 +12,7 @@ const BucklingCalc = lazy(() =>
   import("@/components/calculators/buckling-calc").then((m) => ({ default: m.BucklingCalc })),
 );
 const UnitsCalc = lazy(() =>
-  import("@/components/calculators/units-calc").then((m) => ({ default: m.UnitsCalc })),
+  import("@/components/toolkit/eenheden-calc").then((m) => ({ default: m.EenhedenCalc })),
 );
 const PneumaticCylinderCalc = lazy(() =>
   import("@/components/calculators/pneumatic-cylinder-calc").then((m) => ({

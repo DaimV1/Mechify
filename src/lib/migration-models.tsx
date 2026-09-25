@@ -29,12 +29,6 @@ export const EXTRA_MODELS: Record<
     note: "Selectie op duwen of trekken, met lastfactor en slagvolume. De oorspronkelijke selectie zonder marge blijft beschikbaar.",
     component: module(() => import("@/components/toolkit/cylinder-calc"), "CylinderCalc"),
   },
-  units: {
-    label: "Tweerichtingsconversie",
-    original: "Directe conversie",
-    note: "Conversie vanuit beide invoervelden, met de aanvullende eenheden uit de oorspronkelijke toolkit.",
-    component: module(() => import("@/components/toolkit/eenheden-calc"), "EenhedenCalc"),
-  },
 };
 export const SOURCE_KEYS: Record<string, string> = {
   "fit-tolerances": "passingen",

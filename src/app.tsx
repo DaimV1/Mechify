@@ -52,7 +52,7 @@ const LEGACY: Record<string, string> = {
   cilinder: "/calculators/pneumatic-cylinder?model=referentie",
   knikberekening: "/calculators/buckling",
   "doorbuiging-balk": "/calculators/beam-deflection",
-  eenheden: "/calculators/units?model=referentie",
+  eenheden: "/calculators/units",
   bronnen: "/cad/resources",
   macros: "/cad/macros",
   koppel: "/calculators/drive-power",
