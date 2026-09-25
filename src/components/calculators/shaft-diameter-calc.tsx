@@ -153,7 +153,9 @@ export function ShaftDiameterCalc() {
 
       <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.resultsSection}</h3>
       {dMin == null ? (
-        <p className="mt-5 text-sm text-muted">{t.fill}</p>
+        <p className="mt-5 text-sm text-muted" role="status">
+          {t.fill}
+        </p>
       ) : (
         <ResultGrid items={[{ label: t.resultDiameter, value: `${fmt(dMin)} mm` }]} />
       )}
@@ -173,6 +175,7 @@ export function ShaftDiameterCalc() {
             ]}
           />
           <p
+            role="status"
             className={`mt-3 text-sm font-medium ${
               checkStatus === "fail"
                 ? "text-danger"

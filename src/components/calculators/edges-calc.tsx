@@ -169,7 +169,9 @@ export function EdgesCalc() {
           </div>
 
           {!valid ? (
-            <p className="mt-5 text-sm text-muted">{t.fillValid}</p>
+            <p className="mt-5 text-sm text-muted" role="status">
+              {t.fillValid}
+            </p>
           ) : (
             <>
               <ResultGrid
@@ -184,7 +186,11 @@ export function EdgesCalc() {
                   ].filter(Boolean) as { label: string; value: string }[]
                 }
               />
-              {flat == null && <Note>{t.invalidLegs}</Note>}
+              {flat == null && (
+                <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+                  {t.invalidLegs}
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <CopyResult text={copy} />
                 <CopyLink />

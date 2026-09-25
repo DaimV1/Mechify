@@ -60,6 +60,7 @@ const T = {
     wrenchHex: "Sleutelmaat (zeskant)",
     wrenchSocket: "Sleutelmaat (inbus)",
     torque: "Aandraaimoment T",
+    invalidK: "Vul een moerfactor K groter dan 0 in om het aandraaimoment te berekenen.",
     torquePerSize: (k: string) => `Aandraaimoment per maat (K = ${k})`,
     thSize: "Maat",
     source: "Engineering ToolBox — ISO metric screw threads",
@@ -94,6 +95,7 @@ const T = {
     wrenchHex: "Wrench size (hex)",
     wrenchSocket: "Wrench size (hex socket)",
     torque: "Tightening torque T",
+    invalidK: "Enter a nut factor K greater than 0 to calculate tightening torque.",
     torquePerSize: (k: string) => `Tightening torque per size (K = ${k})`,
     thSize: "Size",
     source: "Engineering ToolBox — ISO metric screw threads",
@@ -209,6 +211,11 @@ export function FastenersCalc() {
             ].filter(Boolean) as { label: string; value: string }[]
           }
         />
+        {!torqueResult && (
+          <p className="mt-3 text-sm text-muted" role="status">
+            {t.invalidK}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />

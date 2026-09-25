@@ -286,7 +286,11 @@ export function Iso2768Calc() {
           </Field>
         </div>
 
-        {d != null && d < LINEAR_SIZE_MIN ? <Note>{t.belowMin(LINEAR_SIZE_MIN)}</Note> : null}
+        {d != null && d < LINEAR_SIZE_MIN ? (
+          <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
+            {t.belowMin(LINEAR_SIZE_MIN)}
+          </p>
+        ) : null}
 
         <ResultGrid
           items={[
