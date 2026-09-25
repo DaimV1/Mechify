@@ -20,6 +20,10 @@ const toolLinks: Record<string, string> = {
   "iso-2768": "/tools/iso-2768",
   edges: "/tools/edges",
   fasteners: "/tools/fasteners",
+  "motor-specification": "/calculators/motor-specification",
+  "beam-deflection": "/calculators/beam-deflection",
+  "fit-tolerances": "/tools/fit-tolerances",
+  "seeger-grooves": "/tools/seeger-grooves",
 };
 export function Topics() {
   const { locale } = useLocale();
