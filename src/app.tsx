@@ -9,6 +9,7 @@ import { Tables } from "@/routes/tables";
 import { Materials } from "@/routes/materials";
 import { About } from "@/routes/about";
 import { NotFound } from "@/routes/not-found";
+import { resolveLegacyRoute } from "@/lib/legacy-routes";
 
 export function App() {
   return (
@@ -18,7 +19,7 @@ export function App() {
       <Route path="/topics" element={<Topics />} />
       <Route path="/topics/:slug" element={<TopicArticle />} />
       <Route path="/cad-workflows" element={<CadWorkflows />} />
-      <Route path="/over" element={<Navigate to="/about" replace />} />
+      <Route path="/over" element={<LegacyRedirect />} />
       <Route path="/toolkit/:slug" element={<LegacyToolRedirect />} />
 
       <Route path="/tools" element={<SectionOverview section="tools" />} />
@@ -39,41 +40,15 @@ export function App() {
   );
 }
 
-const LEGACY: Record<string, string> = {
-  passingen: "/tools/fit-tolerances",
-  "iso-2768": "/tools/iso-2768",
-  "spiebaan-toleranties": "/tools/keyways",
-  lagerpassingen: "/tools/bearing-fits",
-  "seegerring-groef": "/tools/seeger-grooves",
-  bevestigers: "/tools/fasteners?model=referentie",
-  "o-ringgroef": "/tools/o-ring-grooves?model=referentie",
-  kanten: "/tools/edges",
-  motorspecificatie: "/calculators/motor-specification?model=referentie",
-  cilinder: "/calculators/pneumatic-cylinder?model=referentie",
-  knikberekening: "/calculators/buckling",
-  "doorbuiging-balk": "/calculators/beam-deflection",
-  eenheden: "/calculators/units",
-  bronnen: "/cad/resources",
-  macros: "/cad/macros",
-  koppel: "/calculators/drive-power",
-  overbrenging: "/calculators/transmission",
-  converter: "/calculators/units",
-};
 function LegacyToolRedirect() {
   const location = useLocation();
-  const slug = location.pathname.split("/").pop() || "";
-  const target = LEGACY[slug];
+  const target = resolveLegacyRoute(location.pathname, location.search);
   if (!target) return <NotFound />;
-  const [base, defaults] = target.split("?");
-  const params = new URLSearchParams(defaults);
-  new URLSearchParams(location.search).forEach((v, k) => params.set(k, v));
-  if (slug === "iso-2768") {
-    params.set("d", params.get("len") || "42");
-    params.set("leg", params.get("len") || "42");
-    params.set("gl", params.get("len") || "42");
-    params.set("lc", params.get("linear") || "m");
-    params.set("gc", params.get("form") || "K");
-    for (const k of ["len", "linear", "form"]) params.delete(k);
-  }
-  return <Navigate to={base + (params.size ? "?" + params : "")} replace />;
+  return <Navigate to={target} replace />;
+}
+
+function LegacyRedirect() {
+  const location = useLocation();
+  const target = resolveLegacyRoute(location.pathname, location.search);
+  return target ? <Navigate to={target} replace /> : <NotFound />;
 }

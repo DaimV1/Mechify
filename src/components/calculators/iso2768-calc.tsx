@@ -39,6 +39,7 @@ import {
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+import { normalizeIso2768LegacyParams } from "@/lib/legacy-routes";
 
 /**
  * M-01 (audit, 17 sept 2026): ISO 2768-1 (dimensional, Tables 1-3) and
@@ -189,16 +190,19 @@ export function Iso2768Calc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
+  const normalizedSearch = normalizeIso2768LegacyParams(search);
   const [linearClass, setLinearClass] = useState<LinearClass>(
-    (search.get("lc") as LinearClass) ?? "m",
+    (normalizedSearch.get("lc") as LinearClass) ?? "m",
   );
-  const [size, setSize] = useState(search.get("d") ?? "50");
-  const [legLength, setLegLength] = useState(search.get("leg") ?? "50");
-  const [geoClass, setGeoClass] = useState<GeoClass>((search.get("gc") as GeoClass) ?? "K");
-  const [geoLength, setGeoLength] = useState(search.get("gl") ?? "100");
+  const [size, setSize] = useState(normalizedSearch.get("d") ?? "50");
+  const [legLength, setLegLength] = useState(normalizedSearch.get("leg") ?? "50");
+  const [geoClass, setGeoClass] = useState<GeoClass>(
+    (normalizedSearch.get("gc") as GeoClass) ?? "K",
+  );
+  const [geoLength, setGeoLength] = useState(normalizedSearch.get("gl") ?? "100");
 
   useEffect(() => {
-    const next = new URLSearchParams(search);
+    const next = normalizeIso2768LegacyParams(search);
     const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
     next.set("lc", linearClass);
     set("d", size);

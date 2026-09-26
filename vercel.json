@@ -1,4 +1,65 @@
 {
+  "redirects": [
+    { "source": "/over", "destination": "/about", "permanent": true },
+    { "source": "/toolkit/passingen", "destination": "/tools/fit-tolerances", "permanent": true },
+    { "source": "/toolkit/iso-2768", "destination": "/tools/iso-2768", "permanent": true },
+    {
+      "source": "/toolkit/spiebaan-toleranties",
+      "destination": "/tools/keyways",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/lagerpassingen",
+      "destination": "/tools/bearing-fits",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/seegerring-groef",
+      "destination": "/tools/seeger-grooves",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/bevestigers",
+      "destination": "/tools/fasteners?model=referentie",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/o-ringgroef",
+      "destination": "/tools/o-ring-grooves?model=referentie",
+      "permanent": true
+    },
+    { "source": "/toolkit/kanten", "destination": "/tools/edges", "permanent": true },
+    {
+      "source": "/toolkit/motorspecificatie",
+      "destination": "/calculators/motor-specification?model=referentie",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/cilinder",
+      "destination": "/calculators/pneumatic-cylinder?model=referentie",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/knikberekening",
+      "destination": "/calculators/buckling",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/doorbuiging-balk",
+      "destination": "/calculators/beam-deflection",
+      "permanent": true
+    },
+    { "source": "/toolkit/eenheden", "destination": "/calculators/units", "permanent": true },
+    { "source": "/toolkit/bronnen", "destination": "/cad/resources", "permanent": true },
+    { "source": "/toolkit/macros", "destination": "/cad/macros", "permanent": true },
+    { "source": "/toolkit/koppel", "destination": "/calculators/drive-power", "permanent": true },
+    {
+      "source": "/toolkit/overbrenging",
+      "destination": "/calculators/transmission",
+      "permanent": true
+    },
+    { "source": "/toolkit/converter", "destination": "/calculators/units", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/tools/:slug",
@@ -19,14 +80,6 @@
     {
       "source": "/toolkit",
       "destination": "/toolkit.html"
-    },
-    {
-      "source": "/toolkit/:slug",
-      "destination": "/toolkit.html"
-    },
-    {
-      "source": "/over",
-      "destination": "/about.html"
     },
     {
       "source": "/topics",
