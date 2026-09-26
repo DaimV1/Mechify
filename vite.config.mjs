@@ -1,4 +1,4 @@
-import { ARTICLE_AUTHOR, ARTICLE_REVIEWED_DATE_ISO, articles } from "./src/lib/articles.ts";
+import { ARTICLE_AUTHOR, articles } from "./src/lib/articles.ts";
 import { defineConfig } from "vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -107,7 +107,7 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
     type = "TechArticle";
     extra = {
       author: { "@type": "Person", name: ARTICLE_AUTHOR },
-      dateModified: ARTICLE_REVIEWED_DATE_ISO,
+      dateModified: article.reviewedDateIso,
       articleSection: article.category,
     };
     breadcrumbs = [
