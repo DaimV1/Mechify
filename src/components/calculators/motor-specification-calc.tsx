@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   APPLICATIONS,
   computeMotor,
@@ -25,12 +25,13 @@ import {
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
+import { driveQueryNumber } from "@/lib/calculators/drive";
 
 const MOTOR_META: EngineeringSourceMeta = {
   basisType: "physics",
   reference: "F = m·g·(sinθ + μ·cosθ) / μ·m·g / m·g; steady-state operating point",
   status: "current",
-  checkedDate: "2026-09-17",
+  checkedDate: "2026-09-27",
   assumptions: {
     nl: "Alleen eerste schatting, stationair werkpunt: geen acceleratie/inertie, bedrijfscyclus, start-/piekkoppel of thermische beperkingen. Geen vervanging van DIN 22101/FEM-berekeningen voor bandtransporteurs of een hijswerktuigberekening volgens EN 13001/ISO 4301 bij kritieke installaties.",
     en: "First-pass, steady-state sizing only: no acceleration/inertia, duty cycle, start/peak torque or thermal constraints. Not a substitute for DIN 22101/FEM belt-conveyor calculations or a hoist calculation per EN 13001/ISO 4301 on critical installations.",
@@ -54,7 +55,7 @@ const T = {
     resultForce: "Trekkracht F",
     resultRpm: "Toerental n",
     resultTorque: "Koppel T",
-    resultShaftPower: "Asvermogen P",
+    resultShaftPower: "Benodigd motorasvermogen P_motor",
     resultDesignPower: "Ontwerpvermogen (met marge)",
     resultIec: "IEC-vermogen",
     outOfRange: "> 355 kW — buiten reeks",
@@ -75,11 +76,14 @@ const T = {
       [
         `${appLabel}: m=${mass} kg, v=${speed} m/s, D=${diameter} mm`,
         `F=${fmtRound(result.force)} N, n=${fmtRound(result.rpm, 1)} rpm, T=${fmtRound(result.torque, 1)} Nm`,
-        `P_as=${fmtKw(result.shaftPowerW)} kW, P_ontwerp=${fmtKw(result.designPowerW)} kW`,
+        `P_motor=${fmtKw(result.shaftPowerW)} kW (na η), P_ontwerp=${fmtKw(result.designPowerW)} kW`,
         result.iecPower != null
           ? `IEC-vermogen: ${result.iecPower} kW`
           : "Geen IEC-stap tot 355 kW",
       ].join("\n"),
+    shaftLink: "Controleer as op berekend koppel",
+    shaftCaveat:
+      "Draagt het aangedreven asdeel dit koppel? Neem het over voor een eerste controle op zuivere torsie en kies daar zelf een onderbouwde toelaatbare schuifspanning voor materiaal en toepassing; piekbelasting, buiging, vermoeiing en spiebanen blijven buiten die controle.",
   },
   en: {
     heading: "Motor sizing",
@@ -97,7 +101,7 @@ const T = {
     resultForce: "Pull force F",
     resultRpm: "Speed n",
     resultTorque: "Torque T",
-    resultShaftPower: "Shaft power P",
+    resultShaftPower: "Required motor-shaft power P_motor",
     resultDesignPower: "Design power (with margin)",
     resultIec: "IEC power",
     outOfRange: "> 355 kW — outside range",
@@ -118,9 +122,12 @@ const T = {
       [
         `${appLabel}: m=${mass} kg, v=${speed} m/s, D=${diameter} mm`,
         `F=${fmtRound(result.force)} N, n=${fmtRound(result.rpm, 1)} rpm, T=${fmtRound(result.torque, 1)} Nm`,
-        `P_shaft=${fmtKw(result.shaftPowerW)} kW, P_design=${fmtKw(result.designPowerW)} kW`,
+        `P_motor=${fmtKw(result.shaftPowerW)} kW (after η), P_design=${fmtKw(result.designPowerW)} kW`,
         result.iecPower != null ? `IEC power: ${result.iecPower} kW` : "No IEC step up to 355 kW",
       ].join("\n"),
+    shaftLink: "Check shaft at calculated torque",
+    shaftCaveat:
+      "Does the driven shaft section carry this torque? Pass it into a first pure-torsion check and choose a justified allowable shear stress there for the material and application; peak load, bending, fatigue and keyways remain outside that check.",
   },
 };
 
@@ -243,6 +250,17 @@ export function MotorSpecificationCalc() {
               <CopyResult text={copy} />
               <CopyLink />
             </div>
+            {result.torque > 0 ? (
+              <div className="mt-5 rounded-md border border-border-strong bg-bg p-4">
+                <p className="text-sm leading-relaxed text-muted">{t.shaftCaveat}</p>
+                <Link
+                  className="mt-3 inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 text-sm font-medium text-ink hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  to={`/calculators/shaft-diameter?t=${encodeURIComponent(driveQueryNumber(result.torque))}&tau=`}
+                >
+                  {t.shaftLink} →
+                </Link>
+              </div>
+            ) : null}
           </>
         ) : eta > 0 && eta <= 1 ? (
           <p className="mt-5 text-sm text-muted" role="status">

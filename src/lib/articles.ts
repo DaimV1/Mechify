@@ -986,8 +986,8 @@ export const articles = [
   },
   {
     slug: "motor-kiezen-van-last-naar-ieckw",
-    reviewedDate: { nl: "24 sept 2026", en: "24 Sept 2026" },
-    reviewedDateIso: "2026-09-24",
+    reviewedDate: { nl: "27 sept 2026", en: "27 Sept 2026" },
+    reviewedDateIso: "2026-09-27",
     basis: {
       nl: "Vereenvoudigd mechanica-model (F, n, T, P) voor een eerste dimensionering, fysica; geselecteerde voorkeursvermogens als catalogushulp, geen universele beschikbaarheidsnorm. Geen volledige DIN 22101/FEM-methode voor bandtransporteurs en geen elektrisch/thermisch motormodel.",
       en: "Simplified mechanics model (F, n, T, P) for a first-pass sizing, physics; selected preferred power ratings as a catalogue aid, not a universal availability standard. No full DIN 22101/FEM method for belt conveyors and no electrical/thermal motor model.",
@@ -1011,22 +1011,22 @@ export const articles = [
       [
         { nl: "Vier stappen van toepassing naar vermogen", en: "Four steps from application to power" },
         {
-          nl: "De benodigde kracht F volgt uit het type toepassing: bij hijsen alleen het gewicht (F = m·g), bij een rollenbaan of band alleen wrijving (F = μ·m·g), bij een hellingbaan zwaartekracht én wrijving samen (F = m·g·(sinθ + μ·cosθ)). Daarna volgt het toerental uit de omtreksnelheid en wieldiameter (n = v·60/(π·D)), het koppel uit T = F·D/2, en het asvermogen uit P = F·v/η. Dit is een vereenvoudigd model voor een eerste dimensionering — geen volledige DIN 22101/FEM-berekening voor bandtransporteurs, die ook versnelling en meerdere deelweerstanden meeneemt.",
-          en: "The required force F follows from the application type: for hoisting, just the weight (F = m·g); for a roller or belt conveyor, just friction (F = μ·m·g); for an incline, gravity and friction together (F = m·g·(sinθ + μ·cosθ)). From there, speed follows from the surface speed and wheel diameter (n = v·60/(π·D)), torque from T = F·D/2, and shaft power from P = F·v/η. This is a simplified model for a first-pass sizing — not a full DIN 22101/FEM calculation for belt conveyors, which also accounts for acceleration and multiple partial resistances.",
+          nl: "De benodigde kracht F volgt uit het type toepassing: bij hijsen alleen het gewicht (F = m·g), bij een rollenbaan of band alleen wrijving (F = μ·m·g), bij een hellingbaan zwaartekracht én wrijving samen (F = m·g·(sinθ + μ·cosθ)). Daarna volgt het toerental uit de omtreksnelheid en wieldiameter (n = v·60/(π·D)) en het koppel aan de trommel uit T = F·D/2. Het lastvermogen is F·v; het benodigde motorasvermogen na het opgegeven aandrijfrendement is P_motor = F·v/η. Dit is een vereenvoudigd model voor een eerste dimensionering — geen volledige DIN 22101/FEM-berekening voor bandtransporteurs, die ook versnelling en meerdere deelweerstanden meeneemt.",
+          en: "The required force F follows from the application type: for hoisting, just the weight (F = m·g); for a roller or belt conveyor, just friction (F = μ·m·g); for an incline, gravity and friction together (F = m·g·(sinθ + μ·cosθ)). From there, speed follows from the surface speed and wheel diameter (n = v·60/(π·D)), and torque at the drum from T = F·D/2. Load power is F·v; required motor-shaft power after the entered drivetrain efficiency is P_motor = F·v/η. This is a simplified model for a first-pass sizing — not a full DIN 22101/FEM calculation for belt conveyors, which also accounts for acceleration and multiple partial resistances.",
         },
       ],
       [
         { nl: "Rekenvoorbeeld: hijsen, 50 kg bij 0,2 m/s", en: "Worked example: hoisting, 50 kg at 0.2 m/s" },
         {
-          nl: "De kracht is F = 50 × 9,81 = 490,5 N. Met een trommel van Ø200 mm volgt n ≈ 19,1 omw/min en T = 490,5 × 0,1 = 49,05 N·m. Het asvermogen is P = 490,5 × 0,2 / 0,85 ≈ 115,4 W. Met een veiligheidsfactor van 1,1 wordt het ontwerpvermogen ≈ 127,0 W — en de geselecteerde voorkeursreeks rondt dat af naar 0,18 kW. Dit is een voorlopige vermogensselectie, geen vrijgave van een hijsaandrijving.",
-          en: "The force is F = 50 × 9.81 = 490.5 N. With a Ø200 mm drum, n ≈ 19.1 rpm and T = 490.5 × 0.1 = 49.05 N·m follow. Shaft power is P = 490.5 × 0.2 / 0.85 ≈ 115.4 W. With a 1.1 safety factor, the design power becomes ≈ 127.0 W — and the selected preferred series rounds that up to 0.18 kW. This is a preliminary power selection, not approval of a hoist drive.",
+          nl: "De kracht is F = 50 × 9,81 = 490,5 N. Met een trommel van Ø200 mm volgt aan de trommel n ≈ 19,1 omw/min en T = 490,5 × 0,1 = 49,05 N·m. Het lastvermogen is F·v ≈ 98,1 W; na het opgegeven aandrijfrendement van 85% is het benodigde motorasvermogen 98,1/0,85 ≈ 115,4 W. Met een veiligheidsfactor van 1,1 wordt het ontwerpvermogen ≈ 127,0 W — en de geselecteerde voorkeursreeks rondt dat af naar 0,18 kW. Dit is een voorlopige vermogensselectie, geen vrijgave van een hijsaandrijving.",
+          en: "The force is F = 50 × 9.81 = 490.5 N. With a Ø200 mm drum, n ≈ 19.1 rpm and T = 490.5 × 0.1 = 49.05 N·m follow at the drum. The load power is F·v ≈ 98.1 W; after the entered 85% drivetrain efficiency, the required motor-shaft power is 98.1/0.85 ≈ 115.4 W. With a 1.1 safety factor, the design power becomes ≈ 127.0 W — and the selected preferred series rounds that up to 0.18 kW. This is a preliminary power selection, not approval of a hoist drive.",
         },
       ],
       [
         { nl: "Twee marges, geen dubbele veiligheid", en: "Two margins, not double safety" },
         {
-          nl: "De gekozen vermogensfactor (hier 1,1) is slechts een rekenmarge; hij bewijst niet dat de motor kan starten of versnellen. Afronden naar 0,18 kW volgt uit de geselecteerde voorkeurslijst, niet uit een universele beperking: andere vermogens kunnen bij fabrikanten beschikbaar zijn. Samen geeft dat in dit voorbeeld 0,18/0,115 ≈ 57% marge boven het kale asvermogen — reken dat niet dubbel mee als extra veiligheid bovenop de 1,1-factor.",
-          en: "The chosen power factor (here 1.1) is only an arithmetic allowance; it does not establish starting or acceleration capability. Rounding to 0.18 kW follows the selected preferred list, not a universal constraint: manufacturers may offer other ratings. Together that gives about 0.18/0.115 ≈ 57% margin above the bare shaft power in this example — don't count that twice as extra safety on top of the 1.1 factor.",
+          nl: "De gekozen vermogensfactor (hier 1,1) is slechts een rekenmarge; hij bewijst niet dat de motor kan starten of versnellen. Afronden naar 0,18 kW volgt uit de geselecteerde voorkeurslijst, niet uit een universele beperking: andere vermogens kunnen bij fabrikanten beschikbaar zijn. Samen geeft dat in dit voorbeeld 0,18/0,115 ≈ 57% marge boven het benodigde motorasvermogen vóór de 1,1-factor — reken dat niet dubbel mee als extra veiligheid bovenop die factor.",
+          en: "The chosen power factor (here 1.1) is only an arithmetic allowance; it does not establish starting or acceleration capability. Rounding to 0.18 kW follows the selected preferred list, not a universal constraint: manufacturers may offer other ratings. Together that gives about 0.18/0.115 ≈ 57% margin above the required motor-shaft power before the 1.1 factor — don't count that twice as extra safety on top of that factor.",
         },
       ],
       [

@@ -43,12 +43,13 @@ export type MotorResult = {
   force: number;
   rpm: number;
   torque: number;
+  /** Required motor-shaft power after the entered drivetrain efficiency (legacy property name). */
   shaftPowerW: number;
   designPowerW: number;
   iecPower: number | null;
 };
 
-/** n (rpm) = v·60 / (π·D), met D in meter. T (Nm) = F · D/2. P = F·v / η. */
+/** n (rpm) = v·60 / (π·D), with D in metres. T (Nm) = F·D/2 at the drum. P_motor = F·v/η. */
 export function computeMotor({
   force,
   speedMs,

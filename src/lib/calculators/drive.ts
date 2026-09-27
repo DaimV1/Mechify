@@ -1,4 +1,6 @@
 export type Values = Record<string, string>;
+export type DriveTarget = "torque" | "power" | "speed";
+export type DriveOperatingPoint = { powerKw: number; speedRpm: number; torqueNm: number };
 export function value(raw: string, label: string, min = 0, max = 1e12) {
   if (!raw?.trim()) throw Error(`Vul ${label} in.`);
   const n = Number(raw.replace(",", "."));
@@ -19,6 +21,26 @@ export function driveResult(mode: string, v: Values) {
     return (k * value(v.power, "vermogen")) / t;
   }
   return (value(v.torque, "koppel") * value(v.speed, "toerental")) / k;
+}
+
+/**
+ * Resolve the two entered quantities and the calculated quantity into one
+ * mechanically consistent, steady-state shaft operating point. This does not
+ * add a service factor or infer motor input power.
+ */
+export function driveOperatingPoint(target: DriveTarget, v: Values): DriveOperatingPoint {
+  const calculated = driveResult(target, v);
+  return {
+    powerKw: target === "power" ? calculated : value(v.power, "vermogen"),
+    speedRpm: target === "speed" ? calculated : value(v.speed, "toerental"),
+    torqueNm: target === "torque" ? calculated : value(v.torque, "koppel"),
+  };
+}
+
+/** Stable, readable query-string representation without binary floating-point tails. */
+export function driveQueryNumber(n: number): string {
+  if (!Number.isFinite(n)) throw new Error("Query value must be finite.");
+  return Number(n.toPrecision(12)).toString();
 }
 export function ratioResult(v: Values) {
   const i = value(v.ratio, "verhouding");

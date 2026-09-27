@@ -1,6 +1,15 @@
 import { CalculationVisual } from "./calculation-visual";
-import { useState } from "react";
-import { driveResult, ratioResult, forceResult, type Values } from "@/lib/calculators/drive";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  driveOperatingPoint,
+  driveQueryNumber,
+  driveResult,
+  ratioResult,
+  forceResult,
+  type DriveTarget,
+  type Values,
+} from "@/lib/calculators/drive";
 import { tx, useLocale, type Locale } from "@/lib/i18n/locale";
 
 type Bilingual = Record<Locale, string>;
@@ -49,11 +58,34 @@ export function QuickDrive({
   kind?: string;
 }) {
   const { locale } = useLocale();
+  const [search, setSearch] = useSearchParams();
   const fields = definitions[kind];
-  const initial = () => Object.fromEntries(Object.entries(fields).map(([k, f]) => [k, f[2]]));
+  const initial = () =>
+    Object.fromEntries(
+      Object.entries(fields).map(([k, f]) => [
+        k,
+        !compact && kind === "drive" ? (search.get(k === "speed" ? "n" : k[0]) ?? f[2]) : f[2],
+      ]),
+    );
   const [v, setV] = useState<Values>(initial);
-  const [target, setTarget] = useState("torque");
+  const initialTarget = search.get("mode");
+  const [target, setTarget] = useState<DriveTarget>(
+    !compact && kind === "drive" && ["torque", "power", "speed"].includes(initialTarget ?? "")
+      ? (initialTarget as DriveTarget)
+      : "torque",
+  );
   const [status, setStatus] = useState("");
+  useEffect(() => {
+    if (compact || kind !== "drive") return;
+    const next = new URLSearchParams(search);
+    next.set("mode", target);
+    next.set("p", v.power);
+    next.set("n", v.speed);
+    next.set("t", v.torque);
+    setSearch(next, { replace: true });
+    // Only calculation state drives the URL; reacting to `search` would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compact, kind, target, v.power, v.speed, v.torque]);
   let error = "";
   let results: [string, number, string][] = [];
   try {
@@ -90,6 +122,14 @@ export function QuickDrive({
   } catch (e) {
     error = (e as Error).message;
   }
+  let operatingPoint: ReturnType<typeof driveOperatingPoint> | null = null;
+  if (kind === "drive" && !error) {
+    try {
+      operatingPoint = driveOperatingPoint(target, v);
+    } catch {
+      operatingPoint = null;
+    }
+  }
   const formula =
     kind === "drive"
       ? "P = T · 2πn / 60.000"
@@ -110,7 +150,7 @@ export function QuickDrive({
               ["torque", tx(locale, "Koppel", "Torque")],
               ["power", tx(locale, "Vermogen", "Power")],
               ["speed", tx(locale, "Toerental", "Speed")],
-            ] as [string, string][]
+            ] as [DriveTarget, string][]
           ).map(([id, label]) => (
             <button
               key={id}
@@ -133,6 +173,7 @@ export function QuickDrive({
               {label[locale]}
               <div className="input-unit">
                 <input
+                  id={kind === "drive" ? `drive-${key}` : undefined}
                   inputMode="decimal"
                   value={v[key]}
                   aria-invalid={!!error}
@@ -163,6 +204,41 @@ export function QuickDrive({
         </div>
       )}
       {!compact && !error ? <CalculationVisual kind={kind} values={v} /> : null}
+      {!compact && kind === "drive" && operatingPoint && operatingPoint.torqueNm > 0 ? (
+        <section className="mt-5 rounded-md border border-border-strong bg-bg p-4">
+          <h3 className="font-display text-base font-semibold text-ink">
+            {tx(locale, "Volgende ontwerpstap", "Next design step")}
+          </h3>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
+            {tx(
+              locale,
+              "Gebruik het berekende stationaire askoppel als invoer voor een eerste torsiecontrole. Kies daar zelf een onderbouwde toelaatbare schuifspanning voor het materiaal en de toepassing. De as-tool controleert geen buiging, vermoeiing, spiebanen of piekbelasting.",
+              "Use the calculated steady-state shaft torque as input for a first torsion check. There, choose a justified allowable shear stress for the material and application. The shaft tool does not check bending, fatigue, keyways or peak load.",
+            )}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              className="inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 text-sm font-medium text-ink hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              to={`/calculators/shaft-diameter?t=${encodeURIComponent(driveQueryNumber(operatingPoint.torqueNm))}&tau=`}
+            >
+              {tx(locale, "Controleer asdiameter", "Check shaft diameter")} →
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 text-sm font-medium text-ink hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              to="/calculators/motor-specification"
+            >
+              {tx(locale, "Dimensioneer vanuit toepassing", "Size from application")} →
+            </Link>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-muted">
+            {tx(
+              locale,
+              "Motordimensionering opent zonder overgenomen waarden: daarvoor zijn massa, lineaire snelheid en trommeldiameter nodig; P, n en T alleen bepalen geen motorselectie.",
+              "Motor sizing opens without transferred values: it needs mass, linear speed and drum diameter; P, n and T alone do not determine a motor selection.",
+            )}
+          </p>
+        </section>
+      ) : null}
       <div className="calc-actions">
         <button
           onClick={() => {
@@ -202,6 +278,26 @@ export function QuickDrive({
         >
           {tx(locale, "Kopieer resultaat", "Copy result")} ⧉
         </button>
+        {!compact && kind === "drive" ? (
+          <button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                setStatus(tx(locale, "Link gekopieerd", "Link copied"));
+              } catch {
+                setStatus(
+                  tx(
+                    locale,
+                    "Kopiëren niet toegestaan. Kopieer de URL handmatig uit de adresbalk.",
+                    "Copying isn't allowed. Copy the URL manually from the address bar.",
+                  ),
+                );
+              }
+            }}
+          >
+            {tx(locale, "Kopieer link", "Copy link")} ⧉
+          </button>
+        ) : null}
         <span className="copy-status" role="status">
           {status}
         </span>

@@ -95,14 +95,16 @@ export function ShaftDiameterCalc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [torque, setTorque] = useState(search.get("t") ?? "50");
-  const [tauAllow, setTauAllow] = useState(search.get("tau") ?? "40");
+  const [tauAllow, setTauAllow] = useState(search.has("tau") ? (search.get("tau") ?? "") : "40");
   const [dCheck, setDCheck] = useState(search.get("d") ?? "");
 
   useEffect(() => {
     const next = new URLSearchParams(search);
     const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
     set("t", torque);
-    set("tau", tauAllow);
+    // An explicitly empty tau is meaningful for cross-tool handoffs: torque is
+    // known, but allowable stress must still be selected for the material.
+    next.set("tau", tauAllow);
     set("d", dCheck);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
