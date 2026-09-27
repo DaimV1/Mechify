@@ -226,53 +226,53 @@
   "assets": [
     {
       "file": "inventor-batch-pdf.bas",
-      "sha256": "306f037ef95c1d43c900e03f01f2bac0ab130e6e2a834a122240ef24e444111d",
-      "identicalToOriginal": true
+      "originalSha256": "306f037ef95c1d43c900e03f01f2bac0ab130e6e2a834a122240ef24e444111d",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "inventor-export-step.bas",
-      "sha256": "a4f121619db031e01c05dc990b5bd02347cf2a820b1554efc6b05f4d5abf3908",
-      "identicalToOriginal": true
+      "originalSha256": "a4f121619db031e01c05dc990b5bd02347cf2a820b1554efc6b05f4d5abf3908",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "inventor-flat-pattern-dxf.bas",
-      "sha256": "7f5f20d96aee1e8535cc2d2be217d0682783c5864425b7d808d9335a451d528f",
-      "identicalToOriginal": true
+      "originalSha256": "7f5f20d96aee1e8535cc2d2be217d0682783c5864425b7d808d9335a451d528f",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "inventor-save-all.bas",
-      "sha256": "938208670afd799502cdcf8704ed2afd1770daff6c762cdd2baed32cd3d89d27",
-      "identicalToOriginal": true
+      "originalSha256": "938208670afd799502cdcf8704ed2afd1770daff6c762cdd2baed32cd3d89d27",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "inventor-show-iproperties.bas",
-      "sha256": "e4e1fdc25a2977691feab6d40ad1195101bf1c87d62ab2a45b1665aaa30ec2ff",
-      "identicalToOriginal": true
+      "originalSha256": "e4e1fdc25a2977691feab6d40ad1195101bf1c87d62ab2a45b1665aaa30ec2ff",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "solidworks-batch-pdf.bas",
-      "sha256": "2005782d3624cb64204cff0cbd2c96b6af58eed83d76fea621b4644211836b7d",
-      "identicalToOriginal": true
+      "originalSha256": "2005782d3624cb64204cff0cbd2c96b6af58eed83d76fea621b4644211836b7d",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "solidworks-export-step.bas",
-      "sha256": "1437e6f8ca117d173d5b820ffdd66aa012eed5d4acf02aaa33d06a20283c7147",
-      "identicalToOriginal": true
+      "originalSha256": "1437e6f8ca117d173d5b820ffdd66aa012eed5d4acf02aaa33d06a20283c7147",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "solidworks-flat-pattern-dxf.bas",
-      "sha256": "c56e5f0cd1b4dd8b54ad86cad8f0d2a5c82288485956529909f13adb8476e45a",
-      "identicalToOriginal": true
+      "originalSha256": "c56e5f0cd1b4dd8b54ad86cad8f0d2a5c82288485956529909f13adb8476e45a",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "solidworks-save-all.bas",
-      "sha256": "e753893d386e511d8a6322d2f9a2d4193a8a469f8d7a067031bdfc6c5ddd5d73",
-      "identicalToOriginal": true
+      "originalSha256": "e753893d386e511d8a6322d2f9a2d4193a8a469f8d7a067031bdfc6c5ddd5d73",
+      "currentFileMatchesOriginal": false
     },
     {
       "file": "solidworks-show-properties.bas",
-      "sha256": "d682c60ab34abe0e2cc7f0645ea3e08d8d0840d592d63459b3ebb77eae9bbd7b",
-      "identicalToOriginal": true
+      "originalSha256": "d682c60ab34abe0e2cc7f0645ea3e08d8d0840d592d63459b3ebb77eae9bbd7b",
+      "currentFileMatchesOriginal": false
     }
   ]
 }

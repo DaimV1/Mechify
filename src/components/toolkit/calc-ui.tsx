@@ -140,13 +140,14 @@ export function ResultGrid({ items }: { items: { label: ReactNode; value: string
   );
 }
 
-export function CopyResult({ text }: { text: string }) {
+export function CopyResult({ text, label }: { text: string; label?: string }) {
   const [done, setDone] = useState(false);
   return (
     <Button
       type="button"
       variant="secondary"
       className="mt-5 print:hidden"
+      aria-label={label}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(text);

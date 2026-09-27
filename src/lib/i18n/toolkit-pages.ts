@@ -703,7 +703,7 @@ const pages = {
       title: "Macro-bibliotheek.",
       accent: "bibliotheek.",
       crumb: "Macro-bibliotheek",
-      lede: "Downloadbare VBA-macro's voor SolidWorks 2024 en Inventor 2024. Basis-hulpmiddelen: STEP-export, batch opslaan, eigenschappen tonen. Geen productiecode — test eerst op een kopie.",
+      lede: "Downloadbare VBA-macro's met SolidWorks 2024 en Inventor 2024 als gedocumenteerde doelomgeving. De broncode is statisch beoordeeld, maar niet in CAD uitgevoerd. Geen productiecode — test eerst op een kopie.",
       faq: [
         {
           q: "Waarom .bas-bestanden?",
@@ -727,7 +727,7 @@ const pages = {
       title: "Macro library.",
       accent: "library.",
       crumb: "Macro library",
-      lede: "Downloadable VBA macros for SolidWorks 2024 and Inventor 2024. Basic utilities: STEP export, batch save, show properties. Not production code — test on a copy first.",
+      lede: "Downloadable VBA macros with SolidWorks 2024 and Inventor 2024 as documented target environments. Source code was statically reviewed, but not executed in CAD. Not production code — test on a copy first.",
       faq: [
         {
           q: "Why .bas files?",

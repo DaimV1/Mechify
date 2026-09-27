@@ -24,7 +24,7 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 | [CAD-bibliotheken](/cad/resources) | Bestaande links plus originele broncategorieën | Geen bronvisual | Gereed |
 | [Macro-bibliotheek](/cad/macros) | 3 bestaande codevoorbeelden en 10 originele .bas-downloads | Geen bronvisual | Gereed |
 
-De exacte state-initialisatie en URL-sleutels per Mechify-tool staan in migration-manifest.json. De oorspronkelijke componenten en berekeningsmodules blijven beschikbaar. Kopiëren, deelbare rekeninvoer en diameteropslag zijn behouden. Zoekfilters en favorieten zijn toegevoegd. Alle 10 macrobestanden zijn byte-identiek aan de bron; SHA-256-controles staan in het manifest.
+De exacte state-initialisatie en URL-sleutels per Mechify-tool staan in migration-manifest.json. De oorspronkelijke componenten en berekeningsmodules blijven beschikbaar. Kopiëren, deelbare rekeninvoer en diameteropslag zijn behouden. Zoekfilters en favorieten zijn toegevoegd. De oorspronkelijke SHA-256-controles van de 10 gemigreerde macrobestanden blijven als historische herkomst in het migratiemanifest staan. De macro's zijn sindsdien beoordeeld en aangepast; het actuele bestandsoverzicht, de reviewcyclus, API-bronnen en beperkingen staan in `public/macros/manifest.json`.
 
 ## Technische betekenis
 
@@ -59,4 +59,4 @@ Balk: de bestaande uitkomst is doorbuiging onder de last of aan de tip. Het aanv
 
 ## Grenzen
 
-Macrodownloads en hun inhoud zijn gecontroleerd; uitvoering binnen SolidWorks/Inventor is niet getest, omdat die CAD-applicaties hier niet beschikbaar zijn. Er wordt geen directe CAD-koppeling aangeboden. Overgenomen normtabellen zijn referentiedata; dit is geen certificering of onafhankelijke volledige normaudit. De nieuwe artikelen en algemene navigatie zijn Nederlands; de oorspronkelijke NL/EN-rekenhulp blijft via de taalkeuze beschikbaar.
+Macrodownloads ondergaan handmatige bronreview en geautomatiseerde statische controles; compilatie en uitvoering binnen SolidWorks/Inventor zijn niet getest, omdat die CAD-applicaties hier niet beschikbaar zijn. Er wordt geen directe CAD-koppeling aangeboden. Overgenomen normtabellen zijn referentiedata; dit is geen certificering of onafhankelijke volledige normaudit. De nieuwe artikelen en algemene navigatie zijn Nederlands; de oorspronkelijke NL/EN-rekenhulp blijft via de taalkeuze beschikbaar.
