@@ -49,6 +49,7 @@ import {
   shaftSafetyStatus,
   shaftTorsionStress,
 } from "../src/lib/calculators/shaft.ts";
+import { driveOperatingPoint, driveQueryNumber } from "../src/lib/calculators/drive.ts";
 import {
   CLEARANCE_HOLES,
   computeTorque,
@@ -710,6 +711,36 @@ type ShaftTorsionFixture = {
   stressCheck: { torque: number; diameterMm: number; expectedStress: number; tolerance: number };
 };
 const shaftFixture = loadFixture<ShaftTorsionFixture>("shaft-torsion");
+
+describe("Drive operating-point handoff", () => {
+  it("resolves power and speed to a consistent torque for downstream shaft sizing", () => {
+    const point = driveOperatingPoint("torque", {
+      power: "0.75",
+      speed: "1500",
+      torque: "ignored",
+    });
+    close(point.powerKw, 0.75);
+    close(point.speedRpm, 1500);
+    close(point.torqueNm, (0.75 * 60_000) / (2 * Math.PI * 1500));
+    close(point.powerKw, (point.torqueNm * point.speedRpm * 2 * Math.PI) / 60_000);
+  });
+
+  it("keeps a user-entered torque when power is the calculated quantity", () => {
+    const point = driveOperatingPoint("power", {
+      power: "ignored",
+      speed: "120",
+      torque: "40",
+    });
+    close(point.torqueNm, 40);
+    close(point.speedRpm, 120);
+    close(point.powerKw, (40 * 120 * 2 * Math.PI) / 60_000);
+  });
+
+  it("serializes calculated values without binary floating-point tails", () => {
+    assert.equal(driveQueryNumber(49.050000000000004), "49.05");
+    assert.equal(driveQueryNumber((0.75 * 60_000) / (2 * Math.PI * 1500)), "4.77464829276");
+  });
+});
 
 describe("Shaft diameter under torsion (tau = 16T/(pi*d^3))", () => {
   it("T=50 N.m, tau_allow=40 N/mm^2 gives d_min matching the closed-form solution", () => {
