@@ -40,4 +40,4 @@ De originele tool-URL’s blijven bestaan. Oude /toolkit/:slug-links worden met 
 
 Bestaande GitHub-repository DaimV1/Mechify en Vercel-project mechify. Build: npm run build; output: dist; Node 24.x. vite.config.mjs is de actieve configuratie (native loader). De build genereert sitemap, robots.txt en routegebonden HTML-metadata voor sociale previews. vercel.json verzorgt de routes.
 
-Geen Secrets of nieuwe betaalde diensten vereist. Macrobestanden zijn gecontroleerd op bronidentiteit; uitvoering in CAD is buiten deze browsertests.
+Geen Secrets of nieuwe betaalde diensten vereist. Macrobestanden hebben per bestand een API-bron, statische reviewdatum en beperking; compilatie en uitvoering in CAD vallen buiten deze tests.

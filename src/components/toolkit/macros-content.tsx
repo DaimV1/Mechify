@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { additionalMacros } from "@/lib/additional-macros";
 import { Download } from "lucide-react";
 import { CopyResult } from "@/components/toolkit/calc-ui";
 import { tx, useLocale, type Locale } from "@/lib/i18n/locale";
+import macroManifest from "../../../public/macros/manifest.json";
 
 import swExportStep from "../../../public/macros/solidworks-export-step.bas?raw";
 import swBatchPdf from "../../../public/macros/solidworks-batch-pdf.bas?raw";
@@ -140,42 +140,48 @@ function groups(locale: Locale) {
   ];
 }
 
-/**
- * Audit (17 sept 2026, security section): shows a SHA-256 of the exact
- * macro source bundled into this page, computed live in the browser from
- * the same string the "Download .bas" link and the visible code block use
- * — so it can never drift from either. Lets a cautious user diff the
- * downloaded file against a hash they trust before running VBA against
- * their CAD documents; it can't prove the server itself is honest (a
- * compromised server could serve a matching bad file+hash together), only
- * that download and page agree, which is what a self-hosted checksum can
- * ever promise.
- */
-function useSha256Hex(text: string): string | null {
-  const [hash, setHash] = useState<string | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    setHash(null);
-    crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then((digest) => {
-      if (cancelled) return;
-      const hex = Array.from(new Uint8Array(digest))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-      setHash(hex);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [text]);
-  return hash;
-}
-
-function MacroChecksum({ code }: { code: string }) {
-  const hash = useSha256Hex(code);
+function MacroChecksum({ hash }: { hash: string }) {
   return (
     <p className="mono muted text-sm">
-      SHA-256: <code>{hash ?? "…"}</code>
+      SHA-256: <code>{hash}</code>
     </p>
+  );
+}
+
+function MacroValidation({ file, locale }: { file: string; locale: Locale }) {
+  const entry = macroManifest.macros.find((item) => `/macros/${item.file}` === file);
+  if (!entry) return null;
+  return (
+    <div className="mt-4 rounded-lg border border-line bg-panel p-4" data-testid="macro-validation">
+      <p>
+        <strong>{tx(locale, "Validatiestatus:", "Validation status:")}</strong>{" "}
+        {tx(locale, "broncode statisch beoordeeld", "source statically reviewed")}
+      </p>
+      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+        <div>
+          <dt>{tx(locale, "Doelomgeving", "Target environment")}</dt>
+          <dd>{entry.software} {entry.targetVersion}</dd>
+        </div>
+        <div>
+          <dt>{tx(locale, "Bronreview", "Source review")}</dt>
+          <dd>{entry.reviewedOn}</dd>
+        </div>
+        <div>
+          <dt>{tx(locale, "Volgende review uiterlijk", "Next review due")}</dt>
+          <dd>{entry.nextReviewDue}</dd>
+        </div>
+        <div>
+          <dt>{tx(locale, "Uitgevoerd in CAD", "Executed in CAD")}</dt>
+          <dd>{entry.runtimeTested ? tx(locale, "Ja", "Yes") : tx(locale, "Nee", "No")}</dd>
+        </div>
+      </dl>
+      <p className="text-sm text-muted">{entry.limitations[locale]}</p>
+      <p className="text-sm">
+        <a href={entry.source.url} target="_blank" rel="noopener noreferrer">
+          {entry.source.label} ↗
+        </a>
+      </p>
+    </div>
   );
 }
 
@@ -194,6 +200,17 @@ export function MacroDownloads() {
           "Import .bas files through File > Import File in the VBA editor. When pasting manually, omit the first Attribute VB_Name line; it belongs to the import format.",
         )}
       </p>
+      <div className="my-6 rounded-lg border border-line bg-panel p-4">
+        <strong>{tx(locale, "Wat ‘beoordeeld’ hier betekent", "What ‘reviewed’ means here")}</strong>
+        <p>{macroManifest.validationMethod[locale]}</p>
+        <p>
+          {tx(
+            locale,
+            "Een doelversie noemt de gebruikte API-documentatie; het is geen bewijs dat de macro in die CAD-versie draait. Test elke macro eerst op een kopie in jouw eigen CAD-installatie.",
+            "A target version identifies the API documentation used; it is not proof that the macro runs in that CAD version. Test every macro on a copy in your own CAD installation first.",
+          )}
+        </p>
+      </div>
       {groups(locale).map((group) => (
         <section key={group.title}>
           <h2>{group.title}</h2>
@@ -208,26 +225,27 @@ export function MacroDownloads() {
               <article key={m.file}>
                 <h3>{m.name}</h3>
                 <p>{m.note}</p>
-                {m.source ? (
-                  <p className="text-sm text-muted">
-                    {tx(
-                      locale,
-                      "Nieuwe voorbeeldmacro · API gecontroleerd, niet uitgevoerd in CAD. ",
-                      "New example macro · API reviewed, not executed in CAD. ",
-                    )}
-                    <a href={m.source} target="_blank" rel="noopener noreferrer">
-                      {tx(locale, "Officiële API-documentatie ↗", "Official API documentation ↗")}
-                    </a>
-                  </p>
-                ) : null}
-                <a className="button secondary" href={m.file} download>
+                <MacroValidation file={m.file} locale={locale} />
+                <a
+                  className="button secondary"
+                  href={m.file}
+                  download
+                  aria-label={`${tx(locale, "Download", "Download")} ${m.name} (.bas)`}
+                >
                   <Download size={16} />
                   Download .bas
                 </a>
-                <MacroChecksum code={m.code} />
-                <CopyResult text={m.code} />
+                <MacroChecksum
+                  hash={macroManifest.macros.find((entry) => `/macros/${entry.file}` === m.file)!.sha256}
+                />
+                <CopyResult
+                  text={m.code}
+                  label={`${tx(locale, "Kopieer code voor", "Copy code for")} ${m.name}`}
+                />
                 <details>
-                  <summary>Bekijk de VBA-code</summary>
+                  <summary>
+                    {tx(locale, `Bekijk VBA-code voor ${m.name}`, `View VBA code for ${m.name}`)}
+                  </summary>
                   <pre>
                     <code>{m.code}</code>
                   </pre>

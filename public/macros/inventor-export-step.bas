@@ -25,6 +25,11 @@ Sub ExportActiefNaarSTEP()
     Dim oDoc As Document
     Set oDoc = ThisApplication.ActiveDocument
 
+    If oDoc.DocumentType <> kPartDocumentObject And oDoc.DocumentType <> kAssemblyDocumentObject Then
+        MsgBox "Deze macro is alleen bedoeld voor een part of assembly.", vbExclamation
+        Exit Sub
+    End If
+
     If oDoc.FullFileName = "" Then
         MsgBox "Sla het document eerst één keer op (nog geen bestandspad).", vbExclamation
         Exit Sub

@@ -26,6 +26,11 @@ Sub main()
         Exit Sub
     End If
 
+    If swModel.GetType <> swDocPART And swModel.GetType <> swDocASSEMBLY Then
+        MsgBox "Deze macro is alleen bedoeld voor een part of assembly.", vbExclamation
+        Exit Sub
+    End If
+
     Dim docPath As String
     docPath = swModel.GetPathName
 
