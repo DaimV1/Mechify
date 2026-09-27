@@ -58,6 +58,17 @@ export function ToolDetail({ section }: { section: ToolSection }) {
       window.location.pathname + (model === "basis" ? "" : "?model=" + encodeURIComponent(model)),
     );
   }
+  const calculatorWorkbench = (
+    <div key={tool.id + model} className="calc-workbench">
+      {model === "kracht" && tool.id === "pneumatic-cylinder" ? (
+        <QuickDrive kind="force" />
+      ) : model === "referentie" && Alternate ? (
+        <Alternate />
+      ) : (
+        <Calculator />
+      )}
+    </div>
+  );
   return (
     <PageShell>
       <section className="wrap tool-layout-header">
@@ -115,23 +126,19 @@ export function ToolDetail({ section }: { section: ToolSection }) {
             <p>{extra.note}</p>
           </div>
         ) : null}
-        <Suspense
-          fallback={
-            <p className="tool-loading" role="status">
-              {tx(locale, "Rekenmodel wordt geladen…", "Loading calculation model…")}
-            </p>
-          }
-        >
-          <div key={tool.id + model} className="calc-workbench">
-            {model === "kracht" && tool.id === "pneumatic-cylinder" ? (
-              <QuickDrive kind="force" />
-            ) : model === "referentie" && Alternate ? (
-              <Alternate />
-            ) : (
-              <Calculator />
-            )}
-          </div>
-        </Suspense>
+        {tool.id === "macros" ? (
+          calculatorWorkbench
+        ) : (
+          <Suspense
+            fallback={
+              <p className="tool-loading" role="status">
+                {tx(locale, "Rekenmodel wordt geladen…", "Loading calculation model…")}
+              </p>
+            }
+          >
+            {calculatorWorkbench}
+          </Suspense>
+        )}
         {tool.id === "macros" ? (
           <>
             <h2 className="mt-12">{tx(locale, "Downloadbare macro’s", "Downloadable macros")}</h2>

@@ -1,4 +1,5 @@
 import { DrivePowerCalc, TransmissionCalc } from "@/components/quick-drive";
+import { MacrosCalc } from "@/components/calculators/macros-calc";
 import { lazy, type ComponentType } from "react";
 const FitTolerancesCalc = lazy(() =>
   import("@/components/calculators/fit-tolerances-calc").then((m) => ({
@@ -73,10 +74,6 @@ const CadResourcesCalc = lazy(() =>
     default: m.CadResourcesCalc,
   })),
 );
-const MacrosCalc = lazy(() =>
-  import("@/components/calculators/macros-calc").then((m) => ({ default: m.MacrosCalc })),
-);
-
 /** Maps a live tool's id (see lib/tools.ts) to its calculator component. */
 export const CALCULATOR_REGISTRY: Record<string, ComponentType> = {
   "drive-power": DrivePowerCalc,
