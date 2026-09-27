@@ -2,7 +2,10 @@ import { test, expect } from "./support/fixtures.ts";
 
 for (const locale of ["nl", "en"] as const) {
   test(`CAD macro validation is explicit and keyboard-operable (${locale})`, async ({ page }) => {
-    await page.goto(`/cad/macros?lang=${locale}`, { waitUntil: "networkidle" });
+    await page.goto("/cad/macros", { waitUntil: "networkidle" });
+    if (locale === "en") {
+      await page.selectOption('select[aria-label="Taal rekenhulp"]', "en");
+    }
 
     await expect(page.getByTestId("macro-validation")).toHaveCount(14);
     await expect(
