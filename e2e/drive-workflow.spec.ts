@@ -15,7 +15,7 @@ test.describe("connected drive workflow", () => {
     });
     await expect(page.locator("#drive-power")).toHaveValue("1.5");
     await expect(page.locator("#drive-speed")).toHaveValue("750");
-    await expect(page.getByText("19.099", { exact: false })).toBeVisible();
+    await expect(page.locator(".result-number")).toContainText(/19[,.]099/);
 
     await page.reload({ waitUntil: "networkidle" });
     await expect(page.locator("#drive-power")).toHaveValue("1.5");
