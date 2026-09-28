@@ -21,9 +21,7 @@ const PneumaticCylinderCalc = lazy(() =>
   })),
 );
 const MotorSpecificationCalc = lazy(() =>
-  import("@/components/calculators/motor-specification-calc").then((m) => ({
-    default: m.MotorSpecificationCalc,
-  })),
+  import("@/components/toolkit/motor-calc").then((m) => ({ default: m.MotorCalc })),
 );
 const BeamDeflectionCalc = lazy(() =>
   import("@/components/calculators/beam-deflection-calc").then((m) => ({

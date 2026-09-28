@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate, useSearch } from "@/lib/reference-router";
+import { driveQueryNumber } from "@/lib/calculators/drive";
 import {
   DUTY_DEFAULT_MU,
   FAMILY_HINT,
@@ -301,6 +303,23 @@ export function MotorCalc() {
               <CopyResult text={copy} />
               <CopyLink />
             </div>
+            {result.T > 0 ? (
+              <div className="mt-5 rounded-md border border-border-strong bg-bg p-4">
+                <p className="text-sm leading-relaxed text-muted">
+                  {tx(
+                    locale,
+                    "Draagt het aangedreven asdeel dit koppel? Neem het over voor een eerste controle op zuivere torsie en kies daar zelf een onderbouwde toelaatbare schuifspanning voor materiaal en toepassing; piekbelasting, buiging, vermoeiing en spiebanen blijven buiten die controle.",
+                    "Does the driven shaft section carry this torque? Pass it into a first pure-torsion check and choose a justified allowable shear stress there for the material and application; peak load, bending, fatigue and keyways remain outside that check.",
+                  )}
+                </p>
+                <Link
+                  className="mt-3 inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 text-sm font-medium text-ink hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  to={`/calculators/shaft-diameter?t=${encodeURIComponent(driveQueryNumber(result.T))}&tau=`}
+                >
+                  {tx(locale, "Controleer as op berekend koppel", "Check shaft at calculated torque")} →
+                </Link>
+              </div>
+            ) : null}
           </>
         ) : etaRaw != null && !(etaRaw > 0 && etaRaw <= 1) ? (
           <p className="mt-5 text-sm text-muted">

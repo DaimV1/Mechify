@@ -18,7 +18,6 @@ import {
 } from "../src/lib/calculators/iso2768.ts";
 import { bandIndex, computeFit } from "../src/lib/calculators/iso286.ts";
 import { computeOringGroove } from "../src/lib/calculators/oring.ts";
-import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { sizeMotor } from "../src/lib/toolkit/motor.ts";
 import { isVerifiedSeeger } from "../src/lib/toolkit/seeger.ts";
 import { columnCapacity, extremeFiber, sectionProps } from "../src/lib/calculators/knik.ts";
@@ -256,16 +255,6 @@ describe("Motor efficiency guard", () => {
     assert.ok(r);
   });
 
-  it("default calculators computeMotor also rejects eta > 1", () => {
-    const r = computeMotor({
-      force: 981,
-      speedMs: 1,
-      diameterMm: 100,
-      efficiency: 2,
-      safety: 1,
-    });
-    assert.equal(r, null);
-  });
 });
 
 // E12 — the fits tool must accept decimal nominal diameters (bandIndex is

@@ -5,24 +5,6 @@ export const EXTRA_MODELS: Record<
   string,
   { label: string; original: string; note: string; component: ComponentType }
 > = {
-  fasteners: {
-    label: "Tabel & wrijving",
-    original: "Instelbare moerfactor",
-    note: "De tabelmethode en de K-factorbenadering gebruiken verschillende aannames voor wrijving en voorspanning. Hun momenten zijn niet onderling uitwisselbaar.",
-    component: module(() => import("@/components/toolkit/fastener-calc"), "FastenerCalc"),
-  },
-  "o-ring-grooves": {
-    label: "Groeftabel",
-    original: "Instelbare compressie",
-    note: "De tabel levert vaste groefmaten; het vrije ontwerpmodel berekent maten uit compressie en breedtefactor.",
-    component: module(() => import("@/components/toolkit/oring-calc"), "OringCalc"),
-  },
-  "motor-specification": {
-    label: "Inclusief versnelling",
-    original: "Stationair werkpunt",
-    note: "Uitgebreide dimensionering met acceleratie en rollenmassa. Standaardwaarden en marge verschillen van het stationaire model.",
-    component: module(() => import("@/components/toolkit/motor-calc"), "MotorCalc"),
-  },
   "pneumatic-cylinder": {
     label: "Lastfactor & luchtverbruik",
     original: "Boring & knikcontrole",

@@ -72,7 +72,7 @@
       "name": "Bevestigingsmateriaal",
       "route": "/tools/fasteners",
       "visual": "BoltSection",
-      "functionality": "Moerfactor behouden; groef-/bouttabel en wrijving als aanvullend model",
+      "functionality": "Moerfactor (K-factor) is het enige model; de tabel-/wrijvingsmethode (VDI 2230 A1) is verwijderd",
       "status": "migrated",
       "defaultsAndStateDeclarations": [
         "const [search, setSearch] = useSearchParams();",
@@ -85,7 +85,7 @@
       "name": "O-ringgroef",
       "route": "/tools/o-ring-grooves",
       "visual": "OringGroove",
-      "functionality": "Vrije compressie/breedtefactor behouden; originele groeftabel als aanvullend model",
+      "functionality": "Vrije compressie/breedtefactor is het enige model; de originele (ongeciteerde) groeftabel is verwijderd",
       "status": "migrated",
       "defaultsAndStateDeclarations": [
         "const [search, setSearch] = useSearchParams();",
@@ -117,7 +117,7 @@
       "name": "Eenheden",
       "route": "/calculators/units",
       "visual": "Geen losse bronvisual",
-      "functionality": "Alle oude categorieën, tweerichtingsconverter als aanvullend model, vermogen toegevoegd",
+      "functionality": "Alle oude categorieën, tweerichtingsconverter als enige model, vermogen toegevoegd",
       "status": "migrated",
       "defaultsAndStateDeclarations": [
         "const [search, setSearch] = useSearchParams();",
@@ -131,7 +131,7 @@
       "name": "Motorspecificatie",
       "route": "/calculators/motor-specification",
       "visual": "Geen losse bronvisual",
-      "functionality": "Stationair model behouden; versnelling, rollenmassa en uitgebreid werkpunt toegevoegd",
+      "functionality": "Uitgebreid werkpunt (met versnelling en rollenmassa) is het enige model; het stationaire model is verwijderd (minder getoetst tegen IEC 60034)",
       "status": "migrated",
       "defaultsAndStateDeclarations": [
         "const [search, setSearch] = useSearchParams();",

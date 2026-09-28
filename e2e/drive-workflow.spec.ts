@@ -52,10 +52,10 @@ test.describe("connected drive workflow", () => {
     page,
   }) => {
     await page.goto(
-      "/calculators/motor-specification?app=hijsen&m=50&v=0.2&d=200&eta=0.85&s=1.1",
+      "/calculators/motor-specification?duty=hijsen&mass=50&speed=0.2&unit=m%2Fs&d=200&eta=0.85&fb=1.1",
       { waitUntil: "networkidle" },
     );
-    await expect(page.getByText("Required motor-shaft power P_motor")).toBeVisible();
+    await expect(page.getByText("n_rol", { exact: true })).toBeVisible();
     await page.getByRole("link", { name: "Check shaft at calculated torque" }).click();
     await expect(page.locator("#shaft-torque")).toHaveValue("49.05");
     await expect(page.locator("#shaft-tau-allow")).toHaveValue("");

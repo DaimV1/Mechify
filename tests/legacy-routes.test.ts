@@ -60,7 +60,7 @@ test("client fallback preserves queries and destination defaults without redirec
   assert.equal(resolveLegacyRoute("/over", "?lang=en"), "/about?lang=en");
   assert.equal(
     resolveLegacyRoute("/toolkit/bevestigers", "?size=M8&model=eigen"),
-    "/tools/fasteners?size=M8&model=referentie",
+    "/tools/fasteners?size=M8&model=eigen",
   );
   assert.equal(resolveLegacyRoute("/tools/fasteners", "?model=eigen"), null);
 });
