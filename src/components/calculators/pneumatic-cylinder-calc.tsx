@@ -57,7 +57,7 @@ const T = {
   nl: {
     heading: "ISO-boring bij een last",
     intro:
-      "F = p · A, dubbelwerkende cilinder. Zoekt de kleinste standaard boring (ISO 15552 / ISO 6432) waarvan de uittrekkracht de opgegeven last haalt — zonder marge. Reken zelf een veiligheidsfactor voor leidingverlies, wrijving en versnelling.",
+      "F = p · A, dubbelwerkende cilinder. Zoekt de kleinste standaard boring (ISO 15552 / ISO 6432) die de opgegeven last haalt — zonder marge.",
     forceLabel: "Benodigde kracht F (N)",
     pressureLabel: "Werkdruk p (bar)",
     fillForcePressure: "Vul een kracht en druk groter dan 0 in.",
@@ -117,7 +117,7 @@ const T = {
   en: {
     heading: "ISO bore for a load",
     intro:
-      "F = p · A, double-acting cylinder. Finds the smallest standard bore (ISO 15552 / ISO 6432) whose extend force meets the given load — with no margin. Add your own safety factor for line loss, friction and acceleration.",
+      "F = p · A, double-acting cylinder. Finds the smallest standard bore (ISO 15552 / ISO 6432) that meets the given load — with no margin.",
     forceLabel: "Required force F (N)",
     pressureLabel: "Working pressure p (bar)",
     fillForcePressure: "Enter a force and pressure greater than 0.",
@@ -274,7 +274,6 @@ export function PneumaticCylinderCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={CYLINDER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.forceLabel}>
             <NumInput id="pneu-force" value={force} onChange={setForce} />
@@ -422,6 +421,7 @@ export function PneumaticCylinderCalc() {
             ) : null}
           </>
         )}
+        <SourceMetaBadge meta={CYLINDER_META} />
       </CalcPanel>
 
       <section className="mt-12">

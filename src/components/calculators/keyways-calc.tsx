@@ -44,8 +44,7 @@ const rangeLabelDisplay = (over: number, to: number) => `>${over} – ≤${to}`;
 const T = {
   nl: {
     heading: "Spie bij as-Ø",
-    intro:
-      "As-Ø in hele mm. DIN 6885-1: boven de ondergrens tot en met de bovengrens. De eerste rij is boven 6 t/m 8 — Ø 6 mm valt erbuiten.",
+    intro: "As-Ø in hele mm, DIN 6885-1 (bovengrens inclusief; Ø 6 mm valt net buiten de eerste rij).",
     diameterLabel: "As-Ø (mm)",
     fillDiameter: "Vul een as-Ø in.",
     noRow: (d: number) =>
@@ -81,7 +80,7 @@ const T = {
   en: {
     heading: "Key at shaft Ø",
     intro:
-      "Shaft Ø in whole mm. DIN 6885-1: above the lower bound up to and including the upper bound. The first row is above 6 up to 8 — Ø 6 mm falls outside it.",
+      "Shaft Ø in whole mm, DIN 6885-1 (upper bound inclusive; Ø 6 mm falls just outside the first row).",
     diameterLabel: "Shaft Ø (mm)",
     fillDiameter: "Enter a shaft Ø.",
     noRow: (d: number) =>
@@ -166,7 +165,6 @@ export function KeywaysCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={KEYWAY_META} />
         <div className="mt-6 max-w-xs">
           <Field label={t.diameterLabel}>
             <WholeMmInput id="key-diameter" value={diameter} onChange={onDia} />
@@ -204,6 +202,7 @@ export function KeywaysCalc() {
             </div>
           </>
         )}
+        <SourceMetaBadge meta={KEYWAY_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <KeywaySection row={row} />

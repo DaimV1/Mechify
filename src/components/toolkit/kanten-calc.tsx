@@ -81,20 +81,6 @@ export function KantenCalc() {
             "Tooling guidelines · 247TailorSteel",
           )}
         </h2>
-        <Note>
-          {tx(
-            locale,
-            "Shop-spec van 247TailorSteel Sophia, geen ISO of DIN. Discrete diktes; een lege cel is geen buurrij. Bron gecontroleerd: 16-09-2026.",
-            "Shop spec from 247TailorSteel Sophia, not ISO or DIN. Discrete thicknesses; an empty cell is not a neighboring row. Source checked: 2026-09-16.",
-          )}
-        </Note>
-        <Note>
-          {tx(
-            locale,
-            "Bevat het product een scherpe buiging? Gebruik dan voor alle zettingen de scherpe tabellen. Een tabelrij bevestigt niet dat elke legering/toestand in die dikte leverbaar of buigbaar is.",
-            "If the part contains a sharp bend, use the sharp tables for every bend. A table row does not confirm availability or bendability of every alloy/temper at that thickness.",
-          )}
-        </Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={tx(locale, "Dikte (mm)", "Thickness (mm)")}>
             <SelectInput value={tRaw} onChange={setTRaw}>
@@ -220,6 +206,20 @@ export function KantenCalc() {
             )}
           </p>
         )}
+        <Note>
+          {tx(
+            locale,
+            "Shop-spec van 247TailorSteel Sophia, geen ISO of DIN. Discrete diktes; een lege cel is geen buurrij. Bron gecontroleerd: 16-09-2026.",
+            "Shop spec from 247TailorSteel Sophia, not ISO or DIN. Discrete thicknesses; an empty cell is not a neighboring row. Source checked: 2026-09-16.",
+          )}
+        </Note>
+        <Note>
+          {tx(
+            locale,
+            "Bevat het product een scherpe buiging? Gebruik dan voor alle zettingen de scherpe tabellen. Een tabelrij bevestigt niet dat elke legering/toestand in die dikte leverbaar of buigbaar is.",
+            "If the part contains a sharp bend, use the sharp tables for every bend. A table row does not confirm availability or bendability of every alloy/temper at that thickness.",
+          )}
+        </Note>
       </CalcPanel>
 
       <details className="mt-8">
