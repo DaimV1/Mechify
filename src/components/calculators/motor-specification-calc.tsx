@@ -42,7 +42,7 @@ const T = {
   nl: {
     heading: "Motordimensionering",
     intro:
-      "Vereenvoudigd mechanica-model voor een eerste schatting: F = m·g·(sinθ + μ·cosθ) voor een helling, F = μ·m·g horizontaal, F = m·g bij hijsen. Geen vervanging van DIN 22101/FEM-berekeningen voor bandtransporteurs of een hijswerktuigberekening volgens EN 13001/ISO 4301 bij kritieke installaties.",
+      "Eerste schatting: F = m·g·(sinθ + μ·cosθ) op een helling, F = μ·m·g horizontaal, F = m·g bij hijsen.",
     application: "Toepassing",
     mass: "Massa m (kg)",
     speed: "Snelheid v (m/s)",
@@ -88,7 +88,7 @@ const T = {
   en: {
     heading: "Motor sizing",
     intro:
-      "Simplified mechanics model for a first estimate: F = m·g·(sinθ + μ·cosθ) for an incline, F = μ·m·g horizontal, F = m·g for hoisting. Not a substitute for DIN 22101/FEM calculations for belt conveyors or a hoist calculation per EN 13001/ISO 4301 for critical installations.",
+      "First-pass estimate: F = m·g·(sinθ + μ·cosθ) on an incline, F = μ·m·g horizontal, F = m·g for hoisting.",
     application: "Application",
     mass: "Mass m (kg)",
     speed: "Speed v (m/s)",
@@ -193,7 +193,6 @@ export function MotorSpecificationCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={MOTOR_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.application}>
             <SelectInput value={app} onChange={(v) => setApp(v as Application)}>
@@ -271,6 +270,7 @@ export function MotorSpecificationCalc() {
             {t.etaOutOfRange}
           </p>
         )}
+        <SourceMetaBadge meta={MOTOR_META} />
       </CalcPanel>
 
       <section className="mt-12">

@@ -43,7 +43,7 @@ const T = {
   nl: {
     heading: "Seegerringgroef bij Ø",
     intro:
-      "Catalogusopzoeking (DIN 471 as / DIN 472 boring, werkplaatstabel Ø 3–100 mm op vaste nominale maten). Geen ring bij deze diameter geeft geen resultaat — kies een van de standaardmaten. Alleen de hieronder gemarkeerde maat is onafhankelijk geverifieerd tegen een fabrikant-datasheet; andere maten controleren tegen de actuele DIN of ringfabrikant-catalogus vóór productie.",
+      "Catalogusopzoeking (DIN 471 as / DIN 472 boring, vaste nominale maten Ø 3–100 mm). Geen ring bij deze diameter? Kies een standaardmaat.",
     type: "Type",
     diameterShaft: "As-Ø (mm)",
     diameterBore: "Boring-Ø (mm)",
@@ -72,7 +72,7 @@ const T = {
   en: {
     heading: "Circlip groove at Ø",
     intro:
-      "Catalogue lookup (DIN 471 shaft / DIN 472 bore, workshop table Ø 3-100 mm at fixed nominal sizes). No ring at a given diameter returns no result — pick one of the standard sizes instead. Only the size flagged below has been independently verified against a manufacturer datasheet; check every other size against the current DIN or ring manufacturer catalog before production.",
+      "Catalogue lookup (DIN 471 shaft / DIN 472 bore, fixed nominal sizes Ø 3-100 mm). No ring at a given diameter? Pick a standard size instead.",
     type: "Type",
     diameterShaft: "Shaft Ø (mm)",
     diameterBore: "Bore Ø (mm)",
@@ -151,7 +151,6 @@ export function SeegerGroovesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={SEEGER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.type}>
             <SelectInput value={kind} onChange={(v) => setKind(v as CirclipKind)}>
@@ -209,6 +208,7 @@ export function SeegerGroovesCalc() {
             </div>
           </>
         )}
+        <SourceMetaBadge meta={SEEGER_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <CirclipSection

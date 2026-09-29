@@ -42,8 +42,7 @@ const SHAFT_META: EngineeringSourceMeta = {
 const T = {
   nl: {
     heading: "Asdiameter bij torsie",
-    intro:
-      "Minimale diameter van een massieve ronde as die de torsiespanning τ = 16T/(πd³) onder een toelaatbare schuifspanning houdt. Controleer optioneel ook een gekozen diameter.",
+    intro: "Minimale as-Ø die τ = 16T/(πd³) onder een toelaatbare schuifspanning houdt.",
     inputSection: "Koppel en materiaal",
     torque: "Koppel T (N·m)",
     tauAllow: "Toelaatbare schuifspanning τ_toel (N/mm²)",
@@ -64,8 +63,7 @@ const T = {
   },
   en: {
     heading: "Shaft diameter under torsion",
-    intro:
-      "Minimum diameter of a solid round shaft that keeps the torsional stress τ = 16T/(πd³) at or below an allowable shear stress. Optionally check a chosen diameter too.",
+    intro: "Minimum shaft Ø that keeps τ = 16T/(πd³) at or below an allowable shear stress.",
     inputSection: "Torque and material",
     torque: "Torque T (N·m)",
     tauAllow: "Allowable shear stress τ_allow (N/mm²)",
@@ -141,7 +139,6 @@ export function ShaftDiameterCalc() {
         {t.heading}
       </h2>
       <Note>{t.intro}</Note>
-      <SourceMetaBadge meta={SHAFT_META} />
 
       <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.inputSection}</h3>
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -195,6 +192,7 @@ export function ShaftDiameterCalc() {
         <CopyResult text={copy} />
         <CopyLink />
       </div>
+      <SourceMetaBadge meta={SHAFT_META} />
     </CalcPanel>
   );
 }

@@ -53,7 +53,7 @@ const T = {
   nl: {
     heading: "Lagerpassing bij as-Ø en lager-buitendiameter",
     intro:
-      "Groefkogellagers, cilindrische boring, tot Ø50 mm. Uitgangspunt: roterende binnenring, stilstaande buitenring met puntbelasting — het gangbare geval. As-Ø en lager-buitendiameter (D) zijn twee verschillende maten: de behuizingspassing wordt bepaald door D, niet door de as-Ø. Zoek D op in de lagercatalogus (bijv. 6204: d=20 mm, D=47 mm). Algemene richtlijn; de volledige selectietabel van de lagerfabrikant houdt ook rekening met asmateriaal, warmteontwikkeling en meeroterende buitenring.",
+      "Groefkogellagers, cilindrische boring, tot Ø50 mm. As-Ø en lager-buitendiameter D zijn twee verschillende maten — zoek D op in de lagercatalogus (bijv. 6204: d=20 mm, D=47 mm).",
     diameter: "As-Ø / lagerboring d (mm)",
     housingDiameter: "Lager-buitendiameter D (mm)",
     housingDiameterHint: "Niet de as-Ø — de buitendiameter van het gekozen lager (lagercatalogus).",
@@ -95,7 +95,7 @@ const T = {
   en: {
     heading: "Bearing fit at shaft Ø and bearing outside diameter",
     intro:
-      "Deep groove ball bearings, cylindrical bore, up to Ø50 mm. Assumption: rotating inner ring, stationary outer ring with point load — the common case. Shaft Ø and bearing outside diameter (D) are two different dimensions: the housing fit is determined by D, not by the shaft Ø. Look up D in the bearing catalog (e.g. 6204: d=20 mm, D=47 mm). General guideline; the bearing manufacturer's full selection table also accounts for shaft material, heat build-up and a co-rotating outer ring.",
+      "Deep groove ball bearings, cylindrical bore, up to Ø50 mm. Shaft Ø and bearing outside diameter D are two different dimensions — look up D in the bearing catalog (e.g. 6204: d=20 mm, D=47 mm).",
     diameter: "Shaft Ø / bearing bore d (mm)",
     housingDiameter: "Bearing outside diameter D (mm)",
     housingDiameterHint:
@@ -224,7 +224,6 @@ export function BearingFitsCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={BEARING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-4">
           <Field label={t.diameter}>
             <WholeMmInput id="bearing-diameter" value={diameter} onChange={onDia} />
@@ -304,6 +303,7 @@ export function BearingFitsCalc() {
             </div>
           </>
         )}
+        <SourceMetaBadge meta={BEARING_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <BearingFitChart bandIndex={0} shaft={shaftClass ?? undefined} hole={housingClass} />

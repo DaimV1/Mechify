@@ -52,7 +52,7 @@ const T = {
   nl: {
     heading: "Doorbuiging onder puntlast of verdeelde last",
     intro:
-      "Euler-Bernoulli balktheorie, één puntlast óf één gelijkmatig verdeelde last over de volledige overspanning. Vrij opgelegd: a is de afstand van de puntlast tot de linker oplegging. Uitkraging: a is de afstand van de puntlast tot de inklemming (tip bij a = L). Toont zowel de doorbuiging onder de last als de werkelijke maximale doorbuiging (bij een niet-gecentreerde puntlast vallen die niet samen) en de oplegreacties.",
+      "Euler-Bernoulli balktheorie: één puntlast of één verdeelde last over de hele overspanning. Bij puntlast is a de afstand tot de oplegging (vrij opgelegd) of tot de inklemming (uitkraging).",
     loadKind: "Soort last",
     beamType: "Balktype",
     section: "Doorsnede",
@@ -111,7 +111,7 @@ const T = {
   en: {
     heading: "Deflection under point load or distributed load",
     intro:
-      "Euler-Bernoulli beam theory, one point load or one uniformly distributed load over the full span. Simply supported: a is the distance from the point load to the left support. Cantilever: a is the distance from the point load to the fixed support (tip at a = L). Shows both the deflection at the load and the actual maximum deflection (for an off-centre point load these are not the same) and the support reactions.",
+      "Euler-Bernoulli beam theory: one point load or one full-span distributed load. For a point load, a is the distance to the support (simply supported) or to the fixed end (cantilever).",
     loadKind: "Load type",
     beamType: "Beam type",
     section: "Cross-section",
@@ -349,7 +349,6 @@ export function BeamDeflectionCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={BEAM_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.loadKind}>
             <SelectInput value={loadKind} onChange={(v) => setLoadKind(v as LoadKind)}>
@@ -525,6 +524,7 @@ export function BeamDeflectionCalc() {
             </p>
           </>
         )}
+        <SourceMetaBadge meta={BEAM_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         {isUDL ? (

@@ -271,7 +271,6 @@ export function Iso2768Calc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={DIMENSIONAL_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.toleranceClass}>
             <SelectInput value={linearClass} onChange={(v) => setLinearClass(v as LinearClass)}>
@@ -307,6 +306,7 @@ export function Iso2768Calc() {
           {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
         </div>
+        <SourceMetaBadge meta={DIMENSIONAL_META} />
 
         <div className="table-scroll mt-8" tabIndex={0}>
           <table className="ref-table">
@@ -398,7 +398,6 @@ export function Iso2768Calc() {
           {t.geoHeading}
         </h2>
         <Note>{t.geoIntro}</Note>
-        <SourceMetaBadge meta={GEOMETRIC_META} />
         <Note>{t.geoZoneNote}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={t.classLabel}>
@@ -434,6 +433,7 @@ export function Iso2768Calc() {
             <CopyLink />
           </div>
         ) : null}
+        <SourceMetaBadge meta={GEOMETRIC_META} />
 
         <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">

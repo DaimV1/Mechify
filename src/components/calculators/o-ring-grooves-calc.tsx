@@ -58,7 +58,7 @@ const T = {
   nl: {
     heading: "Voorontwerp O-ringgroef bij koorddiameter",
     intro:
-      "Groefdiepte = koord × (1 − squeeze%). Groefbreedte = koord × breedtefactor (ruimte voor volumeverplaatsing en thermische uitzetting). Ontwerpregel, geen ISO 3601-2 gland-tabel — controleer de definitieve maat tegen de norm of fabrikant-designgids vóór productie.",
+      "Groefdiepte = koord × (1 − squeeze%). Groefbreedte = koord × breedtefactor (ruimte voor volumeverplaatsing en thermische uitzetting).",
     cordDiameter: "Koorddiameter (mm)",
     direction: "Richting",
     radial: "Radiaal (as/boring)",
@@ -99,7 +99,7 @@ const T = {
   en: {
     heading: "Preliminary O-ring groove design at cord diameter",
     intro:
-      "Groove depth = cord × (1 − squeeze%). Groove width = cord × width factor (room for volume displacement and thermal expansion). Design rule, not an ISO 3601-2 gland table — check the final dimension against the standard or manufacturer design guide before production.",
+      "Groove depth = cord × (1 − squeeze%). Groove width = cord × width factor (room for volume displacement and thermal expansion).",
     cordDiameter: "Cord diameter (mm)",
     direction: "Direction",
     radial: "Radial (shaft/bore)",
@@ -209,7 +209,6 @@ export function OringGroovesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={ORING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.cordDiameter}>
             <SelectInput value={cord} onChange={setCord}>
@@ -276,6 +275,7 @@ export function OringGroovesCalc() {
             ) : null}
           </>
         )}
+        <SourceMetaBadge meta={ORING_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <OringGroove

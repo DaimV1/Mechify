@@ -61,12 +61,8 @@ const T = {
     heading: "Nominale passing",
     intro: (
       <>
-        Nominale Ø in mm (decimalen toegestaan), boven 0 t/m 3150 mm (de volledige ISO 286-reeks).
-        H/h, JS/js, G/g, F/f en D/d zijn berekend uit de ISO 286-1-formules en gelden over de hele
-        reeks. c11, k6, n6, p6 en s6 hebben geen eenvoudige formule en blijven beperkt tot t/m 50 mm
-        — zie hieronder. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11, JS7, h6, h7 en p6
-        geverifieerd; de overige klassen tonen daar "—" (nog geen bron gecontroleerd) in plaats van
-        een gok.
+        Nominale Ø in mm, boven 0 t/m 3150 mm. In de kleinste band (&gt;0–≤3 mm) zijn alleen
+        H6–H11, JS7, h6, h7 en p6 geverifieerd; overige klassen tonen daar "—" i.p.v. een gok.
       </>
     ),
     diameterLabel: "Nominale Ø (mm)",
@@ -123,11 +119,8 @@ const T = {
     heading: "Nominal fit",
     intro: (
       <>
-        Nominal Ø in mm (decimals allowed), above 0 up to 3150 mm (the full ISO 286 range). H/h,
-        JS/js, G/g, F/f and D/d are computed from the ISO 286-1 formulas and apply across the whole
-        range. c11, k6, n6, p6 and s6 have no simple formula and stay limited to 50 mm and below —
-        see below. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7, h6, h7 and p6 are verified;
-        the other classes show "—" there (not yet checked against a source) instead of a guess.
+        Nominal Ø in mm, above 0 up to 3150 mm. In the smallest band (&gt;0–≤3 mm) only H6–H11,
+        JS7, h6, h7 and p6 are verified; other classes show "—" there instead of a guess.
       </>
     ),
     diameterLabel: "Nominal Ø (mm)",
@@ -246,7 +239,6 @@ export function FitTolerancesCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={FIT_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.diameterLabel}>
             <NumInput id="fit-diameter" value={diameter} onChange={onDia} />
@@ -333,6 +325,7 @@ export function FitTolerancesCalc() {
             </p>
           </>
         )}
+        <SourceMetaBadge meta={FIT_META} />
       </CalcPanel>
 
       <section className="mt-12">
