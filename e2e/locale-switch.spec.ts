@@ -22,7 +22,7 @@ test.describe("Locale switch", () => {
   test("English locale survives client-side navigation to the toolkit", async ({ page }) => {
     await page.goto("/tools/fit-tolerances", { waitUntil: "networkidle" });
     await page.selectOption('select[aria-label="Taal rekenhulp"]', "en");
-    await page.locator('a[href="/en/toolkit"]').first().click();
+    await page.locator('a[href="/en/toolkit"]:visible').first().click();
     await expect(page).toHaveURL(/\/en\/toolkit$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
@@ -34,7 +34,13 @@ test("English SSR URL owns language, preserves shared inputs and has matching me
 }) => {
   await page.goto("/tools/fit-tolerances?d=30#main", { waitUntil: "networkidle" });
   await page.selectOption('select[aria-label="Taal rekenhulp"]', "en");
-  await expect(page).toHaveURL(/\/en\/tools\/fit-tolerances\?d=30#main$/);
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname === "/en/tools/fit-tolerances" &&
+      url.searchParams.get("d") === "30" &&
+      url.searchParams.get("fit") === "H7/h6" &&
+      url.hash === "#main",
+  );
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",

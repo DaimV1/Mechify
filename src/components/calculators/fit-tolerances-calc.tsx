@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   absoluteLimits,
   BANDS,
@@ -61,8 +61,8 @@ const T = {
     heading: "Nominale passing",
     intro: (
       <>
-        Nominale Ø in mm, boven 0 t/m 3150 mm. In de kleinste band (&gt;0–≤3 mm) zijn alleen
-        H6–H11, JS7, h6, h7 en p6 geverifieerd; overige klassen tonen daar "—" i.p.v. een gok.
+        Nominale Ø in mm, boven 0 t/m 3150 mm. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11,
+        JS7, h6, h7 en p6 geverifieerd; overige klassen tonen daar "—" i.p.v. een gok.
       </>
     ),
     diameterLabel: "Nominale Ø (mm)",
@@ -119,8 +119,8 @@ const T = {
     heading: "Nominal fit",
     intro: (
       <>
-        Nominal Ø in mm, above 0 up to 3150 mm. In the smallest band (&gt;0–≤3 mm) only H6–H11,
-        JS7, h6, h7 and p6 are verified; other classes show "—" there instead of a guess.
+        Nominal Ø in mm, above 0 up to 3150 mm. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7,
+        h6, h7 and p6 are verified; other classes show "—" there instead of a guess.
       </>
     ),
     diameterLabel: "Nominal Ø (mm)",
@@ -178,7 +178,9 @@ const T = {
 export function FitTolerancesCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 4, max: 3150 }),
   );
@@ -192,7 +194,7 @@ export function FitTolerancesCalc() {
     if (diameter) next.set("d", diameter);
     else next.delete("d");
     next.set("fit", fitId);
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diameter, fitId]);
 
