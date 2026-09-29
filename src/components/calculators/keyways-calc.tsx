@@ -44,7 +44,8 @@ const rangeLabelDisplay = (over: number, to: number) => `>${over} – ≤${to}`;
 const T = {
   nl: {
     heading: "Spie bij as-Ø",
-    intro: "As-Ø in hele mm, DIN 6885-1 (bovengrens inclusief; Ø 6 mm valt net buiten de eerste rij).",
+    intro:
+      "As-Ø in hele mm, DIN 6885-1 (bovengrens inclusief; Ø 6 mm valt net buiten de eerste rij).",
     diameterLabel: "As-Ø (mm)",
     fillDiameter: "Vul een as-Ø in.",
     noRow: (d: number) =>
@@ -204,7 +205,13 @@ export function KeywaysCalc() {
         )}
         <SourceMetaBadge meta={KEYWAY_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         <KeywaySection row={row} />
       </SchemaPanel>
 

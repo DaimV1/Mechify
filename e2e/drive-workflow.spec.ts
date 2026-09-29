@@ -1,16 +1,12 @@
 import { expect, test } from "./support/fixtures.ts";
 
 test.describe("connected drive workflow", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem("mechify-locale", "en"));
-  });
-
   test("drive operating point persists, is shareable and passes calculated torque to shaft sizing", async ({
     page,
     context,
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto("/calculators/drive-power?mode=torque&p=1.5&n=750&t=4", {
+    await page.goto("/en/calculators/drive-power?mode=torque&p=1.5&n=750&t=4", {
       waitUntil: "networkidle",
     });
     await expect(page.locator("#drive-power")).toHaveValue("1.5");
@@ -28,7 +24,10 @@ test.describe("connected drive workflow", () => {
     expect(shared).toContain("n=750");
 
     const shaftLink = page.getByRole("link", { name: "Check shaft diameter" });
-    await shaftLink.focus();
+    for (let i = 0; i < 70; i++) {
+      await page.keyboard.press("Tab");
+      if (await shaftLink.evaluate((el) => el === document.activeElement)) break;
+    }
     await expect(shaftLink).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/calculators\/shaft-diameter\?/);
@@ -52,7 +51,7 @@ test.describe("connected drive workflow", () => {
     page,
   }) => {
     await page.goto(
-      "/calculators/motor-specification?duty=hijsen&mass=50&speed=0.2&unit=m%2Fs&d=200&eta=0.85&fb=1.1",
+      "/en/calculators/motor-specification?duty=hijsen&mass=50&speed=0.2&unit=m%2Fs&d=200&eta=0.85&fb=1.1",
       { waitUntil: "networkidle" },
     );
     await expect(page.getByText("n_rol", { exact: true })).toBeVisible();
@@ -62,7 +61,7 @@ test.describe("connected drive workflow", () => {
   });
 
   test("zero torque does not offer an invalid shaft handoff", async ({ page }) => {
-    await page.goto("/calculators/drive-power?mode=power&t=0&n=750", {
+    await page.goto("/en/calculators/drive-power?mode=power&t=0&n=750", {
       waitUntil: "networkidle",
     });
     await expect(page.getByRole("link", { name: "Check shaft diameter" })).toHaveCount(0);
@@ -75,7 +74,7 @@ test.describe("connected drive workflow", () => {
         get: () => ({ writeText: () => Promise.reject(new Error("denied")) }),
       });
     });
-    await page.goto("/calculators/drive-power", { waitUntil: "networkidle" });
+    await page.goto("/en/calculators/drive-power", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Copy link" }).click();
     await expect(page.getByRole("status")).toHaveText(
       "Copying isn't allowed. Copy the URL manually from the address bar.",

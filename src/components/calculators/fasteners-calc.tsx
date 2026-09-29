@@ -37,8 +37,8 @@ const FASTENER_META: EngineeringSourceMeta = {
   checkedDate: "2026-09-17",
   validityRange: { nl: "M3-M24", en: "M3-M24" },
   assumptions: {
-    nl: "K≈0,2 nominale moerfactor voor niet-gesmeerde bevestigers; werkelijke K varieert 0,10-0,20 met smering/afwerking. Aanhaalspreiding, afzonderlijke draad-/kopwrijving, verbindingsstijfheid, settingverlies, scheiding, slip en vermoeiing worden niet gecontroleerd — dit is een aandraaimoment-schatting, geen VDI 2230-verbindingsverificatie.",
-    en: "K≈0.2 nominal nut factor for non-lubricated fasteners; actual K varies 0.10-0.20 with lubrication/finish. Tightening scatter, separate thread/head friction, joint stiffness, embedment loss, separation, slip and fatigue are not checked — this is a torque estimate, not a VDI 2230 joint verification.",
+    nl: "K≈0,2 nominale moerfactor voor niet-gesmeerde bevestigers; werkelijke K varieert 0,10-0,20 met smering/afwerking. Aanhaalspreiding, afzonderlijke draad-/kopwrijving, verbindingsstijfheid, settingverlies, scheiding, slip, draadstrippen en vermoeiing worden niet gecontroleerd — dit is een aandraaimoment-schatting, geen VDI 2230-verbindingsverificatie.",
+    en: "K≈0.2 nominal nut factor for non-lubricated fasteners; actual K varies 0.10-0.20 with lubrication/finish. Tightening scatter, separate thread/head friction, joint stiffness, embedment loss, separation, slip, thread stripping and fatigue are not checked — this is a torque estimate, not a VDI 2230 joint verification.",
   },
   verification: {
     nl: "Gebruik een volledige VDI 2230-berekening of de opgegeven aanhaalspecificatie voor kritieke verbindingen.",
@@ -221,7 +221,13 @@ export function FastenersCalc() {
         </div>
         <SourceMetaBadge meta={FASTENER_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         <BoltSection row={lookupFastener(Number(size.slice(1)))} hole={hole.medium} />
       </SchemaPanel>
 

@@ -305,7 +305,13 @@ export function BearingFitsCalc() {
         )}
         <SourceMetaBadge meta={BEARING_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         <BearingFitChart bandIndex={0} shaft={shaftClass ?? undefined} hole={housingClass} />
       </SchemaPanel>
 

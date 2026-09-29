@@ -52,7 +52,7 @@ const T = {
   nl: {
     heading: "Doorbuiging onder puntlast of verdeelde last",
     intro:
-      "Euler-Bernoulli balktheorie: één puntlast of één verdeelde last over de hele overspanning. Bij puntlast is a de afstand tot de oplegging (vrij opgelegd) of tot de inklemming (uitkraging).",
+      "Euler-Bernoulli balktheorie: één puntlast of één gelijkmatig verdeelde last over de hele overspanning. Bij puntlast is a de afstand tot de linkeroplegging (vrij opgelegd) of tot de inklemming (uitkraging).",
     loadKind: "Soort last",
     beamType: "Balktype",
     section: "Doorsnede",
@@ -111,7 +111,7 @@ const T = {
   en: {
     heading: "Deflection under point load or distributed load",
     intro:
-      "Euler-Bernoulli beam theory: one point load or one full-span distributed load. For a point load, a is the distance to the support (simply supported) or to the fixed end (cantilever).",
+      "Euler-Bernoulli beam theory: one point load or one full-span uniformly distributed load. For a point load, a is the distance to the left support (simply supported) or to the fixed end (cantilever).",
     loadKind: "Load type",
     beamType: "Beam type",
     section: "Cross-section",
@@ -287,9 +287,7 @@ export function BeamDeflectionCalc() {
   const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
   const overYield = sigma != null && sigma > rp02;
   const sameLocation =
-    result != null &&
-    !isUDL &&
-    Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
+    result != null && !isUDL && Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
   const ratio = result && result.deflectionMax > 0 && Lraw ? Lraw / result.deflectionMax : null;
   const allowableOk =
     result != null && allowableRaw != null && allowableRaw > 0
@@ -526,7 +524,13 @@ export function BeamDeflectionCalc() {
         )}
         <SourceMetaBadge meta={BEAM_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         {isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
         ) : result && Lraw != null && posARaw != null && Fraw != null && section ? (

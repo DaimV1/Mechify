@@ -1009,14 +1009,20 @@ export const articles = [
     },
     sections: [
       [
-        { nl: "Vier stappen van toepassing naar vermogen", en: "Four steps from application to power" },
+        {
+          nl: "Vier stappen van toepassing naar vermogen",
+          en: "Four steps from application to power",
+        },
         {
           nl: "De benodigde kracht F volgt uit het type toepassing: bij hijsen alleen het gewicht (F = m·g), bij een rollenbaan of band alleen wrijving (F = μ·m·g), bij een hellingbaan zwaartekracht én wrijving samen (F = m·g·(sinθ + μ·cosθ)). Daarna volgt het toerental uit de omtreksnelheid en wieldiameter (n = v·60/(π·D)) en het koppel aan de trommel uit T = F·D/2. Het lastvermogen is F·v; het benodigde motorasvermogen na het opgegeven aandrijfrendement is P_motor = F·v/η. Dit is een vereenvoudigd model voor een eerste dimensionering — geen volledige DIN 22101/FEM-berekening voor bandtransporteurs, die ook versnelling en meerdere deelweerstanden meeneemt.",
           en: "The required force F follows from the application type: for hoisting, just the weight (F = m·g); for a roller or belt conveyor, just friction (F = μ·m·g); for an incline, gravity and friction together (F = m·g·(sinθ + μ·cosθ)). From there, speed follows from the surface speed and wheel diameter (n = v·60/(π·D)), and torque at the drum from T = F·D/2. Load power is F·v; required motor-shaft power after the entered drivetrain efficiency is P_motor = F·v/η. This is a simplified model for a first-pass sizing — not a full DIN 22101/FEM calculation for belt conveyors, which also accounts for acceleration and multiple partial resistances.",
         },
       ],
       [
-        { nl: "Rekenvoorbeeld: hijsen, 50 kg bij 0,2 m/s", en: "Worked example: hoisting, 50 kg at 0.2 m/s" },
+        {
+          nl: "Rekenvoorbeeld: hijsen, 50 kg bij 0,2 m/s",
+          en: "Worked example: hoisting, 50 kg at 0.2 m/s",
+        },
         {
           nl: "De kracht is F = 50 × 9,81 = 490,5 N. Met een trommel van Ø200 mm volgt aan de trommel n ≈ 19,1 omw/min en T = 490,5 × 0,1 = 49,05 N·m. Het lastvermogen is F·v ≈ 98,1 W; na het opgegeven aandrijfrendement van 85% is het benodigde motorasvermogen 98,1/0,85 ≈ 115,4 W. Met een veiligheidsfactor van 1,1 wordt het ontwerpvermogen ≈ 127,0 W — en de geselecteerde voorkeursreeks rondt dat af naar 0,18 kW. Dit is een voorlopige vermogensselectie, geen vrijgave van een hijsaandrijving.",
           en: "The force is F = 50 × 9.81 = 490.5 N. With a Ø200 mm drum, n ≈ 19.1 rpm and T = 490.5 × 0.1 = 49.05 N·m follow at the drum. The load power is F·v ≈ 98.1 W; after the entered 85% drivetrain efficiency, the required motor-shaft power is 98.1/0.85 ≈ 115.4 W. With a 1.1 safety factor, the design power becomes ≈ 127.0 W — and the selected preferred series rounds that up to 0.18 kW. This is a preliminary power selection, not approval of a hoist drive.",
@@ -1063,21 +1069,30 @@ export const articles = [
     },
     sections: [
       [
-        { nl: "Onder de last is niet altijd het maximum", en: "Under the load isn't always the maximum" },
+        {
+          nl: "Onder de last is niet altijd het maximum",
+          en: "Under the load isn't always the maximum",
+        },
         {
           nl: "Voor een vrij opgelegde balk met puntlast F op afstand a van de linker oplegging (b = L − a) geldt de doorbuiging onder de last δ(a) = F·a²·b² / (3·E·I·L). Staat de last niet in het midden (a ≠ b), dan ligt de werkelijke maximale doorbuiging elders op de balk, dichter naar het midden toe vanaf de korte zijde. Alleen bij een gecentreerde last (a = b = L/2) vallen 'onder de last' en 'maximum' samen.",
           en: "For a simply supported beam with a point load F at distance a from the left support (b = L − a), the deflection under the load is δ(a) = F·a²·b² / (3·E·I·L). When the load isn't centred (a ≠ b), the true maximum deflection sits elsewhere on the beam, closer to midspan from the short side. Only with a centred load (a = b = L/2) do 'under the load' and 'maximum' coincide.",
         },
       ],
       [
-        { nl: "Rekenvoorbeeld: last op 200 mm van 1.000 mm", en: "Worked example: load at 200 mm of 1,000 mm" },
+        {
+          nl: "Rekenvoorbeeld: last op 200 mm van 1.000 mm",
+          en: "Worked example: load at 200 mm of 1,000 mm",
+        },
         {
           nl: "Met F = 1.000 N, L = 1.000 mm, a = 200 mm, E = 210.000 N/mm² en I = 1.000.000 mm⁴ is de doorbuiging onder de last ≈ 0,0406 mm. De werkelijke maximale doorbuiging is groter: ≈ 0,0575 mm, op x ≈ 434,3 mm vanaf de oplegging het dichtst bij de last. Het maximum is hier ongeveer 42% groter dan de doorbuiging onder de last; die lokale waarde ligt ongeveer 29% onder het werkelijke maximum.",
           en: "With F = 1,000 N, L = 1,000 mm, a = 200 mm, E = 210,000 N/mm² and I = 1,000,000 mm⁴, the deflection under the load is ≈ 0.0406 mm. The true maximum deflection is larger: ≈ 0.0575 mm, at x ≈ 434.3 mm from the support nearest the load. The maximum is about 42% higher than the under-load deflection; that local value is about 29% below the true maximum.",
         },
       ],
       [
-        { nl: "Een uitkraging maakt het verschil nog groter", en: "A cantilever makes the gap even bigger" },
+        {
+          nl: "Een uitkraging maakt het verschil nog groter",
+          en: "A cantilever makes the gap even bigger",
+        },
         {
           nl: "Bij een uitkraging (ingeklemd bij x = 0) met een last F op afstand a van de inklemming draagt het stuk voorbij de last geen extra moment meer en blijft het recht onder de hoek die bij x = a is opgebouwd — de tip beweegt daardoor verder mee dan het punt onder de last zelf. Met F = 500 N, L = 800 mm, a = 300 mm, E = 210.000 N/mm² en I = 500.000 mm⁴ is de doorbuiging onder de last ≈ 0,0429 mm, maar bij de vrije tip ≈ 0,150 mm — 3,5 keer zoveel. Het maximummoment (bij de inklemming, M = F·a) blijft in beide gevallen hetzelfde; alleen de doorbuiging verschilt.",
           en: "On a cantilever (fixed at x = 0) with a load F at distance a from the fixed end, the segment beyond the load carries no further moment and stays straight at the slope reached at x = a — so the tip translates further than the point under the load itself. With F = 500 N, L = 800 mm, a = 300 mm, E = 210,000 N/mm² and I = 500,000 mm⁴, the deflection under the load is ≈ 0.0429 mm, but at the free tip ≈ 0.150 mm — 3.5 times as much. The maximum moment (at the fixed end, M = F·a) stays the same either way; only the deflection differs.",
@@ -1131,7 +1146,10 @@ export const articles = [
         },
       ],
       [
-        { nl: "Reken de afwijking om naar een echte maat", en: "Convert the deviation to a real dimension" },
+        {
+          nl: "Reken de afwijking om naar een echte maat",
+          en: "Convert the deviation to a real dimension",
+        },
         {
           nl: "+21/0 µm is correct, maar is een extra rekenstap verwijderd van wat er op de tekening en op de machine gebeurt. Tel de afwijking op bij de nominale diameter en je krijgt de twee absolute grensmaten die daadwerkelijk verspaand worden: 25,000–25,021 mm voor de boring, 24,980–24,993 mm voor de as. Die absolute maten zijn wat een operator controleert, niet het afwijkingspaar zelf.",
           en: "+21/0 µm is correct, but it's one arithmetic step removed from what happens on the drawing and on the machine. Add the deviation to the nominal diameter and you get the two absolute limit dimensions actually machined: 25.000–25.021 mm for the hole, 24.980–24.993 mm for the shaft. Those absolute dimensions are what an operator checks, not the deviation pair itself.",
@@ -1148,11 +1166,14 @@ export const articles = [
   },
   {
     slug: "borgveer-twee-groeven-niet-een",
-    reviewedDate: { nl: "24 sept 2026", en: "24 Sept 2026" },
-    reviewedDateIso: "2026-09-24",
+    reviewedDate: {
+      nl: "27 sept 2026",
+      en: "27 Sept 2026",
+    },
+    reviewedDateIso: "2026-09-27",
     basis: {
-      nl: "DIN 471 (as) / DIN 472 (boring) workshoptabel met ISO 286-1 IT11-tolerantie voor de groefdiameter, norm + workshop-praktijk. Alleen d1 = 20 mm is onafhankelijk geverifieerd tegen een fabrikantendatasheet; overige maten zijn ongewijzigde pre-auditwaarden.",
-      en: "DIN 471 (shaft) / DIN 472 (bore) workshop table with an ISO 286-1 IT11 tolerance on the groove diameter, standard + workshop practice. Only d1 = 20 mm is independently verified against a manufacturer datasheet; other sizes are unchanged pre-audit values.",
+      nl: "Rotor Clip DSH/DHO-productbladen, gecontroleerd op 27 september 2026: tien afzonderlijke ring/maten-combinaties met groefdiametergrenzen en catalogusbreedte W. Nominale radiale diepte uit geometrie; overige workshopwaarden zijn niet geverifieerd.",
+      en: "Rotor Clip DSH/DHO product specifications, checked 27 September 2026: ten individual ring/size combinations with groove diameter limits and catalogue width W. Nominal radial depth follows from geometry; other workshop values remain unverified.",
     },
     category: "Toleranties & assemblage",
     title: {
@@ -1160,42 +1181,54 @@ export const articles = [
       en: "Two circlip types require different grooves.",
     },
     intro: {
-      nl: "Dezelfde nominale maat geeft een andere groef op een as dan in een boring — breedte, diameter en zelfs de tolerantieklasse verschillen per kant.",
-      en: "The same nominal size gives a different groove on a shaft than in a bore — width, diameter and even the tolerance class differ per side.",
+      nl: "Dezelfde nominale maat geeft een andere groef op een as dan in een boring. Controleer diametergrenzen en breedte voor het specifieke ringtype.",
+      en: "The same nominal size gives a different groove on a shaft than in a bore. Check diameter limits and width for the specific ring type.",
     },
     time: "5 min",
     tool: "seeger-grooves",
     question: {
-      nl: "Een as van Ø20 mm krijgt een borgring aan de buitenkant en een naaf een borgring aan de binnenkant. Zijn dat dezelfde groefmaten?",
-      en: "A Ø20 mm shaft gets an external retaining ring and a hub gets an internal one. Are those the same groove dimensions?",
+      nl: "Een as van Ø20 mm krijgt een uitwendige borgring en een naaf een inwendige borgring. Zijn dat dezelfde groefmaten?",
+      en: "A Ø20 mm shaft gets an external retaining ring and a hub gets an internal ring. Are their groove dimensions the same?",
     },
     sections: [
       [
-        { nl: "DIN 471 (as) en DIN 472 (boring) zijn twee normen", en: "DIN 471 (shaft) and DIN 472 (bore) are two standards" },
         {
-          nl: "Een uitwendige borgring (DIN 471) zit in een groef die in een as gedraaid is; een inwendige borgring (DIN 472) zit in een groef die in een boring gestoken is. Bij dezelfde nominale maat d1 zijn de groefdiameter d2, de groefbreedte b en de tolerantieklasse van d2 (h11 op de as, H11 in de boring) voor beide kanten apart vastgelegd — het zijn geen spiegelbeelden van elkaar. Tot een audit in september 2026 deelde de brontabel van deze tool één gemeenschappelijke breedtekolom voor beide kanten; bij Ø20 mm bleek dat mis: de externe groef (DSH-20) is 1,3 mm breed, de interne groef (DHO-20) 1,1 mm.",
-          en: "An external retaining ring (DIN 471) sits in a groove turned into a shaft; an internal retaining ring (DIN 472) sits in a groove cut into a bore. At the same nominal size d1, the groove diameter d2, the groove width b, and the tolerance class of d2 (h11 on the shaft, H11 in the bore) are each specified separately for the two sides — they aren't mirror images of each other. Until a September 2026 audit, this tool's source table shared a single width column for both sides; at Ø20 mm that turned out to be wrong: the external groove (DSH-20) is 1.3 mm wide, the internal groove (DHO-20) 1.1 mm.",
+          nl: "Afzonderlijke ringtypen, afzonderlijke groefmaten",
+          en: "Separate ring types, separate groove dimensions",
+        },
+        {
+          nl: "DIN 471 betreft uitwendige ringen op een as; DIN 472 betreft inwendige ringen in een boring. De fabrikant specificeert de groef per onderdeel. De Rotor Clip DSH-20 heeft catalogusbreedte W = 1,3 mm, terwijl DHO-20 W = 1,1 mm heeft. Ook bij Ø30 mm verschillen de breedten: DSH-30 is 1,6 mm en DHO-30 is 1,3 mm.",
+          en: "DIN 471 covers external shaft rings; DIN 472 covers internal bore rings. The manufacturer specifies each part’s groove. Rotor Clip DSH-20 has catalogue width W = 1.3 mm, whereas DHO-20 has W = 1.1 mm. At Ø30 mm the widths also differ: DSH-30 is 1.6 mm and DHO-30 is 1.3 mm.",
         },
       ],
       [
-        { nl: "Rekenvoorbeeld: Ø20 mm, het enige geverifieerde punt", en: "Worked example: Ø20 mm, the one verified point" },
         {
-          nl: "Bij d1 = 20 mm geeft de externe groef (as) d2 = 19 mm (h11), b = 1,3 mm (H13) en een groefdiepte t = 0,5 mm. De interne groef (boring) geeft d2 = 21 mm (H11), b = 1,1 mm (H13) en dezelfde diepte t = 0,5 mm. Beide waarden zijn onafhankelijk gecontroleerd tegen een fabrikantendatasheet (Rotor Clip) — dit is de enige maat in de tabel waarvoor dat is gebeurd.",
-          en: "At d1 = 20 mm, the external groove (shaft) gives d2 = 19 mm (h11), b = 1.3 mm (H13) and a groove depth t = 0.5 mm. The internal groove (bore) gives d2 = 21 mm (H11), b = 1.1 mm (H13) and the same depth t = 0.5 mm. Both values were independently checked against a manufacturer datasheet (Rotor Clip) — this is the only size in the table for which that has been done.",
+          nl: "Voorbeeld: fabrikantgrenzen bij Ø20 mm",
+          en: "Example: manufacturer limits at Ø20 mm",
+        },
+        {
+          nl: "Voor DSH-20 vermeldt Rotor Clip groefdiameter 18,87–19,00 mm en W = 1,3 mm (https://www.rotorclip.com/product/dsh-20/). Voor DHO-20 zijn dat 21,00–21,13 mm en W = 1,1 mm (https://www.rotorclip.com/product/dho-20/). De tool neemt deze diametergrenzen rechtstreeks over. Uit de gepubliceerde W-waarde wordt geen breedtetolerantieklasse afgeleid.",
+          en: "For DSH-20, Rotor Clip specifies groove diameter 18.87–19.00 mm and W = 1.3 mm (https://www.rotorclip.com/product/dsh-20/). For DHO-20 these are 21.00–21.13 mm and W = 1.1 mm (https://www.rotorclip.com/product/dho-20/). The tool reproduces these diameter limits directly. No width tolerance class is inferred from the published W value.",
         },
       ],
       [
-        { nl: "De diepte volgt uit d1 en d2, plus een ISO-tolerantie", en: "Depth follows from d1 and d2, plus an ISO tolerance" },
         {
-          nl: "De groefdiepte t is niet zelf getabelleerd: hij volgt uit t = |d1 − d2| / 2. Zelf krijgt d2 een ISO 286-1 IT11-tolerantie volgens de kant: h11 op de as (0 tot −0,13 mm) of H11 in de boring (0 tot +0,13 mm) — bij Ø19 en Ø21 mm is dat 0,13 mm breed. Alleen als d1 exact de nominale maat heeft, levert deze d2-tolerantie een afgeleide diepte van 0,500 tot 0,565 mm op. Dit is geen onafhankelijke voorgeschreven dieptetolerantie: de werkelijke grensmaten van t volgen uit zowel d1 als d2, inclusief de tolerantie van de as of boring. De groefbreedte b heeft een vaste tolerantieklasse H13, onafhankelijk van de maat. Zo blijft elke groef traceerbaar naar een formule of een norm, niet naar een los ingeschat getal.",
-          en: "The groove depth t isn't tabulated on its own: it follows from t = |d1 − d2| / 2. d2 itself gets an ISO 286-1 IT11 tolerance keyed to the side: h11 on the shaft (0 to −0.13mm) or H11 in the bore (0 to +0.13mm) — for Ø19 and Ø21mm that's 0.13mm wide. Only if d1 is exactly nominal does this d2 tolerance imply a depth of 0.500 to 0.565 mm. This is not an independent prescribed depth tolerance: actual depth limits depend on both d1 and d2, including the shaft or bore tolerance. The groove width b has a fixed tolerance class H13, independent of size. That keeps every groove traceable to a formula or a standard, not a loosely estimated number.",
+          nl: "Nominale diepte is geen dieptetolerantie",
+          en: "Nominal depth is not a depth tolerance",
+        },
+        {
+          nl: "De nominale radiale diepte is t = |d1 − d2| / 2. Met d1 = 20 mm en de getabelleerde groefdiameter 19 mm (as) of 21 mm (boring) is t = 0,5 mm. Dit is geen voorgeschreven dieptetolerantie. Werkelijke dieptegrenzen hangen af van zowel de as- of boringstolerantie als de groefdiametergrenzen. Een ISO-tolerantieklasse wordt niet uit de catalogusgrenzen verondersteld.",
+          en: "Nominal radial depth is t = |d1 − d2| / 2. With d1 = 20 mm and the tabulated groove diameter of 19 mm (shaft) or 21 mm (bore), t = 0.5 mm. This is not a specified depth tolerance. Actual depth limits depend on both shaft or bore tolerances and groove diameter limits. An ISO tolerance class is not assumed from the catalogue limits.",
         },
       ],
       [
-        { nl: "Aannames en toepassingsgrenzen", en: "Assumptions and applicability limits" },
         {
-          nl: "Alleen d1 = 20 mm is voor beide kolommen onafhankelijk geverifieerd. Elke andere maat in de tabel draagt nog zijn ongewijzigde waarde van vóór de audit — niet herafgeleid, en dus met hetzelfde risico dat bij Ø20 mm al één keer een echte fout opleverde. Gebruik deze tool voor een eerste dimensionering, maar bevestig de gekozen maat altijd tegen DIN 471/472 of de catalogus van de ringfabrikant voordat die naar productie gaat.",
-          en: "Only d1 = 20 mm has been independently verified for both columns. Every other size in the table still carries its unchanged pre-audit value — not re-derived, and so carrying the same risk that already produced a real error at Ø20 mm. Use this tool for a first-pass sizing, but always confirm the chosen size against DIN 471/472 or the ring manufacturer's catalogue before it goes to production.",
+          nl: "Verificatie per ring en maat",
+          en: "Verification by ring and size",
+        },
+        {
+          nl: "De tien gecontroleerde onderdelen zijn DSH-10, DSH-20, DSH-25, DSH-30, DSH-40 en DHO-20, DHO-25, DHO-30, DHO-40, DHO-50. Elk heeft in de tool een eigen Rotor Clip-bronlink en controledatum. Verificatie geldt uitsluitend voor de groefgeometrie van die ring/maten-combinatie, niet automatisch voor de andere ring bij dezelfde diameter. Overige workshopwaarden zijn niet geverifieerd. Controleer vóór productie ook draagvermogen, materiaal, montage en de volledige tekening van de gekozen fabrikant.",
+          en: "The ten checked parts are DSH-10, DSH-20, DSH-25, DSH-30, DSH-40 and DHO-20, DHO-25, DHO-30, DHO-40, DHO-50. Each has its own Rotor Clip source link and check date in the tool. Verification covers only the groove geometry of that ring/size combination, not automatically the other ring at the same diameter. Other workshop values remain unverified. Before production, also check load capacity, material, installation and the selected manufacturer’s complete drawing.",
         },
       ],
     ],

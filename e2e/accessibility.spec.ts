@@ -35,28 +35,44 @@ for (const route of TOOL_ROUTES) {
   });
 }
 
+async function tabTo(
+  page: import("@playwright/test").Page,
+  target: import("@playwright/test").Locator,
+) {
+  for (let n = 0; n < 70; n++) {
+    await page.keyboard.press("Tab");
+    if (await target.evaluate((node) => node === document.activeElement)) return;
+  }
+  throw new Error("Control was not reachable with Tab");
+}
+
 test.describe("Keyboard-only operation", () => {
-  test("fit-tolerances is fully operable by keyboard", async ({ page }) => {
-    await page.goto("/tools/fit-tolerances", { waitUntil: "networkidle" });
-
-    await page.locator("#fit-diameter").focus();
-    await page.keyboard.type("30");
-    await expect(page.locator("#fit-diameter")).toHaveValue("30");
-
-    await page.locator("#fit-select").focus();
-    await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#fit-select")).not.toHaveValue("");
-
-    // The copy button must be tab-reachable and activatable without a mouse.
-    const copyButton = page.getByRole("button", { name: "Kopieer resultaat" });
-    await copyButton.focus();
-    await expect(copyButton).toBeFocused();
-  });
-
-  test("skip link and focus outline are present", async ({ page }) => {
+  test("skip link activates main, then calculator controls and copy are tab reachable", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/tools/fit-tolerances", { waitUntil: "networkidle" });
     await page.keyboard.press("Tab");
-    const active = await page.evaluate(() => document.activeElement?.tagName);
-    expect(active).not.toBeNull();
+    const skip = page.locator("a.skip");
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeVisible();
+    await expect(skip).toHaveCSS("outline-style", "solid");
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#main")).toBeFocused();
+    const diameter = page.locator("#fit-diameter");
+    await tabTo(page, diameter);
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.type("30");
+    await expect(diameter).toHaveValue("30");
+    await tabTo(page, page.locator("#fit-select"));
+    const original = await page.locator("#fit-select").inputValue();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#fit-select")).not.toHaveValue(original);
+    const copy = page.getByRole("button", { name: "Kopieer resultaat" });
+    await tabTo(page, copy);
+    await expect(copy).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("30");
   });
 });

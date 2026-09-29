@@ -19,7 +19,7 @@ import {
 import { bandIndex, computeFit } from "../src/lib/calculators/iso286.ts";
 import { computeOringGroove } from "../src/lib/calculators/oring.ts";
 import { sizeMotor } from "../src/lib/toolkit/motor.ts";
-import { isVerifiedSeeger } from "../src/lib/toolkit/seeger.ts";
+import { isVerifiedSeeger, SEEGER_SOURCES } from "../src/lib/toolkit/seeger.ts";
 import { columnCapacity, extremeFiber, sectionProps } from "../src/lib/calculators/knik.ts";
 import { bendingStress, computeBeam } from "../src/lib/calculators/beam.ts";
 import {
@@ -64,6 +64,18 @@ const close = (a: number, b: number, eps = 1e-6) =>
   assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
 type CirclipFixture = {
+  verifiedRows: {
+    kind: "as" | "boring";
+    diameter: number;
+    part: string;
+    url: string;
+    checkedDate: string;
+    diameterMin: number;
+    diameterMax: number;
+    grooveWidth: number;
+    grooveDiameter: number;
+    grooveDepth: number;
+  }[];
   externalRing20: {
     diameter: number;
     grooveDiameter: number;
@@ -77,13 +89,13 @@ type CirclipFixture = {
     grooveWidth: number;
     verified: boolean;
   };
-  unverifiedRing30: { diameter: number; verified: boolean };
+  unverifiedRing35: { diameter: number; verified: boolean };
 };
 const circlipFixture = loadFixture<CirclipFixture>("circlip");
 
 // E01/E02 — circlip groove: catalogue lookup, not the sqrt/percentage estimate.
 describe("Circlip groove (active default tool)", () => {
-  it("external 20 mm ring matches the verified DSH-20-style record", () => {
+  it("external 20 mm ring matches the Rotor Clip DSH-20 product specification", () => {
     const c = circlipFixture.externalRing20;
     const r = computeGroove("as", c.diameter);
     assert.ok(r);
@@ -103,23 +115,50 @@ describe("Circlip groove (active default tool)", () => {
     assert.equal(r.verified, c.verified);
   });
 
-  // Tolerance info (h11/H11 groove class, groove width class, depth
-  // tolerance) is always part of the default result now — there is no
-  // separate "without tolerances" model.
-  it("always reports the groove diameter/width tolerance classes and depth tolerance", () => {
-    const shaft = computeGroove("as", 20);
-    const bore = computeGroove("boring", 20);
-    assert.ok(shaft && bore);
-    assert.equal(shaft.grooveDiameterClass, "h11");
-    assert.equal(bore.grooveDiameterClass, "H11");
-    assert.equal(shaft.grooveWidthClass, "H13");
-    assert.equal(bore.grooveWidthClass, "H13");
-    assert.ok(shaft.grooveDepthPlus > 0);
-    assert.ok(bore.grooveDepthPlus > 0);
+  // Manufacturer diameter limits accompany verified rows; width and nominal
+  // radial depth do not imply an ISO tolerance class or a depth tolerance.
+  it("reports sourced diameter bounds without inventing ISO tolerance classes", () => {
+    const shaft = computeGroove("as", 30);
+    const bore = computeGroove("boring", 30);
+    assert.ok(shaft?.source && bore?.source);
+    assert.equal(shaft.source.diameterMin, 28.35);
+    assert.equal(shaft.source.diameterMax, 28.6);
+    assert.equal(bore.source.diameterMin, 31.4);
+    assert.equal(bore.source.diameterMax, 31.65);
+    assert.equal(bore.grooveWidth, 1.3);
+    assert.equal("grooveDiameterClass" in shaft, false);
+    assert.equal("grooveDepthPlus" in shaft, false);
+    assert.equal(computeGroove("as", 10)?.verified, true);
+    assert.equal(computeGroove("boring", 10)?.verified, false);
+    assert.equal(computeGroove("as", 50)?.verified, false);
+    assert.equal(computeGroove("boring", 50)?.verified, true);
+  });
+
+  it("covers every verified part with its source, limits, width and nominal depth", () => {
+    assert.deepEqual(
+      Object.keys(SEEGER_SOURCES).sort(),
+      circlipFixture.verifiedRows.map((c) => `${c.kind}-${c.diameter}`).sort(),
+    );
+    for (const c of circlipFixture.verifiedRows) {
+      const r = computeGroove(c.kind, c.diameter);
+      assert.ok(r?.source, c.part);
+      assert.equal(r.verified, true, c.part);
+      assert.deepEqual(r.source, {
+        part: c.part,
+        url: c.url,
+        checkedDate: c.checkedDate,
+        diameterMin: c.diameterMin,
+        diameterMax: c.diameterMax,
+        width: c.grooveWidth,
+      });
+      close(r.grooveDiameter, c.grooveDiameter);
+      close(r.grooveWidth, c.grooveWidth);
+      close(r.grooveDepth, c.grooveDepth);
+    }
   });
 
   it("unverified sizes are flagged as such", () => {
-    const c = circlipFixture.unverifiedRing30;
+    const c = circlipFixture.unverifiedRing35;
     const r = computeGroove("as", c.diameter);
     assert.ok(r);
     assert.equal(r.verified, c.verified);

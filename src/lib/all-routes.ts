@@ -24,7 +24,8 @@ export function getAllRoutes(): string[] {
   const sectionRoutes = SECTIONS.map((s) => s.href);
   const toolRoutes = TOOLS.map((t) => toolHref(t));
   const articleRoutes = articles.map((a) => "/topics/" + a.slug);
-  return Array.from(
+  const dutch = Array.from(
     new Set([...HAND_WRITTEN_ROUTES, ...sectionRoutes, ...toolRoutes, ...articleRoutes]),
   );
+  return [...dutch, ...dutch.map((route) => "/en" + (route === "/" ? "" : route))];
 }

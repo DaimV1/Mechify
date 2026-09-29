@@ -4,12 +4,27 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import { SECTIONS, TOOLS, toolHref } from "./src/lib/tools.ts";
 import { getAllRoutes } from "./src/lib/all-routes.ts";
 import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = "https://www.mechify.nl";
+
+function languageLinks(base, xml = false) {
+  const tag = xml ? "xhtml:link" : "link";
+  return [
+    ["nl", base === "/" ? "" : base],
+    ["en", "/en" + (base === "/" ? "" : base)],
+    ["x-default", base === "/" ? "" : base],
+  ]
+    .map(
+      ([lang, path]) =>
+        `<${tag} rel="alternate" hreflang="${lang}" href="${SITE_URL}${path}"${xml ? " /" : ""}>`,
+    )
+    .join("");
+}
 
 /** Emits robots.txt and sitemap.xml from the same tool/section data the app renders, so they can't drift. */
 function sitemapPlugin() {
@@ -19,12 +34,21 @@ function sitemapPlugin() {
     closeBundle() {
       const routes = getAllRoutes();
 
+      const revision =
+        process.env.VERCEL_GIT_COMMIT_SHA ||
+        execFileSync("git", ["rev-parse", "HEAD"], { cwd: __dirname, encoding: "utf8" }).trim();
+      fs.writeFileSync(
+        path.resolve(__dirname, "dist/build-revision.json"),
+        JSON.stringify({ revision }),
+      );
       const template = fs.readFileSync(path.resolve(__dirname, "dist/index.html"), "utf8");
       const escape = (s) =>
         s.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
-      for (const route of routes.filter((r) => r !== "/")) {
-        const tool = TOOLS.find((t) => toolHref(t) === route),
-          article = articles.find((a) => "/topics/" + a.slug === route);
+      for (const route of routes) {
+        const locale = /^\/en(?:\/|$)/.test(route) ? "en" : "nl";
+        const baseRoute = route.replace(/^\/en(?=\/|$)/, "") || "/";
+        const tool = TOOLS.find((t) => toolHref(t) === baseRoute),
+          article = articles.find((a) => "/topics/" + a.slug === baseRoute);
         const labels = {
           "/toolkit": "Engineeringtoolkit",
           "/topics": "Engineeringtopics",
@@ -36,15 +60,38 @@ function sitemapPlugin() {
           "/calculators": "Rekenmodules",
           "/cad": "CAD-bibliotheken en macro’s",
         };
-        const shortTitle = tool?.title.nl || article?.title.nl || labels[route] || "Mechify";
-        const rawTitle = shortTitle + " — Mechify";
+        const shortTitle =
+          tool?.title[locale] ||
+          article?.title[locale] ||
+          (locale === "en"
+            ? {
+                "/": "Mechify",
+                "/toolkit": "Engineering toolkit",
+                "/topics": "Engineering topics",
+                "/cad-workflows": "CAD workflows",
+                "/about": "About Mechify",
+                "/tables": "Tables and standards",
+                "/materials": "Materials",
+                "/tools": "Dimensions and connections",
+                "/calculators": "Calculators",
+                "/cad": "CAD libraries and macros",
+              }[baseRoute]
+            : labels[baseRoute]) ||
+          "Mechify";
+        const rawTitle = shortTitle === "Mechify" ? shortTitle : shortTitle + " — Mechify";
         const rawDescription =
-          tool?.blurb.nl ||
-          article?.intro.nl ||
-          "Praktische engineeringkennis en rekentools voor machinebouwers.";
+          tool?.blurb[locale] ||
+          article?.intro[locale] ||
+          (locale === "en"
+            ? "Practical engineering knowledge and calculators for machine designers."
+            : "Praktische engineeringkennis en rekentools voor machinebouwers.");
         const title = escape(rawTitle);
         const description = escape(rawDescription);
-        let html = template.replace(/<title>[\s\S]*?<\/title>/, "<title>" + title + "</title>");
+        let html = template
+          .replace('<html lang="nl">', `<html lang="${locale}">`)
+          .replace('content="nl_NL"', `content="${locale === "en" ? "en_GB" : "nl_NL"}"`)
+          .replace('"inLanguage": "nl"', `"inLanguage": "${locale}"`)
+          .replace(/<title>[\s\S]*?<\/title>/, "<title>" + title + "</title>");
         html = html
           .replace(
             /(<meta\s+(?:property|name)="(?:og:title|twitter:title)"\s+content=")[^"]*/g,
@@ -54,21 +101,42 @@ function sitemapPlugin() {
             /(<meta\s+(?:property|name)="(?:description|og:description|twitter:description)"\s+content=")[^"]*/g,
             "$1" + description,
           )
-          .replace(/(<link rel="canonical" href=")[^"]*/, "$1" + SITE_URL + route)
-          .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + SITE_URL + route);
-        const pageJsonLd = buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, shortTitle });
+          .replace(
+            /(<link rel="canonical" href=")[^"]*/,
+            "$1" + SITE_URL + (route === "/" ? "" : route),
+          )
+          .replace(
+            /(<meta property="og:url" content=")[^"]*/,
+            "$1" + SITE_URL + (route === "/" ? "" : route),
+          );
+        const pageJsonLd = buildPageJsonLd({
+          route,
+          tool,
+          article,
+          rawTitle,
+          rawDescription,
+          shortTitle,
+          locale,
+        });
         html = html.replace(
           "</head>",
           `<script id="page-jsonld" type="application/ld+json">${pageJsonLd}</script>\n  </head>`,
         );
-        const destination = path.resolve(__dirname, "dist" + route + ".html");
+        html = html.replace("</head>", `${languageLinks(baseRoute)}\n</head>`);
+        const destination = path.resolve(
+          __dirname,
+          route === "/" ? "dist/index.html" : "dist" + route + ".html",
+        );
         fs.mkdirSync(path.dirname(destination), { recursive: true });
         fs.writeFileSync(destination, html);
       }
       const urlset = routes
-        .map((route) => `  <url><loc>${SITE_URL}${route === "/" ? "" : route}</loc></url>`)
+        .map(
+          (route) =>
+            `  <url><loc>${SITE_URL}${route === "/" ? "" : route}</loc>${languageLinks(route.replace(/^\/en(?=\/|$)/, "") || "/", true)}</url>`,
+        )
         .join("\n");
-      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlset}\n</urlset>\n`;
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urlset}\n</urlset>\n`;
 
       const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
 
@@ -88,7 +156,7 @@ function sitemapPlugin() {
  * build script and a browser module can't share one function here (see the
  * `@/`-alias note on all-routes.ts imports above).
  */
-function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, shortTitle }) {
+function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, shortTitle, locale }) {
   const url = SITE_URL + route;
   let type = "WebPage";
   let extra;
@@ -102,7 +170,7 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
     };
     const section = SECTIONS.find((s) => s.id === tool.section);
     breadcrumbs = [{ name: "Mechify", path: "/" }];
-    if (section) breadcrumbs.push({ name: section.label.nl, path: section.href });
+    if (section) breadcrumbs.push({ name: section.label[locale], path: section.href });
   } else if (article) {
     type = "TechArticle";
     extra = {
@@ -112,7 +180,7 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
     };
     breadcrumbs = [
       { name: "Mechify", path: "/" },
-      { name: "Engineeringtopics", path: "/topics" },
+      { name: locale === "en" ? "Engineering topics" : "Engineeringtopics", path: "/topics" },
     ];
   }
   const page = {
@@ -120,6 +188,7 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
     name: rawTitle,
     description: rawDescription,
     url,
+    inLanguage: locale,
     isPartOf: { "@type": "WebSite", name: "Mechify", url: SITE_URL },
     ...extra,
   };
@@ -138,7 +207,11 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
             "@type": "ListItem",
             position: i + 1,
             name: c.name,
-            item: SITE_URL + c.path,
+            item:
+              SITE_URL +
+              (locale === "en"
+                ? "/en" + (c.path === "/" ? "" : c.path.replace(/^\/en/, ""))
+                : c.path),
           })),
         },
       ],

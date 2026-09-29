@@ -1,8 +1,20 @@
 {
   "redirects": [
-    { "source": "/over", "destination": "/about", "permanent": true },
-    { "source": "/toolkit/passingen", "destination": "/tools/fit-tolerances", "permanent": true },
-    { "source": "/toolkit/iso-2768", "destination": "/tools/iso-2768", "permanent": true },
+    {
+      "source": "/over",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/passingen",
+      "destination": "/tools/fit-tolerances",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/iso-2768",
+      "destination": "/tools/iso-2768",
+      "permanent": true
+    },
     {
       "source": "/toolkit/spiebaan-toleranties",
       "destination": "/tools/keyways",
@@ -28,7 +40,11 @@
       "destination": "/tools/o-ring-grooves",
       "permanent": true
     },
-    { "source": "/toolkit/kanten", "destination": "/tools/edges", "permanent": true },
+    {
+      "source": "/toolkit/kanten",
+      "destination": "/tools/edges",
+      "permanent": true
+    },
     {
       "source": "/toolkit/motorspecificatie",
       "destination": "/calculators/motor-specification",
@@ -49,16 +65,36 @@
       "destination": "/calculators/beam-deflection",
       "permanent": true
     },
-    { "source": "/toolkit/eenheden", "destination": "/calculators/units", "permanent": true },
-    { "source": "/toolkit/bronnen", "destination": "/cad/resources", "permanent": true },
-    { "source": "/toolkit/macros", "destination": "/cad/macros", "permanent": true },
-    { "source": "/toolkit/koppel", "destination": "/calculators/drive-power", "permanent": true },
+    {
+      "source": "/toolkit/eenheden",
+      "destination": "/calculators/units",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/bronnen",
+      "destination": "/cad/resources",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/macros",
+      "destination": "/cad/macros",
+      "permanent": true
+    },
+    {
+      "source": "/toolkit/koppel",
+      "destination": "/calculators/drive-power",
+      "permanent": true
+    },
     {
       "source": "/toolkit/overbrenging",
       "destination": "/calculators/transmission",
       "permanent": true
     },
-    { "source": "/toolkit/converter", "destination": "/calculators/units", "permanent": true }
+    {
+      "source": "/toolkit/converter",
+      "destination": "/calculators/units",
+      "permanent": true
+    }
   ],
   "rewrites": [
     {
@@ -112,15 +148,80 @@
     {
       "source": "/cad",
       "destination": "/cad.html"
+    },
+    {
+      "source": "/en",
+      "destination": "/en.html"
+    },
+    {
+      "source": "/en/tools/:slug",
+      "destination": "/en/tools/:slug.html"
+    },
+    {
+      "source": "/en/calculators/:slug",
+      "destination": "/en/calculators/:slug.html"
+    },
+    {
+      "source": "/en/cad/:slug",
+      "destination": "/en/cad/:slug.html"
+    },
+    {
+      "source": "/en/topics/:slug",
+      "destination": "/en/topics/:slug.html"
+    },
+    {
+      "source": "/en/toolkit",
+      "destination": "/en/toolkit.html"
+    },
+    {
+      "source": "/en/topics",
+      "destination": "/en/topics.html"
+    },
+    {
+      "source": "/en/cad-workflows",
+      "destination": "/en/cad-workflows.html"
+    },
+    {
+      "source": "/en/about",
+      "destination": "/en/about.html"
+    },
+    {
+      "source": "/en/tables",
+      "destination": "/en/tables.html"
+    },
+    {
+      "source": "/en/materials",
+      "destination": "/en/materials.html"
+    },
+    {
+      "source": "/en/tools",
+      "destination": "/en/tools.html"
+    },
+    {
+      "source": "/en/calculators",
+      "destination": "/en/calculators.html"
+    },
+    {
+      "source": "/en/cad",
+      "destination": "/en/cad.html"
     }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"

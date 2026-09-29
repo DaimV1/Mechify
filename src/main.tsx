@@ -9,13 +9,17 @@ import "@/styles/index.css";
 const container = document.getElementById("root");
 if (!container) throw new Error("Root element not found");
 
+const english = /^\/en(?:\/|$)/.test(window.location.pathname);
 const app = (
   <StrictMode>
-    <LocaleProvider>
-      <BrowserRouter>
+    <LocaleProvider initialLocale={english ? "en" : "nl"}>
+      <BrowserRouter basename={english ? "/en" : "/"}>
         <App />
       </BrowserRouter>
-      {["mechify.nl", "www.mechify.nl"].includes(window.location.hostname) || window.location.hostname.endsWith(".vercel.app") ? <Analytics /> : null}
+      {["mechify.nl", "www.mechify.nl"].includes(window.location.hostname) ||
+      window.location.hostname.endsWith(".vercel.app") ? (
+        <Analytics />
+      ) : null}
     </LocaleProvider>
   </StrictMode>
 );
@@ -42,4 +46,3 @@ if (container.hasChildNodes() && !window.location.search) {
 } else {
   createRoot(container).render(app);
 }
-

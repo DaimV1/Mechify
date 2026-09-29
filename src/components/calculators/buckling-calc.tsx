@@ -435,7 +435,13 @@ export function BucklingCalc() {
         )}
         <SourceMetaBadge meta={BUCKLING_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         <BucklingModes active={endCondition} />
       </SchemaPanel>
 

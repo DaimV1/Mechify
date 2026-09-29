@@ -8,7 +8,6 @@ import {
   nearestStandardSizes,
   type CirclipKind,
 } from "@/lib/calculators/circlip";
-import { fmtSeeger3, VERIFIED_SEEGER_D1 } from "@/lib/toolkit/seeger";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
 import {
@@ -31,11 +30,11 @@ const SEEGER_META: EngineeringSourceMeta = {
   basisType: "catalogue",
   reference: "DIN 471 (shaft) / DIN 472 (bore) workshop table",
   status: "vendor-current",
-  checkedDate: "2026-09-17",
+  checkedDate: "2026-09-27",
   validityRange: { nl: "Ø 3-100 mm, vaste nominale maten", en: "Ø 3-100 mm, fixed nominal sizes" },
   assumptions: {
-    nl: "Alleen Ø20 mm is onafhankelijk geverifieerd tegen een fabrikant-datasheet (zie status per maat hieronder). Alleen groefgeometrie — bepaalt geen axiale borgcapaciteit, groefspanning of randafstand-geschiktheid.",
-    en: "Only Ø20 mm is independently verified against a manufacturer datasheet (see per-size status below). Groove geometry only — does not establish axial retention capacity, groove stress or edge-distance suitability.",
+    nl: "Verificatie geldt per ringtype en maat (zie bron en controledatum hieronder). Breedte is de cataloguswaarde W zonder afgeleide tolerantieklasse; diepte is nominaal. Alleen groefgeometrie — bepaalt geen axiale borgcapaciteit, groefspanning of randafstand-geschiktheid.",
+    en: "Verification is specific to ring type and size (see source and review date below). Width is catalogue value W without an inferred tolerance class; depth is nominal. Groove geometry only — does not establish axial retention capacity, groove stress or edge-distance suitability.",
   },
 };
 
@@ -43,7 +42,7 @@ const T = {
   nl: {
     heading: "Seegerringgroef bij Ø",
     intro:
-      "Catalogusopzoeking (DIN 471 as / DIN 472 boring, vaste nominale maten Ø 3–100 mm). Geen ring bij deze diameter? Kies een standaardmaat.",
+      "Catalogusopzoeking (DIN 471 as / DIN 472 boring, werkplaatstabel Ø 3–100 mm op vaste nominale maten). Geen ring bij deze diameter geeft geen resultaat — kies een van de standaardmaten. Alleen de hieronder gemarkeerde ringtypen en maten zijn onafhankelijk geverifieerd tegen een fabrikant-datasheet; andere maten controleren tegen de actuele DIN of ringfabrikant-catalogus vóór productie.",
     type: "Type",
     diameterShaft: "As-Ø (mm)",
     diameterBore: "Boring-Ø (mm)",
@@ -59,20 +58,20 @@ const T = {
     },
     grooveDiameter: "Groefdiameter",
     grooveWidth: "Groefbreedte",
-    grooveDepth: "Groefdiepte",
+    grooveDepth: "Groefdiepte (nominaal)",
     verified: "Geverifieerd t.o.v. fabrikant-datasheet.",
     notVerified:
       "Niet geverifieerd — controleer tegen DIN 471/472 of de fabrikantcatalogus vóór productie.",
     estimateTitle: "Catalogustabel",
     thDiameter: "Ø (mm)",
-    sourceBadge: (verifiedList: string) =>
-      `Catalogusdata uit een werkplaatstabel (samenvatting van DIN 471/472), niet de officiële norm-PDF. Alleen Ø${verifiedList} mm is onafhankelijk geverifieerd tegen een fabrikant-datasheet (Rotor Clip); vraag voor elke andere maat de actuele norm of ringfabrikant-catalogus op vóór productie.`,
+    sourceBadge:
+      "Geverifieerde geometrie: Rotor Clip-productpagina per ringtype en maat. Overige werkplaatstabelwaarden zijn niet geverifieerd. Controleer breedtetolerantie, randafstand, afrondingen, materiaal en belasting met de fabrikant vóór productie.",
     copyKind: { as: "As", boring: "Boring" },
   },
   en: {
     heading: "Circlip groove at Ø",
     intro:
-      "Catalogue lookup (DIN 471 shaft / DIN 472 bore, fixed nominal sizes Ø 3-100 mm). No ring at a given diameter? Pick a standard size instead.",
+      "Catalogue lookup (DIN 471 shaft / DIN 472 bore, workshop table Ø 3-100 mm at fixed nominal sizes). No ring at a given diameter returns no result — pick one of the standard sizes instead. Only the ring types and sizes flagged below have been independently verified against a manufacturer datasheet; check every other size against the current DIN or ring manufacturer catalog before production.",
     type: "Type",
     diameterShaft: "Shaft Ø (mm)",
     diameterBore: "Bore Ø (mm)",
@@ -88,17 +87,23 @@ const T = {
     },
     grooveDiameter: "Groove diameter",
     grooveWidth: "Groove width",
-    grooveDepth: "Groove depth",
+    grooveDepth: "Groove depth (nominal)",
     verified: "Verified against a manufacturer datasheet.",
     notVerified:
       "Not verified — confirm against DIN 471/472 or the manufacturer catalog before production.",
     estimateTitle: "Catalogue table",
     thDiameter: "Ø (mm)",
-    sourceBadge: (verifiedList: string) =>
-      `Catalogue data from a workshop table (summary of DIN 471/472), not the official standard PDF. Only Ø${verifiedList} mm is independently verified against a manufacturer datasheet (Rotor Clip); request the current standard or ring manufacturer catalog for every other size before production.`,
+    sourceBadge:
+      "Verified geometry: Rotor Clip product page per ring type and size. Remaining workshop values are unverified. Confirm width tolerance, edge distance, radii, material and loading with the manufacturer before production.",
     copyKind: { as: "Shaft", boring: "Bore" },
   },
 };
+
+function diameterText(r: NonNullable<ReturnType<typeof computeGroove>>) {
+  return r.source
+    ? `${fmtCirclip(r.source.diameterMin)}–${fmtCirclip(r.source.diameterMax)}`
+    : fmtCirclip(r.grooveDiameter);
+}
 
 export function SeegerGroovesCalc() {
   const { locale } = useLocale();
@@ -135,9 +140,12 @@ export function SeegerGroovesCalc() {
     const status = result.verified ? t.verified : t.notVerified;
     return [
       `${t.copyKind[kind]} Ø${d} mm (${standard}) — ${status}`,
-      `${t.grooveDiameter} ${fmtCirclip(result.grooveDiameter)} mm ${result.grooveDiameterClass}`,
-      `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm ${result.grooveWidthClass}`,
-      `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm · 0/+${fmtSeeger3(result.grooveDepthPlus)} mm`,
+      `${t.grooveDiameter} ${diameterText(result)} mm`,
+      `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm (W)`,
+      `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm`,
+      result.source
+        ? `Rotor Clip ${result.source.part} | ${result.source.url} | ${result.source.checkedDate}`
+        : t.notVerified,
       metaCopyLine(SEEGER_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,18 +198,26 @@ export function SeegerGroovesCalc() {
               items={[
                 {
                   label: t.grooveDiameter,
-                  value: `Ø${fmtCirclip(result.grooveDiameter)} mm ${result.grooveDiameterClass}`,
+                  value: `Ø${diameterText(result)} mm`,
                 },
                 {
                   label: t.grooveWidth,
-                  value: `${fmtCirclip(result.grooveWidth)} mm ${result.grooveWidthClass}`,
+                  value: `${fmtCirclip(result.grooveWidth)} mm (W)`,
                 },
                 {
                   label: t.grooveDepth,
-                  value: `${fmtCirclip(result.grooveDepth)} mm · 0/+${fmtSeeger3(result.grooveDepthPlus)} mm`,
+                  value: `${fmtCirclip(result.grooveDepth)} mm`,
                 },
               ]}
             />
+            {result.source && (
+              <p className="mt-3 text-sm text-muted">
+                <a href={result.source.url} className="underline">
+                  Rotor Clip {result.source.part}
+                </a>{" "}
+                · {locale === "nl" ? "Gecontroleerd" : "Reviewed"}: {result.source.checkedDate}
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
               <CopyLink />
@@ -210,7 +226,13 @@ export function SeegerGroovesCalc() {
         )}
         <SourceMetaBadge meta={SEEGER_META} />
       </CalcPanel>
-      <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
+      <SchemaPanel
+        caption={
+          locale === "en"
+            ? "Technical diagram · dimensions in mm · schematic, not to scale"
+            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+        }
+      >
         <CirclipSection
           kind={kind}
           d1={Number.isFinite(d) ? d : undefined}
@@ -244,25 +266,23 @@ export function SeegerGroovesCalc() {
                       <th scope="row" className="normal-case">
                         {dia}
                       </th>
+                      <td>{r ? `Ø${diameterText(r)}` : "—"}</td>
+                      <td>{r ? `${fmtCirclip(r.grooveWidth)} W` : "—"}</td>
+                      <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
                       <td>
-                        {r ? `Ø${fmtCirclip(r.grooveDiameter)} ${r.grooveDiameterClass}` : "—"}
-                      </td>
-                      <td>{r ? `${fmtCirclip(r.grooveWidth)} ${r.grooveWidthClass}` : "—"}</td>
-                      <td>
-                        {r
-                          ? `${fmtCirclip(r.grooveDepth)} · 0/+${fmtSeeger3(r.grooveDepthPlus)}`
-                          : "—"}
-                      </td>
-                      <td>
-                        {r
-                          ? r.verified
-                            ? locale === "nl"
-                              ? "geverifieerd"
-                              : "verified"
-                            : locale === "nl"
-                              ? "niet geverifieerd"
-                              : "not verified"
-                          : "—"}
+                        {r ? (
+                          r.source ? (
+                            <a className="underline" href={r.source.url}>
+                              {r.source.part} · {r.source.checkedDate}
+                            </a>
+                          ) : locale === "nl" ? (
+                            "niet geverifieerd"
+                          ) : (
+                            "not verified"
+                          )
+                        ) : (
+                          "—"
+                        )}
                       </td>
                     </tr>
                   );
@@ -271,7 +291,7 @@ export function SeegerGroovesCalc() {
             </tbody>
           </table>
         </div>
-        <SourceBadge>{t.sourceBadge([...VERIFIED_SEEGER_D1].join(", "))}</SourceBadge>
+        <SourceBadge>{t.sourceBadge}</SourceBadge>
       </section>
     </>
   );
