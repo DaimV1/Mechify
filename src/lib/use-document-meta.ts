@@ -52,6 +52,7 @@ function setPageJsonLd(
     "@type": schema?.type ?? "WebPage",
     name: title,
     description,
+    inLanguage: /^\/en(?:\/|$)/.test(window.location.pathname) ? "en" : "nl",
     url,
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
     ...schema?.extra,
@@ -70,7 +71,7 @@ function setPageJsonLd(
       "@type": "ListItem",
       position: i + 1,
       name: c.name,
-      item: `${SITE_URL}${c.path}`,
+      item: `${SITE_URL}${window.location.pathname.startsWith("/en") && !c.path.startsWith("/en") ? "/en" + (c.path === "/" ? "" : c.path) : c.path}`,
     })),
   };
   tag.textContent = JSON.stringify({
@@ -146,6 +147,21 @@ export function useDocumentMeta(
     document.title = fullTitle;
     setMetaTag("name", "description", description);
     setCanonical(url);
+    const english = /^\/en(?:\/|$)/.test(window.location.pathname);
+    const base = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((tag) => tag.remove());
+    for (const [lang, path] of [
+      ["nl", base === "/" ? "" : base],
+      ["en", "/en" + (base === "/" ? "" : base)],
+      ["x-default", base === "/" ? "" : base],
+    ]) {
+      const link = document.createElement("link");
+      link.rel = "alternate";
+      link.hreflang = lang;
+      link.href = SITE_URL + path;
+      document.head.appendChild(link);
+    }
+    setMetaTag("property", "og:locale", english ? "en_GB" : "nl_NL");
     setMetaTag("property", "og:title", fullTitle);
     setMetaTag("property", "og:description", description);
     setMetaTag("property", "og:url", url);

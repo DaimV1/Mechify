@@ -20,6 +20,9 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run build
+      - run: node --test tests/english-prerender.test.ts
+        env:
+          REQUIRE_PRERENDER: "1"
       - uses: actions/upload-artifact@v7
         with:
           name: dist

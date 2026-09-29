@@ -1,0 +1,23 @@
+name: Deployed smoke
+on:
+  deployment_status:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/deployed-smoke.mjs
+        env:
+          SMOKE_ORIGIN: https://www.mechify.nl
+          EXPECTED_SHA: ${{ github.event.deployment.sha || github.sha }}

@@ -57,7 +57,7 @@ const T = {
   nl: {
     heading: "ISO-boring bij een last",
     intro:
-      "F = p · A, dubbelwerkende cilinder. Zoekt de kleinste standaard boring (ISO 15552 / ISO 6432) die de opgegeven last haalt — zonder marge.",
+      "F = p · A, dubbelwerkende cilinder. Zoekt de kleinste standaard boring (ISO 15552 / ISO 6432) die bij uitschuiven de opgegeven last haalt — zonder marge.",
     forceLabel: "Benodigde kracht F (N)",
     pressureLabel: "Werkdruk p (bar)",
     fillForcePressure: "Vul een kracht en druk groter dan 0 in.",
@@ -117,7 +117,7 @@ const T = {
   en: {
     heading: "ISO bore for a load",
     intro:
-      "F = p · A, double-acting cylinder. Finds the smallest standard bore (ISO 15552 / ISO 6432) that meets the given load — with no margin.",
+      "F = p · A, double-acting cylinder. Finds the smallest standard bore (ISO 15552 / ISO 6432) whose extend force meets the given load — with no margin.",
     forceLabel: "Required force F (N)",
     pressureLabel: "Working pressure p (bar)",
     fillForcePressure: "Enter a force and pressure greater than 0.",
@@ -194,7 +194,7 @@ export function PneumaticCylinderCalc() {
 
   useEffect(() => {
     const next = new URLSearchParams(search);
-    const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
+    const set = (k: string, v: string) => next.set(k, v);
     set("f", force);
     set("p", pressure);
     set("l", stroke);
@@ -250,13 +250,19 @@ export function PneumaticCylinderCalc() {
     if (!recommended || F == null || p == null) return "";
     const extend = extendForce(recommended.bore, p);
     const lines = [
+      t.intro,
       t.copyLoad(fmtN0(F), String(p)),
       t.copyBore(recommended.bore, recommended.series),
       t.copyRod(rod),
       t.copyExtend(fmtN0(extend)),
     ];
-    if (buckling)
+    if (buckling) {
       lines.push(t.copyBuckling(fmtN0(buckling.Fcr), fmtDotComma(buckling.safety ?? 0, 2)));
+      lines.push(t.bucklingBasisNote);
+      if (!buckling.verifiedCapacity) lines.push(t.additionalCheckNote);
+      else if (buckling.safety != null && buckling.safety < 3.5)
+        lines.push(t.lowSafetyNote(fmtDotComma(buckling.safety, 2)));
+    }
     if (airResult) {
       lines.push(t.copyEfficiency(efficiency, fmtN0(airResult.effUit), fmtN0(airResult.effIn)));
       lines.push(t.copyAir(fmtAir(airResult.qCycle), fmtAir(airResult.qMin)));

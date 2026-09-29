@@ -157,7 +157,7 @@ export function BearingLifeCalc() {
 
   useEffect(() => {
     const next = new URLSearchParams(search);
-    const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
+    const set = (k: string, v: string) => next.set(k, v);
     set("C", C);
     set("P", P);
     set("n", rpm);
@@ -187,8 +187,7 @@ export function BearingLifeCalc() {
   const typeLabel = (bt: BearingLoadType) =>
     BEARING_LOAD_TYPES.find((x) => x.id === bt)?.[locale === "nl" ? "label" : "labelEn"] ?? bt;
 
-  const highSpeedWarning =
-    Cval != null && rpmVal != null && rpmVal > 10000 && Cval < 5;
+  const highSpeedWarning = Cval != null && rpmVal != null && rpmVal > 10000 && Cval < 5;
 
   const copy = useMemo(() => {
     if (l10M == null || l10h == null || l10Adj == null || l10hAdj == null) return "";
@@ -205,7 +204,11 @@ export function BearingLifeCalc() {
         fmtBearingLife(l10hAdj),
       ),
     ];
-    if (S0 != null) lines.push(t.copyStatic(fmtBearingLife(S0, 2)));
+    if (S0 != null) {
+      lines.push(t.copyStatic(fmtBearingLife(S0, 2)));
+      lines.push(s0Status === "fail" ? t.s0Fail : s0Status === "caution" ? t.s0Caution : t.s0Ok);
+    }
+    if (highSpeedWarning) lines.push(t.speedWarning);
     lines.push(metaCopyLine(BEARING_LIFE_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,10 +226,7 @@ export function BearingLifeCalc() {
         <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.dynamicSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <Field label={t.bearingType}>
-            <SelectInput
-              value={bearingType}
-              onChange={(v) => setBearingType(v as BearingLoadType)}
-            >
+            <SelectInput value={bearingType} onChange={(v) => setBearingType(v as BearingLoadType)}>
               {BEARING_LOAD_TYPES.map((bt) => (
                 <option key={bt.id} value={bt.id}>
                   {typeLabel(bt.id)}
@@ -261,19 +261,24 @@ export function BearingLifeCalc() {
         ) : (
           <>
             <ResultGrid
-              items={[
-                { label: t.resultL10, value: `${fmtBearingLife(l10M, 2)} × 10⁶ omw.` },
-                { label: t.resultL10h, value: `${fmtBearingLife(l10h)} h` },
-                reliabilityId !== "90"
-                  ? {
-                      label: t.resultL10Adj,
-                      value: `${fmtBearingLife(l10Adj ?? 0, 2)} × 10⁶ omw.`,
-                    }
-                  : null,
-                reliabilityId !== "90"
-                  ? { label: t.resultL10hAdj, value: `${fmtBearingLife(l10hAdj ?? 0)} h` }
-                  : null,
-              ].filter(Boolean) as { label: string; value: string }[]}
+              items={
+                [
+                  {
+                    label: t.resultL10,
+                    value: `${fmtBearingLife(l10M, 2)} × 10⁶ ${locale === "en" ? "rev" : "omw."}`,
+                  },
+                  { label: t.resultL10h, value: `${fmtBearingLife(l10h)} h` },
+                  reliabilityId !== "90"
+                    ? {
+                        label: t.resultL10Adj,
+                        value: `${fmtBearingLife(l10Adj ?? 0, 2)} × 10⁶ ${locale === "en" ? "rev" : "omw."}`,
+                      }
+                    : null,
+                  reliabilityId !== "90"
+                    ? { label: t.resultL10hAdj, value: `${fmtBearingLife(l10hAdj ?? 0)} h` }
+                    : null,
+                ].filter(Boolean) as { label: string; value: string }[]
+              }
             />
             {highSpeedWarning ? (
               <p className="mt-3 text-sm leading-relaxed text-muted" role="status">

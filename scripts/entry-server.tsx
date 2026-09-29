@@ -11,10 +11,8 @@ export { getAllRoutes } from "@/lib/all-routes";
  * shell) to an HTML string for a given path, waiting for every lazy-loaded
  * calculator chunk to resolve (onAllReady, not onShellReady — this runs
  * once per route at build time for static output, not per-request, so
- * there is no streaming-latency reason to resolve early). Always renders
- * with the default "nl" locale and no query string, matching the one
- * canonical version a static file can represent — see LocaleProvider's own
- * comment on why the client's first render must match this.
+ * there is no streaming-latency reason to resolve early). Renders the URL-selected
+ * locale with no query string, matching the client's first hydration render.
  */
 export function renderPage(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -25,8 +23,8 @@ export function renderPage(url: string): Promise<string> {
     sink.on("error", reject);
 
     const { pipe, abort } = renderToPipeableStream(
-      <LocaleProvider>
-        <StaticRouter location={url}>
+      <LocaleProvider initialLocale={/^\/en(?:\/|$)/.test(url) ? "en" : "nl"}>
+        <StaticRouter location={url} basename={/^\/en(?:\/|$)/.test(url) ? "/en" : "/"}>
           <App />
         </StaticRouter>
       </LocaleProvider>,

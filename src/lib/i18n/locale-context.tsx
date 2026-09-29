@@ -8,37 +8,32 @@ type LocaleContextValue = { locale: Locale; setLocale: (l: Locale) => void };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function readStoredLocale(): Locale {
-  if (typeof window === "undefined") return "nl";
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "nl";
-  } catch {
-    return "nl";
+/** The URL owns language, including the very first hydration render. */
+export function LocaleProvider({
+  children,
+  initialLocale = "nl",
+}: {
+  children: ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale] = useState<Locale>(initialLocale);
+  function setLocale(next: Locale) {
+    if (next === locale) return;
+    const base = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+    window.location.assign(
+      (next === "en" ? "/en" + (base === "/" ? "" : base) : base) +
+        window.location.search +
+        window.location.hash,
+    );
   }
-}
-
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  // P0.2: always start at "nl" so the first client render matches the
-  // prerendered (server) HTML exactly — reading localStorage here would
-  // desync from the static "nl" markup for a returning English-preference
-  // visitor and trigger a hydration mismatch. The correction below runs
-  // once, after mount, client-only.
-  const [locale, setLocale] = useState<Locale>("nl");
-
-  useEffect(() => {
-    const stored = readStoredLocale();
-    if (stored !== "nl") setLocale(stored);
-  }, []);
-
   useEffect(() => {
     document.documentElement.lang = locale;
     try {
       window.localStorage.setItem(STORAGE_KEY, locale);
     } catch {
-      /* ignore */
+      /* optional preference */
     }
   }, [locale]);
-
   return <LocaleContext.Provider value={{ locale, setLocale }}>{children}</LocaleContext.Provider>;
 }
 

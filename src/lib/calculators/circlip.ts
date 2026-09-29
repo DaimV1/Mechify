@@ -33,15 +33,11 @@ export const CIRCLIP_KINDS: {
 
 export type CirclipResult = {
   grooveDiameter: number;
-  /** ISO 286 tolerance class of the groove diameter: h11 for a shaft groove, H11 for a bore groove. */
-  grooveDiameterClass: string;
   grooveWidth: number;
-  /** Groove width tolerance class from the workshop table (fixed, not size-dependent). */
-  grooveWidthClass: string;
+  /** Nominal radial depth; shaft/bore manufacturing tolerances are not included. */
   grooveDepth: number;
-  /** Groove depth tolerance, 0 / +grooveDepthPlus mm (ISO 286 IT11/2 on the groove diameter) — deeper is allowed, shallower is not. */
-  grooveDepthPlus: number;
-  /** True only for sizes independently checked against a manufacturer datasheet — see VERIFIED_SEEGER_D1 in toolkit/seeger.ts. */
+  source: import("../toolkit/seeger.ts").SeegerSource | null;
+  /** Manufacturer groove geometry verified for this specific ring and size. */
   verified: boolean;
 };
 
@@ -69,18 +65,16 @@ export function nearestStandardSizes(
  * the table (use nearestStandardSizes to point to the closest sizes that do).
  */
 export function computeGroove(kind: CirclipKind, d: number): CirclipResult | null {
-  if (!(d > 0)) return null;
+  if (!(d > 0) || (kind !== "as" && kind !== "boring")) return null;
   const row = lookupSeeger(d);
   if (!row) return null;
   const seeger = seegerFor(row, kind);
   if (!seeger) return null;
   return {
     grooveDiameter: seeger.d2,
-    grooveDiameterClass: seeger.d2Class,
     grooveWidth: seeger.b,
-    grooveWidthClass: seeger.bClass,
     grooveDepth: seeger.t,
-    grooveDepthPlus: seeger.tPlus,
+    source: seeger.source,
     verified: seeger.verified,
   };
 }

@@ -1,5 +1,5 @@
 {
-  "source": "DIN 471/472 circlip groove tables — verified DSH-20-style record",
+  "source": "Rotor Clip DSH/DHO product specifications: per-part groove geometry checked 2026-09-27; nominal radial depth derived from nominal shaft/bore and groove diameters, not a depth tolerance or load rating",
   "externalRing20": {
     "diameter": 20,
     "grooveDiameter": 19.0,
@@ -13,8 +13,130 @@
     "grooveWidth": 1.1,
     "verified": true
   },
-  "unverifiedRing30": {
-    "diameter": 30,
+  "unverifiedRing35": {
+    "diameter": 35,
     "verified": false
-  }
+  },
+  "verifiedRows": [
+    {
+      "kind": "as",
+      "diameter": 10,
+      "part": "DSH-10",
+      "url": "https://www.rotorclip.com/product/dsh-10/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 9.54,
+      "diameterMax": 9.6,
+      "grooveWidth": 1.1,
+      "grooveDiameter": 9.6,
+      "grooveDepth": 0.2
+    },
+    {
+      "kind": "as",
+      "diameter": 20,
+      "part": "DSH-20",
+      "url": "https://www.rotorclip.com/product/dsh-20/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 18.87,
+      "diameterMax": 19,
+      "grooveWidth": 1.3,
+      "grooveDiameter": 19,
+      "grooveDepth": 0.5
+    },
+    {
+      "kind": "boring",
+      "diameter": 20,
+      "part": "DHO-20",
+      "url": "https://www.rotorclip.com/product/dho-20/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 21,
+      "diameterMax": 21.13,
+      "grooveWidth": 1.1,
+      "grooveDiameter": 21,
+      "grooveDepth": 0.5
+    },
+    {
+      "kind": "as",
+      "diameter": 25,
+      "part": "DSH-25",
+      "url": "https://www.rotorclip.com/product/dsh-25/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 23.69,
+      "diameterMax": 23.9,
+      "grooveWidth": 1.3,
+      "grooveDiameter": 23.9,
+      "grooveDepth": 0.55
+    },
+    {
+      "kind": "boring",
+      "diameter": 25,
+      "part": "DHO-25",
+      "url": "https://www.rotorclip.com/product/dho-25/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 26.2,
+      "diameterMax": 26.41,
+      "grooveWidth": 1.3,
+      "grooveDiameter": 26.2,
+      "grooveDepth": 0.6
+    },
+    {
+      "kind": "as",
+      "diameter": 30,
+      "part": "DSH-30",
+      "url": "https://www.rotorclip.com/product/dsh-30/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 28.35,
+      "diameterMax": 28.6,
+      "grooveWidth": 1.6,
+      "grooveDiameter": 28.6,
+      "grooveDepth": 0.7
+    },
+    {
+      "kind": "boring",
+      "diameter": 30,
+      "part": "DHO-30",
+      "url": "https://www.rotorclip.com/product/dho-30/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 31.4,
+      "diameterMax": 31.65,
+      "grooveWidth": 1.3,
+      "grooveDiameter": 31.4,
+      "grooveDepth": 0.7
+    },
+    {
+      "kind": "as",
+      "diameter": 40,
+      "part": "DSH-40",
+      "url": "https://www.rotorclip.com/product/dsh-40/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 37.25,
+      "diameterMax": 37.5,
+      "grooveWidth": 1.85,
+      "grooveDiameter": 37.5,
+      "grooveDepth": 1.25
+    },
+    {
+      "kind": "boring",
+      "diameter": 40,
+      "part": "DHO-40",
+      "url": "https://www.rotorclip.com/product/dho-40/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 42.5,
+      "diameterMax": 42.75,
+      "grooveWidth": 1.85,
+      "grooveDiameter": 42.5,
+      "grooveDepth": 1.25
+    },
+    {
+      "kind": "boring",
+      "diameter": 50,
+      "part": "DHO-50",
+      "url": "https://www.rotorclip.com/product/dho-50/",
+      "checkedDate": "2026-09-27",
+      "diameterMin": 53,
+      "diameterMax": 53.3,
+      "grooveWidth": 2.15,
+      "grooveDiameter": 53,
+      "grooveDepth": 1.5
+    }
+  ]
 }

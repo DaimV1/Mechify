@@ -38,9 +38,7 @@ export function ToolDetail({ section }: { section: ToolSection }) {
             },
             breadcrumbs: [
               { name: "Mechify", path: "/" },
-              ...(sectionMeta
-                ? [{ name: sectionMeta.label[locale], path: sectionMeta.href }]
-                : []),
+              ...(sectionMeta ? [{ name: sectionMeta.label[locale], path: sectionMeta.href }] : []),
             ],
           }
         : undefined,

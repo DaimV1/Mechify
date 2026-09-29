@@ -1,17 +1,7 @@
 /** Seegerringgroef: DIN 471 (as) / DIN 472 (boring), workshop table. */
 export type SeegerKind = "as" | "boring";
 
-/**
- * bAs/bBor were a single shared `b` field until the September 2026 audit
- * found this wrong for at least one confirmed size: at d1=20 mm, Rotor
- * Clip's external DSH-20 (DIN 471) groove is 1.3 mm wide but its internal
- * DHO-20 (DIN 472) groove is 1.1 mm — a real difference the workshop table
- * this file was built from had collapsed into one column. Only the sizes in
- * VERIFIED_SEEGER_D1 have bAs/bBor independently checked against a
- * manufacturer datasheet; every other row still carries its pre-audit value
- * in both columns (unchanged, not re-derived) and MUST be confirmed against
- * DIN 471/472 or the ring manufacturer's catalogue before production use.
- */
+/** Legacy workshop values remain unverified unless a per-ring source exists below. */
 export type SeegerRow = {
   d1: number;
   d2as: number | null;
@@ -20,11 +10,48 @@ export type SeegerRow = {
   bBor: number;
 };
 
-/** d1 values where bAs and bBor have each been checked against a manufacturer datasheet (see the SeegerRow comment). */
-export const VERIFIED_SEEGER_D1: ReadonlySet<number> = new Set([20]);
+export type SeegerSource = {
+  part: string;
+  url: string;
+  checkedDate: string;
+  diameterMin: number;
+  diameterMax: number;
+  width: number;
+};
 
-export function isVerifiedSeeger(d1: number): boolean {
-  return VERIFIED_SEEGER_D1.has(d1);
+/** Rotor Clip product specifications, mm. W is the published catalogue width;
+ * no width tolerance class or depth tolerance is inferred from these pages.
+ * Verification covers groove geometry only, not ring load capacity or suitability.
+ */
+export const SEEGER_SOURCES: Record<string, SeegerSource> = Object.fromEntries(
+  [
+    ["as", 10, "DSH", 9.54, 9.6, 1.1],
+    ["as", 20, "DSH", 18.87, 19, 1.3],
+    ["boring", 20, "DHO", 21, 21.13, 1.1],
+    ["as", 25, "DSH", 23.69, 23.9, 1.3],
+    ["boring", 25, "DHO", 26.2, 26.41, 1.3],
+    ["as", 30, "DSH", 28.35, 28.6, 1.6],
+    ["boring", 30, "DHO", 31.4, 31.65, 1.3],
+    ["as", 40, "DSH", 37.25, 37.5, 1.85],
+    ["boring", 40, "DHO", 42.5, 42.75, 1.85],
+    ["boring", 50, "DHO", 53, 53.3, 2.15],
+  ].map(([kind, d, series, diameterMin, diameterMax, width]) => [
+    `${kind}-${d}`,
+    {
+      part: `${series}-${d}`,
+      url: `https://www.rotorclip.com/product/${String(series).toLowerCase()}-${d}/`,
+      checkedDate: "2026-09-27",
+      diameterMin: Number(diameterMin),
+      diameterMax: Number(diameterMax),
+      width: Number(width),
+    },
+  ]),
+);
+
+export function isVerifiedSeeger(d1: number, kind?: SeegerKind): boolean {
+  return kind
+    ? Boolean(SEEGER_SOURCES[`${kind}-${d1}`])
+    : Boolean(SEEGER_SOURCES[`as-${d1}`] && SEEGER_SOURCES[`boring-${d1}`]);
 }
 
 export const SEEGER: SeegerRow[] = [
@@ -52,7 +79,7 @@ export const SEEGER: SeegerRow[] = [
   { d1: 25, d2as: 23.9, d2bor: 26.2, bAs: 1.3, bBor: 1.3 },
   { d1: 26, d2as: 24.9, d2bor: 27.2, bAs: 1.3, bBor: 1.3 },
   { d1: 28, d2as: 26.6, d2bor: 29.4, bAs: 1.6, bBor: 1.6 },
-  { d1: 30, d2as: 28.6, d2bor: 31.4, bAs: 1.6, bBor: 1.6 },
+  { d1: 30, d2as: 28.6, d2bor: 31.4, bAs: 1.6, bBor: 1.3 },
   { d1: 32, d2as: 30.3, d2bor: 33.7, bAs: 1.6, bBor: 1.6 },
   { d1: 35, d2as: 33.0, d2bor: 37.0, bAs: 1.6, bBor: 1.6 },
   { d1: 36, d2as: 34.0, d2bor: 38.0, bAs: 1.85, bBor: 1.85 },
@@ -88,38 +115,16 @@ export function lookupSeeger(d1: number) {
   return SEEGER.find((row) => row.d1 === d1) ?? null;
 }
 
-/** ISO 286-1 IT11 in mm, for the groove diameter d₂. */
-export function it11(d: number) {
-  if (d <= 3) return 0.06;
-  if (d <= 6) return 0.075;
-  if (d <= 10) return 0.09;
-  if (d <= 18) return 0.11;
-  if (d <= 30) return 0.13;
-  if (d <= 50) return 0.16;
-  if (d <= 80) return 0.19;
-  return 0.22;
-}
-
-/** t 0 / +IT11/2 — dieper mag (d₂ h11 as, H11 boring), ondieper niet. */
-export function depthPlus(d2: number) {
-  return Math.round((it11(d2) / 2) * 1000) / 1000;
-}
-
-/** Groove width tolerance class from the workshop table — fixed, not derived from d2 like d2Class/tPlus. */
-export const GROOVE_WIDTH_CLASS = "H13";
-
 export function seegerFor(row: SeegerRow, kind: SeegerKind) {
   const d2 = kind === "as" ? row.d2as : row.d2bor;
   if (d2 == null) return null;
-  const t = grooveDepth(row.d1, d2);
+  const source = SEEGER_SOURCES[`${kind}-${row.d1}`] ?? null;
   return {
     d2,
-    b: kind === "as" ? row.bAs : row.bBor,
-    bClass: GROOVE_WIDTH_CLASS,
-    t,
-    d2Class: kind === "as" ? "h11" : "H11",
-    tPlus: depthPlus(d2),
-    verified: isVerifiedSeeger(row.d1),
+    b: source?.width ?? (kind === "as" ? row.bAs : row.bBor),
+    t: grooveDepth(row.d1, d2),
+    source,
+    verified: source !== null,
   };
 }
 
