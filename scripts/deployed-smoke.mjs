@@ -55,11 +55,19 @@ try {
     if (message.type() === "error") errors.push(message.text());
   });
   await page.goto(new URL("/en/calculators/bearing-life", origin).href);
+  // Prerendered inputs are visible before React attaches event handlers. The
+  // calculator's client effect adds these defaults only after it has mounted.
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("type") === "ball" && url.searchParams.get("rel") === "90",
+  );
   await expect(page.locator("#bearing-life-C")).toBeVisible();
   await page.locator("#bearing-life-C").fill("5");
   await expect(page).toHaveURL(/[?&]C=5(?:&|$)/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await page.goto(new URL("/en/calculators/bearing-life?C=4&P=2&n=12000", origin).href);
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("type") === "ball" && url.searchParams.get("rel") === "90",
+  );
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("#bearing-life-C")).toHaveValue("4");
   await page.locator("#bearing-life-C").fill("6");

@@ -320,7 +320,7 @@ export function BearingLifeCalc() {
         )}
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <CopyResult text={copy} />
+          {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
         </div>
         <p className="mt-4 text-sm">

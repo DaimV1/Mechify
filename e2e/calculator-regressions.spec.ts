@@ -6,6 +6,10 @@ test("bearing shared blank stays invalid after reload", async ({ page }) => {
   await expect(page).toHaveURL(/[?&]C=&/);
   await page.reload();
   await expect(page.locator("#bearing-life-C")).toHaveValue("");
+  await expect(
+    page.getByText("Enter C, P and the speed (all greater than 0).", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("L10 (basic)", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
 });
 
