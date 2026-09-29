@@ -47,8 +47,7 @@ its baseline with `npm run test:e2e:update-snapshots` (screenshots live in
 - `src/lib/toolkit/`: additional calculator logic carried over from the
   Damianvink toolkit.
 - `tests/reference-calculators.test.ts`, `tests/reference-toolkit.test.ts`,
-  `tests/reference-cylinder.test.ts`, `tests/kanten-clearance.test.ts`: unit
-  tests for the calculators.
+  `tests/kanten-clearance.test.ts`: unit tests for the calculators.
 - `tests/fixtures/reference-cases/*.json`: the reference tables/worked
   examples (ISO 281 bearing life, ISO 2768, VDI 2230-lite bolted joints, O-ring
   fill, circlip catalogue sizes, pneumatic cylinder buckling, etc.) that the

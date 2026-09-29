@@ -156,12 +156,12 @@ const pages = {
           a: "Manometerdruk (overdruk). 6 bar op de reduceerventiel is 6 bar gauge. Luchtverbruik per cyclus gebruikt p+1 als benadering van absoluut.",
         },
         {
-          q: "Waarom lastfactor 1,25?",
-          a: "Vuistregel voor wrijving en dynamiek. Geen normwaarde. Verhoog bij verticale last, stoppen op de stang, of onbekende wrijving. S = 1 is puur theoretisch.",
+          q: "Waarom geen lastfactor?",
+          a: "De tool zoekt de kleinste standaard boring die F = p·A haalt, zonder marge (S = 1). Reken zelf een veiligheidsfactor voor leidingverlies, wrijving en versnelling — een vaste vuistregelfactor zou dat verschil per toepassing verbergen.",
         },
         {
           q: "ISO 15552 of 6432?",
-          a: "Volgt uit de boring. Ø8–25 is ISO 6432 (rond, mini). Ø32–320 is ISO 15552 (profiel). De kleinste boring die F·S haalt, wint.",
+          a: "Volgt uit de boring. Ø8–25 is ISO 6432 (rond, mini). Ø32–320 is ISO 15552 (profiel). De kleinste boring die F haalt, zonder marge, wint.",
         },
         {
           q: "Kiest deze tool een Festo- of SMC-type?",
@@ -169,7 +169,7 @@ const pages = {
         },
         {
           q: "Wat is de stangknik-check?",
-          a: "Indicatief: massieve stalen stang, ingeklemd-vrij (k=2,1), knik-lengte = slag. Onder de Euler-slankheidsgrens rekent de check op de plooilast (A·Rp0,2) in plaats van Euler — anders overschat Euler de sterkte flink. Richtwaarde S ≥ 3,5. Alleen bij uitgaan (drukstang). Werkelijke bevestiging, geleidingsreserve en stangmateriaal kunnen dit flink verschuiven — gebruik de Euler-knik rekenhulp voor een echte bevestiging.",
+          a: "Optioneel en indicatief: massieve stang met zelf te kiezen materiaal en inklemming, knik-lengte = uitgeschoven lengte. De check toetst tegen de beschikbare uittrekkracht bij deze boring en druk (het geblokkeerde geval), niet tegen de ingevoerde last. Onder de Euler-slankheidsgrens rekent de check op de plooilast (A·Rp0,2) in plaats van Euler — anders overschat Euler de sterkte flink. Fabrikant-selectietabellen hanteren doorgaans 3,5–5× marge; gebruik de Euler-knik rekenhulp voor een echte bevestiging.",
         },
       ],
     },
@@ -188,12 +188,12 @@ const pages = {
           a: "Gauge pressure. 6 bar on the regulator is 6 bar gauge. Air per cycle uses p+1 as an absolute approximation.",
         },
         {
-          q: "Why load factor 1.25?",
-          a: "Rule of thumb for friction and dynamics. Not a standard value. Raise it for vertical load, stopping on the rod, or unknown friction. S = 1 is purely theoretical.",
+          q: "Why no load factor?",
+          a: "The tool finds the smallest standard bore that reaches F = p*A, with no margin (S = 1). Add your own safety factor for line loss, friction and acceleration — a fixed rule-of-thumb factor would hide how much that differs per application.",
         },
         {
           q: "ISO 15552 or 6432?",
-          a: "Follows from the bore. Ø8–25 is ISO 6432 (round, mini). Ø32–320 is ISO 15552 (profile). The smallest bore that covers F·S wins.",
+          a: "Follows from the bore. Ø8–25 is ISO 6432 (round, mini). Ø32–320 is ISO 15552 (profile). The smallest bore that reaches F, with no margin, wins.",
         },
         {
           q: "Does this pick a Festo or SMC type?",
@@ -201,7 +201,7 @@ const pages = {
         },
         {
           q: "What is the rod buckling check?",
-          a: "Indicative: solid steel rod, fixed-free (k=2.1), buckling length = stroke. Below the Euler slenderness limit the check uses the squash load (A·Rp0.2) instead of Euler — otherwise Euler overstates the real strength considerably. Target S ≥ 3.5. Extend (push) direction only. Actual mounting, guide-length allowance and rod material can shift this significantly — use the Euler buckling tool for a real mounting.",
+          a: "Optional and indicative: a solid rod with a chosen material and end condition, buckling length = extended length. The check is run against the available extend force at this bore and pressure (the blocked case), not the entered load. Below the Euler slenderness limit the check uses the squash load (A·Rp0.2) instead of Euler — otherwise Euler overstates the real strength considerably. Manufacturer selection tables typically use a 3.5–5x margin; use the Euler buckling tool for a real mounting.",
         },
       ],
     },

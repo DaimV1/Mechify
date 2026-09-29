@@ -12,7 +12,7 @@ export const LEGACY_TOOL_ROUTES: Readonly<Record<string, string>> = {
   "o-ringgroef": "/tools/o-ring-grooves",
   kanten: "/tools/edges",
   motorspecificatie: "/calculators/motor-specification",
-  cilinder: "/calculators/pneumatic-cylinder?model=referentie",
+  cilinder: "/calculators/pneumatic-cylinder",
   knikberekening: "/calculators/buckling",
   "doorbuiging-balk": "/calculators/beam-deflection",
   eenheden: "/calculators/units",

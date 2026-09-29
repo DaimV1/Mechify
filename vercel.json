@@ -36,7 +36,7 @@
     },
     {
       "source": "/toolkit/cilinder",
-      "destination": "/calculators/pneumatic-cylinder?model=referentie",
+      "destination": "/calculators/pneumatic-cylinder",
       "permanent": true
     },
     {

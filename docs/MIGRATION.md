@@ -4,7 +4,7 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 
 ## Inventarisatie per onderdeel
 
-15 van 15 oorspronkelijke tools geïntegreerd, 8 van 8 oorspronkelijke SVG-visuals overgenomen. Twee nieuwe tools brengen het overzicht op 17; zes aanvullende rekenmodellen staan binnen hun bestaande tool, zonder dubbele calculatorpagina’s. Bevestigingsmateriaal, O-ringgroef en Motorspecificatie hadden voorheen ook zo'n keuze ("Rekenmodel"-dropdown); op Damians verzoek (28 sept 2026) is dat per tool teruggebracht naar één rekenkern.
+15 van 15 oorspronkelijke tools geïntegreerd, 8 van 8 oorspronkelijke SVG-visuals overgenomen. Twee nieuwe tools brengen het overzicht op 17; vijf aanvullende rekenmodellen staan binnen hun bestaande tool, zonder dubbele calculatorpagina’s. Bevestigingsmateriaal, O-ringgroef, Motorspecificatie en Pneumatische cilinder hadden voorheen ook zo'n keuze ("Rekenmodel"-dropdown); op Damians verzoek (28-29 sept 2026) is dat per tool teruggebracht naar één rekenkern.
 
 | Tool / behouden route | Functionaliteit en verschillen | Visual / assets | Migratie |
 |---|---|---|---|
@@ -18,7 +18,7 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 | [Kanten](/tools/edges) | Vrije buigberekening behouden; materiaal/haaks/scherp-richtlijnen als aanvullend model | BendSection | Gereed |
 | [Eenheden](/calculators/units) | Alle oude categorieën, tweerichtingsconverter als enige model (eenrichtingsvariant verwijderd), vermogen toegevoegd | Geen losse bronvisual | Gereed |
 | [Motorspecificatie](/calculators/motor-specification) | Uitgebreid werkpunt (met versnelling en rollenmassa) is het enige model; het stationaire model is verwijderd (minder getoetst tegen IEC 60034) | Geen losse bronvisual | Gereed |
-| [Pneumatische cilinder](/calculators/pneumatic-cylinder) | Boring/knik behouden; lastfactor, duwen/trekken, luchtverbruik; extra krachtmodel | Eigen SVG bij gegeven diameter | Gereed |
+| [Pneumatische cilinder](/calculators/pneumatic-cylinder) | Boring & knikcontrole is het enige model (optionele knik met materiaal/inklemmingkeuze, optioneel luchtverbruik met rendement); de Lastfactor & luchtverbruik-variant is verwijderd | Geen losse bronvisual | Gereed |
 | [Knikberekening](/calculators/buckling) | Alle doorsneden, inklemmingen, materialen, last en grensslankheid behouden | BucklingModes | Gereed |
 | [Doorbuiging balk](/calculators/beam-deflection) | Oplegging/uitkraging behouden; maximale doorbuiging, locatie en spanning toegevoegd | BeamDeflection | Gereed |
 | [CAD-bibliotheken](/cad/resources) | Bestaande links plus originele broncategorieën | Geen bronvisual | Gereed |

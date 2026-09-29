@@ -148,8 +148,8 @@
     {
       "name": "Pneumatische cilinder",
       "route": "/calculators/pneumatic-cylinder",
-      "visual": "Eigen SVG bij gegeven diameter",
-      "functionality": "Boring/knik behouden; lastfactor, duwen/trekken, luchtverbruik; extra krachtmodel",
+      "visual": "Geen losse bronvisual",
+      "functionality": "Boring & knikcontrole is het enige model (optionele knik met materiaal/inklemmingkeuze, optioneel luchtverbruik met rendement); de Lastfactor & luchtverbruik-variant is verwijderd",
       "status": "migrated",
       "defaultsAndStateDeclarations": [
         "const [search, setSearch] = useSearchParams();",
