@@ -18,11 +18,9 @@ import {
 } from "../src/lib/calculators/iso2768.ts";
 import { bandIndex, computeFit } from "../src/lib/calculators/iso286.ts";
 import { computeOringGroove } from "../src/lib/calculators/oring.ts";
-import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { sizeMotor } from "../src/lib/toolkit/motor.ts";
 import { isVerifiedSeeger } from "../src/lib/toolkit/seeger.ts";
 import { columnCapacity, extremeFiber, sectionProps } from "../src/lib/calculators/knik.ts";
-import { rodBucklingCheck } from "../src/lib/toolkit/cylinder.ts";
 import { bendingStress, computeBeam } from "../src/lib/calculators/beam.ts";
 import {
   a1For,
@@ -40,9 +38,13 @@ import {
 import {
   airConsumptionPerCycleL,
   airConsumptionPerMinuteL,
+  ALL_BORES,
   annulusArea,
   circleArea,
   effectiveForce,
+  extendForce,
+  minBoreFor,
+  retractForce,
 } from "../src/lib/calculators/pneumatic.ts";
 import {
   shaftDiameterForTorque,
@@ -256,16 +258,6 @@ describe("Motor efficiency guard", () => {
     assert.ok(r);
   });
 
-  it("default calculators computeMotor also rejects eta > 1", () => {
-    const r = computeMotor({
-      force: 981,
-      speedMs: 1,
-      diameterMm: 100,
-      efficiency: 2,
-      safety: 1,
-    });
-    assert.equal(r, null);
-  });
 });
 
 // E12 — the fits tool must accept decimal nominal diameters (bandIndex is
@@ -307,20 +299,6 @@ describe("Buckling: verified capacity vs screening-only upper bound", () => {
     assert.ok(r);
     assert.equal(r.governing, "euler");
     assert.equal(r.verifiedCapacity, true);
-  });
-});
-
-// E10 — rod protrusion is a length ADD-ON: omitting it (protrusion=0) must
-// give the highest (most optimistic) F_cr, never a conservative default.
-describe("Pneumatic rod buckling: protrusion is not a worst-case default", () => {
-  it("more protrusion strictly lowers F_cr", () => {
-    const noProtrusion = rodBucklingCheck(12, 300, 500, 0);
-    const withProtrusion = rodBucklingCheck(12, 300, 500, 50);
-    assert.ok(noProtrusion && withProtrusion);
-    assert.ok(
-      withProtrusion.Fcr < noProtrusion.Fcr,
-      `expected added protrusion to lower F_cr: ${withProtrusion.Fcr} vs ${noProtrusion.Fcr}`,
-    );
   });
 });
 
@@ -703,6 +681,38 @@ describe("Pneumatic cylinder: efficiency and air consumption (PNEU-001)", () => 
     const low = airConsumptionPerCycleL(32, 12, 100, 4);
     const high = airConsumptionPerCycleL(32, 12, 100, 8);
     assert.ok(high > low);
+  });
+});
+
+type PneumaticCylinderFixture = {
+  bore32rod12at6bar: {
+    bore: number;
+    rod: number;
+    pBar: number;
+    forceOut: number;
+    forceIn: number;
+    tolerance: number;
+  };
+};
+const cylinderFixture = loadFixture<PneumaticCylinderFixture>("pneumatic-cylinder");
+
+describe("pneumatische cilinder", () => {
+  it("Ø32 at 6 bar is 482,5 N out, 414,7 N in (rod 12)", () => {
+    const c = cylinderFixture.bore32rod12at6bar;
+    close(extendForce(c.bore, c.pBar), c.forceOut, c.tolerance);
+    close(retractForce(c.bore, c.rod, c.pBar), c.forceIn, c.tolerance);
+  });
+
+  it("1000 N at 6 bar picks the smallest bore that meets the load, no margin", () => {
+    const pick = minBoreFor(1000, 6);
+    assert.ok(pick);
+    assert.ok(extendForce(pick.bore, 6) >= 1000);
+    const smallerBores = ALL_BORES.filter((row) => row.bore < pick.bore);
+    assert.ok(smallerBores.every((row) => extendForce(row.bore, 6) < 1000));
+  });
+
+  it("above Ø320 returns null", () => {
+    assert.equal(minBoreFor(1e6, 6), null);
   });
 });
 

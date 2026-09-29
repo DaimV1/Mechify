@@ -2,26 +2,22 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { tx } from "@/lib/i18n/locale";
 import { COMMON } from "@/lib/i18n/common";
 import { Suspense } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow } from "@/components/brand-ui";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { findTool, SECTIONS, type ToolSection } from "@/lib/tools";
-import { EXTRA_MODELS, SOURCE_KEYS } from "@/lib/migration-models";
+import { SOURCE_KEYS } from "@/lib/migration-models";
 import { toolkitCopy } from "@/lib/i18n/toolkit-pages";
 import { Faq } from "@/components/toolkit/calc-ui";
 import { MacroDownloads } from "@/components/toolkit/macros-content";
 import { ReferenceResources } from "@/components/toolkit/bronnen-content";
-import { QuickDrive } from "@/components/quick-drive";
 import { useDocumentMeta, useFaqJsonLd } from "@/lib/use-document-meta";
 import { NotFound } from "./not-found";
 export function ToolDetail({ section }: { section: ToolSection }) {
   const { locale, setLocale } = useLocale();
   const { slug = "" } = useParams();
-  const [params, setParams] = useSearchParams();
   const tool = findTool(section, slug);
-  const model = params.get("model") || "basis";
-  const extra = tool ? EXTRA_MODELS[tool.id] : null;
   const Calculator = tool ? CALCULATOR_REGISTRY[tool.id] : null;
   const sourceKey = tool ? SOURCE_KEYS[tool.id] : undefined;
   const copy = sourceKey
@@ -52,21 +48,12 @@ export function ToolDetail({ section }: { section: ToolSection }) {
   );
   useFaqJsonLd(copy?.faq);
   if (!tool || !Calculator) return <NotFound />;
-  const Alternate = extra?.component;
   function reset() {
-    window.location.assign(
-      window.location.pathname + (model === "basis" ? "" : "?model=" + encodeURIComponent(model)),
-    );
+    window.location.assign(window.location.pathname);
   }
   const calculatorWorkbench = (
-    <div key={tool.id + model} className="calc-workbench">
-      {model === "kracht" && tool.id === "pneumatic-cylinder" ? (
-        <QuickDrive kind="force" />
-      ) : model === "referentie" && Alternate ? (
-        <Alternate />
-      ) : (
-        <Calculator />
-      )}
+    <div key={tool.id} className="calc-workbench">
+      <Calculator />
     </div>
   );
   return (
@@ -101,31 +88,6 @@ export function ToolDetail({ section }: { section: ToolSection }) {
           </label>
           <button onClick={reset}>↺ {tx(locale, "Reset invoer", "Reset input")}</button>
         </div>
-        {extra ? (
-          <div className="model-switch">
-            <label>
-              {tx(locale, "Rekenmodel", "Calculation model")}
-              <select
-                aria-label={tx(locale, "Rekenmodel", "Calculation model")}
-                value={model}
-                onChange={(e) => {
-                  setParams(e.target.value === "basis" ? {} : { model: e.target.value }, {
-                    replace: true,
-                  });
-                }}
-              >
-                <option value="basis">{extra.original}</option>
-                <option value="referentie">{extra.label}</option>
-                {tool.id === "pneumatic-cylinder" ? (
-                  <option value="kracht">
-                    {tx(locale, "Kracht bij gegeven diameter", "Force at a given diameter")}
-                  </option>
-                ) : null}
-              </select>
-            </label>
-            <p>{extra.note}</p>
-          </div>
-        ) : null}
         {tool.id === "macros" ? (
           calculatorWorkbench
         ) : (

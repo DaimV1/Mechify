@@ -24,7 +24,6 @@ import {
   lambdaLimit,
   sectionProps,
 } from "../src/lib/calculators/knik.ts";
-import { rodBucklingCheck } from "../src/lib/toolkit/cylinder.ts";
 import { matchTools, TOOLS } from "../src/lib/tools.ts";
 describe("ISO 286 passingen", () => {
   it("H7/h6 at 20 mm is 0 to 34 µm clearance", () => {
@@ -463,52 +462,6 @@ describe("Euler-knik", () => {
   });
 });
 
-describe("pneumatische cilinder — stangknik", () => {
-  it("H-5: below the Euler slenderness limit, F_cr is capped at the squash load, not the (much higher, unsafe) Euler value", () => {
-    // Audit's default case: Ø63/20 rod, 100 mm stroke, F_uit ≈ 1870 N.
-    const r = rodBucklingCheck(20, 100, 1870);
-    assert.ok(r);
-    assert.equal(r.belowEulerLimit, true);
-    // Euler alone would say ~369120 N; the real governing load here is the
-    // squash load A·Rp0.2 = π/4·20² · 235 ≈ 73827 N.
-    assert.ok(
-      r.Fcr < 369120 * 0.9,
-      `Fcr should be capped well below the Euler value, got ${r.Fcr}`,
-    );
-    assert.ok(
-      Math.abs(r.sigmaCr - 235) < 1,
-      `sigmaCr should equal Rp0.2=235 at the squash cap, got ${r.sigmaCr}`,
-    );
-  });
-
-  it("H-5: a long, thin rod above the Euler limit is not capped", () => {
-    const r = rodBucklingCheck(20, 2000, 500);
-    assert.ok(r);
-    assert.equal(r.belowEulerLimit, false);
-  });
-
-  it("H-5: flags when S is positive but below the recommended 3.5 minimum", () => {
-    const safe = rodBucklingCheck(20, 100, 1870);
-    assert.ok(safe && !safe.belowRecommendedSafety);
-    const tight = rodBucklingCheck(20, 100, 25000);
-    assert.ok(tight && tight.safety! >= 1 && tight.belowRecommendedSafety);
-  });
-
-  it("H-6: cylinder.ts's k matches knik.ts's fixed-free kDesign — single source of truth", () => {
-    assert.equal(kDesignFor("fc"), 2.1);
-    // Same rod/stroke/load through both tools' Fcr must now agree, since
-    // both use the same kDesign (2.1) instead of cilinder using 2.1 while
-    // knikberekening's own selector computed with the theoretical k=2.
-    const viaCylinder = rodBucklingCheck(20, 100, 1870);
-    const I = (Math.PI * 20 ** 4) / 64;
-    const A = (Math.PI * 20 ** 2) / 4;
-    const viaKnik = computeBuckling({ L: 100, k: kDesignFor("fc"), E: 210000, I, A, F: 1870 });
-    assert.ok(viaCylinder && viaKnik);
-    assert.equal(viaCylinder.Leff, viaKnik.Leff);
-    assert.equal(viaCylinder.lambda, viaKnik.lambda);
-  });
-});
-
 describe("07-09 audit fixes", () => {
   it("A3: N9 keyway width uses the ISO 286-1 rule ES=0 above 3 mm", () => {
     // ES(N) is 0 for grades above IT8 at sizes over 3 mm. b=6 -> 0 / -IT9.
@@ -568,21 +521,4 @@ describe("07-09 audit fixes", () => {
     assert.ok(Math.abs(lambdaLimit(3000, 50) - 24.3) < 0.5); // plastic ~24
   });
 
-  it("H-6 stays fixed: cilinder and knik agree on the same rod", () => {
-    const rod = rodBucklingCheck(20, 100, 1870);
-    const s = sectionProps("rond", { D: 20 });
-    assert.ok(rod && s);
-    const viaKnik = columnCapacity({
-      L: 100,
-      k: kDesignFor("fc"),
-      E: 210000,
-      I: s.I,
-      A: s.A,
-      F: 1870,
-      rp02: 235,
-    });
-    assert.ok(viaKnik);
-    assert.equal(rod.Fcr, viaKnik.Fcr);
-    assert.equal(rod.governing, viaKnik.governing);
-  });
 });

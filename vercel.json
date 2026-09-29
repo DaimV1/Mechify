@@ -20,23 +20,23 @@
     },
     {
       "source": "/toolkit/bevestigers",
-      "destination": "/tools/fasteners?model=referentie",
+      "destination": "/tools/fasteners",
       "permanent": true
     },
     {
       "source": "/toolkit/o-ringgroef",
-      "destination": "/tools/o-ring-grooves?model=referentie",
+      "destination": "/tools/o-ring-grooves",
       "permanent": true
     },
     { "source": "/toolkit/kanten", "destination": "/tools/edges", "permanent": true },
     {
       "source": "/toolkit/motorspecificatie",
-      "destination": "/calculators/motor-specification?model=referentie",
+      "destination": "/calculators/motor-specification",
       "permanent": true
     },
     {
       "source": "/toolkit/cilinder",
-      "destination": "/calculators/pneumatic-cylinder?model=referentie",
+      "destination": "/calculators/pneumatic-cylinder",
       "permanent": true
     },
     {

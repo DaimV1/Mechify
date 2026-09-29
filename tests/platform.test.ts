@@ -3,7 +3,6 @@ import { test } from "node:test";
 import { driveResult, ratioResult, forceResult } from "../src/lib/calculators/drive.ts";
 import { CATEGORIES, categoryById, convert, unitById } from "../src/lib/toolkit/units.ts";
 import { bendDeduction } from "../src/lib/calculators/bending.ts";
-import { computeMotor } from "../src/lib/calculators/motor.ts";
 import { computeBeam } from "../src/lib/calculators/beam.ts";
 import { computeDeflection } from "../src/lib/toolkit/deflection.ts";
 const close = (a: number, b: number) =>
@@ -53,12 +52,6 @@ test("Every converter pair roundtrips signed values", () => {
 test("180 degree bending is excluded; regular cases unchanged", () => {
   assert.ok(Number.isNaN(bendDeduction(180, 2, 2, 0.4)));
   close(bendDeduction(90, 2, 2, 0.4), 8 - 1.4 * Math.PI);
-});
-test("Motor rejects nonphysical efficiency and infinity", () => {
-  const args = { force: 100, speedMs: 0.5, diameterMm: 100, efficiency: 0.9, safety: 1.2 };
-  close(computeMotor(args)!.shaftPowerW, (100 * 0.5) / 0.9);
-  assert.equal(computeMotor({ ...args, efficiency: 1.1 }), null);
-  assert.equal(computeMotor({ ...args, force: Infinity }), null);
 });
 test("Beam load and tip formulas with off-centre and zero load", () => {
   const args = { type: "opgelegd" as const, F: 1000, L: 1000, a: 500, E: 200000, I: 10000 };

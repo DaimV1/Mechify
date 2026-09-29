@@ -10,11 +10,8 @@ export type CylinderRow = { series: "ISO 15552" | "ISO 6432"; bore: number; rods
  * trek, dikke voor druk/uitknikvastheid) — de eerste is de meest gangbare.
  * Controleer de fabrikant-catalogus voor de volledige set opties.
  *
- * ENG-004 (audit, 17 sept 2026): dit is nu de ENIGE bron voor boring/
- * stangdiameter-combinaties in de app — toolkit/cylinder.ts leidt zijn eigen
- * tabel hiervan af in plaats van een eigen, onafhankelijk afwijkende kopie
- * bij te houden (voorheen gaf het bij Ø200/250/320 een andere basis-
- * stangdiameter: 40/50/63 daar tegenover 50/63/80 hier). Geen van beide
+ * ENG-004 (audit, 17 sept 2026): dit is de ENIGE bron voor boring/
+ * stangdiameter-combinaties in de app. Geen van beide
  * bronnen noemt een specifiek fabrikant/typenummer per rij, dus welke
  * variant elke rij precies representeert is niet vastgesteld — reken dit
  * niet als één geverifieerde catalogus. Voor een echte bestelling: kies één

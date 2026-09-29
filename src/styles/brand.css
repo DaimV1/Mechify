@@ -2180,30 +2180,6 @@ footer {
 .migration-tool button:hover {
   border-color: #48e5d0;
 }
-.model-switch {
-  margin: 25px 0 35px;
-  padding: 20px;
-  background: #162423;
-  border: 1px solid #365451;
-}
-.model-switch label {
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.model-switch select {
-  background: #10201e;
-  padding: 11px 15px;
-  border: 1px solid #587970;
-  border-radius: 4px;
-  color: #8beedc;
-}
-.model-switch p {
-  font-size: 13px;
-  margin-top: 14px;
-  max-width: 900px;
-}
 .tool-toolbar {
   display: flex;
   justify-content: space-between;
@@ -2297,11 +2273,6 @@ footer {
     border: 0 !important;
     padding: 20px !important;
   }
-  .model-switch label {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
 }
 @media (max-width: 600px) {
   .tool-grid.full-grid {
@@ -2309,13 +2280,6 @@ footer {
   }
   .full-grid .tool-card {
     padding: 25px 0 !important;
-  }
-  .model-switch {
-    padding: 17px;
-  }
-  .model-switch select {
-    width: 100%;
-    font-size: 13px;
   }
   .migration-tool h2 {
     font-size: 25px;

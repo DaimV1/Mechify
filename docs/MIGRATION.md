@@ -4,7 +4,7 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 
 ## Inventarisatie per onderdeel
 
-15 van 15 oorspronkelijke tools geïntegreerd, 8 van 8 oorspronkelijke SVG-visuals overgenomen. Twee nieuwe tools brengen het overzicht op 17; negen aanvullende rekenmodellen staan binnen hun bestaande tool, zonder dubbele calculatorpagina’s.
+15 van 15 oorspronkelijke tools geïntegreerd, 8 van 8 oorspronkelijke SVG-visuals overgenomen. Twee nieuwe tools brengen het overzicht op 17; vijf aanvullende rekenmodellen staan binnen hun bestaande tool, zonder dubbele calculatorpagina’s. Bevestigingsmateriaal, O-ringgroef, Motorspecificatie en Pneumatische cilinder hadden voorheen ook zo'n keuze ("Rekenmodel"-dropdown); op Damians verzoek (28-29 sept 2026) is dat per tool teruggebracht naar één rekenkern.
 
 | Tool / behouden route | Functionaliteit en verschillen | Visual / assets | Migratie |
 |---|---|---|---|
@@ -13,12 +13,12 @@ De nieuwe Mechify-presentatie is leidend. Broncode uit DaimV1/Mechify (66202ef52
 | [Spiebaan](/tools/keyways) | Diameter, spiemaat, groefdiepte en breedtetoleranties | KeywaySection | Gereed |
 | [Lagerpassingen](/tools/bearing-fits) | Vast/los behouden; roterende ring als aanvullend model | BearingFitChart | Gereed |
 | [Seegerringgroef](/tools/seeger-grooves) | Ontwerpschatting behouden; originele groeftabel als aanvullend model | CirclipSection | Gereed |
-| [Bevestigingsmateriaal](/tools/fasteners) | Moerfactor behouden; groef-/bouttabel en wrijving als aanvullend model | BoltSection | Gereed |
-| [O-ringgroef](/tools/o-ring-grooves) | Vrije compressie/breedtefactor behouden; originele groeftabel als aanvullend model | OringGroove | Gereed |
+| [Bevestigingsmateriaal](/tools/fasteners) | Moerfactor (K-factor) is het enige model; de tabel-/wrijvingsmethode (VDI 2230 A1) is verwijderd | BoltSection | Gereed |
+| [O-ringgroef](/tools/o-ring-grooves) | Vrije compressie/breedtefactor is het enige model; de originele (ongeciteerde) groeftabel is verwijderd | OringGroove | Gereed |
 | [Kanten](/tools/edges) | Vrije buigberekening behouden; materiaal/haaks/scherp-richtlijnen als aanvullend model | BendSection | Gereed |
 | [Eenheden](/calculators/units) | Alle oude categorieën, tweerichtingsconverter als enige model (eenrichtingsvariant verwijderd), vermogen toegevoegd | Geen losse bronvisual | Gereed |
-| [Motorspecificatie](/calculators/motor-specification) | Stationair model behouden; versnelling, rollenmassa en uitgebreid werkpunt toegevoegd | Geen losse bronvisual | Gereed |
-| [Pneumatische cilinder](/calculators/pneumatic-cylinder) | Boring/knik behouden; lastfactor, duwen/trekken, luchtverbruik; extra krachtmodel | Eigen SVG bij gegeven diameter | Gereed |
+| [Motorspecificatie](/calculators/motor-specification) | Uitgebreid werkpunt (met versnelling en rollenmassa) is het enige model; het stationaire model is verwijderd (minder getoetst tegen IEC 60034) | Geen losse bronvisual | Gereed |
+| [Pneumatische cilinder](/calculators/pneumatic-cylinder) | Boring & knikcontrole is het enige model (optionele knik met materiaal/inklemmingkeuze, optioneel luchtverbruik met rendement); de Lastfactor & luchtverbruik-variant is verwijderd | Geen losse bronvisual | Gereed |
 | [Knikberekening](/calculators/buckling) | Alle doorsneden, inklemmingen, materialen, last en grensslankheid behouden | BucklingModes | Gereed |
 | [Doorbuiging balk](/calculators/beam-deflection) | Oplegging/uitkraging behouden; maximale doorbuiging, locatie en spanning toegevoegd | BeamDeflection | Gereed |
 | [CAD-bibliotheken](/cad/resources) | Bestaande links plus originele broncategorieën | Geen bronvisual | Gereed |
@@ -34,7 +34,7 @@ De acht oorspronkelijke visuals zijn SVG-componenten uit schema.tsx, geen afbeel
 
 Seeger Ø20: de bestaande Mechify-ontwerpschatting geeft Ø18,4 / 2 / 0,8 mm; de oorspronkelijke groeftabel geeft Ø19 / 1,3 / 0,5 mm. Beide modellen zijn zichtbaar benoemd.
 
-Bout M8: Mechify K-factor 0,2 geeft circa 28,1 Nm; de brontabel geeft 27,3 Nm. Geen stilzwijgende vervanging.
+Bout M8: Mechify K-factor 0,2 geeft circa 28,1 Nm; de (inmiddels verwijderde) brontabel gaf 27,3 Nm voor dezelfde maat. Geen stilzwijgende aanpassing van de getoonde K-factorwaarde.
 
 Balk: de bestaande uitkomst is doorbuiging onder de last of aan de tip. Het aanvullende model geeft ook het werkelijke maximum en zijn positie. Bij een excentrische last zijn dit verschillende grootheden.
 
