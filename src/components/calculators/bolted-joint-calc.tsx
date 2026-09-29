@@ -53,7 +53,7 @@ const T = {
   nl: {
     heading: "Boutverbinding — statische controle (VDI 2230-lite)",
     intro:
-      "Controleert de twee klassieke VDI 2230-grensgevallen voor een concentrisch, statisch axiaal belaste boutverbinding: blijft de verbinding geklemd (restklemkracht F_KR) en blijft de bout onder de vloeigrens (F_Smax)? Excentrische/buig- en dwarsbelasting, settingtabel en vermoeiing zitten hier niet in.",
+      "Controleert de twee klassieke VDI 2230-grensgevallen voor een concentrische, statisch axiaal belaste boutverbinding: blijft de verbinding geklemd (F_KR), blijft de bout onder de vloeigrens (F_Smax)?",
     inputSection: "Bout en voorspanning",
     threadSize: "Draadmaat",
     propertyClass: "Sterkteklasse",
@@ -100,7 +100,7 @@ const T = {
   en: {
     heading: "Bolted joint — static verification (VDI 2230-lite)",
     intro:
-      "Checks the two classic VDI 2230 boundary cases for a concentric, static, axially loaded bolted joint: does the joint stay clamped (residual clamp load F_KR), and does the bolt stay below yield (F_Smax)? Eccentric/bending and transverse load, the embedding-loss table and fatigue are not included.",
+      "Checks the two classic VDI 2230 boundary cases for a concentric, static, axially loaded bolted joint: does the joint stay clamped (F_KR), does the bolt stay below yield (F_Smax)?",
     inputSection: "Bolt and preload",
     threadSize: "Thread size",
     propertyClass: "Property class",
@@ -241,7 +241,6 @@ export function BoltedJointCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={BOLTED_JOINT_META} />
 
         <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.inputSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -356,6 +355,7 @@ export function BoltedJointCalc() {
             {t.chainToFasteners}
           </Link>
         </p>
+        <SourceMetaBadge meta={BOLTED_JOINT_META} />
       </CalcPanel>
     </>
   );

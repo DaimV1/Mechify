@@ -49,7 +49,7 @@ const T = {
   nl: {
     heading: "Euler-knik van een staaf",
     intro:
-      "Kritieke knikkracht F_cr = π² E I / L_eff². Rechthoek en koker rekenen met I_min (de zwakke as) — die knikt eerst. Ideale Euler-theorie: geen initiële kromming, geen partiële veiligheidsfactoren. Geen vervanging van EN 1993-1-1 bij kritieke constructies.",
+      "Kritieke knikkracht F_cr = π² E I / L_eff². Rechthoek en koker rekenen met I_min (de zwakke as) — die knikt eerst.",
     lengthLabel: "Lengte L (mm)",
     endConditionLabel: "Inklemming",
     sectionLabel: "Doorsnede",
@@ -114,7 +114,7 @@ const T = {
   en: {
     heading: "Euler buckling of a column",
     intro:
-      "Critical buckling load F_cr = π² E I / L_eff². Rectangle and box section use I_min (the weak axis) — that buckles first. Ideal Euler theory: no initial curvature, no partial safety factors. Not a substitute for EN 1993-1-1 on critical structures.",
+      "Critical buckling load F_cr = π² E I / L_eff². Rectangle and box section use I_min (the weak axis) — that buckles first.",
     lengthLabel: "Length L (mm)",
     endConditionLabel: "End condition",
     sectionLabel: "Cross-section",
@@ -278,7 +278,6 @@ export function BucklingCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={BUCKLING_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.lengthLabel}>
             <NumInput id="knik-length" value={L} onChange={setL} />
@@ -434,6 +433,7 @@ export function BucklingCalc() {
             {t.fillValidDims}
           </p>
         )}
+        <SourceMetaBadge meta={BUCKLING_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <BucklingModes active={endCondition} />

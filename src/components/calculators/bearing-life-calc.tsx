@@ -52,7 +52,7 @@ const T = {
   nl: {
     heading: "Lagerlevensduur (L10 / L10h)",
     intro:
-      "Basis-levensduurberekening volgens ISO 281: L10 = (C/P)^p miljoen omwentelingen, L10h = L10 · 10⁶ / (60·n) bedrijfsuren. C en P komen uit de lagercatalogus voor het reeds gekozen lager — deze tool bepaalt geen lagerkeuze en geen X/Y-lastfactoren.",
+      "ISO 281: L10 = (C/P)^p miljoen omwentelingen, L10h = L10 · 10⁶ / (60·n) bedrijfsuren. C en P komen uit de lagercatalogus voor het gekozen lager.",
     dynamicSection: "Dynamische levensduur",
     dynamicLoad: "Dynamische draaggetal C (kN)",
     equivDynamicLoad: "Equivalente dynamische last P (kN)",
@@ -97,7 +97,7 @@ const T = {
   en: {
     heading: "Bearing life (L10 / L10h)",
     intro:
-      "Basic rating life per ISO 281: L10 = (C/P)^p million revolutions, L10h = L10 · 10⁶ / (60·n) operating hours. C and P come from the bearing catalogue for the bearing already selected — this tool does not select a bearing or derive X/Y load factors.",
+      "ISO 281: L10 = (C/P)^p million revolutions, L10h = L10 · 10⁶ / (60·n) operating hours. C and P come from the bearing catalogue for the selected bearing.",
     dynamicSection: "Dynamic life",
     dynamicLoad: "Dynamic load rating C (kN)",
     equivDynamicLoad: "Equivalent dynamic load P (kN)",
@@ -219,7 +219,6 @@ export function BearingLifeCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={BEARING_LIFE_META} />
 
         <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.dynamicSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -324,6 +323,7 @@ export function BearingLifeCalc() {
             {t.chainToBearingFits}
           </Link>
         </p>
+        <SourceMetaBadge meta={BEARING_LIFE_META} />
       </CalcPanel>
     </>
   );

@@ -50,7 +50,7 @@ const T = {
   nl: {
     heading: "Doorlaat, sleutelmaat en aandraaimoment",
     intro:
-      "T = K · F · d, met F = 0,75 · Rp0,2 · A_s (ISO 898-1 spanningsdoorsnede). K ≈ 0,2 is de gangbare moerfactor voor niet-gesmeerde, zwart/fosfaat afgewerkte bevestigers — bij vet, MoS₂ of RVS kan K 0,10–0,20 zijn. Dit is een aandraaimoment-SCHATTING, geen VDI 2230-verbindingsberekening: aanhaalspreiding, afzonderlijke draad-/kopwrijving, verbindingsstijfheid, settingverlies, scheidingskracht, slip, vermoeiing en overbelasting van de draad zitten er niet in. Doorlaat- en sleutelmaten hieronder zijn onafhankelijke naslagwaarden (ISO 273 / ISO 4014-4017 / ISO 4762), niet afgeleid uit deze schatting. Volg bij kritieke verbindingen de opgegeven aanhaalspecificatie of een volledige VDI 2230-berekening.",
+      "T = K · F · d, met F = 0,75 · Rp0,2 · A_s (ISO 898-1). K ≈ 0,2 is de gangbare moerfactor voor niet-gesmeerde bevestigers — een SCHATTING, zie hieronder voor de aannames.",
     threadSize: "Draadmaat",
     propertyClass: "Sterkteklasse",
     nutFactor: "Moerfactor K",
@@ -85,7 +85,7 @@ const T = {
   en: {
     heading: "Clearance hole, wrench size and tightening torque",
     intro:
-      "T = K · F · d, with F = 0.75 · Rp0.2 · A_s (ISO 898-1 stress area). K ≈ 0.2 is the common nut factor for non-lubricated, black/phosphate finished fasteners — with grease, MoS₂ or stainless it can be 0.10–0.20. This is a tightening-torque ESTIMATE, not a VDI 2230 joint calculation: tightening scatter, separate thread/head friction, joint stiffness, embedment loss, separating force, slip, fatigue and thread stripping are not included. Clearance-hole and wrench-size values below are independent reference data (ISO 273 / ISO 4014-4017 / ISO 4762), not derived from this estimate. For critical joints, follow the specified tightening spec or a full VDI 2230 calculation.",
+      "T = K · F · d, with F = 0.75 · Rp0.2 · A_s (ISO 898-1). K ≈ 0.2 is the common nut factor for non-lubricated fasteners — an ESTIMATE, see below for the assumptions.",
     threadSize: "Thread size",
     propertyClass: "Property class",
     nutFactor: "Nut factor K",
@@ -172,7 +172,6 @@ export function FastenersCalc() {
           {t.heading}
         </h2>
         <Note>{t.intro}</Note>
-        <SourceMetaBadge meta={FASTENER_META} />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.threadSize}>
             <SelectInput value={size} onChange={(v) => setSize(v as ThreadSize)}>
@@ -220,6 +219,7 @@ export function FastenersCalc() {
           {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
         </div>
+        <SourceMetaBadge meta={FASTENER_META} />
       </CalcPanel>
       <SchemaPanel caption="Technisch schema · maten in mm · schematisch, niet op schaal">
         <BoltSection row={lookupFastener(Number(size.slice(1)))} hole={hole.medium} />
