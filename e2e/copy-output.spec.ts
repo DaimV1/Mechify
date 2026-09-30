@@ -32,3 +32,36 @@ test.describe("Copy result", () => {
     expect(clipboardText).toContain("d=20");
   });
 });
+
+/**
+ * Both copy actions used to swallow a denied clipboard permission silently
+ * (no user-visible feedback at all). They now surface the same explicit
+ * denial message as the drive-power calculator's bespoke copy controls.
+ */
+test.describe("Copy result and copy link report clipboard denial", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, "clipboard", {
+        configurable: true,
+        get: () => ({ writeText: () => Promise.reject(new Error("denied")) }),
+      });
+    });
+  });
+
+  test("copy result shows a denial message", async ({ page }) => {
+    await page.goto("/tools/keyways", { waitUntil: "networkidle" });
+    await page.fill("#key-diameter", "20");
+    await page.getByRole("button", { name: "Kopieer resultaat" }).click();
+    await expect(page.getByRole("status")).toHaveText(
+      "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+    );
+  });
+
+  test("copy link shows a denial message", async ({ page }) => {
+    await page.goto("/tools/keyways", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Kopieer link" }).click();
+    await expect(page.getByRole("status")).toHaveText(
+      "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+    );
+  });
+});

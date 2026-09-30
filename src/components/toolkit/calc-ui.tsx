@@ -141,26 +141,39 @@ export function ResultGrid({ items }: { items: { label: ReactNode; value: string
 }
 
 export function CopyResult({ text, label }: { text: string; label?: string }) {
+  const { locale } = useLocale();
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      className="mt-5 print:hidden"
-      aria-label={label}
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setDone(true);
-          window.setTimeout(() => setDone(false), 1600);
-        } catch {
-          /* ignore */
-        }
-      }}
-    >
-      {done ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {done ? <CopyLabel done /> : <CopyLabel done={false} />}
-    </Button>
+    <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
+      <Button
+        type="button"
+        variant="secondary"
+        aria-label={label}
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            setDenied(false);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            setDenied(true);
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {done ? <CopyLabel done /> : <CopyLabel done={false} />}
+      </Button>
+      {denied ? (
+        <span role="status" className="text-sm text-muted">
+          {tx(
+            locale,
+            "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+            "Copying isn't allowed. Select the text to copy it manually.",
+          )}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -180,12 +193,22 @@ export function CadCallout({
 }) {
   const { locale } = useLocale();
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-accent/40 bg-bg px-4 py-3">
       <div>
         <p className="font-mono text-lg font-semibold tabular-nums text-ink">{designation}</p>
         {limits ? (
           <p className="mt-0.5 font-mono text-sm tabular-nums text-muted">{limits}</p>
+        ) : null}
+        {denied ? (
+          <p role="status" className="mt-0.5 text-sm text-muted">
+            {tx(
+              locale,
+              "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+              "Copying isn't allowed. Select the text to copy it manually.",
+            )}
+          </p>
         ) : null}
       </div>
       <Button
@@ -195,10 +218,11 @@ export function CadCallout({
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(copyText);
+            setDenied(false);
             setDone(true);
             window.setTimeout(() => setDone(false), 1600);
           } catch {
-            /* ignore */
+            setDenied(true);
           }
         }}
       >
@@ -215,25 +239,38 @@ export function CadCallout({
 
 /** Copies the current page URL (with its query-string state) so a result can be pasted into a mail or a ticket. */
 export function CopyLink() {
+  const { locale } = useLocale();
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      className="mt-5 print:hidden"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          setDone(true);
-          window.setTimeout(() => setDone(false), 1600);
-        } catch {
-          /* ignore */
-        }
-      }}
-    >
-      {done ? <Check className="size-4" /> : <Link2 className="size-4" />}
-      <LinkLabel done={done} />
-    </Button>
+    <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            setDenied(false);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            setDenied(true);
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Link2 className="size-4" />}
+        <LinkLabel done={done} />
+      </Button>
+      {denied ? (
+        <span role="status" className="text-sm text-muted">
+          {tx(
+            locale,
+            "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+            "Copying isn't allowed. Select the text to copy it manually.",
+          )}
+        </span>
+      ) : null}
+    </div>
   );
 }
 

@@ -5,6 +5,7 @@ export type CommonStrings = {
   copyResult: string;
   copyLink: string;
   copied: string;
+  copyDenied: string;
   source: string;
   searchTool: string;
   searchToolAria: string;
@@ -46,6 +47,7 @@ export const COMMON: Record<Locale, CommonStrings> = {
     copyResult: "Kopieer resultaat",
     copyLink: "Kopieer link",
     copied: "Gekopieerd",
+    copyDenied: "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
     source: "Bron:",
     searchTool: "Zoek een tool",
     searchToolAria: "Zoek tools",
@@ -84,6 +86,7 @@ export const COMMON: Record<Locale, CommonStrings> = {
     copyResult: "Copy result",
     copyLink: "Copy link",
     copied: "Copied",
+    copyDenied: "Copying isn't allowed. Select the text to copy it manually.",
     source: "Source:",
     searchTool: "Search a tool",
     searchToolAria: "Search tools",

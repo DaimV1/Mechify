@@ -67,6 +67,8 @@ export function QuickDrive({
         !compact && kind === "drive" ? (search.get(k === "speed" ? "n" : k[0]) ?? f[2]) : f[2],
       ]),
     );
+  const defaults = (): Values =>
+    Object.fromEntries(Object.entries(fields).map(([k, f]) => [k, f[2]]));
   const [v, setV] = useState<Values>(initial);
   const initialTarget = search.get("mode");
   const [target, setTarget] = useState<DriveTarget>(
@@ -242,7 +244,7 @@ export function QuickDrive({
       <div className="calc-actions">
         <button
           onClick={() => {
-            setV(initial());
+            setV(defaults());
             setTarget("torque");
             setStatus("");
           }}

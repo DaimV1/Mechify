@@ -154,24 +154,32 @@ export function CopyResult({ text }: { text: string }) {
   const { locale } = useLocale();
   const t = COMMON[locale];
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      className="mt-5 print:hidden"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setDone(true);
-          window.setTimeout(() => setDone(false), 1600);
-        } catch {
-          /* ignore */
-        }
-      }}
-    >
-      {done ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {done ? t.copied : t.copyResult}
-    </Button>
+    <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            setDenied(false);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            setDenied(true);
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {done ? t.copied : t.copyResult}
+      </Button>
+      {denied ? (
+        <span role="status" className="text-sm text-muted">
+          {t.copyDenied}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -180,24 +188,32 @@ export function CopyLink() {
   const { locale } = useLocale();
   const t = COMMON[locale];
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
-    <Button
-      type="button"
-      variant="secondary"
-      className="mt-5 print:hidden"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          setDone(true);
-          window.setTimeout(() => setDone(false), 1600);
-        } catch {
-          /* ignore */
-        }
-      }}
-    >
-      {done ? <Check className="size-4" /> : <Link2 className="size-4" />}
-      {done ? t.copied : t.copyLink}
-    </Button>
+    <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            setDenied(false);
+            setDone(true);
+            window.setTimeout(() => setDone(false), 1600);
+          } catch {
+            setDenied(true);
+          }
+        }}
+      >
+        {done ? <Check className="size-4" /> : <Link2 className="size-4" />}
+        {done ? t.copied : t.copyLink}
+      </Button>
+      {denied ? (
+        <span role="status" className="text-sm text-muted">
+          {t.copyDenied}
+        </span>
+      ) : null}
+    </div>
   );
 }
 

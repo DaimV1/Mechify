@@ -80,4 +80,26 @@ test.describe("connected drive workflow", () => {
       "Copying isn't allowed. Copy the URL manually from the address bar.",
     );
   });
+
+  test("reset restores the drive power calculator's defaults after editing", async ({ page }) => {
+    await page.goto("/en/calculators/drive-power?mode=torque&p=1.5&n=750&t=4", {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator("#drive-power")).toHaveValue("1.5");
+    await expect(page.locator("#drive-speed")).toHaveValue("750");
+
+    await page.locator("#drive-power").fill("9");
+    await page.locator("#drive-speed").fill("999");
+    await expect(page.locator("#drive-power")).toHaveValue("9");
+
+    await page.locator(".calc-actions").getByRole("button", { name: "Reset" }).click();
+    await expect(page.locator("#drive-power")).toHaveValue("0.75");
+    await expect(page.locator("#drive-speed")).toHaveValue("1500");
+    await expect(page).toHaveURL(/p=0\.75/);
+    await expect(page).toHaveURL(/n=1500/);
+
+    await page.reload({ waitUntil: "networkidle" });
+    await expect(page.locator("#drive-power")).toHaveValue("0.75");
+    await expect(page.locator("#drive-speed")).toHaveValue("1500");
+  });
 });
