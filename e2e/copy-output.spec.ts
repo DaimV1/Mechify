@@ -64,4 +64,20 @@ test.describe("Copy result and copy link report clipboard denial", () => {
       "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
     );
   });
+
+  test("fit-tolerances CAD callout shows a denial message", async ({ page }) => {
+    await page.goto("/tools/fit-tolerances", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Kopieer maataanduiding" }).first().click();
+    await expect(page.getByRole("status")).toHaveText(
+      "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren.",
+    );
+  });
+
+  test("macro library copy code shows a denial message", async ({ page }) => {
+    await page.goto("/en/cad/macros", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Copy code", exact: true }).first().click();
+    await expect(page.getByRole("status")).toHaveText(
+      "Copying isn't allowed. Select the code to copy it manually.",
+    );
+  });
 });

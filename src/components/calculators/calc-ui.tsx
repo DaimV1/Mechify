@@ -272,12 +272,20 @@ export function CadCallout({
 }) {
   const { locale } = useLocale();
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-accent/40 bg-bg px-4 py-3">
       <div>
         <p className="font-mono text-lg font-semibold tabular-nums text-ink">{designation}</p>
         {limits ? (
           <p className="mt-0.5 font-mono text-sm tabular-nums text-muted">{limits}</p>
+        ) : null}
+        {denied ? (
+          <p role="status" className="mt-0.5 text-sm text-muted">
+            {locale === "nl"
+              ? "Kopiëren niet toegestaan. Selecteer de tekst om handmatig te kopiëren."
+              : "Copying isn't allowed. Select the text to copy it manually."}
+          </p>
         ) : null}
       </div>
       <Button
@@ -287,10 +295,11 @@ export function CadCallout({
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(copyText);
+            setDenied(false);
             setDone(true);
             window.setTimeout(() => setDone(false), 1600);
           } catch {
-            /* ignore */
+            setDenied(true);
           }
         }}
       >

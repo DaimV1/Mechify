@@ -60,6 +60,7 @@ const T = {
       "VBA-macro's voor SolidWorks (SldWorks API): STEP-export, alles opslaan en custom properties tonen. De code hieronder is exact de inhoud van het downloadbare .bas-bestand — geen aparte, mogelijk afwijkende kopie. Test macro's altijd eerst op een kopie van je bestanden — API-methodesignatuur kan licht verschillen per SolidWorks-versie. Inventor gebruikt een ander objectmodel (iLogic / Inventor API via VB.NET) — zie de aanvullende macro's voor Inventor-voorbeelden.",
     copyCode: "Kopieer code",
     copied: "Gekopieerd",
+    copyDenied: "Kopiëren niet toegestaan. Selecteer de code om handmatig te kopiëren.",
     download: "Download .bas",
   },
   en: {
@@ -69,6 +70,7 @@ const T = {
       "VBA macros for SolidWorks (SldWorks API): STEP export, save all and showing custom properties. The code below is exactly the content of the downloadable .bas file — not a separate, potentially diverging copy. Always test macros on a copy of your files first — API method signatures can vary slightly between SolidWorks versions. Inventor uses a different object model (iLogic / Inventor API via VB.NET) — see the supplementary macros for Inventor examples.",
     copyCode: "Copy code",
     copied: "Copied",
+    copyDenied: "Copying isn't allowed. Select the code to copy it manually.",
     download: "Download .bas",
   },
 };
@@ -76,6 +78,7 @@ const T = {
 function MacroBlock({ macro, locale }: { macro: Macro; locale: Locale }) {
   const t = T[locale];
   const [done, setDone] = useState(false);
+  const [denied, setDenied] = useState(false);
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -85,7 +88,7 @@ function MacroBlock({ macro, locale }: { macro: Macro; locale: Locale }) {
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-muted">{macro.description[locale]}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -93,16 +96,22 @@ function MacroBlock({ macro, locale }: { macro: Macro; locale: Locale }) {
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(macro.code);
+                setDenied(false);
                 setDone(true);
                 window.setTimeout(() => setDone(false), 1600);
               } catch {
-                /* ignore */
+                setDenied(true);
               }
             }}
           >
             {done ? <Check className="size-4" /> : <Copy className="size-4" />}
             {done ? t.copied : t.copyCode}
           </Button>
+          {denied ? (
+            <span role="status" className="text-sm text-muted">
+              {t.copyDenied}
+            </span>
+          ) : null}
           <a
             href={macro.file}
             download
