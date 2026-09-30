@@ -92,7 +92,7 @@ const T = {
     sameNote:
       "Deze last staat op de plaats van de maximale doorbuiging (gecentreerd bij vrij opgelegd, of op de tip bij uitkraging), dus δ(a) en δ_max vallen hier samen.",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
-      `σ_max = ${sigma} N/mm² ≥ Rp0,2 ≈ ${rp02} N/mm² (${material}, richtwaarde) — deze last geeft blijvende vervorming; de doorbuiging hierboven is dan niet meer geldig.`,
+      `σ_max = ${sigma} N/mm² ≥ Rp0,2 ≈ ${rp02} N/mm² (${material}, richtwaarde) — op of boven de indicatieve vloeigrens. De lineair-elastische doorbuiging valt buiten het geldige modelbereik. De getoonde waarden zijn elastische schattingen, geen geldige doorbuigingstoets. De toets aan de toelaatbare doorbuiging is niet uitgevoerd.`,
     allowableFailNote: (max: string, allow: string) =>
       `δ_max = ${max} mm overschrijdt de opgegeven toelaatbare doorbuiging van ${allow} mm.`,
     allowablePassNote: (max: string, allow: string) =>
@@ -151,7 +151,7 @@ const T = {
     sameNote:
       "This load sits at the location of maximum deflection (centred for simply supported, or at the tip for a cantilever), so δ(a) and δ_max coincide here.",
     overYieldNote: (sigma: string, rp02: string, material: string) =>
-      `σ_max = ${sigma} N/mm² ≥ Rp0.2 ≈ ${rp02} N/mm² (${material}, indicative) — this load causes permanent deformation; the deflection above no longer applies.`,
+      `σ_max = ${sigma} N/mm² ≥ Rp0.2 ≈ ${rp02} N/mm² (${material}, indicative) — at or above the indicative yield limit. Linear-elastic deflection is outside this model’s valid range. Displayed values are elastic screening estimates, not a verified deflection check. The allowable-deflection comparison is not evaluated.`,
     allowableFailNote: (max: string, allow: string) =>
       `δ_max = ${max} mm exceeds the specified allowable deflection of ${allow} mm.`,
     allowablePassNote: (max: string, allow: string) =>
@@ -285,12 +285,12 @@ export function BeamDeflectionCalc() {
       : null;
 
   const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
-  const overYield = sigma != null && sigma > rp02;
+  const overYield = sigma != null && sigma >= rp02;
   const sameLocation =
     result != null && !isUDL && Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
   const ratio = result && result.deflectionMax > 0 && Lraw ? Lraw / result.deflectionMax : null;
   const allowableOk =
-    result != null && allowableRaw != null && allowableRaw > 0
+    result != null && !overYield && allowableRaw != null && allowableRaw > 0
       ? result.deflectionMax <= allowableRaw
       : null;
   const reactionALabel = isUDL || beamType === "opgelegd" ? t.reactionA : t.reactionFixed;
@@ -302,9 +302,12 @@ export function BeamDeflectionCalc() {
     const beamLabelText = beamLabel ? label(beamLabel) : "";
     const loadText = isUDL ? `w=${udl} N/mm` : `a=${posA} mm, F=${force} N`;
     return [
+      overYield
+        ? t.overYieldNote(fmtBeamNum(sigma ?? 0, 1), fmtBeamNum(rp02, 0), label(material))
+        : "",
       `${beamLabelText}, L=${L} mm, ${loadText}, ${label(material)}, ${axisApplies ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
       isUDL ? "" : `δ(a) = ${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
-      `δ_max = ${fmtBeamNum(result.deflectionMax, 3)} mm bij x=${fmtBeamNum(result.xMax, 0)} mm`,
+      `δ_max = ${fmtBeamNum(result.deflectionMax, 3)} mm ${locale === "en" ? "at" : "bij"} x=${fmtBeamNum(result.xMax, 0)} mm`,
       `M_max = ${fmtBeamNum(result.momentMax, 0)} N·mm`,
       `${reactionALabel} = ${fmtBeamNum(result.reactionA, 0)} N, ${reactionBLabel} = ${fmtBeamNum(result.reactionB, 0)} N`,
       sigma != null ? `σ_max = ${fmtBeamNum(sigma, 1)} N/mm²` : "",
@@ -330,6 +333,8 @@ export function BeamDeflectionCalc() {
     material,
     ratio,
     sigma,
+    overYield,
+    rp02,
     allowableOk,
     allowable,
     reactionALabel,

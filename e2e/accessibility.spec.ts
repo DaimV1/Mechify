@@ -76,3 +76,27 @@ test.describe("Keyboard-only operation", () => {
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("30");
   });
 });
+
+for (const locale of ["nl", "en"] as const) {
+  test(`mobile menu Escape restores keyboard focus (${locale})`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "Mobile disclosure navigation only");
+    await page.goto(locale === "en" ? "/en/toolkit" : "/toolkit", { waitUntil: "networkidle" });
+    const toggle = page.locator(".menu-button");
+    await tabTo(page, toggle);
+    // Reach every menu link through the real keyboard sequence.
+    for (let link = 0; link < 4; link++) {
+      await page.keyboard.press("Enter");
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+      for (let tab = 0; tab <= link; tab++) await page.keyboard.press("Tab");
+      await expect(page.locator("#navigation a").nth(link)).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await expect(page.locator("#navigation")).toBeHidden();
+      await expect(toggle).toBeFocused();
+    }
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Escape");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(toggle).toBeFocused();
+  });
+}

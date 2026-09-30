@@ -1,10 +1,11 @@
 import { Logo } from "./logo";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { COMMON } from "@/lib/i18n/common";
 export function Header() {
   const [open, setOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const { locale } = useLocale();
   const t = COMMON[locale];
   return (
@@ -12,9 +13,18 @@ export function Header() {
       <a className="skip" href="#main">
         {t.skipToContent}
       </a>
-      <header className="header">
+      <header
+        className="header"
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && open) {
+            setOpen(false);
+            menuButton.current?.focus();
+          }
+        }}
+      >
         <Logo className="brand-logo" />
         <button
+          ref={menuButton}
           className="menu-button"
           aria-label={t.openMenu}
           aria-expanded={open}
@@ -28,9 +38,6 @@ export function Header() {
           className={open ? "open" : ""}
           id="navigation"
           aria-label={t.mainNav}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setOpen(false);
-          }}
         >
           <NavLink to="/topics">{t.navTopics}</NavLink>
           <NavLink to="/toolkit">{t.navToolkit}</NavLink>
