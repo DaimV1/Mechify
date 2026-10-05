@@ -46,8 +46,8 @@ const titles: Record<string, Record<Locale, string>> = {
   ratio: { nl: "Overbrengingsverhouding", en: "Transmission ratio" },
   force: { nl: "Kracht bij een gegeven cilinder", en: "Force for a given cylinder" },
 };
-const format = (n: number) =>
-  n.toLocaleString("nl-NL", {
+const format = (n: number, locale: Locale) =>
+  n.toLocaleString(locale === "en" ? "en-GB" : "nl-NL", {
     maximumFractionDigits: Math.abs(n) > 0 && Math.abs(n) < 0.001 ? 9 : 3,
   });
 export function QuickDrive({
@@ -134,7 +134,7 @@ export function QuickDrive({
   }
   const formula =
     kind === "drive"
-      ? "P = T · 2πn / 60.000"
+      ? "P = T · 2πn / 60000"
       : kind === "ratio"
         ? "n₂ = n₁ / i · T₂ = T₁ · i · η"
         : "Fuit = p · πD² / 4 · η; Fin = p · π(D² − d²) / 4 · η";
@@ -199,7 +199,7 @@ export function QuickDrive({
             <div key={label}>
               <span className="result-label">{label}</span>
               <div className="result-number">
-                {format(n)} <span>{unit}</span>
+                {format(n, locale)} <span>{unit}</span>
               </div>
             </div>
           ))}
@@ -262,7 +262,7 @@ export function QuickDrive({
                   ...Object.entries(v)
                     .filter(([k]) => kind !== "drive" || k !== target)
                     .map(([k, n]) => `${fields[k][0][locale]}: ${n} ${fields[k][1][locale]}`),
-                  ...results.map(([l, n, u]) => `${l}: ${format(n)} ${u}`),
+                  ...results.map(([l, n, u]) => `${l}: ${format(n, locale)} ${u}`),
                   formula,
                 ].join("\n"),
               );
