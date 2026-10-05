@@ -35,12 +35,10 @@ export function shaftTorsionStress(T: number, d: number): number | null {
 export type ShaftStatus = "fail" | "caution" | "ok";
 
 /**
- * Static safety band against yielding, same 1.0/1.2 screening convention
- * used by the bolted-joint tool: below 1.0 the shaft yields under the
- * assumed torque — a direct physical fact. The 1.0-1.2 "caution" band is a
- * Mechify screening threshold, not a code-mandated value; no single design
- * code fixes one number here, since the right margin depends on how well
- * the torque and material strength are actually known.
+ * Reserve band for entered allowable shear stress / calculated shear stress.
+ * Below 1.0 the entered allowable is exceeded; yielding cannot be inferred
+ * because that allowable may already incorporate a design safety factor.
+ * The 1.0/1.2 band is a Mechify screening threshold, not a code requirement.
  */
 export function shaftSafetyStatus(safetyFactor: number): ShaftStatus {
   if (safetyFactor < 1.0) return "fail";

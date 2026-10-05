@@ -820,7 +820,8 @@ describe("Shaft diameter under torsion (tau = 16T/(pi*d^3))", () => {
     assert.equal(shaftTorsionStress(50, 0), null);
   });
 
-  it("safety status follows the 1.0/1.2 screening bands", () => {
+  it("allowable stress reserve follows the 1.0/1.2 screening bands", () => {
+    assert.equal(shaftSafetyStatus(40 / 50), "fail");
     assert.equal(shaftSafetyStatus(0.9), "fail");
     assert.equal(shaftSafetyStatus(1.1), "caution");
     assert.equal(shaftSafetyStatus(1.5), "ok");

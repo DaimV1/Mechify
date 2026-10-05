@@ -30,8 +30,8 @@ const SHAFT_META: EngineeringSourceMeta = {
     en: "Solid round shaft, pure torsion",
   },
   assumptions: {
-    nl: "Alleen torsiespanning uit een gegeven koppel. Buiging, axiale last en dwarskracht van een tandwiel/poelie/kettingwiel zitten er niet in — bij de meeste assen is dat wél de maatgevende belasting, niet zuivere torsie alleen. Ook geen spanningsconcentratie bij spiebanen/schouders/gaten, geen vermoeiing en geen stijfheid (torsiehoek, doorbuiging, kritisch toerental). De 1,0/1,2-veiligheidsband is een Mechify-screeningscriterium, geen vaste normwaarde.",
-    en: "Torsional stress from a given torque only. Bending, axial load and transverse shear from a gear/pulley/sprocket are not included — for most shafts that combined loading governs, not pure torsion alone. Also no stress concentration at keyways/shoulders/holes, no fatigue, and no stiffness (twist angle, deflection, critical speed). The 1.0/1.2 safety band is a Mechify screening threshold, not a fixed code value.",
+    nl: "Alleen torsiespanning uit een gegeven koppel. Buiging, axiale last en dwarskracht van een tandwiel/poelie/kettingwiel zitten er niet in — bij de meeste assen is dat wél de maatgevende belasting, niet zuivere torsie alleen. Ook geen spanningsconcentratie bij spiebanen/schouders/gaten, geen vermoeiing en geen stijfheid (torsiehoek, doorbuiging, kritisch toerental). De 1,0/1,2-reserveband is een Mechify-screeningscriterium, geen vaste normwaarde.",
+    en: "Torsional stress from a given torque only. Bending, axial load and transverse shear from a gear/pulley/sprocket are not included — for most shafts that combined loading governs, not pure torsion alone. Also no stress concentration at keyways/shoulders/holes, no fatigue, and no stiffness (twist angle, deflection, critical speed). The 1.0/1.2 reserve band is a Mechify screening threshold, not a fixed code value.",
   },
   verification: {
     nl: "Voor een as die ook buiging of dwarskracht draagt: gebruik een combinatiespanning (bijv. von Mises) en een vermoeiingscontrole, niet deze tool alleen.",
@@ -51,15 +51,19 @@ const T = {
     checkSection: "Controleer een gekozen diameter (optioneel)",
     checkDiameter: "Gekozen diameter d (mm)",
     resultStress: "Torsiespanning τ bij d",
-    resultSF: "Veiligheid tegen vloeien S_F",
-    sfFail: "S_F < 1,0 — de as vloeit bij dit koppel op deze diameter.",
-    sfCaution: "S_F tussen 1,0 en 1,2 — krap, controleer de belastingsaannames.",
-    sfOk: "S_F ≥ 1,2 — voldoende marge tegen vloeien (zuivere torsie).",
+    resultSF: "Reserve t.o.v. ingevoerde toelaatbare spanning R",
+    sfFail: "R < 1,0 — de berekende spanning overschrijdt de ingevoerde toelaatbare spanning.",
+    sfCaution: "R tussen 1,0 en 1,2 — beperkte reserve; controleer de belastingsaannames.",
+    sfOk: "R ≥ 1,2 — reserve ten opzichte van de ingevoerde toelaatbare spanning volgens het Mechify-screeningscriterium.",
+    reserveHelp:
+      "R = τ_toel/τ. Dit is geen veiligheidsfactor tegen vloeien; de toelaatbare spanning kan al een veiligheidsfactor bevatten.",
+    copyUnavailable:
+      "Geen resultaat om te kopiëren: vul een geldig positief koppel en een geldige positieve toelaatbare spanning in.",
     fill: "Vul koppel en toelaatbare schuifspanning in (beide groter dan 0).",
     copy: (torque: string, tau: string, dmin: string) =>
       `T=${torque} N·m, τ_toel=${tau} N/mm²: d_min = ${dmin} mm`,
     copyCheck: (d: string, stress: string, sf: string) =>
-      `Bij d=${d} mm: τ = ${stress} N/mm², S_F = ${sf}`,
+      `Bij d=${d} mm: τ = ${stress} N/mm², R = ${sf}`,
   },
   en: {
     heading: "Shaft diameter under torsion",
@@ -72,25 +76,26 @@ const T = {
     checkSection: "Check a chosen diameter (optional)",
     checkDiameter: "Chosen diameter d (mm)",
     resultStress: "Torsional stress τ at d",
-    resultSF: "Static safety against yield S_F",
-    sfFail: "S_F < 1.0 — the shaft yields under this torque at this diameter.",
-    sfCaution: "S_F between 1.0 and 1.2 — tight, check the load assumptions.",
-    sfOk: "S_F ≥ 1.2 — adequate margin against yielding (pure torsion).",
+    resultSF: "Reserve against entered allowable stress R",
+    sfFail: "R < 1.0 — calculated stress exceeds the entered allowable stress.",
+    sfCaution: "R between 1.0 and 1.2 — limited reserve; check the load assumptions.",
+    sfOk: "R ≥ 1.2 — reserve against the entered allowable stress meets the Mechify screening threshold.",
+    reserveHelp:
+      "R = τ_allow/τ. This is not a safety factor against yield; the allowable stress may already include a safety factor.",
+    copyUnavailable: "No result to copy: enter a valid positive torque and allowable stress.",
     fill: "Enter torque and allowable shear stress (both greater than 0).",
     copy: (torque: string, tau: string, dmin: string) =>
       `T=${torque} N.m, tau_allow=${tau} N/mm^2: d_min = ${dmin} mm`,
     copyCheck: (d: string, stress: string, sf: string) =>
-      `At d=${d} mm: tau = ${stress} N/mm^2, S_F = ${sf}`,
+      `At d=${d} mm: tau = ${stress} N/mm^2, R = ${sf}`,
   },
 };
-
-function fmt(n: number, digits = 2): string {
-  return n.toLocaleString("nl-NL", { maximumFractionDigits: digits });
-}
 
 export function ShaftDiameterCalc() {
   const { locale } = useLocale();
   const t = T[locale];
+  const fmt = (n: number, digits = 2) =>
+    n.toLocaleString(locale === "en" ? "en-GB" : "nl-NL", { maximumFractionDigits: digits });
   const [search, setSearch] = useSearchParams();
   const [torque, setTorque] = useState(search.get("t") ?? "50");
   const [tauAllow, setTauAllow] = useState(search.has("tau") ? (search.get("tau") ?? "") : "40");
@@ -99,7 +104,8 @@ export function ShaftDiameterCalc() {
   useEffect(() => {
     const next = new URLSearchParams(search);
     const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
-    set("t", torque);
+    // Preserve intentional blanks so a shared/reloaded URL cannot restore 50 N·m.
+    next.set("t", torque);
     // An explicitly empty tau is meaningful for cross-tool handoffs: torque is
     // known, but allowable stress must still be selected for the material.
     next.set("tau", tauAllow);
@@ -119,14 +125,23 @@ export function ShaftDiameterCalc() {
     torqueVal != null && dCheckVal != null && dCheckVal > 0
       ? shaftTorsionStress(torqueVal, dCheckVal)
       : null;
-  const checkSF = checkStress != null && tauVal != null ? tauVal / checkStress : null;
+  const checkSF =
+    dMin != null && checkStress != null && checkStress > 0 && tauVal != null
+      ? tauVal / checkStress
+      : null;
   const checkStatus = checkSF != null ? shaftSafetyStatus(checkSF) : null;
 
   const copy = useMemo(() => {
     if (dMin == null) return "";
     const lines = [t.copy(torque, tauAllow, fmt(dMin)), metaCopyLine(SHAFT_META, locale)];
     if (checkStress != null && checkSF != null) {
-      lines.splice(1, 0, t.copyCheck(dCheck, fmt(checkStress, 1), fmt(checkSF)));
+      lines.splice(
+        1,
+        0,
+        t.copyCheck(dCheck, fmt(checkStress, 1), fmt(checkSF)),
+        t.reserveHelp,
+        checkStatus === "fail" ? t.sfFail : checkStatus === "caution" ? t.sfCaution : t.sfOk,
+      );
     }
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,6 +188,7 @@ export function ShaftDiameterCalc() {
               { label: t.resultSF, value: fmt(checkSF) },
             ]}
           />
+          <Note>{t.reserveHelp}</Note>
           <p
             role="status"
             className={`mt-3 text-sm font-medium ${
@@ -189,7 +205,11 @@ export function ShaftDiameterCalc() {
       ) : null}
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <CopyResult text={copy} />
+        {copy ? (
+          <CopyResult text={copy} />
+        ) : (
+          <p className="text-sm text-muted">{t.copyUnavailable}</p>
+        )}
         <CopyLink />
       </div>
       <SourceMetaBadge meta={SHAFT_META} />
