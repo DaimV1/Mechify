@@ -196,10 +196,13 @@ export function OringGroovesCalc() {
         fmtOring(result.width),
         fmtOring(result.fillPercent, 0),
       ),
+      ...(outOfRange
+        ? [t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))]
+        : []),
       metaCopyLine(ORING_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result, cord, sealType, squeeze, direction, locale]);
+  }, [result, cord, sealType, squeeze, direction, locale, outOfRange]);
 
   return (
     <>
