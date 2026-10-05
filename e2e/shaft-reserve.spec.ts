@@ -6,7 +6,7 @@ for (const locale of ["nl", "en"] as const) {
     context,
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto(`${locale === "en" ? "/en" : ""}/tools/shaft-diameter?t=50&tau=40&d=16`, {
+    await page.goto(`${locale === "en" ? "/en" : ""}/calculators/shaft-diameter?t=50&tau=40&d=16`, {
       waitUntil: "networkidle",
     });
     const status = page.getByRole("status").filter({ hasText: "R <" });
@@ -39,7 +39,7 @@ for (const locale of ["nl", "en"] as const) {
   test(`shaft invalid shared states survive reload without exports (${locale})`, async ({
     page,
   }) => {
-    const route = `${locale === "en" ? "/en" : ""}/tools/shaft-diameter`;
+    const route = `${locale === "en" ? "/en" : ""}/calculators/shaft-diameter`;
     const copy = page.getByRole("button", {
       name: locale === "en" ? "Copy result" : "Kopieer resultaat",
       exact: true,
