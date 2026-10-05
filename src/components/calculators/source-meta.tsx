@@ -42,8 +42,17 @@ const FIELD_LABELS = {
     range: "Geldigheid",
     assumptions: "Aannames",
     verify: "Verifieer",
+    beforeUse: "Voor gebruik",
+    sourceDetails: "Brondetails",
   },
-  en: { checked: "Checked", range: "Validity", assumptions: "Assumptions", verify: "Verify" },
+  en: {
+    checked: "Checked",
+    range: "Validity",
+    assumptions: "Assumptions",
+    verify: "Verify",
+    beforeUse: "Before use",
+    sourceDetails: "Source details",
+  },
 };
 
 /**
@@ -71,31 +80,45 @@ export function SourceMetaBadge({ meta }: { meta: EngineeringSourceMeta }) {
         <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
         <span>{metaLabel(meta, locale)}</span>
       </p>
-      <p className="mt-1 text-muted">
-        {meta.reference}
-        {meta.sourceUrl ? (
-          <>
-            {" · "}
-            <a
-              href={meta.sourceUrl}
-              className="text-accent hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.verify}
-            </a>
-          </>
-        ) : null}
-      </p>
-      <p className="mt-1 text-subtle">
-        {t.checked} {meta.checkedDate}
-        {meta.validityRange ? ` · ${t.range}: ${metaText(meta.validityRange, locale)}` : ""}
-      </p>
+      {meta.verification ? (
+        <p className="mt-2 text-sm text-ink">
+          <strong>{t.beforeUse}:</strong> {metaText(meta.verification, locale)}
+        </p>
+      ) : null}
+      {meta.validityRange ? (
+        <p className="mt-1 text-muted">
+          {t.range}: {metaText(meta.validityRange, locale)}
+        </p>
+      ) : null}
       {meta.assumptions ? (
         <p className="mt-1 text-subtle">
           {t.assumptions}: {metaText(meta.assumptions, locale)}
         </p>
       ) : null}
+      <details className="mt-2">
+        <summary className="cursor-pointer text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+          {t.sourceDetails}
+        </summary>
+        <p className="mt-1 text-muted">
+          {meta.reference}
+          {meta.sourceUrl ? (
+            <>
+              {" · "}
+              <a
+                href={meta.sourceUrl}
+                className="text-accent hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.verify}
+              </a>
+            </>
+          ) : null}
+        </p>
+        <p className="mt-1 text-subtle">
+          {t.checked} {meta.checkedDate}
+        </p>
+      </details>
     </div>
   );
 }
