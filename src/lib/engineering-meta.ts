@@ -76,7 +76,7 @@ export function metaTone(meta: EngineeringSourceMeta): "ok" | "warn" | "danger" 
 const CHECKED_LABEL: Record<Locale, string> = { nl: "Gecontroleerd", en: "Checked" };
 const RANGE_LABEL: Record<Locale, string> = { nl: "Geldigheid", en: "Validity" };
 
-/** One-line text for copy-to-clipboard output, so provenance travels with the number, not just the on-screen badge. */
+/** Provenance and use conditions travel with copied numbers; omit absent optional fields. */
 export function metaCopyLine(meta: EngineeringSourceMeta, locale: Locale): string {
   const parts = [
     `${metaLabel(meta, locale)}: ${meta.reference}`,
@@ -84,5 +84,14 @@ export function metaCopyLine(meta: EngineeringSourceMeta, locale: Locale): strin
   ];
   if (meta.validityRange)
     parts.push(`${RANGE_LABEL[locale]}: ${metaText(meta.validityRange, locale)}`);
-  return parts.join(" · ");
+  const lines = [parts.join(" · ")];
+  if (meta.assumptions)
+    lines.push(
+      `${locale === "nl" ? "Aannames" : "Assumptions"}: ${metaText(meta.assumptions, locale)}`,
+    );
+  if (meta.verification)
+    lines.push(
+      `${locale === "nl" ? "Voor gebruik" : "Before use"}: ${metaText(meta.verification, locale)}`,
+    );
+  return lines.join("\n");
 }
