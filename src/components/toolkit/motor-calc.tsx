@@ -57,6 +57,11 @@ export function MotorCalc() {
   const [fb, setFb] = useState(search.fb ?? "1,2");
   const [accel, setAccel] = useState(search.a ?? "0");
   const [rollerMass, setRollerMass] = useState(search.rm ?? "");
+  const [initialEtaInvalid] = useState(() => {
+    const restored = search.eta;
+    const value = restored === undefined ? null : parseNum(restored);
+    return restored !== undefined && (value == null || value <= 0 || value > 1);
+  });
 
   useEffect(() => {
     navigate({
@@ -64,12 +69,12 @@ export function MotorCalc() {
         ...prev,
         speed: speed || undefined,
         unit: speedUnit,
-        d: diameterMm || undefined,
-        mass: mass || undefined,
+        d: diameterMm,
+        mass,
         duty,
         mu: mu || undefined,
         alpha: alpha || undefined,
-        eta: eta || undefined,
+        eta,
         fb: fb || undefined,
         a: accel || undefined,
         rm: rollerMass || undefined,
@@ -165,6 +170,7 @@ export function MotorCalc() {
           <ValidatedNumField
             label={tx(locale, "Roldiameter (mm)", "Roller diameter (mm)")}
             id="motor-diameter"
+            validateInitially={search.d !== undefined}
             value={diameterMm}
             onChange={setDiameterMm}
             error={
@@ -176,6 +182,7 @@ export function MotorCalc() {
           <ValidatedNumField
             label={tx(locale, "Massa (kg)", "Mass (kg)")}
             id="motor-mass"
+            validateInitially={search.mass !== undefined}
             value={mass}
             onChange={setMass}
             error={
@@ -206,7 +213,7 @@ export function MotorCalc() {
           ) : null}
         </div>
 
-        <details className="mt-6">
+        <details className="mt-6" open={initialEtaInvalid || undefined}>
           <summary className="cursor-pointer text-sm font-medium text-ink">
             {tx(locale, "Geavanceerd (η, f_b, μ, a)", "Advanced (η, f_b, μ, a)")}
           </summary>
@@ -214,6 +221,7 @@ export function MotorCalc() {
             <ValidatedNumField
               label={tx(locale, "Rendement η", "Efficiency η")}
               id="motor-eta"
+              validateInitially={initialEtaInvalid}
               value={eta}
               onChange={setEta}
               error={

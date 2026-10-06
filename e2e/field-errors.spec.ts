@@ -11,6 +11,70 @@ async function tabTo(page: Page, target: Locator) {
 
 for (const locale of ["nl", "en"] as const) {
   for (const example of [
+    { route: "shaft-diameter", input: "shaft-torque", key: "t", value: "0" },
+    { route: "shaft-diameter", input: "shaft-tau-allow", key: "tau", value: "" },
+    { route: "shaft-diameter", input: "shaft-d-check", key: "d", value: "bad", optional: true },
+    { route: "motor-specification", input: "motor-diameter", key: "d", value: "bad" },
+    { route: "motor-specification", input: "motor-mass", key: "mass", value: "" },
+    { route: "motor-specification", input: "motor-eta", key: "eta", value: "1.1", eta: true },
+    { route: "motor-specification", input: "motor-eta", key: "eta", value: "", eta: true },
+  ]) {
+    test(`restored ${example.input}=${example.value} has immediate feedback (${locale})`, async ({
+      page,
+    }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/calculators/${example.route}?${example.key}=${example.value}`,
+        { waitUntil: "networkidle" },
+      );
+      const input = page.locator(`#${example.input}`);
+      const correction = example.eta
+        ? locale === "en"
+          ? "Enter a number greater than 0 and at most 1."
+          : "Vul een getal groter dan 0 en maximaal 1 in."
+        : locale === "en"
+          ? "Enter a number greater than 0."
+          : "Vul een getal groter dan 0 in.";
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (attempt) await page.reload({ waitUntil: "networkidle" });
+        await expect(input).toHaveValue(example.value);
+        await expect(input).toHaveAttribute("aria-invalid", "true");
+        await expect(input).toHaveAccessibleDescription(correction);
+        await expect(page.locator(`#${example.input}-error`)).toBeVisible();
+        expect(new URL(page.url()).searchParams.get(example.key)).toBe(example.value);
+        const copy = page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        });
+        if (example.optional) await expect(copy).toBeVisible();
+        else await expect(copy).toHaveCount(0);
+      }
+      await input.fill(example.eta ? "0.85" : "40");
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await expect(page.locator(`#${example.input}-error`)).toHaveCount(0);
+    });
+  }
+
+  for (const example of [
+    { route: "shaft-diameter", input: "shaft-torque", query: "t=50&d=" },
+    { route: "motor-specification", input: "motor-diameter", query: "d=100" },
+  ]) {
+    test(`valid shared input still delays first edit feedback (${locale}, ${example.route})`, async ({
+      page,
+    }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/calculators/${example.route}?${example.query}`,
+        { waitUntil: "networkidle" },
+      );
+      await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
+      const input = page.locator(`#${example.input}`);
+      await input.fill("bad");
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await input.press("Tab");
+      await expect(input).toHaveAttribute("aria-invalid", "true");
+    });
+  }
+
+  for (const example of [
     { route: "shaft-diameter", input: "shaft-torque", corrected: "50", expected: "d_min" },
     { route: "motor-specification", input: "motor-diameter", corrected: "100", expected: "P=" },
   ]) {
