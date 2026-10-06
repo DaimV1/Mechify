@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import { PageShell } from "@/components/layout/page-shell";
 import { Eyebrow } from "@/components/brand-ui";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
-import { findTool, SECTIONS, type ToolSection } from "@/lib/tools";
+import { DIAMETER_KEY, findTool, SECTIONS, type ToolSection } from "@/lib/tools";
 import { SOURCE_KEYS } from "@/lib/migration-models";
 import { toolkitCopy } from "@/lib/i18n/toolkit-pages";
 import { Faq } from "@/components/toolkit/calc-ui";
@@ -46,7 +46,22 @@ export function ToolDetail({ section }: { section: ToolSection }) {
   );
   useFaqJsonLd(copy?.faq);
   if (!tool || !Calculator) return <NotFound />;
+  const usesSharedDiameter = [
+    "fit-tolerances",
+    "seeger-grooves",
+    "keyways",
+    "bearing-fits",
+  ].includes(tool.id);
   function reset() {
+    // Removing query parameters alone would rehydrate the previous shared diameter.
+    // Other tools do not own this input; leave their remembered diameter intact.
+    if (usesSharedDiameter) {
+      try {
+        window.sessionStorage.removeItem(DIAMETER_KEY);
+      } catch {
+        // Storage is optional; resetting the URL must still work when it is blocked.
+      }
+    }
     window.location.assign(window.location.pathname);
   }
   const calculatorWorkbench = (
@@ -84,7 +99,24 @@ export function ToolDetail({ section }: { section: ToolSection }) {
               <option value="en">EN</option>
             </select>
           </label>
-          <button onClick={reset}>↺ {tx(locale, "Reset invoer", "Reset input")}</button>
+          <button
+            onClick={reset}
+            title={
+              usesSharedDiameter
+                ? tx(
+                    locale,
+                    "Herstel de standaardinvoer (Ø20 mm) en wis de gedeelde diameter. De taal blijft behouden.",
+                    "Restore default inputs (Ø20 mm) and clear the shared diameter. Language is preserved.",
+                  )
+                : tx(
+                    locale,
+                    "Herstel de standaardinvoer van deze tool. De taal blijft behouden.",
+                    "Restore this tool's default inputs. Language is preserved.",
+                  )
+            }
+          >
+            ↺ {tx(locale, "Reset invoer", "Reset input")}
+          </button>
         </div>
         {tool.id === "macros" ? (
           calculatorWorkbench
