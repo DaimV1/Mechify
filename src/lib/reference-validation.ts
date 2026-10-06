@@ -174,15 +174,17 @@ function validate9(s: Record<string, unknown>) {
     return {
       speed: num(s.speed),
       unit: s.unit === "m/min" || s.unit === "m/s" ? s.unit : undefined,
-      d: num(s.d),
-      mass: num(s.mass),
+      // These fields provide inline validation; preserve invalid shared input
+      // instead of silently replacing it with a valid calculator default.
+      d: typeof s.d === "string" ? s.d : undefined,
+      mass: typeof s.mass === "string" ? s.mass : undefined,
       duty:
         s.duty === "rollenbaan" || s.duty === "band" || s.duty === "helling" || s.duty === "hijsen"
           ? s.duty
           : undefined,
       mu: num(s.mu),
       alpha: num(s.alpha),
-      eta: num(s.eta),
+      eta: typeof s.eta === "string" ? s.eta : undefined,
       fb: num(s.fb),
       a: num(s.a),
       rm: num(s.rm),

@@ -161,6 +161,7 @@ export function ShaftDiameterCalc() {
         <ValidatedNumField
           label={t.torque}
           id="shaft-torque"
+          validateInitially={search.has("t")}
           value={torque}
           onChange={setTorque}
           error={torqueVal == null || torqueVal <= 0 ? t.positiveError : undefined}
@@ -168,6 +169,7 @@ export function ShaftDiameterCalc() {
         <ValidatedNumField
           label={t.tauAllow}
           id="shaft-tau-allow"
+          validateInitially={search.has("tau")}
           value={tauAllow}
           onChange={setTauAllow}
           error={tauVal == null || tauVal <= 0 ? t.positiveError : undefined}
@@ -188,6 +190,7 @@ export function ShaftDiameterCalc() {
         <ValidatedNumField
           label={t.checkDiameter}
           id="shaft-d-check"
+          validateInitially={search.has("d")}
           value={dCheck}
           onChange={setDCheck}
           error={

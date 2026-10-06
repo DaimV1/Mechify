@@ -7,6 +7,8 @@ export type NumericFieldProps = {
   onChange: (value: string) => void;
   /** Calculator-owned correction; no numerical rules are inferred by the input. */
   error?: string;
+  /** Show an invalid restored value on mount; later edits still wait for blur. */
+  validateInitially?: boolean;
 };
 
 /** Feedback begins on blur, clears on correction, and does not announce every keystroke. */
@@ -16,9 +18,10 @@ export function NumericField({
   value,
   onChange,
   error,
+  validateInitially = false,
   inputClassName,
 }: NumericFieldProps & { inputClassName: string }) {
-  const [touched, setTouched] = useState(false);
+  const [touched, setTouched] = useState(validateInitially && Boolean(error));
   const visibleError = touched ? error : undefined;
   const errorId = `${id}-error`;
   return (
