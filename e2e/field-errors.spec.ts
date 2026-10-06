@@ -15,6 +15,10 @@ for (const locale of ["nl", "en"] as const) {
     { route: "shaft-diameter", input: "shaft-tau-allow", key: "tau", value: "" },
     { route: "shaft-diameter", input: "shaft-d-check", key: "d", value: "bad", optional: true },
     { route: "motor-specification", input: "motor-diameter", key: "d", value: "bad" },
+    ...["", "bad", "0", "-1"].flatMap((value) => [
+      { route: "motor-specification", input: "motor-speed", key: "speed", value },
+      { route: "motor-specification", input: "motor-fb", key: "fb", value },
+    ]),
     { route: "motor-specification", input: "motor-mass", key: "mass", value: "" },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "1.1", eta: true },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "", eta: true },
@@ -57,8 +61,10 @@ for (const locale of ["nl", "en"] as const) {
   for (const example of [
     { route: "shaft-diameter", input: "shaft-torque", query: "t=50&d=" },
     { route: "motor-specification", input: "motor-diameter", query: "d=100" },
+    { route: "motor-specification", input: "motor-speed", query: "speed=30" },
+    { route: "motor-specification", input: "motor-fb", query: "fb=1.2" },
   ]) {
-    test(`valid shared input still delays first edit feedback (${locale}, ${example.route})`, async ({
+    test(`valid shared input still delays first edit feedback (${locale}, ${example.input})`, async ({
       page,
     }) => {
       await page.goto(
@@ -66,6 +72,12 @@ for (const locale of ["nl", "en"] as const) {
         { waitUntil: "networkidle" },
       );
       await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
+      if (example.input === "motor-fb") {
+        await page
+          .locator("summary")
+          .filter({ hasText: locale === "en" ? "Advanced (" : "Geavanceerd (" })
+          .click();
+      }
       const input = page.locator(`#${example.input}`);
       await input.fill("bad");
       await expect(input).not.toHaveAttribute("aria-invalid");

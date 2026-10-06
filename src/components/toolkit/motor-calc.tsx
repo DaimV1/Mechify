@@ -63,11 +63,17 @@ export function MotorCalc() {
     return restored !== undefined && (value == null || value <= 0 || value > 1);
   });
 
+  const [initialFbInvalid] = useState(() => {
+    const restored = search.fb;
+    const value = restored === undefined ? null : parseNum(restored);
+    return restored !== undefined && (value == null || value <= 0);
+  });
+
   useEffect(() => {
     navigate({
       search: (prev) => ({
         ...prev,
-        speed: speed || undefined,
+        speed,
         unit: speedUnit,
         d: diameterMm,
         mass,
@@ -75,7 +81,7 @@ export function MotorCalc() {
         mu: mu || undefined,
         alpha: alpha || undefined,
         eta,
-        fb: fb || undefined,
+        fb,
         a: accel || undefined,
         rm: rollerMass || undefined,
       }),
@@ -158,15 +164,28 @@ export function MotorCalc() {
           )}
         </Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label={tx(locale, "Transportsnelheid", "Conveyor speed")}>
-            <div className="flex gap-2">
-              <NumInput id="motor-speed" value={speed} onChange={setSpeed} />
-              <SelectInput value={speedUnit} onChange={onUnit}>
-                <option value="m/min">m/min</option>
-                <option value="m/s">m/s</option>
-              </SelectInput>
+          <div className="flex items-start gap-2">
+            <ValidatedNumField
+              label={tx(locale, "Transportsnelheid", "Conveyor speed")}
+              id="motor-speed"
+              validateInitially={search.speed !== undefined}
+              value={speed}
+              onChange={setSpeed}
+              error={
+                vRaw == null || vRaw <= 0
+                  ? tx(locale, "Vul een getal groter dan 0 in.", "Enter a number greater than 0.")
+                  : undefined
+              }
+            />
+            <div className="w-24 shrink-0">
+              <Field label={tx(locale, "Eenheid", "Unit")}>
+                <SelectInput value={speedUnit} onChange={onUnit}>
+                  <option value="m/min">m/min</option>
+                  <option value="m/s">m/s</option>
+                </SelectInput>
+              </Field>
             </div>
-          </Field>
+          </div>
           <ValidatedNumField
             label={tx(locale, "Roldiameter (mm)", "Roller diameter (mm)")}
             id="motor-diameter"
@@ -213,7 +232,7 @@ export function MotorCalc() {
           ) : null}
         </div>
 
-        <details className="mt-6" open={initialEtaInvalid || undefined}>
+        <details className="mt-6" open={initialEtaInvalid || initialFbInvalid || undefined}>
           <summary className="cursor-pointer text-sm font-medium text-ink">
             {tx(locale, "Geavanceerd (η, f_b, μ, a)", "Advanced (η, f_b, μ, a)")}
           </summary>
@@ -234,9 +253,18 @@ export function MotorCalc() {
                   : undefined
               }
             />
-            <Field label={tx(locale, "Bedrijfsfactor f_b", "Service factor f_b")}>
-              <NumInput id="motor-fb" value={fb} onChange={setFb} />
-            </Field>
+            <ValidatedNumField
+              label={tx(locale, "Bedrijfsfactor f_b", "Service factor f_b")}
+              id="motor-fb"
+              validateInitially={initialFbInvalid}
+              value={fb}
+              onChange={setFb}
+              error={
+                fbRaw == null || fbRaw <= 0
+                  ? tx(locale, "Vul een getal groter dan 0 in.", "Enter a number greater than 0.")
+                  : undefined
+              }
+            />
             {showMuAdvanced ? (
               <Field label={tx(locale, "μ (overschrijven)", "μ (override)")}>
                 <NumInput id="motor-mu-adv" value={mu} onChange={setMu} />
