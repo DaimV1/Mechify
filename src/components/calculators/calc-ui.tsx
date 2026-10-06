@@ -1,3 +1,4 @@
+import { NumericField, type NumericFieldProps } from "@/components/numeric-field";
 import { Check, Copy, Info, Link2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,11 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 
 const controlClass =
   "h-12 w-full rounded-md border border-border-strong bg-bg px-3 font-mono text-base text-ink tabular-nums outline-none transition-[border-color,box-shadow] duration-150 focus:border-accent focus:ring-2 focus:ring-accent/30";
+
+/** Opt-in labeled input with delayed, associated inline feedback. */
+export function ValidatedNumField(props: NumericFieldProps) {
+  return <NumericField {...props} inputClassName={controlClass} />;
+}
 
 /** Keeps one decimal separator visible so "20,5" doesn't collapse to "205". */
 export function sanitizeDiameterInput(raw: string) {

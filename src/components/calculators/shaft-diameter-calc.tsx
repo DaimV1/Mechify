@@ -11,9 +11,8 @@ import {
   CalcPanel,
   CopyLink,
   CopyResult,
-  Field,
   Note,
-  NumInput,
+  ValidatedNumField,
   parseNum,
   ResultGrid,
 } from "@/components/calculators/calc-ui";
@@ -59,6 +58,7 @@ const T = {
       "R = τ_toel/τ. Dit is geen veiligheidsfactor tegen vloeien; de toelaatbare spanning kan al een veiligheidsfactor bevatten.",
     copyUnavailable:
       "Geen resultaat om te kopiëren: vul een geldig positief koppel en een geldige positieve toelaatbare spanning in.",
+    positiveError: "Vul een getal groter dan 0 in.",
     fill: "Vul koppel en toelaatbare schuifspanning in (beide groter dan 0).",
     copy: (torque: string, tau: string, dmin: string) =>
       `T=${torque} N·m, τ_toel=${tau} N/mm²: d_min = ${dmin} mm`,
@@ -83,6 +83,7 @@ const T = {
     reserveHelp:
       "R = τ_allow/τ. This is not a safety factor against yield; the allowable stress may already include a safety factor.",
     copyUnavailable: "No result to copy: enter a valid positive torque and allowable stress.",
+    positiveError: "Enter a number greater than 0.",
     fill: "Enter torque and allowable shear stress (both greater than 0).",
     copy: (torque: string, tau: string, dmin: string) =>
       `T=${torque} N.m, tau_allow=${tau} N/mm^2: d_min = ${dmin} mm`,
@@ -157,12 +158,20 @@ export function ShaftDiameterCalc() {
 
       <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.inputSection}</h3>
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
-        <Field label={t.torque}>
-          <NumInput id="shaft-torque" value={torque} onChange={setTorque} />
-        </Field>
-        <Field label={t.tauAllow}>
-          <NumInput id="shaft-tau-allow" value={tauAllow} onChange={setTauAllow} />
-        </Field>
+        <ValidatedNumField
+          label={t.torque}
+          id="shaft-torque"
+          value={torque}
+          onChange={setTorque}
+          error={torqueVal == null || torqueVal <= 0 ? t.positiveError : undefined}
+        />
+        <ValidatedNumField
+          label={t.tauAllow}
+          id="shaft-tau-allow"
+          value={tauAllow}
+          onChange={setTauAllow}
+          error={tauVal == null || tauVal <= 0 ? t.positiveError : undefined}
+        />
       </div>
 
       <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.resultsSection}</h3>
@@ -176,9 +185,17 @@ export function ShaftDiameterCalc() {
 
       <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.checkSection}</h3>
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
-        <Field label={t.checkDiameter}>
-          <NumInput id="shaft-d-check" value={dCheck} onChange={setDCheck} />
-        </Field>
+        <ValidatedNumField
+          label={t.checkDiameter}
+          id="shaft-d-check"
+          value={dCheck}
+          onChange={setDCheck}
+          error={
+            dCheck.trim() !== "" && (dCheckVal == null || dCheckVal <= 0)
+              ? t.positiveError
+              : undefined
+          }
+        />
       </div>
       {checkStress != null && checkSF != null ? (
         <>

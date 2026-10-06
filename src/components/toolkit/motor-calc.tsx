@@ -25,6 +25,7 @@ import {
   Field,
   Note,
   NumInput,
+  ValidatedNumField,
   ResultGrid,
   SelectInput,
 } from "./calc-ui";
@@ -161,12 +162,28 @@ export function MotorCalc() {
               </SelectInput>
             </div>
           </Field>
-          <Field label={tx(locale, "Roldiameter (mm)", "Roller diameter (mm)")}>
-            <NumInput id="motor-diameter" value={diameterMm} onChange={setDiameterMm} />
-          </Field>
-          <Field label={tx(locale, "Massa (kg)", "Mass (kg)")}>
-            <NumInput id="motor-mass" value={mass} onChange={setMass} />
-          </Field>
+          <ValidatedNumField
+            label={tx(locale, "Roldiameter (mm)", "Roller diameter (mm)")}
+            id="motor-diameter"
+            value={diameterMm}
+            onChange={setDiameterMm}
+            error={
+              dRaw == null || dRaw <= 0
+                ? tx(locale, "Vul een getal groter dan 0 in.", "Enter a number greater than 0.")
+                : undefined
+            }
+          />
+          <ValidatedNumField
+            label={tx(locale, "Massa (kg)", "Mass (kg)")}
+            id="motor-mass"
+            value={mass}
+            onChange={setMass}
+            error={
+              mRaw == null || mRaw <= 0
+                ? tx(locale, "Vul een getal groter dan 0 in.", "Enter a number greater than 0.")
+                : undefined
+            }
+          />
           <Field label={tx(locale, "Bedrijf", "Duty")}>
             <SelectInput value={duty} onChange={onDuty}>
               <option value="rollenbaan">
@@ -194,9 +211,21 @@ export function MotorCalc() {
             {tx(locale, "Geavanceerd (η, f_b, μ, a)", "Advanced (η, f_b, μ, a)")}
           </summary>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field label={tx(locale, "Rendement η", "Efficiency η")}>
-              <NumInput id="motor-eta" value={eta} onChange={setEta} />
-            </Field>
+            <ValidatedNumField
+              label={tx(locale, "Rendement η", "Efficiency η")}
+              id="motor-eta"
+              value={eta}
+              onChange={setEta}
+              error={
+                etaRaw == null || etaRaw <= 0 || etaRaw > 1
+                  ? tx(
+                      locale,
+                      "Vul een getal groter dan 0 en maximaal 1 in.",
+                      "Enter a number greater than 0 and at most 1.",
+                    )
+                  : undefined
+              }
+            />
             <Field label={tx(locale, "Bedrijfsfactor f_b", "Service factor f_b")}>
               <NumInput id="motor-fb" value={fb} onChange={setFb} />
             </Field>
@@ -316,7 +345,12 @@ export function MotorCalc() {
                   className="mt-3 inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 text-sm font-medium text-ink hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   to={`/calculators/shaft-diameter?t=${encodeURIComponent(driveQueryNumber(result.T))}&tau=`}
                 >
-                  {tx(locale, "Controleer as op berekend koppel", "Check shaft at calculated torque")} →
+                  {tx(
+                    locale,
+                    "Controleer as op berekend koppel",
+                    "Check shaft at calculated torque",
+                  )}{" "}
+                  →
                 </Link>
               </div>
             ) : null}
