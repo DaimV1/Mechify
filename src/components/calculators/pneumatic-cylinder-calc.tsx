@@ -30,7 +30,6 @@ import {
   CopyResult,
   Field,
   Note,
-  NumInput,
   parseNum,
   ResultGrid,
   SelectInput,
@@ -62,6 +61,7 @@ const T = {
     forceLabel: "Benodigde kracht F (N)",
     pressureLabel: "Werkdruk p (bar)",
     positiveNumber: "Vul een getal groter dan 0 in.",
+    efficiencyNumber: "Vul een getal groter dan 0 en maximaal 1 in.",
     smallerNumber: "Vul een kleiner getal in.",
     fillForcePressure: "Vul een kracht en druk groter dan 0 in.",
     noBore: (p: string) =>
@@ -111,7 +111,8 @@ const T = {
     effRetractForce: "Effectieve intrekkracht (met wrijving)",
     airPerCycle: "Luchtverbruik per cyclus",
     airPerMinute: "Luchtverbruik per minuut",
-    fillAir: "Vul rendement, slag en cycli per minuut in (alle groter dan 0).",
+    fillAir:
+      "Vul een slag en cycli per minuut groter dan 0 in, en een rendement groter dan 0 tot maximaal 1.",
     copyEfficiency: (eta: string, effUit: string, effIn: string) =>
       `Rendement η=${eta}: effectieve uittrekkracht ${effUit} N, intrekkracht ${effIn} N`,
     copyAir: (perCycle: string, perMin: string) =>
@@ -124,6 +125,7 @@ const T = {
     forceLabel: "Required force F (N)",
     pressureLabel: "Working pressure p (bar)",
     positiveNumber: "Enter a number greater than 0.",
+    efficiencyNumber: "Enter a number greater than 0 and at most 1.",
     smallerNumber: "Enter a smaller number.",
     fillForcePressure: "Enter a force and pressure greater than 0.",
     noBore: (p: string) =>
@@ -173,7 +175,8 @@ const T = {
     effRetractForce: "Effective retract force (with friction)",
     airPerCycle: "Air consumption per cycle",
     airPerMinute: "Air consumption per minute",
-    fillAir: "Enter efficiency, stroke and cycles per minute (all greater than 0).",
+    fillAir:
+      "Enter stroke and cycles per minute greater than 0, and efficiency greater than 0 up to 1.",
     copyEfficiency: (eta: string, effUit: string, effIn: string) =>
       `Efficiency eta=${eta}: effective extend force ${effUit} N, retract force ${effIn} N`,
     copyAir: (perCycle: string, perMin: string) =>
@@ -192,10 +195,8 @@ export function PneumaticCylinderCalc() {
     (search.get("end") as EndConditionId) ?? "fc",
   );
   const [materialId, setMaterialId] = useState(search.get("material") ?? "staal");
-  const [showBuckling, setShowBuckling] = useState(false);
   const [efficiency, setEfficiency] = useState(search.get("eta") ?? "0.9");
   const [cyclesPerMin, setCyclesPerMin] = useState(search.get("cpm") ?? "10");
-  const [showAir, setShowAir] = useState(false);
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -226,7 +227,7 @@ export function PneumaticCylinderCalc() {
   const rod = recommended?.rods[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
-  const buckling = useMemo(() => {
+  const bucklingCandidate = useMemo(() => {
     if (!recommended || rod == null || L == null || !(L > 0) || p == null) return null;
     const section = sectionProps("rond", { D: rod });
     if (!section) return null;
@@ -248,15 +249,62 @@ export function PneumaticCylinderCalc() {
 
   const etaVal = parseNum(efficiency);
   const cyclesVal = parseNum(cyclesPerMin);
-  const airResult = useMemo(() => {
-    if (!recommended || rod == null || p == null || L == null || !(L > 0)) return null;
-    if (etaVal == null || !(etaVal > 0) || cyclesVal == null || !(cyclesVal > 0)) return null;
+  const bucklingIsFinite =
+    bucklingCandidate != null &&
+    Number.isFinite(bucklingCandidate.Fcr) &&
+    Number.isFinite(bucklingCandidate.lambda) &&
+    (bucklingCandidate.safety == null || Number.isFinite(bucklingCandidate.safety));
+  const qCycleCandidate =
+    recommended && rod != null && p != null && L != null && L > 0
+      ? airConsumptionPerCycleL(recommended.bore, rod, L, p)
+      : null;
+  const strokeOverflows =
+    L != null &&
+    L > 0 &&
+    ((bucklingCandidate != null && !bucklingIsFinite) ||
+      (qCycleCandidate != null && !Number.isFinite(qCycleCandidate)));
+  const strokeError =
+    L == null || L <= 0 ? t.positiveNumber : strokeOverflows ? t.smallerNumber : undefined;
+  const efficiencyError =
+    etaVal == null || etaVal <= 0 || etaVal > 1 ? t.efficiencyNumber : undefined;
+  const qMinCandidate =
+    qCycleCandidate != null && Number.isFinite(qCycleCandidate) && cyclesVal != null
+      ? airConsumptionPerMinuteL(qCycleCandidate, cyclesVal)
+      : null;
+  const cyclesError =
+    cyclesVal == null || cyclesVal <= 0
+      ? t.positiveNumber
+      : qMinCandidate != null && !Number.isFinite(qMinCandidate)
+        ? t.smallerNumber
+        : undefined;
+  const buckling = bucklingIsFinite ? bucklingCandidate : null;
+  const [strokeValidationVisible, setStrokeValidationVisible] = useState(
+    search.has("l") && Boolean(strokeError),
+  );
+  const [showBuckling, setShowBuckling] = useState(search.has("l") && strokeError !== undefined);
+  const [showAir, setShowAir] = useState(
+    (search.has("l") && strokeError !== undefined) ||
+      (search.has("eta") && efficiencyError !== undefined) ||
+      (search.has("cpm") && cyclesError !== undefined),
+  );
+  const efficiencyResult = useMemo(() => {
+    if (!recommended || rod == null || p == null || etaVal == null || efficiencyError) return null;
     const effUit = effectiveForce(extendForce(recommended.bore, p), etaVal);
     const effIn = effectiveForce(retractForce(recommended.bore, rod, p), etaVal);
-    const qCycle = airConsumptionPerCycleL(recommended.bore, rod, L, p);
-    const qMin = airConsumptionPerMinuteL(qCycle, cyclesVal);
-    return { effUit, effIn, qCycle, qMin };
-  }, [recommended, rod, p, L, etaVal, cyclesVal]);
+    const values = { effUit, effIn };
+    return Object.values(values).every((value) => value != null && Number.isFinite(value))
+      ? values
+      : null;
+  }, [recommended, rod, p, efficiencyError, etaVal]);
+  const airResult =
+    qCycleCandidate != null &&
+    qMinCandidate != null &&
+    Number.isFinite(qCycleCandidate) &&
+    Number.isFinite(qMinCandidate) &&
+    !strokeError &&
+    !cyclesError
+      ? { qCycle: qCycleCandidate, qMin: qMinCandidate }
+      : null;
 
   const copy = useMemo(() => {
     if (!recommended || F == null || p == null) return "";
@@ -275,14 +323,18 @@ export function PneumaticCylinderCalc() {
       else if (buckling.safety != null && buckling.safety < 3.5)
         lines.push(t.lowSafetyNote(fmtDotComma(buckling.safety, 2)));
     }
+    if (efficiencyResult) {
+      lines.push(
+        t.copyEfficiency(efficiency, fmtN0(efficiencyResult.effUit), fmtN0(efficiencyResult.effIn)),
+      );
+    }
     if (airResult) {
-      lines.push(t.copyEfficiency(efficiency, fmtN0(airResult.effUit), fmtN0(airResult.effIn)));
       lines.push(t.copyAir(fmtAir(airResult.qCycle), fmtAir(airResult.qMin)));
     }
     lines.push(metaCopyLine(CYLINDER_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recommended, F, p, rod, buckling, airResult, efficiency, locale]);
+  }, [recommended, F, p, rod, buckling, efficiencyResult, airResult, efficiency, locale]);
 
   return (
     <>
@@ -358,18 +410,30 @@ export function PneumaticCylinderCalc() {
             <button
               type="button"
               onClick={() => setShowBuckling((s) => !s)}
+              aria-expanded={showBuckling}
+              aria-controls="pneu-buckling-panel"
               className="mt-6 text-sm font-medium text-ink underline decoration-border-strong underline-offset-4 hover:decoration-ink"
             >
               {showBuckling ? t.hideBuckling : t.showBuckling}
             </button>
             {showBuckling ? (
-              <div className="mt-4 rounded-lg border border-border bg-bg p-4">
+              <div
+                id="pneu-buckling-panel"
+                className="mt-4 rounded-lg border border-border bg-bg p-4"
+              >
                 <Note>{t.bucklingIntro}</Note>
                 <Note>{t.bucklingBasisNote}</Note>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field label={t.strokeLabel}>
-                    <NumInput id="pneu-stroke" value={stroke} onChange={setStroke} />
-                  </Field>
+                  <ValidatedNumField
+                    label={t.strokeLabel}
+                    id="pneu-stroke"
+                    validateInitially={search.has("l")}
+                    validationVisible={strokeValidationVisible && Boolean(strokeError)}
+                    onValidationVisible={() => setStrokeValidationVisible(true)}
+                    value={stroke}
+                    onChange={setStroke}
+                    error={strokeError}
+                  />
                   <Field label={t.endConditionLabel}>
                     <SelectInput
                       value={endCondition}
@@ -426,36 +490,72 @@ export function PneumaticCylinderCalc() {
             <button
               type="button"
               onClick={() => setShowAir((s) => !s)}
+              aria-expanded={showAir}
+              aria-controls="pneu-air-panel"
               className="mt-3 text-sm font-medium text-ink underline decoration-border-strong underline-offset-4 hover:decoration-ink"
             >
               {showAir ? t.hideAir : t.showAir}
             </button>
             {showAir ? (
-              <div className="mt-4 rounded-lg border border-border bg-bg p-4">
+              <div id="pneu-air-panel" className="mt-4 rounded-lg border border-border bg-bg p-4">
                 <Note>{t.airIntro}</Note>
                 <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                  <Field label={t.strokeLabel}>
-                    <NumInput id="pneu-air-stroke" value={stroke} onChange={setStroke} />
-                  </Field>
-                  <Field label={t.efficiencyLabel}>
-                    <NumInput id="pneu-efficiency" value={efficiency} onChange={setEfficiency} />
-                  </Field>
-                  <Field label={t.cyclesLabel}>
-                    <NumInput id="pneu-cycles" value={cyclesPerMin} onChange={setCyclesPerMin} />
-                  </Field>
-                </div>
-                {airResult ? (
-                  <ResultGrid
-                    items={[
-                      { label: t.effExtendForce, value: `${fmtN0(airResult.effUit)} N` },
-                      { label: t.effRetractForce, value: `${fmtN0(airResult.effIn)} N` },
-                      { label: t.airPerCycle, value: `${fmtAir(airResult.qCycle)} Nl` },
-                      { label: t.airPerMinute, value: `${fmtAir(airResult.qMin)} Nl/min` },
-                    ]}
+                  <ValidatedNumField
+                    label={t.strokeLabel}
+                    id="pneu-air-stroke"
+                    validateInitially={search.has("l")}
+                    validationVisible={strokeValidationVisible && Boolean(strokeError)}
+                    onValidationVisible={() => setStrokeValidationVisible(true)}
+                    value={stroke}
+                    onChange={setStroke}
+                    error={strokeError}
                   />
-                ) : (
+                  <ValidatedNumField
+                    label={t.efficiencyLabel}
+                    id="pneu-efficiency"
+                    validateInitially={search.has("eta")}
+                    value={efficiency}
+                    onChange={setEfficiency}
+                    error={efficiencyError}
+                  />
+                  <ValidatedNumField
+                    label={t.cyclesLabel}
+                    id="pneu-cycles"
+                    validateInitially={search.has("cpm")}
+                    value={cyclesPerMin}
+                    onChange={setCyclesPerMin}
+                    error={cyclesError}
+                  />
+                </div>
+                {efficiencyResult || airResult ? (
+                  <ResultGrid
+                    items={
+                      [
+                        efficiencyResult
+                          ? {
+                              label: t.effExtendForce,
+                              value: `${fmtN0(efficiencyResult.effUit)} N`,
+                            }
+                          : null,
+                        efficiencyResult
+                          ? {
+                              label: t.effRetractForce,
+                              value: `${fmtN0(efficiencyResult.effIn)} N`,
+                            }
+                          : null,
+                        airResult
+                          ? { label: t.airPerCycle, value: `${fmtAir(airResult.qCycle)} Nl` }
+                          : null,
+                        airResult
+                          ? { label: t.airPerMinute, value: `${fmtAir(airResult.qMin)} Nl/min` }
+                          : null,
+                      ].filter(Boolean) as { label: string; value: string }[]
+                    }
+                  />
+                ) : null}
+                {!efficiencyResult || !airResult ? (
                   <p className="mt-4 text-sm text-muted">{t.fillAir}</p>
-                )}
+                ) : null}
               </div>
             ) : null}
           </>

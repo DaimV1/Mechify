@@ -82,3 +82,43 @@ test("cylinder suppresses overflowing pressure results without imposing a force 
   await expect(page.getByText(/No standard bore/)).toBeVisible();
   await expect(page.locator("#pneu-force")).not.toHaveAttribute("aria-invalid");
 });
+
+test("cylinder suppresses overflowing optional results and copied details", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1000&p=6&l=1e308", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.locator("#pneu-stroke")).toHaveAccessibleDescription("Enter a smaller number.");
+  await expect(page.locator("#pneu-air-stroke")).toHaveAccessibleDescription(
+    "Enter a smaller number.",
+  );
+  await expect(page.getByText("Effective extend force (with friction)")).toBeVisible();
+  await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Copy result", exact: true }).click();
+  let copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).not.toContain("Rod buckling");
+  expect(copied).not.toContain("Air consumption:");
+
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1000&p=6&cpm=1e308", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.locator("#pneu-cycles")).toHaveAccessibleDescription("Enter a smaller number.");
+  await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Copy result", exact: true }).click();
+  copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain("Efficiency eta=0.9");
+  expect(copied).not.toContain("Air consumption:");
+});
+
+test("cylinder accepts efficiency boundary eta=1", async ({ page }) => {
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1000&p=6&eta=1", {
+    waitUntil: "networkidle",
+  });
+  await page.getByRole("button", { name: "Efficiency and air consumption (optional)" }).click();
+  await expect(page.locator("#pneu-efficiency")).toHaveValue("1");
+  await expect(page.locator("#pneu-efficiency")).not.toHaveAttribute("aria-invalid");
+  await expect(page.getByText("Effective extend force (with friction)")).toBeVisible();
+});

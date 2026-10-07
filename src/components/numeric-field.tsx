@@ -9,6 +9,9 @@ export type NumericFieldProps = {
   error?: string;
   /** Show an invalid restored value on mount; later edits still wait for blur. */
   validateInitially?: boolean;
+  /** Optional shared visibility state for duplicated controls that edit one value. */
+  validationVisible?: boolean;
+  onValidationVisible?: () => void;
 };
 
 /** Feedback begins on blur, clears on correction, and does not announce every keystroke. */
@@ -19,10 +22,12 @@ export function NumericField({
   onChange,
   error,
   validateInitially = false,
+  validationVisible,
+  onValidationVisible,
   inputClassName,
 }: NumericFieldProps & { inputClassName: string }) {
   const [touched, setTouched] = useState(validateInitially && Boolean(error));
-  const visibleError = touched ? error : undefined;
+  const visibleError = (validationVisible ?? touched) ? error : undefined;
   const errorId = `${id}-error`;
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted">
@@ -36,7 +41,10 @@ export function NumericField({
         value={value}
         onFocus={(event) => event.currentTarget.select()}
         onChange={(event) => onChange(event.target.value)}
-        onBlur={() => setTouched(true)}
+        onBlur={() => {
+          setTouched(true);
+          onValidationVisible?.();
+        }}
         aria-invalid={visibleError ? true : undefined}
         aria-describedby={visibleError ? errorId : undefined}
         className={inputClassName}
