@@ -18,7 +18,32 @@ for (const locale of ["nl", "en"] as const) {
     ...["", "bad", "0", "-1"].flatMap((value) => [
       { route: "motor-specification", input: "motor-speed", key: "speed", value },
       { route: "motor-specification", input: "motor-fb", key: "fb", value },
+      { route: "bearing-life", input: "bearing-life-C", key: "C", value },
+      { route: "bearing-life", input: "bearing-life-P", key: "P", value },
+      { route: "bearing-life", input: "bearing-life-rpm", key: "n", value },
+      ...(value === ""
+        ? []
+        : [
+            { route: "bearing-life", input: "bearing-life-C0", key: "C0", value, optional: true },
+            { route: "bearing-life", input: "bearing-life-P0", key: "P0", value, optional: true },
+          ]),
     ]),
+    {
+      route: "bearing-life",
+      input: "bearing-life-C0",
+      key: "C0",
+      value: "",
+      query: "C0=&P0=3",
+      optional: true,
+    },
+    {
+      route: "bearing-life",
+      input: "bearing-life-P0",
+      key: "P0",
+      value: "",
+      query: "C0=8&P0=",
+      optional: true,
+    },
     { route: "motor-specification", input: "motor-mass", key: "mass", value: "" },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "1.1", eta: true },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "", eta: true },
@@ -26,10 +51,10 @@ for (const locale of ["nl", "en"] as const) {
     test(`restored ${example.input}=${example.value} has immediate feedback (${locale})`, async ({
       page,
     }) => {
-      await page.goto(
-        `${locale === "en" ? "/en" : ""}/calculators/${example.route}?${example.key}=${example.value}`,
-        { waitUntil: "networkidle" },
-      );
+      const query = "query" in example ? example.query : `${example.key}=${example.value}`;
+      await page.goto(`${locale === "en" ? "/en" : ""}/calculators/${example.route}?${query}`, {
+        waitUntil: "networkidle",
+      });
       const input = page.locator(`#${example.input}`);
       const correction = example.eta
         ? locale === "en"
@@ -63,6 +88,11 @@ for (const locale of ["nl", "en"] as const) {
     { route: "motor-specification", input: "motor-diameter", query: "d=100" },
     { route: "motor-specification", input: "motor-speed", query: "speed=30" },
     { route: "motor-specification", input: "motor-fb", query: "fb=1.2" },
+    { route: "bearing-life", input: "bearing-life-C", query: "C=10" },
+    { route: "bearing-life", input: "bearing-life-P", query: "P=2" },
+    { route: "bearing-life", input: "bearing-life-rpm", query: "n=1500" },
+    { route: "bearing-life", input: "bearing-life-C0", query: "C0=8&P0=3" },
+    { route: "bearing-life", input: "bearing-life-P0", query: "C0=8&P0=3" },
   ]) {
     test(`valid shared input still delays first edit feedback (${locale}, ${example.input})`, async ({
       page,
@@ -89,6 +119,7 @@ for (const locale of ["nl", "en"] as const) {
   for (const example of [
     { route: "shaft-diameter", input: "shaft-torque", corrected: "50", expected: "d_min" },
     { route: "motor-specification", input: "motor-diameter", corrected: "100", expected: "P=" },
+    { route: "bearing-life", input: "bearing-life-C", corrected: "10", expected: "L10 =" },
   ]) {
     test(`field correction and result copy work by keyboard (${locale}, ${example.route})`, async ({
       page,
@@ -180,5 +211,19 @@ for (const locale of ["nl", "en"] as const) {
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Backspace");
     await expect(input).not.toHaveAttribute("aria-invalid");
+  });
+
+  test(`optional bearing static pair stays quiet when both are blank (${locale})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/calculators/bearing-life?C0=&P0=`, {
+      waitUntil: "networkidle",
+    });
+    for (const inputId of ["bearing-life-C0", "bearing-life-P0"]) {
+      const input = page.locator(`#${inputId}`);
+      await expect(input).toHaveValue("");
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await expect(page.locator(`#${inputId}-error`)).toHaveCount(0);
+    }
   });
 }

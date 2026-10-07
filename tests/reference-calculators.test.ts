@@ -296,7 +296,6 @@ describe("Motor efficiency guard", () => {
     });
     assert.ok(r);
   });
-
 });
 
 // E12 — the fits tool must accept decimal nominal diameters (bandIndex is
@@ -573,8 +572,12 @@ describe("Bearing life (L10/L10h, ISO 281)", () => {
   it("invalid inputs (zero/negative load or speed) return null, not Infinity/NaN", () => {
     assert.equal(l10Millions(10, 0, "ball"), null);
     assert.equal(l10Millions(0, 2, "ball"), null);
+    assert.equal(l10Millions(1e308, 1e-308, "ball"), null);
     assert.equal(l10Hours(125, 0), null);
+    assert.equal(l10Hours(Number.MAX_VALUE, 1), null);
+    assert.equal(staticSafetyFactor(0, 2), null);
     assert.equal(staticSafetyFactor(8, 0), null);
+    assert.equal(staticSafetyFactor(Number.MAX_VALUE, Number.MIN_VALUE), null);
   });
 });
 
