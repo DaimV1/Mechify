@@ -49,6 +49,28 @@ for (const locale of ["nl", "en"] as const) {
     { route: "motor-specification", input: "motor-mass", key: "mass", value: "" },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "1.1", eta: true },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "", eta: true },
+    {
+      route: "pneumatic-cylinder",
+      input: "pneu-stroke",
+      key: "l",
+      value: "bad",
+      optional: true,
+    },
+    {
+      route: "pneumatic-cylinder",
+      input: "pneu-efficiency",
+      key: "eta",
+      value: "1.1",
+      optional: true,
+      eta: true,
+    },
+    {
+      route: "pneumatic-cylinder",
+      input: "pneu-cycles",
+      key: "cpm",
+      value: "bad",
+      optional: true,
+    },
   ]) {
     test(`restored ${example.input}=${example.value} has immediate feedback (${locale})`, async ({
       page,
@@ -204,6 +226,109 @@ for (const locale of ["nl", "en"] as const) {
         exact: true,
       }),
     ).toBeVisible();
+  });
+
+  test(`optional cylinder panels stay quiet until opened (${locale})`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder`, {
+      waitUntil: "networkidle",
+    });
+    const bucklingToggle = page.locator('button[aria-controls="pneu-buckling-panel"]');
+    const airToggle = page.locator('button[aria-controls="pneu-air-panel"]');
+    await expect(bucklingToggle).toHaveAttribute("aria-expanded", "false");
+    await expect(airToggle).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#pneu-buckling-panel, #pneu-air-panel")).toHaveCount(0);
+    await tabTo(page, bucklingToggle);
+    await page.keyboard.press("Enter");
+    await expect(bucklingToggle).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#pneu-stroke")).not.toHaveAttribute("aria-invalid");
+    await tabTo(page, airToggle);
+    await page.keyboard.press("Enter");
+    await expect(airToggle).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#pneu-air-stroke, #pneu-efficiency, #pneu-cycles")).toHaveCount(3);
+    await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
+  });
+
+  test(`invalid shared cylinder stroke exposes both dependent sections (${locale})`, async ({
+    page,
+  }) => {
+    await page.goto(
+      `${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder?f=1000&p=6&l=bad`,
+      { waitUntil: "networkidle" },
+    );
+    for (const id of ["pneu-stroke", "pneu-air-stroke"]) {
+      await expect(page.locator(`#${id}`)).toHaveValue("bad");
+      await expect(page.locator(`#${id}`)).toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator(`#${id}`)).toHaveAccessibleDescription(
+        locale === "en" ? "Enter a number greater than 0." : "Vul een getal groter dan 0 in.",
+      );
+    }
+    await expect(page.locator("#pneu-buckling-panel, #pneu-air-panel")).toHaveCount(2);
+  });
+
+  test(`cylinder stroke validation stays synchronized across both controls (${locale})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder`, {
+      waitUntil: "networkidle",
+    });
+    await page
+      .getByRole("button", {
+        name:
+          locale === "en"
+            ? "Rod buckling check (optional)"
+            : "Uitknikcontrole zuigerstang (optioneel)",
+      })
+      .click();
+    await page
+      .getByRole("button", {
+        name:
+          locale === "en"
+            ? "Efficiency and air consumption (optional)"
+            : "Rendement en luchtverbruik (optioneel)",
+      })
+      .click();
+    await page.locator("#pneu-stroke").fill("");
+    await page.locator("#pneu-stroke").blur();
+    for (const id of ["pneu-stroke", "pneu-air-stroke"]) {
+      await expect(page.locator(`#${id}`)).toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator(`#${id}`)).toHaveAccessibleDescription(
+        locale === "en" ? "Enter a number greater than 0." : "Vul een getal groter dan 0 in.",
+      );
+    }
+  });
+
+  test(`valid shared cylinder stroke delays synchronized feedback (${locale})`, async ({
+    page,
+  }) => {
+    await page.goto(
+      `${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder?f=1000&p=6&l=300`,
+      { waitUntil: "networkidle" },
+    );
+    await page
+      .getByRole("button", {
+        name:
+          locale === "en"
+            ? "Rod buckling check (optional)"
+            : "Uitknikcontrole zuigerstang (optioneel)",
+      })
+      .click();
+    await page
+      .getByRole("button", {
+        name:
+          locale === "en"
+            ? "Efficiency and air consumption (optional)"
+            : "Rendement en luchtverbruik (optioneel)",
+      })
+      .click();
+    const bucklingStroke = page.locator("#pneu-stroke");
+    const airStroke = page.locator("#pneu-air-stroke");
+    await bucklingStroke.fill("");
+    await expect(bucklingStroke).not.toHaveAttribute("aria-invalid");
+    await expect(airStroke).not.toHaveAttribute("aria-invalid");
+    await bucklingStroke.blur();
+    await expect(bucklingStroke).toHaveAttribute("aria-invalid", "true");
+    await expect(airStroke).toHaveAttribute("aria-invalid", "true");
   });
 
   test(`optional shaft diameter stays quiet when blank (${locale})`, async ({ page }) => {
