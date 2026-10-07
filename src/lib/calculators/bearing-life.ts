@@ -47,13 +47,15 @@ export function a1For(reliabilityId: string): number {
 /** L10 basic rating life in millions of revolutions. C and P in the same unit (kN or N). */
 export function l10Millions(C: number, P: number, type: BearingLoadType): number | null {
   if (!(C > 0) || !(P > 0)) return null;
-  return Math.pow(C / P, lifeExponent(type));
+  const life = Math.pow(C / P, lifeExponent(type));
+  return Number.isFinite(life) ? life : null;
 }
 
 /** L10h basic rating life in operating hours, at constant speed n (rpm). */
 export function l10Hours(l10M: number, rpm: number): number | null {
   if (!(l10M >= 0) || !(rpm > 0)) return null;
-  return (l10M * 1e6) / (60 * rpm);
+  const hours = (l10M * 1e6) / (60 * rpm);
+  return Number.isFinite(hours) ? hours : null;
 }
 
 /** Reliability-adjusted life (Lna) in the same unit as l10 (millions of revolutions, or hours). */
@@ -63,8 +65,9 @@ export function adjustedLife(l10: number, a1: number): number {
 
 /** Static safety factor S0 = C0 / P0 — no time dimension, just a load margin against permanent deformation at the most stressed contact. */
 export function staticSafetyFactor(C0: number, P0: number): number | null {
-  if (!(C0 >= 0) || !(P0 > 0)) return null;
-  return C0 / P0;
+  if (!(C0 > 0) || !(P0 > 0)) return null;
+  const safety = C0 / P0;
+  return Number.isFinite(safety) ? safety : null;
 }
 
 /**

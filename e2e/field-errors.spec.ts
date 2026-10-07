@@ -18,6 +18,11 @@ for (const locale of ["nl", "en"] as const) {
     ...["", "bad", "0", "-1"].flatMap((value) => [
       { route: "motor-specification", input: "motor-speed", key: "speed", value },
       { route: "motor-specification", input: "motor-fb", key: "fb", value },
+      { route: "bearing-life", input: "bearing-life-C", key: "C", value },
+      { route: "bearing-life", input: "bearing-life-P", key: "P", value },
+      { route: "bearing-life", input: "bearing-life-rpm", key: "n", value },
+      { route: "bearing-life", input: "bearing-life-C0", key: "C0", value, optional: true },
+      { route: "bearing-life", input: "bearing-life-P0", key: "P0", value, optional: true },
     ]),
     { route: "motor-specification", input: "motor-mass", key: "mass", value: "" },
     { route: "motor-specification", input: "motor-eta", key: "eta", value: "1.1", eta: true },
@@ -63,6 +68,11 @@ for (const locale of ["nl", "en"] as const) {
     { route: "motor-specification", input: "motor-diameter", query: "d=100" },
     { route: "motor-specification", input: "motor-speed", query: "speed=30" },
     { route: "motor-specification", input: "motor-fb", query: "fb=1.2" },
+    { route: "bearing-life", input: "bearing-life-C", query: "C=10" },
+    { route: "bearing-life", input: "bearing-life-P", query: "P=2" },
+    { route: "bearing-life", input: "bearing-life-rpm", query: "n=1500" },
+    { route: "bearing-life", input: "bearing-life-C0", query: "C0=8&P0=3" },
+    { route: "bearing-life", input: "bearing-life-P0", query: "C0=8&P0=3" },
   ]) {
     test(`valid shared input still delays first edit feedback (${locale}, ${example.input})`, async ({
       page,
@@ -89,6 +99,7 @@ for (const locale of ["nl", "en"] as const) {
   for (const example of [
     { route: "shaft-diameter", input: "shaft-torque", corrected: "50", expected: "d_min" },
     { route: "motor-specification", input: "motor-diameter", corrected: "100", expected: "P=" },
+    { route: "bearing-life", input: "bearing-life-C", corrected: "10", expected: "L10 =" },
   ]) {
     test(`field correction and result copy work by keyboard (${locale}, ${example.route})`, async ({
       page,

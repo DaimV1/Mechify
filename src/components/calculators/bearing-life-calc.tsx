@@ -20,10 +20,10 @@ import {
   CopyResult,
   Field,
   Note,
-  NumInput,
   parseNum,
   ResultGrid,
   SelectInput,
+  ValidatedNumField,
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
@@ -68,6 +68,11 @@ const T = {
     resultL10hAdj: "L10h (aangepast, uren)",
     resultS0: "S0 = C0 / P0",
     fillDynamic: "Vul C, P en het toerental in (alle groter dan 0).",
+    positiveNumber: "Vul een getal groter dan 0 in.",
+    calculationRange:
+      "De invoer levert een getal buiten het ondersteunde rekenbereik op. Controleer C, P en het toerental.",
+    staticCalculationRange:
+      "De invoer levert een getal buiten het ondersteunde rekenbereik op. Controleer C0 en P0.",
     fillStatic: "Vul C0 en P0 in om de statische veiligheid te controleren.",
     s0Fail: "S0 < 1 — de statische belasting overschrijdt de aanbevolen ondergrens.",
     s0Caution:
@@ -113,6 +118,11 @@ const T = {
     resultL10hAdj: "L10h (adjusted, hours)",
     resultS0: "S0 = C0 / P0",
     fillDynamic: "Enter C, P and the speed (all greater than 0).",
+    positiveNumber: "Enter a number greater than 0.",
+    calculationRange:
+      "The inputs produce a value outside the supported numerical range. Check C, P and the speed.",
+    staticCalculationRange:
+      "The inputs produce a value outside the supported numerical range. Check C0 and P0.",
     fillStatic: "Enter C0 and P0 to check static safety.",
     s0Fail: "S0 < 1 — the static load exceeds the recommended lower bound.",
     s0Caution:
@@ -183,6 +193,12 @@ export function BearingLifeCalc() {
   const P0val = parseNum(P0);
   const S0 = C0val != null && P0val != null ? staticSafetyFactor(C0val, P0val) : null;
   const s0Status = S0 != null ? staticSafetyStatus(S0) : null;
+  const dynamicInputsValid =
+    Cval != null && Cval > 0 && Pval != null && Pval > 0 && rpmVal != null && rpmVal > 0;
+  const dynamicResultOutOfRange = dynamicInputsValid && (l10M == null || l10h == null);
+  const hasStaticInput = C0.trim() !== "" || P0.trim() !== "";
+  const staticInputsValid = C0val != null && C0val > 0 && P0val != null && P0val > 0;
+  const staticResultOutOfRange = hasStaticInput && staticInputsValid && S0 == null;
 
   const typeLabel = (bt: BearingLoadType) =>
     BEARING_LOAD_TYPES.find((x) => x.id === bt)?.[locale === "nl" ? "label" : "labelEn"] ?? bt;
@@ -243,20 +259,35 @@ export function BearingLifeCalc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label={t.dynamicLoad}>
-            <NumInput id="bearing-life-C" value={C} onChange={setC} />
-          </Field>
-          <Field label={t.equivDynamicLoad}>
-            <NumInput id="bearing-life-P" value={P} onChange={setP} />
-          </Field>
-          <Field label={t.speed}>
-            <NumInput id="bearing-life-rpm" value={rpm} onChange={setRpm} />
-          </Field>
+          <ValidatedNumField
+            label={t.dynamicLoad}
+            id="bearing-life-C"
+            validateInitially={search.has("C")}
+            value={C}
+            onChange={setC}
+            error={Cval == null || Cval <= 0 ? t.positiveNumber : undefined}
+          />
+          <ValidatedNumField
+            label={t.equivDynamicLoad}
+            id="bearing-life-P"
+            validateInitially={search.has("P")}
+            value={P}
+            onChange={setP}
+            error={Pval == null || Pval <= 0 ? t.positiveNumber : undefined}
+          />
+          <ValidatedNumField
+            label={t.speed}
+            id="bearing-life-rpm"
+            validateInitially={search.has("n")}
+            value={rpm}
+            onChange={setRpm}
+            error={rpmVal == null || rpmVal <= 0 ? t.positiveNumber : undefined}
+          />
         </div>
 
         {l10M == null || l10h == null ? (
           <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillDynamic}
+            {dynamicResultOutOfRange ? t.calculationRange : t.fillDynamic}
           </p>
         ) : (
           <>
@@ -290,16 +321,26 @@ export function BearingLifeCalc() {
 
         <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.staticSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label={t.staticLoad}>
-            <NumInput id="bearing-life-C0" value={C0} onChange={setC0} />
-          </Field>
-          <Field label={t.equivStaticLoad}>
-            <NumInput id="bearing-life-P0" value={P0} onChange={setP0} />
-          </Field>
+          <ValidatedNumField
+            label={t.staticLoad}
+            id="bearing-life-C0"
+            validateInitially={search.has("C0") || search.has("P0")}
+            value={C0}
+            onChange={setC0}
+            error={hasStaticInput && (C0val == null || C0val <= 0) ? t.positiveNumber : undefined}
+          />
+          <ValidatedNumField
+            label={t.equivStaticLoad}
+            id="bearing-life-P0"
+            validateInitially={search.has("C0") || search.has("P0")}
+            value={P0}
+            onChange={setP0}
+            error={hasStaticInput && (P0val == null || P0val <= 0) ? t.positiveNumber : undefined}
+          />
         </div>
         {S0 == null ? (
           <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillStatic}
+            {staticResultOutOfRange ? t.staticCalculationRange : t.fillStatic}
           </p>
         ) : (
           <>
