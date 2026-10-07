@@ -36,6 +36,7 @@ import {
   SelectInput,
   SourceBadge,
   SourceLink,
+  ValidatedNumField,
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
@@ -60,6 +61,8 @@ const T = {
       "F = p · A, dubbelwerkende cilinder. Zoekt de kleinste standaard boring (ISO 15552 / ISO 6432) die bij uitschuiven de opgegeven last haalt — zonder marge.",
     forceLabel: "Benodigde kracht F (N)",
     pressureLabel: "Werkdruk p (bar)",
+    positiveNumber: "Vul een getal groter dan 0 in.",
+    smallerNumber: "Vul een kleiner getal in.",
     fillForcePressure: "Vul een kracht en druk groter dan 0 in.",
     noBore: (p: string) =>
       `Geen standaard boring tot Ø320 mm haalt deze kracht bij ${p} bar. Verhoog de druk of gebruik een meercilinder-opstelling.`,
@@ -120,6 +123,8 @@ const T = {
       "F = p · A, double-acting cylinder. Finds the smallest standard bore (ISO 15552 / ISO 6432) whose extend force meets the given load — with no margin.",
     forceLabel: "Required force F (N)",
     pressureLabel: "Working pressure p (bar)",
+    positiveNumber: "Enter a number greater than 0.",
+    smallerNumber: "Enter a smaller number.",
     fillForcePressure: "Enter a force and pressure greater than 0.",
     noBore: (p: string) =>
       `No standard bore up to Ø320 mm reaches this force at ${p} bar. Increase the pressure or use a multi-cylinder setup.`,
@@ -209,8 +214,15 @@ export function PneumaticCylinderCalc() {
   const F = parseNum(force);
   const p = parseNum(pressure);
   const L = parseNum(stroke);
+  const pressureForCalculation =
+    p != null && p > 0 && ALL_BORES.every((row) => Number.isFinite(extendForce(row.bore, p)))
+      ? p
+      : null;
 
-  const recommended = F != null && p != null && F > 0 && p > 0 ? minBoreFor(F, p) : null;
+  const recommended =
+    F != null && F > 0 && pressureForCalculation != null
+      ? minBoreFor(F, pressureForCalculation)
+      : null;
   const rod = recommended?.rods[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
@@ -281,15 +293,31 @@ export function PneumaticCylinderCalc() {
         </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label={t.forceLabel}>
-            <NumInput id="pneu-force" value={force} onChange={setForce} />
-          </Field>
-          <Field label={t.pressureLabel}>
-            <NumInput id="pneu-pressure" value={pressure} onChange={setPressure} />
-          </Field>
+          <ValidatedNumField
+            label={t.forceLabel}
+            id="pneu-force"
+            validateInitially={search.has("f")}
+            value={force}
+            onChange={setForce}
+            error={F == null || F <= 0 ? t.positiveNumber : undefined}
+          />
+          <ValidatedNumField
+            label={t.pressureLabel}
+            id="pneu-pressure"
+            validateInitially={search.has("p")}
+            value={pressure}
+            onChange={setPressure}
+            error={
+              p == null || p <= 0
+                ? t.positiveNumber
+                : pressureForCalculation == null
+                  ? t.smallerNumber
+                  : undefined
+            }
+          />
         </div>
 
-        {F == null || p == null || F <= 0 || p <= 0 ? (
+        {F == null || F <= 0 || pressureForCalculation == null ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillForcePressure}
           </p>
@@ -307,11 +335,16 @@ export function PneumaticCylinderCalc() {
                 [
                   { label: t.recommendedBore, value: `Ø${recommended.bore} mm` },
                   { label: t.rod, value: `Ø${rod} mm` },
-                  { label: t.extendForce, value: `${fmtN0(extendForce(recommended.bore, p))} N` },
+                  {
+                    label: t.extendForce,
+                    value: `${fmtN0(extendForce(recommended.bore, pressureForCalculation))} N`,
+                  },
                   rod != null
                     ? {
                         label: t.retractForce,
-                        value: `${fmtN0(retractForce(recommended.bore, rod, p))} N`,
+                        value: `${fmtN0(
+                          retractForce(recommended.bore, rod, pressureForCalculation),
+                        )} N`,
                       }
                     : null,
                 ].filter(Boolean) as { label: string; value: string }[]
@@ -441,12 +474,15 @@ export function PneumaticCylinderCalc() {
                 <th>{t.thSeries}</th>
                 <th>{t.thBore}</th>
                 <th>{t.thRod}</th>
-                <th>{t.thExtendAt(pressure || "6")}</th>
+                <th>
+                  {t.thExtendAt(
+                    pressureForCalculation == null ? "—" : String(pressureForCalculation),
+                  )}
+                </th>
               </tr>
             </thead>
             <tbody>
               {ALL_BORES.map((row) => {
-                const pVal = parseNum(pressure) ?? 6;
                 const isActive =
                   recommended?.bore === row.bore && recommended.series === row.series;
                 return (
@@ -456,7 +492,11 @@ export function PneumaticCylinderCalc() {
                     </th>
                     <td>Ø{row.bore} mm</td>
                     <td>Ø{row.rods.join(" / ")} mm</td>
-                    <td>{fmtN0(extendForce(row.bore, pVal))} N</td>
+                    <td>
+                      {pressureForCalculation == null
+                        ? "—"
+                        : `${fmtN0(extendForce(row.bore, pressureForCalculation))} N`}
+                    </td>
                   </tr>
                 );
               })}

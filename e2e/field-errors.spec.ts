@@ -21,6 +21,8 @@ for (const locale of ["nl", "en"] as const) {
       { route: "bearing-life", input: "bearing-life-C", key: "C", value },
       { route: "bearing-life", input: "bearing-life-P", key: "P", value },
       { route: "bearing-life", input: "bearing-life-rpm", key: "n", value },
+      { route: "pneumatic-cylinder", input: "pneu-force", key: "f", value },
+      { route: "pneumatic-cylinder", input: "pneu-pressure", key: "p", value },
       ...(value === ""
         ? []
         : [
@@ -91,6 +93,8 @@ for (const locale of ["nl", "en"] as const) {
     { route: "bearing-life", input: "bearing-life-C", query: "C=10" },
     { route: "bearing-life", input: "bearing-life-P", query: "P=2" },
     { route: "bearing-life", input: "bearing-life-rpm", query: "n=1500" },
+    { route: "pneumatic-cylinder", input: "pneu-force", query: "f=1000" },
+    { route: "pneumatic-cylinder", input: "pneu-pressure", query: "p=6" },
     { route: "bearing-life", input: "bearing-life-C0", query: "C0=8&P0=3" },
     { route: "bearing-life", input: "bearing-life-P0", query: "C0=8&P0=3" },
   ]) {
@@ -120,6 +124,12 @@ for (const locale of ["nl", "en"] as const) {
     { route: "shaft-diameter", input: "shaft-torque", corrected: "50", expected: "d_min" },
     { route: "motor-specification", input: "motor-diameter", corrected: "100", expected: "P=" },
     { route: "bearing-life", input: "bearing-life-C", corrected: "10", expected: "L10 =" },
+    {
+      route: "pneumatic-cylinder",
+      input: "pneu-force",
+      corrected: "1000",
+      expected: "Ø50 mm",
+    },
   ]) {
     test(`field correction and result copy work by keyboard (${locale}, ${example.route})`, async ({
       page,

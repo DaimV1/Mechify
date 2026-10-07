@@ -46,3 +46,39 @@ test("cylinder shared blank force stays invalid after reload", async ({ page }) 
   await expect(page.locator("#pneu-force")).toHaveValue("");
   await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
 });
+
+test("cylinder invalid shared pressure does not label fallback table forces as input values", async ({
+  page,
+}) => {
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1000&p=bad", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.locator("#pneu-pressure")).toHaveValue("bad");
+  await expect(page.getByRole("columnheader", { name: "Extend force @ — bar" })).toBeVisible();
+  await expect(page.locator("table.ref-table tbody tr").first().locator("td").last()).toHaveText(
+    "—",
+  );
+  await expect(page.getByText("bad bar", { exact: false })).toHaveCount(0);
+});
+
+test("cylinder suppresses overflowing pressure results without imposing a force limit", async ({
+  page,
+}) => {
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1000&p=1e308", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.locator("#pneu-pressure")).toHaveAccessibleDescription(
+    "Enter a smaller number.",
+  );
+  await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
+  await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+  await expect(page.locator("table.ref-table tbody tr").first().locator("td").last()).toHaveText(
+    "—",
+  );
+
+  await page.goto("/en/calculators/pneumatic-cylinder?f=1e308&p=6", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.getByText(/No standard bore/)).toBeVisible();
+  await expect(page.locator("#pneu-force")).not.toHaveAttribute("aria-invalid");
+});
