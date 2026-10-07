@@ -1,7 +1,7 @@
 Attribute VB_Name = "SlaAllesOp"
 '
 ' SolidWorks 2024 VBA-macro — Sla alle gewijzigde open documenten op
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: loopt door alle op dit moment geopende documenten en slaat elk
 ' document met niet-opgeslagen wijzigingen op. Documenten zonder

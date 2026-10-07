@@ -174,7 +174,7 @@ function buildPageJsonLd({ route, tool, article, rawTitle, rawDescription, short
   } else if (article) {
     type = "TechArticle";
     extra = {
-      author: { "@type": "Person", name: ARTICLE_AUTHOR },
+      author: { "@type": "Organization", name: ARTICLE_AUTHOR },
       dateModified: article.reviewedDateIso,
       articleSection: article.category,
     };

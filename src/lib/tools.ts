@@ -340,11 +340,11 @@ export const TOOLS: Tool[] = [
     id: "bolted-joint",
     section: "calculators",
     slug: "bolted-joint",
-    title: { nl: "Boutverbinding (VDI 2230-lite)", en: "Bolted joint (VDI 2230-lite)" },
-    standard: "VDI 2230",
+    title: { nl: "Boutlast en klemkracht", en: "Bolt load and clamp force" },
+    standard: "F_KR · F_S,max",
     blurb: {
-      nl: "Statische verificatie: restklemkracht F_KR, maximale boutkracht F_S,max en veiligheid tegen vloeien.",
-      en: "Static verification: residual clamp load F_KR, maximum bolt force F_S,max and safety against yielding.",
+      nl: "Vereenvoudigd model: restklemkracht F_KR en maximale boutkracht F_S,max. Geen volledige VDI 2230-verificatie.",
+      en: "Simplified model: residual clamp force F_KR and maximum bolt force F_S,max. Not a complete VDI 2230 verification.",
     },
     tags: [
       "bout",

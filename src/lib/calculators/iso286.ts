@@ -339,9 +339,9 @@ export const FITS = [
     hole: "H7",
     shaft: "p6",
     kind: "lijn" as FitKind,
-    use: "Lichte perspassing. Tot 18 mm max. speling 0 µm (lijnpassing mogelijk). Daarboven altijd overmaat.",
+    use: "Boven 3 t/m 18 mm: overmaat of lijnpassing (max. speling 0 µm). Boven 18 t/m 50 mm: overmaat. Boven 0 t/m 3 mm: betwist; boven 50 mm: niet beschikbaar.",
     useEn:
-      "Light press fit. Up to 18 mm max. clearance 0 µm (line fit possible). Above that, always interference.",
+      "Above 3 through 18 mm: interference or line fit (max. clearance 0 µm). Above 18 through 50 mm: interference. Above 0 through 3 mm: disputed; above 50 mm: unavailable.",
   },
   {
     id: "H7/s6",

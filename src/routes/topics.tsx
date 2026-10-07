@@ -92,7 +92,7 @@ export function Topics() {
         {list.length ? (
           list.map((a, i) => (
             <Link className="topic-row" key={a.slug} to={"/topics/" + a.slug}>
-              <span className="row-index">0{i + 1}</span>
+              <span className="row-index">{String(i + 1).padStart(2, "0")}</span>
               <div>
                 <span className="mono muted">
                   {CATEGORY_LABELS[a.category][locale]} · {a.time}
@@ -130,7 +130,7 @@ export function TopicArticle() {
         ? {
             type: "TechArticle",
             extra: {
-              author: { "@type": "Person", name: ARTICLE_AUTHOR },
+              author: { "@type": "Organization", name: ARTICLE_AUTHOR },
               dateModified: a.reviewedDateIso,
               articleSection: a.category,
             },
@@ -189,7 +189,7 @@ export function TopicArticle() {
             <span className="mono muted">{tx(locale, "IN DIT ARTIKEL", "IN THIS ARTICLE")}</span>
             {a.sections.map(([title], i) => (
               <a href={"#deel-" + i} key={title.nl}>
-                0{i + 1} {title[locale]}
+                {String(i + 1).padStart(2, "0")} {title[locale]}
               </a>
             ))}
             <Action to={toolLinks[a.tool]}>
@@ -205,7 +205,7 @@ export function TopicArticle() {
             </div>
             {a.sections.map(([title, text], i) => (
               <section id={"deel-" + i} key={title.nl}>
-                <span className="mono muted">0{i + 1}</span>
+                <span className="mono muted">{String(i + 1).padStart(2, "0")}</span>
                 <h2>{title[locale]}</h2>
                 <p>{text[locale]}</p>
               </section>

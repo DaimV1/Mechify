@@ -1,7 +1,7 @@
 Attribute VB_Name = "ExportActiefNaarSTEP"
 '
 ' Inventor 2024 VBA-macro — Exporteer actief document naar STEP
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: slaat het actieve part of assembly op als .stp, naast het
 ' bestaande bestand, met dezelfde naam.

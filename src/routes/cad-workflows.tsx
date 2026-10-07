@@ -66,7 +66,10 @@ const steps = [
     },
   },
   {
-    title: { nl: "Ontwerpcontrole & productieoverdracht", en: "Design review & handoff to production" },
+    title: {
+      nl: "Ontwerpcontrole & productieoverdracht",
+      en: "Design review & handoff to production",
+    },
     principle: {
       nl: "Beoordeel botsingen, gereedschapsruimte, toleranties en montagevolgorde. Leg daarna de vrijgegeven revisie vast.",
       en: "Review interferences, tool clearance, tolerances and assembly order. Then fix the released revision.",
@@ -107,11 +110,19 @@ export function CadWorkflows() {
             "Practical CAD workflows for SolidWorks and Autodesk Inventor.",
           )}
           <br />
-          {tx(locale, "Het principe komt eerst. De software volgt.", "The principle comes first. The software follows.")}
+          {tx(
+            locale,
+            "Het principe komt eerst. De software volgt.",
+            "The principle comes first. The software follows.",
+          )}
         </p>
       </section>
       <section className="wrap cad-content">
-        <div className="cad-switch" role="group" aria-label={tx(locale, "Kies CAD-software", "Choose CAD software")}>
+        <div
+          className="cad-switch"
+          role="group"
+          aria-label={tx(locale, "Kies CAD-software", "Choose CAD software")}
+        >
           {["SolidWorks", "Autodesk Inventor"].map((s) => (
             <button key={s} aria-pressed={software === s} onClick={() => setSoftware(s)}>
               {s}
@@ -127,13 +138,17 @@ export function CadWorkflows() {
         </p>
         {steps.map((step, i) => (
           <article className="workflow" key={step.title.nl}>
-            <div className="workflow-number">0{i + 1}</div>
+            <div className="workflow-number">{String(i + 1).padStart(2, "0")}</div>
             <div>
               <h2>{step.title[locale]}</h2>
               <div className="workflow-columns">
                 <div>
                   <span className="mono muted">
-                    {tx(locale, "SOFTWARE-ONAFHANKELIJK PRINCIPE", "SOFTWARE-INDEPENDENT PRINCIPLE")}
+                    {tx(
+                      locale,
+                      "SOFTWARE-ONAFHANKELIJK PRINCIPE",
+                      "SOFTWARE-INDEPENDENT PRINCIPLE",
+                    )}
                   </span>
                   <p>{step.principle[locale]}</p>
                 </div>
