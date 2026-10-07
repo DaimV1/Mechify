@@ -233,18 +233,8 @@ for (const locale of ["nl", "en"] as const) {
     await page.goto(`${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder`, {
       waitUntil: "networkidle",
     });
-    const bucklingToggle = page.getByRole("button", {
-      name:
-        locale === "en"
-          ? "Rod buckling check (optional)"
-          : "Uitknikcontrole zuigerstang (optioneel)",
-    });
-    const airToggle = page.getByRole("button", {
-      name:
-        locale === "en"
-          ? "Efficiency and air consumption (optional)"
-          : "Rendement en luchtverbruik (optioneel)",
-    });
+    const bucklingToggle = page.locator('button[aria-controls="pneu-buckling-panel"]');
+    const airToggle = page.locator('button[aria-controls="pneu-air-panel"]');
     await expect(bucklingToggle).toHaveAttribute("aria-expanded", "false");
     await expect(airToggle).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator("#pneu-buckling-panel, #pneu-air-panel")).toHaveCount(0);
