@@ -96,3 +96,12 @@ First batch N01–N04 and this consolidated plan shipped in PR #41. Both critics
 Next bounded A09 batch: accessible fit-diameter feedback, raw invalid URL preservation and NL/EN browser regressions. Prepared locally; independent reviews, browser CI, merge and production verification remain required.
 
 CEO confirmed hourly continuation was re-enabled on 8 October and points at this register. It attempts work when capacity permits; it cannot detect exact usage-limit resets. Stop retrying when the authorised backlog is complete or genuinely blocked. Preserve completed release status and update this register on every release.
+
+
+## 2026-10-08 continuation — PR #42 and bounded N09
+
+- PR #42 merged as `446defc1d2c5c3c534d5cff2de9758da9c2ecf3d`; production smoke run `37734679152` passed. Fit diameter feedback is shipped; tolerance tables unchanged.
+- N09 partial implementation: retain Basic solid-round torsion sizing and chosen-solid check; add an expandable Advanced hollow/concentric circular section check using entered outside/inside diameters, same torque and allowable shear stress. No invented material presets or yield/fatigue approval.
+- Annular reference: Wiley / Philpot MecMovies, chapter 6, https://www.education.wiley.com/content/Philpot_Mechanics_of_Materials_4e/media/simulations/mec_movies/ch06/m06_02_s170.html ; J = π(Do⁴−Di⁴)/32, τmax=T·Do/(2J), with T converted to N·mm. Formula checked 2026-10-08. Independent cases: 50 N·m, Do20/Di10 mm → 33.953054526271 MPa; 100 N·m, Do40/Di30 → 11.641047266150059 MPa. Reserve remains entered allowable/calculated stress, not yield safety.
+- Hollow geometry must satisfy finite Do>0 and 0≤Di<Do. Invalid/blank shared geometry persists and receives correction feedback; exports retain geometry, warnings and omitted checks. Local instability, fatigue, stress concentrations, stiffness and combined loading remain outside this model.
+- Release review/CI pending for N09 batch. Remaining combined bending/torsion/axial loading, material/yield/safety-factor selection, keyway/concentration effects and equivalent stress remain open; evidence gaps unchanged.

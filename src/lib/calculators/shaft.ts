@@ -45,3 +45,26 @@ export function shaftSafetyStatus(safetyFactor: number): ShaftStatus {
   if (safetyFactor < 1.2) return "caution";
   return "ok";
 }
+
+/** Uniform circular annulus, elastic pure torsion. mm, N·m → N/mm².
+ * J = π(Do⁴−Di⁴)/32; τmax = T·1000·Do/(2J).
+ * Factored difference avoids cancellation for thin walls. No local buckling,
+ * fatigue, stress concentrations or combined loading assessment.
+ */
+export function hollowShaftTorsionStress(
+  torque: number,
+  outer: number,
+  inner: number,
+): number | null {
+  if (
+    ![torque, outer, inner].every(Number.isFinite) ||
+    torque <= 0 ||
+    outer <= 0 ||
+    inner < 0 ||
+    inner >= outer
+  )
+    return null;
+  const fourthDifference = (outer - inner) * (outer + inner) * (outer * outer + inner * inner);
+  const stress = (16 * torque * 1000 * outer) / (Math.PI * fourthDifference);
+  return Number.isFinite(stress) && stress > 0 ? stress : null;
+}
