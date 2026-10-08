@@ -34,7 +34,7 @@ for (const locale of ["nl", "en"] as const) {
     test(`invalid hollow shared inside diameter=${inner} stays invalid (${locale})`, async ({
       page,
     }) => {
-      await page.goto(`${route}?t=50&tau=40&do=20&di=${inner}`, { waitUntil: "networkidle" });
+      await page.goto(`${route}?t=50&tau=40&do=20&di=${inner}#tool`, { waitUntil: "networkidle" });
       const advanced = page.locator("details").filter({ has: page.locator("#shaft-inner") });
       for (let attempt = 0; attempt < 2; attempt++) {
         if (attempt) await page.reload({ waitUntil: "networkidle" });
@@ -46,6 +46,7 @@ for (const locale of ["nl", "en"] as const) {
             : "Vul een getal van 0 tot kleiner dan de buitendiameter in.",
         );
         await expect(advanced.locator("dd")).toHaveCount(0);
+        expect(new URL(page.url()).hash).toBe("#tool");
       }
     });
   }

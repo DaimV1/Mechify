@@ -93,7 +93,7 @@ Roadmap order: (1) confirmed correctness/positioning N01–N04; (2) core enginee
 
 First batch N01–N04 and this consolidated plan shipped in PR #41. Both critics approved; full CI passed. CEO verified production smoke run `37733029508` succeeded on deployed SHA `2d36407b9c6a70e563402923e20e37356b3fe32e`. No formulas/numeric tables changed and no evidence gap was closed by wording changes.
 
-Next bounded A09 batch: accessible fit-diameter feedback, raw invalid URL preservation and NL/EN browser regressions. Prepared locally; independent reviews, browser CI, merge and production verification remain required.
+A09 fit-diameter feedback, raw invalid URL preservation and NL/EN browser regressions shipped in PR #42; production verification is recorded below.
 
 CEO confirmed hourly continuation was re-enabled on 8 October and points at this register. It attempts work when capacity permits; it cannot detect exact usage-limit resets. Stop retrying when the authorised backlog is complete or genuinely blocked. Preserve completed release status and update this register on every release.
 
@@ -104,4 +104,10 @@ CEO confirmed hourly continuation was re-enabled on 8 October and points at this
 - N09 partial implementation: retain Basic solid-round torsion sizing and chosen-solid check; add an expandable Advanced hollow/concentric circular section check using entered outside/inside diameters, same torque and allowable shear stress. No invented material presets or yield/fatigue approval.
 - Annular reference: Wiley / Philpot MecMovies, chapter 6, https://www.education.wiley.com/content/Philpot_Mechanics_of_Materials_4e/media/simulations/mec_movies/ch06/m06_02_s170.html ; J = π(Do⁴−Di⁴)/32, τmax=T·Do/(2J), with T converted to N·mm. Formula checked 2026-10-08. Independent cases: 50 N·m, Do20/Di10 mm → 33.953054526271 MPa; 100 N·m, Do40/Di30 → 11.641047266150059 MPa. Reserve remains entered allowable/calculated stress, not yield safety.
 - Hollow geometry must satisfy finite Do>0 and 0≤Di<Do. Invalid/blank shared geometry persists and receives correction feedback; exports retain geometry, warnings and omitted checks. Local instability, fatigue, stress concentrations, stiffness and combined loading remain outside this model.
-- Release review/CI pending for N09 batch. Remaining combined bending/torsion/axial loading, material/yield/safety-factor selection, keyway/concentration effects and equivalent stress remain open; evidence gaps unchanged.
+- PR #43 remains unmerged. The prior remote revision `d9a0b730bf6a9f801ec5dcc727b9968f823d47e8` failed browser CI. Local correction `f76bbbb` preserves URL anchors and updates workflow result-label selectors; the invalid shared-link regression also now explicitly supplies the `#tool` anchor it asserts. Independent delta reviews, upload, full CI, merge and production verification remain required. No shaft release is claimed. Remaining combined bending/torsion/axial loading, material/yield/safety-factor selection, keyway/concentration effects and equivalent stress remain open; evidence gaps unchanged.
+
+## 2026-10-08 continuation — sticky header released
+
+- PR #44 merged as `02210904bf285ade956bb5132c135f829be5e5f9`. Main CI run `37775692386` and production smoke run `37775771116` passed; production deployment is verified.
+- The header remains visible while scrolling. Related bounded polish adjusts the article contents-panel offset, adds a subtle header separator and allows the mobile menu to scroll on shorter screens, while preserving print layout.
+- This navigation release does not close engineering source gaps, manual accessibility evidence gaps or CAD runtime validation. Those requirements remain open above.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   hollowShaftTorsionStress,
   shaftDiameterForTorque,
@@ -118,7 +118,9 @@ export function ShaftDiameterCalc() {
   const t = T[locale];
   const fmt = (n: number, digits = 2) =>
     n.toLocaleString(locale === "en" ? "en-GB" : "nl-NL", { maximumFractionDigits: digits });
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [torque, setTorque] = useState(search.get("t") ?? "50");
   const [tauAllow, setTauAllow] = useState(search.has("tau") ? (search.get("tau") ?? "") : "40");
   const [dCheck, setDCheck] = useState(search.get("d") ?? "");
@@ -141,7 +143,7 @@ export function ShaftDiameterCalc() {
       next.set("do", outer);
       next.set("di", inner);
     }
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [torque, tauAllow, dCheck, outer, inner, hollowOpen]);
 
