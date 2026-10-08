@@ -31,11 +31,11 @@ import {
   Field,
   KindDot,
   Note,
-  NumInput,
   parseNum,
   ResultGrid,
   SelectInput,
   SourceLink,
+  ValidatedNumField,
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
@@ -71,6 +71,7 @@ const T = {
     upTo50: " (t/m 50 mm)",
     fillDiameter: "Vul een nominale Ø in.",
     fillPositive: "Vul een nominale Ø groter dan 0 in.",
+    fillRange: "Vul een nominale Ø van maximaal 3150 mm in.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
         {fitId} heeft geen formule voor c, k, n, p of s en is alleen beschikbaar t/m 50 mm. Ø {d} mm
@@ -130,6 +131,7 @@ const T = {
     upTo50: " (up to 50 mm)",
     fillDiameter: "Enter a nominal Ø.",
     fillPositive: "Enter a nominal Ø greater than 0.",
+    fillRange: "Enter a nominal Ø no greater than 3150 mm.",
     noFormula: (fitId: string, d: number, bandLabel: string) => (
       <>
         {fitId} has no formula for c, k, n, p or s and is only available up to 50 mm. Ø {d} mm falls
@@ -193,8 +195,7 @@ export function FitTolerancesCalc() {
 
   useEffect(() => {
     const next = new URLSearchParams(search);
-    if (diameter) next.set("d", diameter);
-    else next.delete("d");
+    next.set("d", diameter);
     next.set("fit", fitId);
     navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,6 +214,8 @@ export function FitTolerancesCalc() {
 
   const dRaw = parseNum(diameter);
   const isEmpty = diameter.trim() === "";
+  const diameterError =
+    dRaw == null || dRaw <= 0 ? t.fillPositive : dRaw > 3150 ? t.fillRange : undefined;
   const d = dRaw != null && dRaw > 0 ? dRaw : Number.NaN;
   const result = Number.isFinite(d) ? computeFit(d, fitId) : null;
   const holeLimits = result ? absoluteLimits(d, result.ES, result.EI) : null;
@@ -244,9 +247,14 @@ export function FitTolerancesCalc() {
         </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label={t.diameterLabel}>
-            <NumInput id="fit-diameter" value={diameter} onChange={onDia} />
-          </Field>
+          <ValidatedNumField
+            label={t.diameterLabel}
+            id="fit-diameter"
+            validateInitially={search.has("d")}
+            value={diameter}
+            onChange={onDia}
+            error={diameterError}
+          />
           <Field label={t.fitLabel}>
             <SelectInput id="fit-select" value={fitId} onChange={setFitId}>
               {FITS.map((f) => (
@@ -263,9 +271,9 @@ export function FitTolerancesCalc() {
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
           </p>
-        ) : dRaw != null && dRaw <= 0 ? (
+        ) : diameterError ? (
           <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillPositive}
+            {diameterError}
           </p>
         ) : fitOutOfBandRange ? (
           <p className="mt-5 text-sm text-muted" role="status">
