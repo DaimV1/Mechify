@@ -7,7 +7,7 @@ All roadmap work is authorised, delivered in bounded batches by a coding agent w
 ## October action-list continuity
 
 | Existing ID | Current state and retained scope | New audit mapping |
-|---|---|---|
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | A01 | Shipped PR #32: shaft reserve is against entered allowable shear stress, not yield. Preserve. | N09 combined shaft must retain this distinction. |
 | A02 | Open/evidence needed: bearing-fit recommendations must separate axial location from circumferential loading; identify manufacturer/edition/table and supported arrangements. | N10, N19 |
 | A03 | Shipped PR #33: visible Before use and copied assumptions/limitations. Preserve. | N05, N06, N14 |
@@ -16,7 +16,7 @@ All roadmap work is authorised, delivered in bounded batches by a coding agent w
 | A06 | Open: granular verification register, primary vs secondary/formula/estimate/unresolved status, covered cells and evidence. Ten circlip combinations verified, not the whole catalogue. | N05–N06, N19–N21 |
 | A07 | Shaft-specific blank/share/export fixes shipped PR #32. Preserve and extend only when defects are reproduced. | N07, all tool expansions |
 | A08 | Reset/remembered diameter fixes shipped PR #34. Preserve locale and unrelated preferences. | N07 |
-| A09 | Partial: shaft, motor, bearing-life and required/optional pneumatic field errors shipped PR #35–#40. Remaining calculators, enum URL validation and other fields open. Separate local fit-validation commit `068e872` exists; preserve/reconcile before release, not yet shipped. | N07 |
+| A09 | Partial: shaft, motor, bearing-life and required/optional pneumatic field errors shipped PR #35–#40. Remaining calculators, enum URL validation and other fields open. Fit diameter validation rebased onto PR #41 and prepared locally: blank/malformed/nonpositive/>3150 mm shared values retained with immediate accessible NL/EN errors; missing values retain defaults. Independent review/CI/release pending. | N07 |
 | A10 | Open: bilingual terminology, labels, numbers, concise purpose/model/omission statements; material labels and shaft formatting still require review. Drive locale/export contribution shipped PR #31. | N01–N04, N14, N17 |
 | A11 | Open: governing result before intermediate values, essential inputs and visible limitation; validate mobile, keyboard and zoom. | N08, N14–N16 |
 | A12 | Open external validation: actual CAD execution and manual screen-reader/200%/400% zoom reports. Static metadata/automated checks do not close it. | N22–N23 |
@@ -24,11 +24,11 @@ All roadmap work is authorised, delivered in bounded batches by a coding agent w
 ## Confirmed corrections and platform quality
 
 | ID / priority | Scope and acceptance | State |
-|---|---|---|
-| N01 / P0 | Remove public personal portfolio/founder biography dependency, including About, metadata, article JSON-LD and downloadable macro headers (refresh checksums, preserve untested runtime status). Attribute platform content consistently to Mechify as an Organization. | Implemented locally in first batch; reviews/release pending. |
-| N02 / P0 | ISO 286: EI = 0 lower deviation; ES/EI and es/ei terminology. H7/p6 conditional line fit in supported >3–18 mm; >18–50 interference; >0–3 unresolved, >50 unavailable. No table changes without primary evidence. | Copy implemented locally; numeric verification remains open under A06. |
-| N03 / P0 | Replace VDI 2230-lite public branding with simplified bolt-load/clamp-force model. Explicitly not full VDI verification, including source badge, article and copied context. Preserve formulas and exclusions. Optionally derive Φ from supported compliance models later. | Branding implemented locally; compliance-factor extension queued separately. |
-| N04 / P2 | Fix topic/section numbering to 01…09, 10, 11; keep consistent list numbering. | Implemented locally; release pending. |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| N01 / P0 | Remove public personal portfolio/founder biography dependency, including About, metadata, article JSON-LD and downloadable macro headers (refresh checksums, preserve untested runtime status). Attribute platform content consistently to Mechify as an Organization. | Shipped PR #41; both critics approved and production smoke passed on `2d36407`. |
+| N02 / P0 | ISO 286: EI = 0 lower deviation; ES/EI and es/ei terminology. H7/p6 conditional line fit in supported >3–18 mm; >18–50 interference; >0–3 unresolved, >50 unavailable. No table changes without primary evidence. | Copy shipped PR #41; numeric verification remains open under A06. |
+| N03 / P0 | Replace VDI 2230-lite public branding with simplified bolt-load/clamp-force model. Explicitly not full VDI verification, including source badge, article and copied context. Preserve formulas and exclusions. Optionally derive Φ from supported compliance models later. | Branding shipped PR #41; compliance-factor extension queued separately. |
+| N04 / P2 | Fix topic/section numbering to 01…09, 10, 11; keep consistent list numbering. | Shipped PR #41. |
 | N05 / P2 | Result-level provenance: STANDARD / MANUFACTURER DATA / PHYSICS MODEL / DESIGN ESTIMATE, with catalogue nuance and existing unresolved/legacy state retained. Assess existing SourceMetaBadge before duplicating it. | Queued; existing badges already partially fulfil this. |
 | N06 / P2 | Public compact “verified against” cases and granular register per tool/article/dataset: source edition/page/table, covered cells/ranges, reference calculation, review date/reviewer, unresolved gaps. Never infer verification from a date or adjacent table row. | Queued + primary evidence needed (A02/A04/A05/A06). |
 | N07 / P2 | Finish A09: associated accessible errors, blank/malformed shared-state preservation, no NaN/Infinity, unavailable exports explained. Preserve reset and required-warning exports. | Partial as recorded above; remaining adoption queued. |
@@ -44,7 +44,7 @@ All roadmap work is authorised, delivered in bounded batches by a coding agent w
 All extensions require a sourced model, units, limits, independent reference case, invalid-input/export checks, equivalent NL/EN meaning and the release gates above. Source-dependent features must stay unavailable or explicitly preliminary, never fabricated.
 
 | ID / priority | Tool and acceptance criteria | Dependencies / status |
-|---|---|---|
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | N09 / P1 | Shaft: retain torsion-only Basic; Advanced combined bending/torsion/axial, hollow sections, material/yield/safety factor, keyway/concentration effects, equivalent stress. Distinguish static screening from fatigue design. | A01/A04/A06; queued. |
 | N10 / P1 | Bearing life: Fr/Fa → P via bearing-specific X/Y/e and transparent factors → L10/L10h; later load spectrum and modified life with supported reliability/lubrication/contamination data. | Manufacturer/ISO 281 evidence; queued. |
 | N11 / P1 | O-ring: squeeze + gland fill + stretch; pressure, compound/hardness, extrusion gap, temperature, static/reciprocating/rotary context. Application warnings, no complete seal approval. | A05; queued/evidence needed. |
@@ -62,7 +62,7 @@ All extensions require a sourced model, units, limits, independent reference cas
 These are authorised staged product additions, not missing-correctness defects. Each needs engineering and website review before release.
 
 | Order / ID | Addition | Connection / acceptance direction |
-|---|---|---|
+| ---------- | -------------------------------------- | ------------------------------------------------------------------- |
 | 1 / X01 | Tolerance stacks | Fits/ISO 2768; explicit worst-case and any statistical assumptions. |
 | 2 / X02 | Combined shaft sizing | Implemented through N09, not duplicate work. |
 | 3 / X03 | Linear guide load/moment helper | Guide arrangements, load cases and manufacturer limits. |
@@ -89,8 +89,10 @@ Use public primary references first. Ask Damian only for missing/inaccessible ev
 
 ## Delivery and continuation
 
-Roadmap order: (1) confirmed correctness/positioning N01–N04; (2) core engineering depth; (3) CSS/diagrams; (4) external validation closure when evidence is available; (5) connected workflows/examples; (6) natural expansion. Continue bounded A09 fixes alongside this order and reconcile pending `068e872` without overwriting it.
+Roadmap order: (1) confirmed correctness/positioning N01–N04; (2) core engineering depth; (3) CSS/diagrams; (4) external validation closure when evidence is available; (5) connected workflows/examples; (6) natural expansion. Continue bounded A09 fixes alongside this order with the preserved fit-validation batch rebased onto PR #41.
 
-First batch on `codex/audit-1007` contains N01–N04 and this consolidated plan. It is **local implementation, not yet merged/deployed or independently accepted**. No formulas/numeric tables are changed, and no evidence gap is closed by wording changes. Validation and exact release revision will be recorded after review.
+First batch N01–N04 and this consolidated plan shipped in PR #41. Both critics approved; full CI passed. CEO verified production smoke run `37733029508` succeeded on deployed SHA `2d36407b9c6a70e563402923e20e37356b3fe32e`. No formulas/numeric tables changed and no evidence gap was closed by wording changes.
 
-CEO confirmed hourly continuation is enabled and now points at this register (branch copy until merged). It attempts work when capacity permits; it cannot detect exact usage-limit resets. Stop retrying when the authorised backlog is complete or genuinely blocked. Preserve completed release status and update this register on every release.
+Next bounded A09 batch: accessible fit-diameter feedback, raw invalid URL preservation and NL/EN browser regressions. Prepared locally; independent reviews, browser CI, merge and production verification remain required.
+
+CEO confirmed hourly continuation was re-enabled on 8 October and points at this register. It attempts work when capacity permits; it cannot detect exact usage-limit resets. Stop retrying when the authorised backlog is complete or genuinely blocked. Preserve completed release status and update this register on every release.

@@ -10,6 +10,63 @@ async function tabTo(page: Page, target: Locator) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const value of ["", "bad", "0", "-1", "3150.1", "1e309"]) {
+    test(`restored fit diameter=${value} has immediate feedback (${locale})`, async ({ page }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/tools/fit-tolerances?d=${value}&fit=H7%2Fh6`,
+        { waitUntil: "networkidle" },
+      );
+      const input = page.locator("#fit-diameter");
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (attempt) await page.reload({ waitUntil: "networkidle" });
+        await expect(input).toHaveValue(value);
+        await expect(input).toHaveAttribute("aria-invalid", "true");
+        await expect(input).toHaveAccessibleDescription(
+          value === "3150.1"
+            ? locale === "en"
+              ? "Enter a nominal Ø no greater than 3150 mm."
+              : "Vul een nominale Ø van maximaal 3150 mm in."
+            : locale === "en"
+              ? "Enter a nominal Ø greater than 0."
+              : "Vul een nominale Ø groter dan 0 in.",
+        );
+        expect(new URL(page.url()).searchParams.get("d")).toBe(value);
+        await expect(page.getByText(/NaN|Infinity|∞/)).toHaveCount(0);
+        await expect(
+          page.getByRole("button", {
+            name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+      }
+      await input.fill("20");
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await expect(page.locator("#fit-diameter-error")).toHaveCount(0);
+    });
+  }
+
+  test(`valid shared fit diameter delays first edit feedback (${locale})`, async ({ page }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fit-tolerances?d=20&fit=H7%2Fh6`, {
+      waitUntil: "networkidle",
+    });
+    const input = page.locator("#fit-diameter");
+    await expect(input).not.toHaveAttribute("aria-invalid");
+    await input.fill("bad");
+    await expect(input).not.toHaveAttribute("aria-invalid");
+    await input.press("Tab");
+    await expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+
+  test(`missing fit diameter uses its normal default without an error (${locale})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fit-tolerances`, {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator("#fit-diameter")).not.toHaveAttribute("aria-invalid");
+    await expect(page.locator("#fit-diameter-error")).toHaveCount(0);
+  });
+
   for (const example of [
     { route: "shaft-diameter", input: "shaft-torque", key: "t", value: "0" },
     { route: "shaft-diameter", input: "shaft-tau-allow", key: "tau", value: "" },
