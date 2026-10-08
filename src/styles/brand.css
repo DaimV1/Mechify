@@ -147,10 +147,14 @@ em {
   gap: 40px;
   padding: 0 52px;
   border-bottom: 1px solid #ffffff12;
-  position: relative;
-  z-index: 5;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+  background: var(--bg);
+  box-shadow: 0 4px 16px #0002;
   max-width: 1650px;
-  margin: auto;
+  margin-inline: auto;
 }
 .brand {
   display: inline-flex;
@@ -1178,7 +1182,7 @@ footer {
 }
 .article-toc {
   position: sticky;
-  top: 40px;
+  top: 110px;
   align-self: start;
   display: flex;
   flex-direction: column;
@@ -1660,7 +1664,11 @@ footer {
   .header nav {
     display: none;
     position: absolute;
-    top: 75px;
+    top: 100%;
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     left: 0;
     right: 0;
     background: #172227;
@@ -2322,4 +2330,12 @@ footer {
 .tool-toolbar {
   gap: 14px;
   flex-wrap: wrap;
+}
+
+@media print {
+  .header {
+    position: static;
+    box-shadow: none;
+    background: transparent;
+  }
 }
