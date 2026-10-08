@@ -1,7 +1,7 @@
 Attribute VB_Name = "ExporteerVlakPatroonNaarDXF"
 '
 ' SolidWorks 2024 VBA-macro — Exporteer vlak patroon naar DXF
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: zoekt de Flat-Pattern-feature van het actieve plaatwerk-part,
 ' schakelt die tijdelijk in (unsuppress) als dat nodig is, slaat het

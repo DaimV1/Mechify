@@ -1,7 +1,7 @@
 Attribute VB_Name = "ToonIProperties"
 '
 ' Inventor 2024 VBA-macro — Toon iProperties van het actieve document
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: leest Titel, Auteur, Onderwerp en Trefwoorden uit de
 ' samenvattingsgegevens (Summary) van het actieve document en toont ze

@@ -30,10 +30,9 @@ import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
 
 const BOLTED_JOINT_META: EngineeringSourceMeta = {
-  basisType: "standard",
-  reference:
-    "VDI 2230 Blatt 1 — static verification of a concentrically loaded bolted joint (lite scope)",
-  status: "current",
+  basisType: "physics",
+  reference: "Simplified concentric bolt-load / clamp-force model based on VDI 2230 concepts",
+  status: "estimate",
   checkedDate: "2026-09-17",
   validityRange: {
     nl: "Concentrische, statische axiale belasting — geen excentrische/buiglast, geen dwarskracht, geen vermoeiing",
@@ -51,9 +50,9 @@ const BOLTED_JOINT_META: EngineeringSourceMeta = {
 
 const T = {
   nl: {
-    heading: "Boutverbinding — statische controle (VDI 2230-lite)",
+    heading: "Boutlast en klemkracht — vereenvoudigd model",
     intro:
-      "Controleert de twee klassieke VDI 2230-grensgevallen voor een concentrische, statisch axiaal belaste boutverbinding: blijft de verbinding geklemd (F_KR), blijft de bout onder de vloeigrens (F_Smax)?",
+      "Schat restklemkracht en maximale boutkracht op basis van VDI-concepten voor een concentrische, statisch axiaal belaste boutverbinding: blijft de verbinding geklemd (F_KR), blijft de bout onder de vloeigrens (F_Smax)? Dit is geen volledige VDI 2230-verificatie.",
     inputSection: "Bout en voorspanning",
     threadSize: "Draadmaat",
     propertyClass: "Sterkteklasse",
@@ -98,9 +97,9 @@ const T = {
       ].join("\n"),
   },
   en: {
-    heading: "Bolted joint — static verification (VDI 2230-lite)",
+    heading: "Bolt load and clamp force — simplified model",
     intro:
-      "Checks the two classic VDI 2230 boundary cases for a concentric, static, axially loaded bolted joint: does the joint stay clamped (F_KR), does the bolt stay below yield (F_Smax)?",
+      "Estimates residual clamp force and maximum bolt force based on VDI concepts for a concentric, static, axially loaded bolted joint: does the joint stay clamped (F_KR), does the bolt stay below yield (F_Smax)? This is not a complete VDI 2230 verification.",
     inputSection: "Bolt and preload",
     threadSize: "Thread size",
     propertyClass: "Property class",

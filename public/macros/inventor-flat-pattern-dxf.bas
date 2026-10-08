@@ -1,7 +1,7 @@
 Attribute VB_Name = "ExporteerVlakPatroonNaarDXF"
 '
 ' Inventor 2024 VBA-macro — Exporteer vlak patroon naar DXF
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: van het actieve plaatwerk-part wordt het vlakke patroon (Flat
 ' Pattern) opgeslagen als .dxf naast het bestaande bestand, met dezelfde

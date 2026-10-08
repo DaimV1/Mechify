@@ -1,7 +1,7 @@
 Attribute VB_Name = "BatchExportTekeningenNaarPDF"
 '
 ' Inventor 2024 VBA-macro — Batch-export open tekeningen naar PDF
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: loopt door alle op dit moment geopende documenten, en exporteert
 ' elke tekening (.idw/.dwg) die al een bestandspad heeft naar PDF, naast

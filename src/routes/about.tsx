@@ -6,8 +6,7 @@ import { useDocumentMeta } from "@/lib/use-document-meta";
 const T = {
   nl: {
     metaTitle: "Over Mechify",
-    metaDescription:
-      "Waarom Mechify bestaat, wie het bouwt en hoe de rekenmodules tot stand komen.",
+    metaDescription: "Rekenmodules, bronnen en toepassingsgrenzen voor werktuigbouwkundig ontwerp.",
     eyebrow: "Over ons",
     title: "Over Mechify",
     p1: (
@@ -24,23 +23,22 @@ const T = {
         rekenmodellen en praktische ontwerpbenaderingen. Bij norm- en tabeldata worden alleen
         vastgelegde waarden getoond; ontbrekende tabelwaarden worden niet stil geïnterpoleerd.
         Schattingsmodellen — zoals een aandraaimoment via een moerfactor, een eerste
-        O-ringgroefschatting of een motordimensionering — worden expliciet als indicatief
-        gemarkeerd en tonen hun aannames en toepassingsgrenzen naast het resultaat.
+        O-ringgroefschatting of een motordimensionering — worden expliciet als indicatief gemarkeerd
+        en tonen hun aannames en toepassingsgrenzen naast het resultaat.
       </>
     ),
     p3: (
       <>
-        Mechify is gebouwd door <strong className="text-ink">Damian Vink</strong>,
-        werktuigbouwkundig ontwerper. De tools zijn ontstaan uit dagelijks gebruik op de tekentafel
-        en zijn geleidelijk uitgebreid tot een zelfstandig platform, los van een persoonlijke
-        portfolio-site — zodat de tools kunnen groeien zonder daaraan vast te zitten.
+        Gebruik de resultaten als ondersteuning bij ontwerpkeuzes. Controleer de vermelde aannames,
+        bronstatus en toepassingsgrenzen voordat je maten of componenten vastlegt. Een
+        rekenresultaat vervangt geen volledige ontwerpcontrole.
       </>
     ),
     p4Prefix: "Vragen, correcties op een tabel, of een tool die je mist? Mail naar",
   },
   en: {
     metaTitle: "About Mechify",
-    metaDescription: "Why Mechify exists, who builds it, and how the calculators come together.",
+    metaDescription: "Calculators, sources and applicability limits for mechanical design.",
     eyebrow: "About us",
     title: "About Mechify",
     p1: (
@@ -55,18 +53,16 @@ const T = {
       <>
         Mechify distinguishes standards tables, manufacturer data, physics-based calculations and
         practical design estimates. Standard and table data shows only recorded values — missing
-        tabulated values are never silently interpolated. Estimate models — a tightening torque
-        from a nut factor, a preliminary O-ring groove sizing, a motor sizing — are explicitly
-        labelled as indicative and show their assumptions and applicability limits alongside the
-        result.
+        tabulated values are never silently interpolated. Estimate models — a tightening torque from
+        a nut factor, a preliminary O-ring groove sizing, a motor sizing — are explicitly labelled
+        as indicative and show their assumptions and applicability limits alongside the result.
       </>
     ),
     p3: (
       <>
-        Mechify is built by <strong className="text-ink">Damian Vink</strong>, a mechanical design
-        engineer. The tools grew out of daily use at the drawing board and were gradually expanded
-        into a standalone platform, separate from a personal portfolio site — so the tools can keep
-        growing without being tied to one.
+        Use the results to support design decisions. Check the stated assumptions, source status and
+        applicability limits before specifying dimensions or components. A calculation result does
+        not replace a complete design review.
       </>
     ),
     p4Prefix: "Questions, corrections to a table, or a tool you're missing? Email",

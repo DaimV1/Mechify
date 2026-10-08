@@ -25,7 +25,9 @@ export function Home() {
     <PageShell>
       <section className="hero wrap">
         <div className="hero-copy">
-          <Eyebrow>{tx(locale, "HET PLATFORM VOOR MACHINEBOUWERS", "THE PLATFORM FOR MACHINE BUILDERS")}</Eyebrow>
+          <Eyebrow>
+            {tx(locale, "HET PLATFORM VOOR MACHINEBOUWERS", "THE PLATFORM FOR MACHINE BUILDERS")}
+          </Eyebrow>
           <h1>
             {tx(locale, "Van engineeringvraag", "From engineering question")}
             <br />
@@ -58,7 +60,13 @@ export function Home() {
         </div>
         <AssemblyHero />
         <div className="hero-bottom">
-          <span>{tx(locale, "VAN EERSTE CONCEPT TOT MAAKBAAR ONTWERP", "FROM FIRST CONCEPT TO MANUFACTURABLE DESIGN")}</span>
+          <span>
+            {tx(
+              locale,
+              "VAN EERSTE CONCEPT TOT MAAKBAAR ONTWERP",
+              "FROM FIRST CONCEPT TO MANUFACTURABLE DESIGN",
+            )}
+          </span>
           <a href="#verder">{tx(locale, "SCROLL OM TE VERKENNEN ↓", "SCROLL TO EXPLORE ↓")}</a>
         </div>
       </section>
@@ -77,7 +85,9 @@ export function Home() {
       </div>
       <section className="section wrap preview-section" id="verder">
         <div className="section-copy">
-          <Eyebrow>{tx(locale, "01 / VAN VRAAG NAAR INZICHT", "01 / FROM QUESTION TO INSIGHT")}</Eyebrow>
+          <Eyebrow>
+            {tx(locale, "01 / VAN VRAAG NAAR INZICHT", "01 / FROM QUESTION TO INSIGHT")}
+          </Eyebrow>
           <h2>
             {tx(locale, "Minder zoeken.", "Less searching.")}
             <br />
@@ -99,7 +109,11 @@ export function Home() {
             <p>
               {tx(locale, "Geen black box.", "No black box.")}
               <br />
-              {tx(locale, "Jij houdt grip op de berekening.", "You stay in control of the calculation.")}
+              {tx(
+                locale,
+                "Jij houdt grip op de berekening.",
+                "You stay in control of the calculation.",
+              )}
             </p>
           </div>
         </div>
@@ -110,7 +124,11 @@ export function Home() {
             </span>
             <Link
               to="/calculators/drive-power"
-              aria-label={tx(locale, "Open volledige koppelcalculator", "Open the full torque calculator")}
+              aria-label={tx(
+                locale,
+                "Open volledige koppelcalculator",
+                "Open the full torque calculator",
+              )}
             >
               ↗
             </Link>
@@ -121,7 +139,13 @@ export function Home() {
       <section className="section section-border wrap">
         <div className="section-heading">
           <div>
-            <Eyebrow>{tx(locale, "02 / KENNIS DIE VERDER HELPT", "02 / KNOWLEDGE THAT HELPS YOU MOVE FORWARD")}</Eyebrow>
+            <Eyebrow>
+              {tx(
+                locale,
+                "02 / KENNIS DIE VERDER HELPT",
+                "02 / KNOWLEDGE THAT HELPS YOU MOVE FORWARD",
+              )}
+            </Eyebrow>
             <h2>
               {tx(locale, "Begrijp de techniek.", "Understand the engineering.")}
               <br />
@@ -135,7 +159,7 @@ export function Home() {
         <div className="topics-home">
           {articles.slice(0, 4).map((a, i) => (
             <Link className="topic-row" key={a.slug} to={"/topics/" + a.slug}>
-              <span className="row-index">0{i + 1}</span>
+              <span className="row-index">{String(i + 1).padStart(2, "0")}</span>
               <div>
                 <span className="mono muted">
                   {CATEGORY_LABELS[a.category][locale]} · {a.time}
@@ -151,7 +175,9 @@ export function Home() {
         <div className="wrap section">
           <div className="section-heading">
             <div>
-              <Eyebrow>{tx(locale, "03 / JE DIGITALE WERKBANK", "03 / YOUR DIGITAL WORKBENCH")}</Eyebrow>
+              <Eyebrow>
+                {tx(locale, "03 / JE DIGITALE WERKBANK", "03 / YOUR DIGITAL WORKBENCH")}
+              </Eyebrow>
               <h2>
                 {tx(locale, "Goed gereedschap.", "Good tools.")}
                 <br />
@@ -173,7 +199,9 @@ export function Home() {
       </section>
       <section className="section wrap cad-home">
         <div className="cad-blueprint">
-          <div className="mono muted">{tx(locale, "MODEL STRUCTURE / REV. 01", "MODEL STRUCTURE / REV. 01")}</div>
+          <div className="mono muted">
+            {tx(locale, "MODEL STRUCTURE / REV. 01", "MODEL STRUCTURE / REV. 01")}
+          </div>
           <div className="tree">
             <div>
               ⌖ <strong>Machine_assembly</strong>
@@ -203,11 +231,17 @@ export function Home() {
           </div>
           <div className="blueprint-foot">
             <span className="status-dot" />{" "}
-            {tx(locale, "Eén ontwerpintentie. Een robuust model.", "One design intent. One robust model.")}
+            {tx(
+              locale,
+              "Eén ontwerpintentie. Een robuust model.",
+              "One design intent. One robust model.",
+            )}
           </div>
         </div>
         <div>
-          <Eyebrow>{tx(locale, "04 / VAN MODEL NAAR MACHINE", "04 / FROM MODEL TO MACHINE")}</Eyebrow>
+          <Eyebrow>
+            {tx(locale, "04 / VAN MODEL NAAR MACHINE", "04 / FROM MODEL TO MACHINE")}
+          </Eyebrow>
           <h2>
             {tx(locale, "Je CAD-model.", "Your CAD model.")}
             <br />

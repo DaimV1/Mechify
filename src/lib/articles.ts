@@ -1,5 +1,5 @@
 /** P1.8 (audit, 17 sept 2026): every article now carries its own provenance — author, technical basis and a review date — instead of requiring a reader to inspect source code to know whether a claim came from physics, a standard, a manufacturer catalogue or a design rule of thumb. */
-export const ARTICLE_AUTHOR = "Damian Vink";
+export const ARTICLE_AUTHOR = "Mechify";
 /** Default ISO 8601 date for the original articles' `reviewedDate` ("17 sept 2026"), for schema.org dateModified. */
 export const ARTICLE_REVIEWED_DATE_ISO = "2026-09-17";
 /** I18N-001: display form of the original articles' review date; new articles set their own date. */
@@ -695,8 +695,8 @@ export const articles = [
     reviewedDate: { nl: "23 sept 2026", en: "23 Sept 2026" },
     reviewedDateIso: "2026-09-23",
     basis: {
-      nl: "Mechify-vereenvoudiging (VDI 2230-lite), geen officiële normvariant: restklemkracht en maximale boutkracht van een gesloten, concentrisch en statisch belaste boutverbinding. Geen excentrische belasting, dwarskracht/wrijvingsgrip, vermoeiing of zetverlies-tabel.",
-      en: "Mechify simplification (VDI 2230-lite), not an official standard variant: residual clamp force and maximum bolt force of a closed, concentrically loaded static bolted joint. No eccentric loading, transverse/friction-grip check, fatigue or embedding-loss table.",
+      nl: "Vereenvoudigd boutlast- en klemkrachtmodel op basis van VDI-concepten, geen volledige VDI 2230-verificatie: restklemkracht en maximale boutkracht van een gesloten, concentrisch en statisch belaste boutverbinding. Geen excentrische belasting, dwarskracht/wrijvingsgrip, vermoeiing of zetverlies-tabel.",
+      en: "Simplified bolt-load and clamp-force model based on VDI concepts, not a complete VDI 2230 verification: residual clamp force and maximum bolt force of a closed, concentrically loaded static bolted joint. No eccentric loading, transverse/friction-grip check, fatigue or embedding-loss table.",
     },
     category: "Toleranties & assemblage",
     title: {

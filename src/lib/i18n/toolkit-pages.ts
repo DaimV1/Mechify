@@ -91,7 +91,7 @@ const pages = {
       faq: [
         {
           q: "Wat is het eenheidsgatstelsel in ISO 286?",
-          a: "Het gat krijgt een H-afwijking (ondermaat 0). De as (c, d, f, g, h, k, n, p, s) bepaalt of de passing los, overgang of vast is.",
+          a: "Het gat krijgt een H-tolerantieveld (onderafwijking EI = 0). De as (c, d, f, g, h, k, n, p, s) bepaalt of de passing los, overgang of vast is.",
         },
         {
           q: "Wat betekent H7/g6?",
@@ -103,7 +103,7 @@ const pages = {
         },
         {
           q: "Is H7/p6 altijd overmaat?",
-          a: "Nee. Tot 18 mm is de maximale speling 0 µm (lijnpassing mogelijk). Vanaf 18–30 mm is max. speling negatief: altijd interferentie.",
+          a: "Niet altijd. In de ondersteunde tabelbanden boven 3 t/m 18 mm is de maximale speling 0 µm: lijnpassing is mogelijk. Boven 18 t/m 50 mm is er altijd overmaat. De band boven 0 t/m 3 mm is betwist; boven 50 mm zijn p6-waarden niet beschikbaar.",
         },
         {
           q: "Zijn de waarden in mm of µm?",
@@ -119,7 +119,7 @@ const pages = {
       faq: [
         {
           q: "What is the hole-basis system in ISO 286?",
-          a: "The hole gets an H deviation (lower deviation 0). The shaft (c, d, f, g, h, k, n, p, s) decides whether the fit is clearance, transition or interference.",
+          a: "The hole gets an H tolerance zone (lower deviation EI = 0). The shaft (c, d, f, g, h, k, n, p, s) decides whether the fit is clearance, transition or interference.",
         },
         {
           q: "What does H7/g6 mean?",
@@ -131,7 +131,7 @@ const pages = {
         },
         {
           q: "Is H7/p6 always interference?",
-          a: "No. Up to 18 mm the maximum clearance is 0 µm (line fit possible). From 18–30 mm max. clearance is negative: always interference.",
+          a: "Not always. In the supported table bands above 3 through 18 mm, maximum clearance is 0 µm: line fit is possible. Above 18 through 50 mm there is always interference. The above 0 through 3 mm band is disputed; p6 values above 50 mm are unavailable.",
         },
         {
           q: "Are the values in mm or µm?",

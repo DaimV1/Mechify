@@ -62,7 +62,8 @@ const T = {
     intro: (
       <>
         Nominale Ø in mm, boven 0 t/m 3150 mm. In de kleinste band (&gt;0–≤3 mm) zijn alleen H6–H11,
-        JS7, h6, h7 en p6 geverifieerd; overige klassen tonen daar "—" i.p.v. een gok.
+        JS7, h6 en h7 als tabelwaarden opgenomen. p6 is daar afgeleid en betwist; overige klassen
+        tonen "—".
       </>
     ),
     diameterLabel: "Nominale Ø (mm)",
@@ -99,16 +100,16 @@ const T = {
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Voorkeurpassingen",
     sec1Note:
-      "Minimum … maximum speling in mm. Negatief = overmaat. H7/p6 tot 18 mm: max. 0 µm (lijnpassing mogelijk).",
+      "Minimum … maximum speling in mm. Negatief = overmaat. H7/p6 boven 3 t/m 18 mm: max. 0 µm (lijnpassing mogelijk); boven 0 t/m 3 mm betwist.",
     thDiameter: "Ø (mm)",
     onlyTo50: "* alleen t/m 50 mm (geen formule voor c, k, n, p of s).",
     whenWhichFit: "Wanneer welke passing",
     sec2Title: "2. Gattoleranties",
-    sec2Note: "Bovenmaat / ondermaat t.o.v. nominaal, in mm. JS7 = ±IT7/2, niet afgerond.",
+    sec2Note: "Bovenafwijking ES / onderafwijking EI, in mm. JS7 = ±IT7/2, niet afgerond.",
     sec2Footnote:
       'H6–H11, F8, G7 en JS7 zijn berekend uit de ISO 286-1-formules boven 50 mm. * K7 en N7 hebben geen formule en blijven t/m 50 mm. In de >0–≤3 mm-band tonen F8, G7, K7 en N7 "—": niet gegokt, nog niet tegen een primaire bron gecontroleerd.',
     sec3Title: "3. Astoleranties",
-    sec3Note: "Bovenmaat / ondermaat t.o.v. nominaal, in mm.",
+    sec3Note: "Bovenafwijking es / onderafwijking ei, in mm.",
     sec3Footnote:
       "Diameters: boven de ondergrens tot en met de bovengrens. JS7 is ±IT7/2 volgens ISO 286-2, zonder afronding naar hele µm. d9, f7, g6, h6 en h7 zijn berekend uit de ISO 286-1-formules boven 50 mm. * c11, k6, n6, p6 en s6 hebben geen formule en blijven t/m 50 mm. Naslag, geen vervanging van de norm.",
     sourceHole: "RoyMech ISO 286-2 hole tolerances",
@@ -120,7 +121,8 @@ const T = {
     intro: (
       <>
         Nominal Ø in mm, above 0 up to 3150 mm. In the smallest band (&gt;0–≤3 mm) only H6–H11, JS7,
-        h6, h7 and p6 are verified; other classes show "—" there instead of a guess.
+        h6 and h7 are included as table values. p6 is derived and disputed there; other classes show
+        "—".
       </>
     ),
     diameterLabel: "Nominal Ø (mm)",
@@ -157,16 +159,16 @@ const T = {
       `Ø ${d} mm · ${fitId} · band ${bandLabel} mm`,
     sec1Title: "1. Preferred fits",
     sec1Note:
-      "Minimum … maximum clearance in mm. Negative = interference. H7/p6 up to 18 mm: max. 0 µm (line fit possible).",
+      "Minimum … maximum clearance in mm. Negative = interference. H7/p6 above 3 through 18 mm: max. 0 µm (line fit possible); above 0 through 3 mm disputed.",
     thDiameter: "Ø (mm)",
     onlyTo50: "* only up to 50 mm (no formula for c, k, n, p or s).",
     whenWhichFit: "Which fit, when",
     sec2Title: "2. Hole tolerances",
-    sec2Note: "Upper / lower deviation from nominal, in mm. JS7 = ±IT7/2, not rounded.",
+    sec2Note: "Upper deviation ES / lower deviation EI, in mm. JS7 = ±IT7/2, not rounded.",
     sec2Footnote:
       'H6–H11, F8, G7 and JS7 are computed from the ISO 286-1 formulas above 50 mm. * K7 and N7 have no formula and stay limited to 50 mm. In the >0–≤3 mm band, F8, G7, K7 and N7 show "—": not guessed, not yet checked against a primary source.',
     sec3Title: "3. Shaft tolerances",
-    sec3Note: "Upper / lower deviation from nominal, in mm.",
+    sec3Note: "Upper deviation es / lower deviation ei, in mm.",
     sec3Footnote:
       "Diameters: above the lower bound up to and including the upper bound. JS7 is ±IT7/2 per ISO 286-2, not rounded to whole µm. d9, f7, g6, h6 and h7 are computed from the ISO 286-1 formulas above 50 mm. * c11, k6, n6, p6 and s6 have no formula and stay limited to 50 mm. Reference only, not a substitute for the standard.",
     sourceHole: "RoyMech ISO 286-2 hole tolerances",

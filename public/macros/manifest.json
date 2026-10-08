@@ -6,31 +6,31 @@
   },
   "macros": [
     {
-      "file": "solidworks-export-step.bas", "sha256": "4977982b40a20f5db69e8c7d81e1302c74145980af9b74473d19f174344eae05", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
+      "file": "solidworks-export-step.bas", "sha256": "ba6572cf3d012446399bd361c6f2268f73cf1931edd2642fdb1bbec2b685fce8", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "SOLIDWORKS API 2024 — SaveAs", "url": "https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~SaveAs.html" },
       "limitations": { "nl": "Alleen opgeslagen parts/assemblies; een bestaande STEP kan zonder bevestiging worden overschreven. Exportopties en referenties zijn niet in SolidWorks getest.", "en": "Saved parts/assemblies only; an existing STEP may be overwritten without confirmation. Export options and references were not tested in SolidWorks." }
     },
     {
-      "file": "solidworks-batch-pdf.bas", "sha256": "e4d4248c544e95857d6d39b0e8877570d9d9dd1abaa9a723c24ebc5417cddae6", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
+      "file": "solidworks-batch-pdf.bas", "sha256": "57e6df2ec24663650da4834816daa9c164bc1aeeb062623c2944ef055ddf7dc3", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "SOLIDWORKS API 2024 — SaveAs", "url": "https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~SaveAs.html" },
       "limitations": { "nl": "Alleen open, opgeslagen tekeningen; PDF-instellingen, fonts en referenties zijn niet in SolidWorks getest.", "en": "Open, saved drawings only; PDF settings, fonts and references were not tested in SolidWorks." }
     },
     {
-      "file": "solidworks-show-properties.bas", "sha256": "6433b630df194b787f4652b79ef25cabef0d63551bb2d3e1f733a4e5e2fd4e9c", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
+      "file": "solidworks-show-properties.bas", "sha256": "c4b33c0e8a133ac0fb63b8aca88b6428deb4c73b3dc725bed5344bbb32888416", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "SOLIDWORKS API 2024 — CustomPropertyManager", "url": "https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICustomPropertyManager.html" },
       "limitations": { "nl": "Leest alleen documentniveau-eigenschappen, niet configuratiespecifieke waarden; niet in SolidWorks getest.", "en": "Reads document-level properties only, not configuration-specific values; not tested in SolidWorks." }
     },
     {
-      "file": "solidworks-save-all.bas", "sha256": "0c8409a0f5568dba7ddb8860abb6faa458df5e18428b915ead3fa6e97b563888", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
+      "file": "solidworks-save-all.bas", "sha256": "29e3603980f3c8fa9b9550de249f74476445159dcd9e60c5d1ff430a1f96cd33", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "SOLIDWORKS API 2024 — GetSaveFlag", "url": "https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDoc2~GetSaveFlag.html" },
       "limitations": { "nl": "Slaat gewijzigde, reeds opgeslagen open documenten op; foutafhandeling en referentie-updates zijn niet in SolidWorks getest.", "en": "Saves modified, previously saved open documents; error handling and reference updates were not tested in SolidWorks." }
     },
     {
-      "file": "solidworks-flat-pattern-dxf.bas", "sha256": "44e521503f87f30bbc4b1438787a980ffdf581fb972e915b4570abf49d6913fa", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
+      "file": "solidworks-flat-pattern-dxf.bas", "sha256": "7a229f39f5caa630ac2a914bf57a6461944ac9419e8db113c48a2b91e105c130", "software": "SolidWorks", "targetVersion": "2024", "entryPoint": "main",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "SOLIDWORKS API 2024 — SaveAs", "url": "https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~SaveAs.html" },
       "limitations": { "nl": "Vereist een opgeslagen plaatwerk-part met Flat-Pattern-feature. De generieke SaveAs-route garandeert geen betrouwbaar vlak-patroonresultaat; inspecteer elke DXF. Niet in SolidWorks getest.", "en": "Requires a saved sheet-metal part with a Flat-Pattern feature. Generic SaveAs does not guarantee a reliable flat-pattern result; inspect every DXF. Not tested in SolidWorks." }
@@ -48,31 +48,31 @@
       "limitations": { "nl": "Rapporteert namen en actieve configuratie; onderdrukking, display states en derived configurations vallen buiten de controle.", "en": "Reports names and the active configuration; suppression, display states and derived configurations are outside this check." }
     },
     {
-      "file": "inventor-export-step.bas", "sha256": "d170e55963bfcd1948736ec97783bdb55a8ed82be415cb434a91b01c8cc895ab", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ExportActiefNaarSTEP",
+      "file": "inventor-export-step.bas", "sha256": "f313741700cbfe2f02938215479a7e10509053056bd3e72b4d419a0fcdc9aac8", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ExportActiefNaarSTEP",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "Inventor API 2024 — TranslatorAddIn", "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-API/files/TranslatorAddIn.htm" },
       "limitations": { "nl": "Alleen opgeslagen parts/assemblies; vertaleropties en referenties zijn niet in Inventor getest.", "en": "Saved parts/assemblies only; translator options and references were not tested in Inventor." }
     },
     {
-      "file": "inventor-save-all.bas", "sha256": "21e0f7b763916d5b56be492b89b8dde5f5579542aa2e5331f0c69ec7226ea39d", "software": "Inventor", "targetVersion": "2024", "entryPoint": "SlaAllesOp",
+      "file": "inventor-save-all.bas", "sha256": "d6583222f1173d8e806ac26dab6d7e0cbb3163959edfda60912dd09863db2e34", "software": "Inventor", "targetVersion": "2024", "entryPoint": "SlaAllesOp",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "Inventor API 2024 — Document.Save", "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-API/files/Document_Save.htm" },
       "limitations": { "nl": "Slaat gewijzigde, reeds opgeslagen open documenten op; foutafhandeling en afhankelijkheden zijn niet in Inventor getest.", "en": "Saves modified, previously saved open documents; error handling and dependencies were not tested in Inventor." }
     },
     {
-      "file": "inventor-show-iproperties.bas", "sha256": "b1ce756e5ed7069876c31ce105361c0e24e49695927d0f4a71c719498a5adb1d", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ToonIProperties",
+      "file": "inventor-show-iproperties.bas", "sha256": "d772e9edfac3b07386cf7fa7b542b02c90391f395dbc797406fd183ca0965c94", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ToonIProperties",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "Inventor API 2024 — PropertySets", "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-API/files/Document_PropertySets.htm" },
       "limitations": { "nl": "Leest vier Summary Information-velden; overige iProperties en lokalisatiegedrag zijn niet in Inventor getest.", "en": "Reads four Summary Information fields; other iProperties and localization behavior were not tested in Inventor." }
     },
     {
-      "file": "inventor-batch-pdf.bas", "sha256": "124ba9a4b5c919e4bd77341b9b35e976176a5e54a2ade35670a42ff4f4cf150c", "software": "Inventor", "targetVersion": "2024", "entryPoint": "BatchExportTekeningenNaarPDF",
+      "file": "inventor-batch-pdf.bas", "sha256": "3b49f1b913ffe83c9e09d8d051d4573e4d5eed8d7a00931264b92ff1620ba406", "software": "Inventor", "targetVersion": "2024", "entryPoint": "BatchExportTekeningenNaarPDF",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "Inventor API 2024 — PDF Translator sample", "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-API/files/SaveAsPDFTranslator_Sample.htm" },
       "limitations": { "nl": "Alleen open, opgeslagen tekeningen; PDF AddIn, sheets, fonts en referenties zijn niet in Inventor getest.", "en": "Open, saved drawings only; PDF AddIn, sheets, fonts and references were not tested in Inventor." }
     },
     {
-      "file": "inventor-flat-pattern-dxf.bas", "sha256": "528e14c2fbba3350efab08ed7aef9d89395b97bf2c6c47e094a7a7c2e1972cac", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ExporteerVlakPatroonNaarDXF",
+      "file": "inventor-flat-pattern-dxf.bas", "sha256": "64e700e07b6e8f5f79d080abb9bb7db9cf695b3d1fc0a3e1a12bf9ade4a824d1", "software": "Inventor", "targetVersion": "2024", "entryPoint": "ExporteerVlakPatroonNaarDXF",
       "reviewedOn": "2026-09-27", "nextReviewDue": "2027-03-27", "runtimeTested": false,
       "source": { "label": "Inventor API 2024 — DataIO.WriteDataToFile", "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-API/files/DataIO_WriteDataToFile.htm" },
       "limitations": { "nl": "Vereist een opgeslagen plaatwerk-part; DXF-opties, layer mapping en herstel na fouten zijn niet in Inventor getest.", "en": "Requires a saved sheet-metal part; DXF options, layer mapping and recovery after errors were not tested in Inventor." }

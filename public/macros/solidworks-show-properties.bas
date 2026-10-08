@@ -1,7 +1,7 @@
 Attribute VB_Name = "ToonCustomProperties"
 '
 ' SolidWorks 2024 VBA-macro — Toon custom properties van het actieve document
-' damianvink.nl/toolkit/macros
+' https://www.mechify.nl/cad/macros
 '
 ' Wat: leest alle custom properties (configuratie-onafhankelijk, "") van
 ' het actieve document en toont ze in een berichtvenster. Alleen-lezen,
