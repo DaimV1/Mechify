@@ -70,7 +70,9 @@ test("static fallback remains and controls stay unavailable when renderer fails"
   await expect(assembly.getByRole("button")).toHaveCount(3);
   for (const button of await assembly.getByRole("button").all())
     await expect(button).toBeDisabled();
-  await expect(assembly.getByRole("status")).toContainText("Statisch schema");
+  await expect(assembly.locator(".assembly-fallback-note")).toHaveText(
+    "Statisch schema — interactieve bediening is niet beschikbaar.",
+  );
 });
 
 test("schematic can unmount and remount without page errors", async ({ page, consoleErrors }) => {
