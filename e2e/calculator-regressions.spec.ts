@@ -126,7 +126,7 @@ test("cylinder accepts efficiency boundary eta=1", async ({ page }) => {
 test("fastener blank nut factor survives reload without hiding reference dimensions", async ({
   page,
 }) => {
-  await page.goto("/en/calculators/fasteners?k=0.2#tool", { waitUntil: "networkidle" });
+  await page.goto("/en/tools/fasteners?k=0.2#tool", { waitUntil: "networkidle" });
   await page.locator("#fastener-k").fill("");
   await expect.poll(() => new URL(page.url()).searchParams.get("k")).toBe("");
   expect(new URL(page.url()).hash).toBe("#tool");
@@ -140,7 +140,7 @@ test("fastener blank nut factor survives reload without hiding reference dimensi
 });
 
 test("fastener overflow suppresses only torque outputs and exports", async ({ page }) => {
-  await page.goto("/en/calculators/fasteners?k=1e308", { waitUntil: "networkidle" });
+  await page.goto("/en/tools/fasteners?k=1e308", { waitUntil: "networkidle" });
   await expect(page.locator("#fastener-k")).toHaveAccessibleDescription("Enter a smaller number.");
   await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
   await expect(page.getByText("Clearance medium", { exact: true })).toBeVisible();
