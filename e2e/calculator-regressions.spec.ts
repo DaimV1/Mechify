@@ -122,3 +122,30 @@ test("cylinder accepts efficiency boundary eta=1", async ({ page }) => {
   await expect(page.locator("#pneu-efficiency")).not.toHaveAttribute("aria-invalid");
   await expect(page.getByText("Effective extend force (with friction)")).toBeVisible();
 });
+
+test("fastener blank nut factor survives reload without hiding reference dimensions", async ({
+  page,
+}) => {
+  await page.goto("/en/tools/fasteners?k=0.2#tool", { waitUntil: "networkidle" });
+  await page.locator("#fastener-k").fill("");
+  await expect.poll(() => new URL(page.url()).searchParams.get("k")).toBe("");
+  expect(new URL(page.url()).hash).toBe("#tool");
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.locator("#fastener-k")).toHaveValue("");
+  await expect(page.locator("#fastener-k")).toHaveAccessibleDescription(
+    "Enter a number greater than 0.",
+  );
+  await expect(page.getByText("Clearance medium", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
+});
+
+test("fastener overflow suppresses only torque outputs and exports", async ({ page }) => {
+  await page.goto("/en/tools/fasteners?k=1e308", { waitUntil: "networkidle" });
+  await expect(page.locator("#fastener-k")).toHaveAccessibleDescription("Enter a smaller number.");
+  await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+  await expect(page.getByText("Clearance medium", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
+  await expect(page.locator("table.ref-table tbody tr").first().locator("td").nth(1)).toHaveText(
+    "— N·m",
+  );
+});

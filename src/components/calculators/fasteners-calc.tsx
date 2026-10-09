@@ -1,7 +1,7 @@
 import { BoltSection, SchemaPanel } from "@/components/toolkit/schema";
 import { lookupFastener } from "@/lib/toolkit/fastener";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   CLEARANCE_HOLES,
   computeTorque,
@@ -20,11 +20,11 @@ import {
   CopyResult,
   Field,
   Note,
-  NumInput,
   parseNum,
   ResultGrid,
   SelectInput,
   SourceLink,
+  ValidatedNumField,
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
 import { metaCopyLine, type EngineeringSourceMeta } from "@/lib/engineering-meta";
@@ -61,6 +61,8 @@ const T = {
     wrenchSocket: "Sleutelmaat (inbus)",
     torque: "Aandraaimoment T",
     invalidK: "Vul een moerfactor K groter dan 0 in om het aandraaimoment te berekenen.",
+    positiveNumber: "Vul een getal groter dan 0 in.",
+    smallerNumber: "Vul een kleiner getal in.",
     torquePerSize: (k: string) => `Aandraaimoment per maat (K = ${k})`,
     thSize: "Maat",
     source: "Engineering ToolBox — ISO metric screw threads",
@@ -96,6 +98,8 @@ const T = {
     wrenchSocket: "Wrench size (hex socket)",
     torque: "Tightening torque T",
     invalidK: "Enter a nut factor K greater than 0 to calculate tightening torque.",
+    positiveNumber: "Enter a number greater than 0.",
+    smallerNumber: "Enter a smaller number.",
     torquePerSize: (k: string) => `Tightening torque per size (K = ${k})`,
     thSize: "Size",
     source: "Engineering ToolBox — ISO metric screw threads",
@@ -122,7 +126,9 @@ const T = {
 export function FastenersCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [size, setSize] = useState<ThreadSize>(
     (search.get("m") && search.get("m")! in CLEARANCE_HOLES ? search.get("m") : "M8") as ThreadSize,
   );
@@ -133,15 +139,29 @@ export function FastenersCalc() {
     const next = new URLSearchParams(search);
     next.set("m", size);
     next.set("c", classId);
-    if (k) next.set("k", k);
-    else next.delete("k");
-    setSearch(next, { replace: true });
+    next.set("k", k);
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, classId, k]);
 
   const cls = PROPERTY_CLASSES.find((c) => c.id === classId) ?? PROPERTY_CLASSES[0];
-  const kVal = parseNum(k) ?? NaN;
-  const torqueResult = kVal > 0 ? computeTorque(size, cls, kVal) : null;
+  const parsedK = parseNum(k);
+  const kProducesFiniteResults =
+    parsedK != null &&
+    parsedK > 0 &&
+    THREAD_SIZES.every((threadSize) =>
+      PROPERTY_CLASSES.every((propertyClass) =>
+        Number.isFinite(computeTorque(threadSize, propertyClass, parsedK).torque),
+      ),
+    );
+  const kError =
+    parsedK == null || parsedK <= 0
+      ? t.positiveNumber
+      : !kProducesFiniteResults
+        ? t.smallerNumber
+        : undefined;
+  const kVal = kProducesFiniteResults ? parsedK : null;
+  const torqueResult = kVal != null ? computeTorque(size, cls, kVal) : null;
   const hole = CLEARANCE_HOLES[size];
   const wrench = WRENCH_SIZES[size];
 
@@ -191,9 +211,14 @@ export function FastenersCalc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label={t.nutFactor}>
-            <NumInput id="fastener-k" value={k} onChange={setK} />
-          </Field>
+          <ValidatedNumField
+            label={t.nutFactor}
+            id="fastener-k"
+            validateInitially={search.has("k")}
+            value={k}
+            onChange={setK}
+            error={kError}
+          />
         </div>
 
         <ResultGrid
@@ -212,7 +237,7 @@ export function FastenersCalc() {
         />
         {!torqueResult && (
           <p className="mt-3 text-sm text-muted" role="status">
-            {t.invalidK}
+            {kError === t.smallerNumber ? t.smallerNumber : t.invalidK}
           </p>
         )}
         <div className="flex flex-wrap gap-2">
@@ -233,7 +258,7 @@ export function FastenersCalc() {
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {t.torquePerSize(String(kVal))}
+          {t.torquePerSize(kVal == null ? "—" : String(kVal))}
         </h2>
         <div className="table-scroll mt-4" tabIndex={0}>
           <table className="ref-table">
@@ -255,7 +280,7 @@ export function FastenersCalc() {
                   <td>{STRESS_AREA[s]}</td>
                   {PROPERTY_CLASSES.map((c) => (
                     <td key={c.id}>
-                      {kVal > 0 ? fmtFastener(computeTorque(s, c, kVal).torque) : "—"} N·m
+                      {kVal != null ? fmtFastener(computeTorque(s, c, kVal).torque) : "—"} N·m
                     </td>
                   ))}
                 </tr>

@@ -80,6 +80,7 @@ for (const locale of ["nl", "en"] as const) {
       { route: "bearing-life", input: "bearing-life-rpm", key: "n", value },
       { route: "pneumatic-cylinder", input: "pneu-force", key: "f", value },
       { route: "pneumatic-cylinder", input: "pneu-pressure", key: "p", value },
+      { route: "fasteners", input: "fastener-k", key: "k", value },
       ...(value === ""
         ? []
         : [
@@ -133,9 +134,12 @@ for (const locale of ["nl", "en"] as const) {
       page,
     }) => {
       const query = "query" in example ? example.query : `${example.key}=${example.value}`;
-      await page.goto(`${locale === "en" ? "/en" : ""}/calculators/${example.route}?${query}`, {
-        waitUntil: "networkidle",
-      });
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/${example.route === "fasteners" ? "tools" : "calculators"}/${example.route}?${query}`,
+        {
+          waitUntil: "networkidle",
+        },
+      );
       const input = page.locator(`#${example.input}`);
       const correction = example.eta
         ? locale === "en"
@@ -174,6 +178,7 @@ for (const locale of ["nl", "en"] as const) {
     { route: "bearing-life", input: "bearing-life-rpm", query: "n=1500" },
     { route: "pneumatic-cylinder", input: "pneu-force", query: "f=1000" },
     { route: "pneumatic-cylinder", input: "pneu-pressure", query: "p=6" },
+    { route: "fasteners", input: "fastener-k", query: "k=0.2" },
     { route: "bearing-life", input: "bearing-life-C0", query: "C0=8&P0=3" },
     { route: "bearing-life", input: "bearing-life-P0", query: "C0=8&P0=3" },
   ]) {
@@ -181,7 +186,7 @@ for (const locale of ["nl", "en"] as const) {
       page,
     }) => {
       await page.goto(
-        `${locale === "en" ? "/en" : ""}/calculators/${example.route}?${example.query}`,
+        `${locale === "en" ? "/en" : ""}/${example.route === "fasteners" ? "tools" : "calculators"}/${example.route}?${example.query}`,
         { waitUntil: "networkidle" },
       );
       await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
@@ -209,15 +214,19 @@ for (const locale of ["nl", "en"] as const) {
       corrected: "1000",
       expected: "Ø50 mm",
     },
+    { route: "fasteners", input: "fastener-k", corrected: "0.2", expected: "N·m" },
   ]) {
     test(`field correction and result copy work by keyboard (${locale}, ${example.route})`, async ({
       page,
       context,
     }) => {
       await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-      await page.goto(`${locale === "en" ? "/en" : ""}/calculators/${example.route}`, {
-        waitUntil: "networkidle",
-      });
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/${example.route === "fasteners" ? "tools" : "calculators"}/${example.route}`,
+        {
+          waitUntil: "networkidle",
+        },
+      );
       const input = page.locator(`#${example.input}`);
       const error = page.locator(`#${example.input}-error`);
       const correction =
