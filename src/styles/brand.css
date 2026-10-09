@@ -342,28 +342,95 @@ canvas {
   aspect-ratio: 660/580;
   margin-top: 20px;
 }
-.assembly-controls {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-  justify-content: center;
-  margin-top: -18px;
+.assembly-stage {
   position: relative;
 }
-.assembly-controls > span:first-child {
-  margin-right: 16px;
-  font-size: 10px;
-  color: #a6b6b9;
-  min-width: 90px;
+.assembly-controls {
+  display: grid;
+  gap: 12px;
+  margin: -12px auto 0;
+  position: relative;
+  max-width: 430px;
 }
-.assembly-controls input {
-  width: 135px;
-  height: 20px;
+.assembly-presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.assembly-presets button {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #151e22;
+  color: #b9c9c9;
+  min-height: 36px;
+  padding: 7px 9px;
+  font: 10px var(--mono);
+  letter-spacing: 0.04em;
+}
+.assembly-presets button:hover:not(:disabled),
+.assembly-presets button:focus-visible {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.assembly-presets button:disabled,
+.assembly-slider input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.assembly-slider label {
+  display: flex;
+  justify-content: space-between;
+  color: #a6b6b9;
+  font: 10px var(--mono);
+}
+.assembly-slider output {
+  color: var(--cyan);
+}
+.assembly-slider input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
   accent-color: var(--cyan);
   cursor: ew-resize;
 }
-.assembly-controls > span {
-  color: #68787d;
+.assembly-fallback-note,
+.assembly-path {
+  color: #91a2a5;
+  font-size: 11px;
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+.assembly-explanation {
+  margin-top: 14px;
+}
+.assembly-parts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+.assembly-parts li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 7px;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+.assembly-parts strong,
+.assembly-parts small {
+  display: block;
+}
+.assembly-parts strong {
+  color: #c5d2d2;
+  font-size: 11px;
+}
+.assembly-parts small {
+  color: #819196;
+  font-size: 9px;
+  line-height: 1.45;
+  margin-top: 2px;
 }
 .visual-caption {
   display: flex;
@@ -1734,15 +1801,7 @@ footer {
     margin-top: 10px;
   }
   .assembly-controls {
-    margin-top: -8px;
-    gap: 9px;
-  }
-  .assembly-controls > span:first-child {
-    font-size: 9px;
-    margin-right: 8px;
-  }
-  .assembly-controls input {
-    width: 120px;
+    margin-top: -4px;
   }
   .visual-caption {
     margin-left: 0;
@@ -2107,6 +2166,8 @@ footer {
 .assembly-fallback {
   position: absolute;
   top: 20px;
+  right: 0;
+  bottom: auto;
   left: 0;
   width: 100%;
   height: auto;
@@ -2116,14 +2177,24 @@ footer {
 .assembly:has(canvas[data-ready="true"]) .assembly-fallback {
   visibility: hidden;
 }
-@media (max-width: 1150px) and (min-width: 851px) {
-  .assembly-fallback {
-    top: 45px;
-  }
-}
 @media (max-width: 600px) {
   .assembly-fallback {
     top: 10px;
+  }
+  .assembly-parts {
+    grid-template-columns: 1fr;
+  }
+  .assembly-controls {
+    margin-top: 0;
+  }
+  .assembly-presets button {
+    min-height: 44px;
+    padding-inline: 5px;
+  }
+}
+@media (max-width: 340px) {
+  .assembly-presets {
+    grid-template-columns: 1fr;
   }
 }
 
