@@ -40,10 +40,10 @@ test.describe("connected drive workflow", () => {
     await expect(
       page.getByText("Enter torque and allowable shear stress (both greater than 0)."),
     ).toBeVisible();
-    await expect(page.getByText("Minimum diameter d_min")).toHaveCount(0);
+    await expect(page.getByText("Minimum solid diameter d_min")).toHaveCount(0);
 
     await page.locator("#shaft-tau-allow").fill("40");
-    await expect(page.getByText("Minimum diameter d_min")).toBeVisible();
+    await expect(page.getByText("Minimum solid diameter d_min")).toBeVisible();
     await expect(page.getByText(/13[,.]45 mm/)).toBeVisible();
   });
 
