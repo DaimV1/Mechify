@@ -149,3 +149,49 @@ test("fastener overflow suppresses only torque outputs and exports", async ({ pa
     "— N·m",
   );
 });
+
+for (const locale of ["nl", "en"] as const) {
+  for (const value of ["unknown", "", "constructor"]) {
+    test(`fastener ${locale} unsupported property class ${JSON.stringify(value)} is correctable`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(`${prefix}/tools/fasteners?c=${value}#tool`, { waitUntil: "networkidle" });
+      const input = page.locator("#fastener-class");
+      await expect(input).toHaveAttribute("aria-invalid", "true");
+      await expect(input).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose property class 8.8, 10.9 or 12.9 to calculate tightening torque."
+          : "Kies sterkteklasse 8.8, 10.9 of 12.9 om het aandraaimoment te berekenen.",
+      );
+      await expect(
+        page.getByText(locale === "en" ? "Tightening torque T" : "Aandraaimoment T", {
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      await expect(copy).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("c")).toBe(value);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(input).toHaveAttribute("aria-invalid", "true");
+      await input.selectOption("10.9");
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await expect(copy).toBeVisible();
+      await expect(page.getByText("≈ 39,5 N·m", { exact: true })).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("c")).toBe("10.9");
+      expect(new URL(page.url()).hash).toBe("#tool");
+    });
+  }
+  test(`fastener ${locale} prototype thread key uses supported default`, async ({ page }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fasteners?m=constructor`, {
+      waitUntil: "networkidle",
+    });
+    await expect(
+      page.getByLabel(locale === "en" ? "Thread size" : "Draadmaat", { exact: true }),
+    ).toHaveValue("M8");
+    await expect(page.getByText("≈ 28,1 N·m", { exact: true })).toBeVisible();
+  });
+}
