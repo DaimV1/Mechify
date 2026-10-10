@@ -190,8 +190,10 @@ for (const locale of ["nl", "en"] as const) {
       waitUntil: "networkidle",
     });
     await expect(
-      page.getByLabel(locale === "en" ? "Thread size" : "Draadmaat", { exact: true }),
+      // Field wraps the select: Playwright label text also includes its option text.
+      page.getByLabel(locale === "en" ? "Thread size" : "Draadmaat"),
     ).toHaveValue("M8");
+    await expect.poll(() => new URL(page.url()).searchParams.get("m")).toBe("M8");
     await expect(page.getByText("≈ 28,1 N·m", { exact: true })).toBeVisible();
   });
 }
