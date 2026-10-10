@@ -231,3 +231,38 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const type of ["unknown", "", "constructor"]) {
+    test(`bearing ${locale} invalid type ${JSON.stringify(type)} preserves independent static check`, async ({
+      page,
+    }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/calculators/bearing-life?type=${type}&C0=10&P0=2`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#bearing-type");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a bearing type from the list to calculate bearing life."
+          : "Kies een lagertype uit de lijst om de levensduur te berekenen.",
+      );
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      await expect(copy).toHaveCount(0);
+      await expect(page.getByText(/× 10⁶/)).toHaveCount(0);
+      await expect(page.getByText("5", { exact: true })).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("type")).toBe(type);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await select.selectOption("ball");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(copy).toBeVisible();
+      await expect(page.getByText(/125 × 10⁶/)).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("type")).toBe("ball");
+    });
+  }
+}
