@@ -60,6 +60,8 @@ const T = {
     wrenchHex: "Sleutelmaat (zeskant)",
     wrenchSocket: "Sleutelmaat (inbus)",
     torque: "Aandraaimoment T",
+    invalidClass: "Kies sterkteklasse 8.8, 10.9 of 12.9 om het aandraaimoment te berekenen.",
+    chooseClass: "Kies een sterkteklasse",
     invalidK: "Vul een moerfactor K groter dan 0 in om het aandraaimoment te berekenen.",
     positiveNumber: "Vul een getal groter dan 0 in.",
     smallerNumber: "Vul een kleiner getal in.",
@@ -97,6 +99,8 @@ const T = {
     wrenchHex: "Wrench size (hex)",
     wrenchSocket: "Wrench size (hex socket)",
     torque: "Tightening torque T",
+    invalidClass: "Choose property class 8.8, 10.9 or 12.9 to calculate tightening torque.",
+    chooseClass: "Choose a property class",
     invalidK: "Enter a nut factor K greater than 0 to calculate tightening torque.",
     positiveNumber: "Enter a number greater than 0.",
     smallerNumber: "Enter a smaller number.",
@@ -130,7 +134,9 @@ export function FastenersCalc() {
   const location = useLocation();
   const navigate = useNavigate();
   const [size, setSize] = useState<ThreadSize>(
-    (search.get("m") && search.get("m")! in CLEARANCE_HOLES ? search.get("m") : "M8") as ThreadSize,
+    (search.get("m") && THREAD_SIZES.includes(search.get("m") as ThreadSize)
+      ? search.get("m")
+      : "M8") as ThreadSize,
   );
   const [classId, setClassId] = useState(search.get("c") ?? "8.8");
   const [k, setK] = useState(search.get("k") ?? "0.2");
@@ -144,7 +150,7 @@ export function FastenersCalc() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, classId, k]);
 
-  const cls = PROPERTY_CLASSES.find((c) => c.id === classId) ?? PROPERTY_CLASSES[0];
+  const cls = PROPERTY_CLASSES.find((c) => c.id === classId);
   const parsedK = parseNum(k);
   const kProducesFiniteResults =
     parsedK != null &&
@@ -161,7 +167,7 @@ export function FastenersCalc() {
         ? t.smallerNumber
         : undefined;
   const kVal = kProducesFiniteResults ? parsedK : null;
-  const torqueResult = kVal != null ? computeTorque(size, cls, kVal) : null;
+  const torqueResult = kVal != null && cls ? computeTorque(size, cls, kVal) : null;
   const hole = CLEARANCE_HOLES[size];
   const wrench = WRENCH_SIZES[size];
 
@@ -203,7 +209,18 @@ export function FastenersCalc() {
             </SelectInput>
           </Field>
           <Field label={t.propertyClass}>
-            <SelectInput value={classId} onChange={setClassId}>
+            <SelectInput
+              id="fastener-class"
+              value={cls ? classId : ""}
+              onChange={setClassId}
+              aria-invalid={!cls || undefined}
+              aria-describedby={!cls ? "fastener-class-error" : undefined}
+            >
+              {!cls && (
+                <option value="" disabled>
+                  {t.chooseClass}
+                </option>
+              )}
               {PROPERTY_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.id}
@@ -236,8 +253,12 @@ export function FastenersCalc() {
           }
         />
         {!torqueResult && (
-          <p className="mt-3 text-sm text-muted" role="status">
-            {kError === t.smallerNumber ? t.smallerNumber : t.invalidK}
+          <p
+            id={!cls ? "fastener-class-error" : undefined}
+            className="mt-3 text-sm text-muted"
+            role="status"
+          >
+            {!cls ? t.invalidClass : kError === t.smallerNumber ? t.smallerNumber : t.invalidK}
           </p>
         )}
         <div className="flex flex-wrap gap-2">
