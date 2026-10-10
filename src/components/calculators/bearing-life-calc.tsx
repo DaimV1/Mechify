@@ -184,6 +184,11 @@ export function BearingLifeCalc() {
   const rpmVal = parseNum(rpm);
   const l10M = Cval != null && Pval != null ? l10Millions(Cval, Pval, bearingType) : null;
   const l10h = l10M != null && rpmVal != null ? l10Hours(l10M, rpmVal) : null;
+  const validReliability = RELIABILITY_LEVELS.some((r) => r.id === reliabilityId);
+  const reliabilityError =
+    locale === "nl"
+      ? "Kies een betrouwbaarheid uit de lijst om de levensduur te berekenen."
+      : "Choose a reliability from the list to calculate bearing life.";
   const a1 = a1For(reliabilityId);
   const l10Adj = l10M != null ? adjustedLife(l10M, a1) : null;
   const l10hAdj = l10h != null ? adjustedLife(l10h, a1) : null;
@@ -206,7 +211,8 @@ export function BearingLifeCalc() {
   const highSpeedWarning = Cval != null && rpmVal != null && rpmVal > 10000 && Cval < 5;
 
   const copy = useMemo(() => {
-    if (l10M == null || l10h == null || l10Adj == null || l10hAdj == null) return "";
+    if (!validReliability || l10M == null || l10h == null || l10Adj == null || l10hAdj == null)
+      return "";
     const lines = [
       t.copy(
         C,
@@ -228,7 +234,20 @@ export function BearingLifeCalc() {
     lines.push(metaCopyLine(BEARING_LIFE_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [l10M, l10h, l10Adj, l10hAdj, S0, C, P, rpm, bearingType, reliabilityLabel, locale]);
+  }, [
+    validReliability,
+    l10M,
+    l10h,
+    l10Adj,
+    l10hAdj,
+    S0,
+    C,
+    P,
+    rpm,
+    bearingType,
+    reliabilityLabel,
+    locale,
+  ]);
 
   return (
     <>
@@ -251,7 +270,18 @@ export function BearingLifeCalc() {
             </SelectInput>
           </Field>
           <Field label={t.reliability}>
-            <SelectInput value={reliabilityId} onChange={setReliabilityId}>
+            <SelectInput
+              id="bearing-reliability"
+              value={validReliability ? reliabilityId : ""}
+              onChange={setReliabilityId}
+              aria-invalid={!validReliability || undefined}
+              aria-describedby={!validReliability ? "bearing-reliability-error" : undefined}
+            >
+              {!validReliability && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies een betrouwbaarheid" : "Choose a reliability"}
+                </option>
+              )}
               {RELIABILITY_LEVELS.map((r) => (
                 <option key={r.id} value={r.id}>
                   L{r.reliability} (a1 = {r.a1})
@@ -285,7 +315,11 @@ export function BearingLifeCalc() {
           />
         </div>
 
-        {l10M == null || l10h == null ? (
+        {!validReliability ? (
+          <p id="bearing-reliability-error" className="mt-5 text-sm text-muted" role="status">
+            {reliabilityError}
+          </p>
+        ) : l10M == null || l10h == null ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {dynamicResultOutOfRange ? t.calculationRange : t.fillDynamic}
           </p>

@@ -197,3 +197,37 @@ for (const locale of ["nl", "en"] as const) {
     await expect(page.getByText("≈ 28,1 N·m", { exact: true })).toBeVisible();
   });
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const reliability of ["unknown", ""]) {
+    test(`bearing ${locale} invalid reliability ${JSON.stringify(reliability)} is correctable`, async ({
+      page,
+    }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/calculators/bearing-life?rel=${reliability}`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#bearing-reliability");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a reliability from the list to calculate bearing life."
+          : "Kies een betrouwbaarheid uit de lijst om de levensduur te berekenen.",
+      );
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      await expect(copy).toHaveCount(0);
+      await expect(page.getByText(/125 × 10⁶/)).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("rel")).toBe(reliability);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await select.selectOption("95");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(copy).toBeVisible();
+      await expect(page.getByText(/77,5 × 10⁶/)).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("rel")).toBe("95");
+    });
+  }
+}
