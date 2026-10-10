@@ -227,7 +227,14 @@ export function PneumaticCylinderCalc() {
   const rod = recommended?.rods[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
+  const validMaterial = MATERIALS_E.some((m) => m.id === materialId);
+  const materialError =
+    locale === "nl"
+      ? "Kies een stangmateriaal uit de lijst voor de knikcontrole."
+      : "Choose a rod material from the list for the buckling check.";
+
   const bucklingCandidate = useMemo(() => {
+    if (!validMaterial) return null;
     if (!recommended || rod == null || L == null || !(L > 0) || p == null) return null;
     const section = sectionProps("rond", { D: rod });
     if (!section) return null;
@@ -245,7 +252,7 @@ export function PneumaticCylinderCalc() {
       F: F_uit,
       rp02: rp02For(materialId),
     });
-  }, [recommended, rod, L, p, endCondition, materialId]);
+  }, [recommended, rod, L, p, endCondition, materialId, validMaterial]);
 
   const etaVal = parseNum(efficiency);
   const cyclesVal = parseNum(cyclesPerMin);
@@ -281,7 +288,9 @@ export function PneumaticCylinderCalc() {
   const [strokeValidationVisible, setStrokeValidationVisible] = useState(
     search.has("l") && Boolean(strokeError),
   );
-  const [showBuckling, setShowBuckling] = useState(search.has("l") && strokeError !== undefined);
+  const [showBuckling, setShowBuckling] = useState(
+    !validMaterial || (search.has("l") && strokeError !== undefined),
+  );
   const [showAir, setShowAir] = useState(
     (search.has("l") && strokeError !== undefined) ||
       (search.has("eta") && efficiencyError !== undefined) ||
@@ -447,7 +456,18 @@ export function PneumaticCylinderCalc() {
                     </SelectInput>
                   </Field>
                   <Field label={t.rodMaterialLabel}>
-                    <SelectInput value={materialId} onChange={setMaterialId}>
+                    <SelectInput
+                      id="pneu-material"
+                      value={validMaterial ? materialId : ""}
+                      onChange={setMaterialId}
+                      aria-invalid={!validMaterial || undefined}
+                      aria-describedby={!validMaterial ? "pneu-material-error" : undefined}
+                    >
+                      {!validMaterial && (
+                        <option value="" disabled>
+                          {locale === "nl" ? "Kies een stangmateriaal" : "Choose a rod material"}
+                        </option>
+                      )}
                       {MATERIALS_E.map((m) => (
                         <option key={m.id} value={m.id}>
                           {label(m)}
@@ -456,7 +476,11 @@ export function PneumaticCylinderCalc() {
                     </SelectInput>
                   </Field>
                 </div>
-                {buckling ? (
+                {!validMaterial ? (
+                  <p id="pneu-material-error" className="mt-4 text-sm text-muted" role="status">
+                    {materialError}
+                  </p>
+                ) : buckling ? (
                   <>
                     <ResultGrid
                       items={[

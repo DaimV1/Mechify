@@ -266,3 +266,38 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const material of ["unknown", "", "constructor"]) {
+    test(`pneumatic ${locale} invalid material ${JSON.stringify(material)} suppresses only buckling`, async ({
+      page,
+    }) => {
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder?material=${material}`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#pneu-material");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a rod material from the list for the buckling check."
+          : "Kies een stangmateriaal uit de lijst voor de knikcontrole.",
+      );
+      await expect(page.getByText("F_cr", { exact: true })).toHaveCount(0);
+      await expect(page.locator('a[href^="/calculators/buckling?"]')).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("material")).toBe(material);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await select.selectOption("staal");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText("F_cr", { exact: true })).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("material")).toBe("staal");
+    });
+  }
+}
