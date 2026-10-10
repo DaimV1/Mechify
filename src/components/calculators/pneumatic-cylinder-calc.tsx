@@ -227,6 +227,11 @@ export function PneumaticCylinderCalc() {
   const rod = recommended?.rods[0];
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
+  const validEnd = END_CONDITIONS.some((c) => c.id === endCondition);
+  const endError =
+    locale === "nl"
+      ? "Kies een inklemming uit de lijst voor de knikcontrole."
+      : "Choose an end condition from the list for the buckling check.";
   const validMaterial = MATERIALS_E.some((m) => m.id === materialId);
   const materialError =
     locale === "nl"
@@ -234,7 +239,7 @@ export function PneumaticCylinderCalc() {
       : "Choose a rod material from the list for the buckling check.";
 
   const bucklingCandidate = useMemo(() => {
-    if (!validMaterial) return null;
+    if (!validMaterial || !validEnd) return null;
     if (!recommended || rod == null || L == null || !(L > 0) || p == null) return null;
     const section = sectionProps("rond", { D: rod });
     if (!section) return null;
@@ -252,7 +257,7 @@ export function PneumaticCylinderCalc() {
       F: F_uit,
       rp02: rp02For(materialId),
     });
-  }, [recommended, rod, L, p, endCondition, materialId, validMaterial]);
+  }, [recommended, rod, L, p, endCondition, materialId, validMaterial, validEnd]);
 
   const etaVal = parseNum(efficiency);
   const cyclesVal = parseNum(cyclesPerMin);
@@ -289,7 +294,7 @@ export function PneumaticCylinderCalc() {
     search.has("l") && Boolean(strokeError),
   );
   const [showBuckling, setShowBuckling] = useState(
-    !validMaterial || (search.has("l") && strokeError !== undefined),
+    !validMaterial || !validEnd || (search.has("l") && strokeError !== undefined),
   );
   const [showAir, setShowAir] = useState(
     (search.has("l") && strokeError !== undefined) ||
@@ -445,9 +450,17 @@ export function PneumaticCylinderCalc() {
                   />
                   <Field label={t.endConditionLabel}>
                     <SelectInput
-                      value={endCondition}
+                      id="pneu-end"
+                      value={validEnd ? endCondition : ""}
+                      aria-invalid={!validEnd || undefined}
+                      aria-describedby={!validEnd ? "pneu-end-error" : undefined}
                       onChange={(v) => setEndCondition(v as EndConditionId)}
                     >
+                      {!validEnd && (
+                        <option value="" disabled>
+                          {locale === "nl" ? "Kies een inklemming" : "Choose an end condition"}
+                        </option>
+                      )}
                       {END_CONDITIONS.map((c) => (
                         <option key={c.id} value={c.id}>
                           {label(c)}
@@ -476,11 +489,16 @@ export function PneumaticCylinderCalc() {
                     </SelectInput>
                   </Field>
                 </div>
+                {!validEnd && (
+                  <p id="pneu-end-error" className="mt-4 text-sm text-muted" role="status">
+                    {endError}
+                  </p>
+                )}
                 {!validMaterial ? (
                   <p id="pneu-material-error" className="mt-4 text-sm text-muted" role="status">
                     {materialError}
                   </p>
-                ) : buckling ? (
+                ) : !validEnd ? null : buckling ? (
                   <>
                     <ResultGrid
                       items={[

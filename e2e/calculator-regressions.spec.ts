@@ -301,3 +301,37 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const end of ["unknown", "", "constructor"]) {
+    test(`pneumatic ${locale} invalid end ${JSON.stringify(end)} suppresses only buckling`, async ({
+      page,
+    }) => {
+      await page.goto(`${locale === "en" ? "/en" : ""}/calculators/pneumatic-cylinder?end=${end}`, {
+        waitUntil: "networkidle",
+      });
+      const select = page.locator("#pneu-end");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose an end condition from the list for the buckling check."
+          : "Kies een inklemming uit de lijst voor de knikcontrole.",
+      );
+      await expect(page.getByText("F_cr", { exact: true })).toHaveCount(0);
+      await expect(page.locator('a[href^="/calculators/buckling?"]')).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("end")).toBe(end);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await select.selectOption("fc");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText("F_cr", { exact: true })).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("end")).toBe("fc");
+    });
+  }
+}
