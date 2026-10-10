@@ -182,7 +182,13 @@ export function BearingLifeCalc() {
   const Cval = parseNum(C);
   const Pval = parseNum(P);
   const rpmVal = parseNum(rpm);
-  const l10M = Cval != null && Pval != null ? l10Millions(Cval, Pval, bearingType) : null;
+  const validBearingType = BEARING_LOAD_TYPES.some((bt) => bt.id === bearingType);
+  const typeError =
+    locale === "nl"
+      ? "Kies een lagertype uit de lijst om de levensduur te berekenen."
+      : "Choose a bearing type from the list to calculate bearing life.";
+  const l10M =
+    validBearingType && Cval != null && Pval != null ? l10Millions(Cval, Pval, bearingType) : null;
   const l10h = l10M != null && rpmVal != null ? l10Hours(l10M, rpmVal) : null;
   const validReliability = RELIABILITY_LEVELS.some((r) => r.id === reliabilityId);
   const reliabilityError =
@@ -261,7 +267,18 @@ export function BearingLifeCalc() {
         <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.dynamicSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <Field label={t.bearingType}>
-            <SelectInput value={bearingType} onChange={(v) => setBearingType(v as BearingLoadType)}>
+            <SelectInput
+              id="bearing-type"
+              value={validBearingType ? bearingType : ""}
+              onChange={(v) => setBearingType(v as BearingLoadType)}
+              aria-invalid={!validBearingType || undefined}
+              aria-describedby={!validBearingType ? "bearing-type-error" : undefined}
+            >
+              {!validBearingType && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies een lagertype" : "Choose a bearing type"}
+                </option>
+              )}
               {BEARING_LOAD_TYPES.map((bt) => (
                 <option key={bt.id} value={bt.id}>
                   {typeLabel(bt.id)}
@@ -315,11 +332,16 @@ export function BearingLifeCalc() {
           />
         </div>
 
+        {!validBearingType && (
+          <p id="bearing-type-error" className="mt-5 text-sm text-muted" role="status">
+            {typeError}
+          </p>
+        )}
         {!validReliability ? (
           <p id="bearing-reliability-error" className="mt-5 text-sm text-muted" role="status">
             {reliabilityError}
           </p>
-        ) : l10M == null || l10h == null ? (
+        ) : !validBearingType ? null : l10M == null || l10h == null ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {dynamicResultOutOfRange ? t.calculationRange : t.fillDynamic}
           </p>
