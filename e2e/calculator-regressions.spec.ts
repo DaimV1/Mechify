@@ -335,3 +335,39 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const kind of ["unknown", "", "constructor"]) {
+    test(`circlip ${locale} invalid kind ${JSON.stringify(kind)} does not imply missing ring`, async ({
+      page,
+    }) => {
+      await page.goto(`${locale === "en" ? "/en" : ""}/tools/seeger-grooves?kind=${kind}&d=20`, {
+        waitUntil: "networkidle",
+      });
+      const select = page.locator("#circlip-kind");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose shaft or bore from the list to look up the circlip groove."
+          : "Kies as of boring uit de lijst om de seegerringgroef op te zoeken.",
+      );
+      await expect(
+        page.getByText(/No standard circlip for|Geen standaard seegerring voor/),
+      ).toHaveCount(0);
+      await expect(page.locator("table.ref-table")).toHaveCount(0);
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      await expect(copy).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("kind")).toBe(kind);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await select.selectOption("boring");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(copy).toBeVisible();
+      await expect(page.locator("table.ref-table")).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("kind")).toBe("boring");
+    });
+  }
+}

@@ -129,11 +129,16 @@ export function SeegerGroovesCalc() {
     if (next.status === "ok") storeDiameter(String(next.mm));
   }
 
+  const validKind = CIRCLIP_KINDS.some((k) => k.id === kind);
+  const kindError =
+    locale === "nl"
+      ? "Kies as of boring uit de lijst om de seegerringgroef op te zoeken."
+      : "Choose shaft or bore from the list to look up the circlip groove.";
   const parsed = parseWholeMm(diameter);
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
-  const result = Number.isFinite(d) ? computeGroove(kind, d) : null;
+  const result = validKind && Number.isFinite(d) ? computeGroove(kind, d) : null;
   const standard = CIRCLIP_KINDS.find((k) => k.id === kind)?.standard ?? "";
-  const nearest = Number.isFinite(d) && !result ? nearestStandardSizes(kind, d) : null;
+  const nearest = validKind && Number.isFinite(d) && !result ? nearestStandardSizes(kind, d) : null;
 
   const copy = useMemo(() => {
     if (!result) return "";
@@ -161,7 +166,18 @@ export function SeegerGroovesCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.type}>
-            <SelectInput value={kind} onChange={(v) => setKind(v as CirclipKind)}>
+            <SelectInput
+              id="circlip-kind"
+              value={validKind ? kind : ""}
+              onChange={(v) => setKind(v as CirclipKind)}
+              aria-invalid={!validKind || undefined}
+              aria-describedby={!validKind ? "circlip-kind-error" : undefined}
+            >
+              {!validKind && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies een type" : "Choose a type"}
+                </option>
+              )}
               {CIRCLIP_KINDS.map((k) => (
                 <option key={k.id} value={k.id}>
                   {locale === "nl" ? k.label : k.labelEn} ({k.standard})
@@ -169,12 +185,18 @@ export function SeegerGroovesCalc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label={kind === "as" ? t.diameterShaft : t.diameterBore}>
+          <Field
+            label={!validKind ? "Diameter (mm)" : kind === "as" ? t.diameterShaft : t.diameterBore}
+          >
             <WholeMmInput id="circlip-diameter" value={diameter} onChange={onDia} />
           </Field>
         </div>
 
-        {parsed.status === "empty" ? (
+        {!validKind ? (
+          <p id="circlip-kind-error" className="mt-5 text-sm text-muted" role="status">
+            {kindError}
+          </p>
+        ) : parsed.status === "empty" ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
           </p>
@@ -226,73 +248,77 @@ export function SeegerGroovesCalc() {
         )}
         <SourceMetaBadge meta={SEEGER_META} />
       </CalcPanel>
-      <SchemaPanel
-        caption={
-          locale === "en"
-            ? "Technical diagram · dimensions in mm · schematic, not to scale"
-            : "Technisch schema · maten in mm · schematisch, niet op schaal"
-        }
-      >
-        <CirclipSection
-          kind={kind}
-          d1={Number.isFinite(d) ? d : undefined}
-          d2={result?.grooveDiameter}
-          b={result?.grooveWidth}
-          t={result?.grooveDepth}
-        />
-      </SchemaPanel>
+      {validKind && (
+        <SchemaPanel
+          caption={
+            locale === "en"
+              ? "Technical diagram · dimensions in mm · schematic, not to scale"
+              : "Technisch schema · maten in mm · schematisch, niet op schaal"
+          }
+        >
+          <CirclipSection
+            kind={kind}
+            d1={Number.isFinite(d) ? d : undefined}
+            d2={result?.grooveDiameter}
+            b={result?.grooveWidth}
+            t={result?.grooveDepth}
+          />
+        </SchemaPanel>
+      )}
 
-      <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {t.estimateTitle}
-        </h2>
-        <div className="table-scroll mt-4" tabIndex={0}>
-          <table className="ref-table">
-            <thead>
-              <tr>
-                <th>{t.thDiameter}</th>
-                <th>{t.grooveDiameter}</th>
-                <th>{t.grooveWidth}</th>
-                <th>{t.grooveDepth}</th>
-                <th>{locale === "nl" ? "Status" : "Status"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[8, 10, 12, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100].map(
-                (dia) => {
-                  const r = computeGroove(kind, dia);
-                  return (
-                    <tr key={dia} className={dia === d ? "is-active" : ""}>
-                      <th scope="row" className="normal-case">
-                        {dia}
-                      </th>
-                      <td>{r ? `Ø${diameterText(r)}` : "—"}</td>
-                      <td>{r ? `${fmtCirclip(r.grooveWidth)} W` : "—"}</td>
-                      <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
-                      <td>
-                        {r ? (
-                          r.source ? (
-                            <a className="underline" href={r.source.url}>
-                              {r.source.part} · {r.source.checkedDate}
-                            </a>
-                          ) : locale === "nl" ? (
-                            "niet geverifieerd"
+      {validKind && (
+        <section className="mt-12">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+            {t.estimateTitle}
+          </h2>
+          <div className="table-scroll mt-4" tabIndex={0}>
+            <table className="ref-table">
+              <thead>
+                <tr>
+                  <th>{t.thDiameter}</th>
+                  <th>{t.grooveDiameter}</th>
+                  <th>{t.grooveWidth}</th>
+                  <th>{t.grooveDepth}</th>
+                  <th>{locale === "nl" ? "Status" : "Status"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[8, 10, 12, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100].map(
+                  (dia) => {
+                    const r = computeGroove(kind, dia);
+                    return (
+                      <tr key={dia} className={dia === d ? "is-active" : ""}>
+                        <th scope="row" className="normal-case">
+                          {dia}
+                        </th>
+                        <td>{r ? `Ø${diameterText(r)}` : "—"}</td>
+                        <td>{r ? `${fmtCirclip(r.grooveWidth)} W` : "—"}</td>
+                        <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
+                        <td>
+                          {r ? (
+                            r.source ? (
+                              <a className="underline" href={r.source.url}>
+                                {r.source.part} · {r.source.checkedDate}
+                              </a>
+                            ) : locale === "nl" ? (
+                              "niet geverifieerd"
+                            ) : (
+                              "not verified"
+                            )
                           ) : (
-                            "not verified"
-                          )
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  );
-                },
-              )}
-            </tbody>
-          </table>
-        </div>
-        <SourceBadge>{t.sourceBadge}</SourceBadge>
-      </section>
+                            "—"
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  },
+                )}
+              </tbody>
+            </table>
+          </div>
+          <SourceBadge>{t.sourceBadge}</SourceBadge>
+        </section>
+      )}
     </>
   );
 }
