@@ -18,6 +18,7 @@ import {
   Field,
   Note,
   NumInput,
+  ValidatedNumField,
   parseNum,
   ResultGrid,
   SelectInput,
@@ -176,10 +177,21 @@ export function OringGroovesCalc() {
   const cordVal = parseNum(cord);
   const squeezeVal = parseNum(squeeze);
   const widthFactorVal = parseNum(widthFactor) ?? NaN;
-  const result =
+  const resultCandidate =
     cordVal != null && squeezeVal != null
       ? computeOringGroove(cordVal, squeezeVal, widthFactorVal)
       : null;
+  const widthError =
+    !Number.isFinite(widthFactorVal) || widthFactorVal <= 1
+      ? locale === "nl"
+        ? "Vul een breedtefactor groter dan 1 in."
+        : "Enter a width factor greater than 1."
+      : STANDARD_CORDS.some((c) => computeOringGroove(c, seal.default, widthFactorVal) == null)
+        ? locale === "nl"
+          ? "Vul een kleinere breedtefactor in."
+          : "Enter a smaller width factor."
+        : undefined;
+  const result = widthError ? null : resultCandidate;
   const outOfRange =
     squeezeVal != null && (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
 
@@ -240,12 +252,17 @@ export function OringGroovesCalc() {
           <Field label={t.squeeze(seal.squeezeMin, seal.squeezeMax)}>
             <NumInput id="oring-squeeze" value={squeeze} onChange={setSqueeze} />
           </Field>
-          <Field label={t.widthFactor}>
-            <NumInput id="oring-width" value={widthFactor} onChange={setWidthFactor} />
-          </Field>
+          <ValidatedNumField
+            label={t.widthFactor}
+            id="oring-width"
+            value={widthFactor}
+            onChange={setWidthFactor}
+            error={widthError}
+            validateInitially={search.has("wf")}
+          />
         </div>
 
-        {!result ? (
+        {widthError ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillValid}
           </p>

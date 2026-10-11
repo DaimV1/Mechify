@@ -252,6 +252,11 @@ const oringFixture = loadFixture<OringFixture>("oring-groove");
 
 // E07 — O-ring groove: nominal cross-section fill must be checked, not just squeeze%.
 describe("O-ring groove fill", () => {
+  it("rejects overflowing geometry instead of exporting Infinity or zero fill", () => {
+    assert.equal(computeOringGroove(3.55, 20, 1e308), null);
+    assert.equal(computeOringGroove(1e200, 20, 1.4), null);
+    assert.equal(computeOringGroove(3.55, 20, Infinity), null);
+  });
   it("cord 3.55 mm, squeeze 30%, width factor 1.1 is overfilled (~102%)", () => {
     const c = oringFixture.overfilled;
     const r = computeOringGroove(c.cordDiameter, c.squeezePercent, c.widthFactor);
