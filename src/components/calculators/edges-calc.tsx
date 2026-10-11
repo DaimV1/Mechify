@@ -125,8 +125,10 @@ export function EdgesCalc() {
   const BD = valid ? bendDeduction(angleDeg!, Ri!, T!, K!) : null;
   const flat = valid ? singleBendFlatLength([L1, L2], angleDeg!, Ri!, T!, K!) : null;
 
+  const finiteResults = valid && Number.isFinite(BA) && Number.isFinite(BD);
+
   const copy = useMemo(() => {
-    if (!valid || BA == null || BD == null) return "";
+    if (!finiteResults || BA == null || BD == null) return "";
     const lines = [
       `T=${thickness} mm, Ri=${radius} mm, θ=${angle}°, K=${fmtBendNum(K!, 2)}`,
       `${t.ba} = ${fmtBendNum(BA, 2)} mm`,
@@ -136,7 +138,7 @@ export function EdgesCalc() {
     lines.push(metaCopyLine(KFACTOR_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valid, BA, BD, flat, K, thickness, radius, angle, L1, L2, locale]);
+  }, [finiteResults, BA, BD, flat, K, thickness, radius, angle, L1, L2, locale]);
 
   return (
     <>
@@ -172,9 +174,13 @@ export function EdgesCalc() {
             </Field>
           </div>
 
-          {!valid ? (
+          {!finiteResults ? (
             <p className="mt-5 text-sm text-muted" role="status">
-              {t.fillValid}
+              {valid
+                ? locale === "nl"
+                  ? "De berekening valt buiten het numerieke bereik. Gebruik kleinere afmetingen."
+                  : "The calculation exceeds the numerical range. Use smaller dimensions."
+                : t.fillValid}
             </p>
           ) : (
             <>
