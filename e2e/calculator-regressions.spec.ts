@@ -423,7 +423,7 @@ for (const locale of ["nl", "en"] as const) {
       waitUntil: "networkidle",
     });
     const details = page.locator("details").filter({ has: page.locator("#edge-t") });
-    await details.locator("summary").click();
+    await details.locator(":scope > summary").click();
     await expect(details.getByRole("status")).toHaveText(
       locale === "en"
         ? "The calculation exceeds the numerical range. Use smaller dimensions."
@@ -437,7 +437,7 @@ for (const locale of ["nl", "en"] as const) {
     await expect(copy).toHaveCount(0);
     expect(new URL(page.url()).searchParams.get("ba_t")).toBe("1e308");
     await page.reload({ waitUntil: "networkidle" });
-    await details.locator("summary").click();
+    await details.locator(":scope > summary").click();
     await expect(page.locator("#edge-t")).toHaveValue("1e308");
     await page.locator("#edge-t").fill("2");
     await page.locator("#edge-r").fill("2");
