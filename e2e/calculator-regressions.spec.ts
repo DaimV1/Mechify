@@ -414,3 +414,33 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  test(`edges ${locale} overflowing supplementary calculation has no result export`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/edges?ba_t=1e308&ba_r=1e308`, {
+      waitUntil: "networkidle",
+    });
+    const details = page.locator("details").filter({ has: page.locator("#edge-t") });
+    await details.locator("summary").click();
+    await expect(details.getByRole("status")).toHaveText(
+      locale === "en"
+        ? "The calculation exceeds the numerical range. Use smaller dimensions."
+        : "De berekening valt buiten het numerieke bereik. Gebruik kleinere afmetingen.",
+    );
+    await expect(details.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+    const copy = details.getByRole("button", {
+      name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+      exact: true,
+    });
+    await expect(copy).toHaveCount(0);
+    expect(new URL(page.url()).searchParams.get("ba_t")).toBe("1e308");
+    await page.reload({ waitUntil: "networkidle" });
+    await details.locator("summary").click();
+    await expect(page.locator("#edge-t")).toHaveValue("1e308");
+    await page.locator("#edge-t").fill("2");
+    await page.locator("#edge-r").fill("2");
+    await expect(copy).toBeVisible();
+  });
+}
