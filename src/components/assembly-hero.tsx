@@ -3,6 +3,7 @@ import { tx, useLocale } from "@/lib/i18n/locale";
 
 type AssemblyController = {
   setProgress: (progress: number, userInitiated?: boolean) => void;
+  setHighlight: (part: string) => void;
   dispose: () => void;
 };
 
@@ -12,6 +13,7 @@ export function AssemblyHero() {
   const controllerRef = useRef<AssemblyController | null>(null);
   const [progress, setProgress] = useState(65);
   const [status, setStatus] = useState<"loading" | "ready" | "fallback">("loading");
+  const [highlight, setHighlight] = useState("all");
   const { locale } = useLocale();
 
   useEffect(() => {
@@ -39,6 +41,10 @@ export function AssemblyHero() {
     controllerRef.current?.setProgress(value, true);
   };
   const interactive = status === "ready";
+  const updateHighlight = (part: string) => {
+    setHighlight(part);
+    controllerRef.current?.setHighlight(part);
+  };
   const stateLabel =
     progress === 0
       ? tx(locale, "Compact", "Compact")
@@ -48,35 +54,63 @@ export function AssemblyHero() {
   const components = [
     {
       number: "01",
-      name: tx(locale, "Aandrijving", "Drive input"),
+      id: "sun",
+      name: tx(locale, "Zonnewiel + ingaande as", "Sun gear + input shaft"),
       description: tx(
         locale,
-        "Conceptuele invoer van het draaimoment.",
-        "Conceptual torque input.",
+        "18 tanden; de getoonde ingang in dit illustratieve geval.",
+        "18 teeth; the shown input in this illustrative case.",
       ),
     },
     {
       number: "02",
-      name: tx(locale, "Koppeling", "Coupling"),
+      id: "planets",
+      name: tx(locale, "Drie planeetwielen", "Three planet gears"),
       description: tx(
         locale,
-        "Verbeeldt een koppelpunt in het bedoelde, conceptuele koppelpad.",
-        "Depicts a coupling point in the intended, conceptual torque path.",
+        "Elk 15 tanden, gelijkmatig rond het zonnewiel geplaatst.",
+        "15 teeth each, equally spaced around the sun gear.",
       ),
     },
     {
       number: "03",
-      name: tx(locale, "Steun", "Support"),
+      id: "ring",
+      name: tx(locale, "Vast ringwiel", "Fixed ring gear"),
       description: tx(
         locale,
-        "Verbeeldt de richting naar een generiek steunconcept; de lageropstelling is niet gevalideerd.",
-        "Depicts the direction toward a generic support concept; the bearing arrangement is not validated.",
+        "48 inwendige tanden; voorgesteld als het vaste lid.",
+        "48 internal teeth; shown as the fixed member.",
       ),
     },
     {
       number: "04",
-      name: tx(locale, "Montageplaat", "Mounting plate"),
-      description: tx(locale, "Visuele basis van het schema.", "Visual base of the schematic."),
+      id: "carrier",
+      name: tx(locale, "Drager + uitgaande naaf", "Carrier + output hub"),
+      description: tx(
+        locale,
+        "Voorgesteld als de uitgang; externe belasting ontbreekt.",
+        "Shown as the output; external load is omitted.",
+      ),
+    },
+    {
+      number: "05",
+      id: "bearings",
+      name: tx(locale, "Conceptuele lagers", "Conceptual bearings"),
+      description: tx(
+        locale,
+        "Alleen plaatsaanduiding; passing en levensduur zijn niet bepaald.",
+        "Location only; fit and life are not determined.",
+      ),
+    },
+    {
+      number: "06",
+      id: "housing",
+      name: tx(locale, "Behuizing", "Housing"),
+      description: tx(
+        locale,
+        "Opengewerkt voor zicht; geen gevalideerd productieontwerp.",
+        "Opened for visibility; not a validated production design.",
+      ),
     },
   ];
 
@@ -84,7 +118,7 @@ export function AssemblyHero() {
     <div className="assembly" data-render-status={status}>
       <div className="visual-top" aria-hidden="true">
         <span className="mono">
-          MX–01 / {tx(locale, "MECHANISCH SCHEMA", "MECHANICAL SCHEMATIC")}
+          PG–01 / {tx(locale, "PLANETAIR SCHEMA", "PLANETARY SCHEMATIC")}
         </span>
         <span className="mono cyan">
           {status === "ready"
@@ -107,8 +141,8 @@ export function AssemblyHero() {
           ref={canvasRef}
           aria-label={tx(
             locale,
-            "Interactief mechanisch schema van een aandrijving, koppeling en steun",
-            "Interactive mechanical schematic of a drive input, coupling and support",
+            "Interactief conceptueel schema van een planetaire tandwielset",
+            "Interactive conceptual schematic of a planetary gearset",
           )}
           aria-hidden={status === "ready" ? undefined : true}
           role="img"
@@ -159,25 +193,30 @@ export function AssemblyHero() {
         <p className="assembly-path">
           {tx(
             locale,
-            "Conceptueel: draaimoment gaat van de aandrijving naar de koppeling. De steun positioneert de getoonde onderdelen en verbeeldt radiale ondersteuning; een doorgaande uitgaande as en belasting zijn niet gemodelleerd. De afstandsbediening verduidelijkt alleen de zichtbare onderdelen; dit is geen gevalideerde montage of lageropstelling.",
-            "Conceptually, torque passes from the drive input to the coupling. The support positions the shown components and depicts radial support; a continuous output shaft and load are not modelled. The distance control only clarifies the visible components; this is not a validated assembly or bearing arrangement.",
+            "Illustratief geval: zonnewiel = ingang, ringwiel = vast, drager = uitgang. Zr 48 = Zs 18 + 2·Zp 15. De beweging is niet kinematisch opgelost; explosieafstand is alleen een kijkhulp. Geen gevalideerd tandwielkastontwerp, lagerarrangement of belastingsmodel.",
+            "Illustrative case: sun = input, ring = fixed, carrier = output. Zr 48 = Zs 18 + 2·Zp 15. Motion is not kinematically solved; explosion distance is only a viewing aid. Not a validated gearbox design, bearing arrangement, or load model.",
           )}
         </p>
         <ol className="assembly-parts">
           {components.map((component) => (
-            <li key={component.number}>
+            <li key={component.number} data-active={highlight === component.id}>
               <span className="mono cyan">{component.number}</span>
-              <span>
+              <button
+                type="button"
+                onClick={() => updateHighlight(highlight === component.id ? "all" : component.id)}
+                disabled={!interactive}
+                aria-pressed={highlight === component.id}
+              >
                 <strong>{component.name}</strong>
                 <small>{component.description}</small>
-              </span>
+              </button>
             </li>
           ))}
         </ol>
       </div>
       <div className="visual-caption mono">
         <span>
-          {tx(locale, "CONCEPTUEEL MECHANISCH SCHEMA", "CONCEPTUAL MECHANICAL SCHEMATIC")}
+          {tx(locale, "CONCEPTUELE PLANETAIRE TANDWIELSET", "CONCEPTUAL PLANETARY GEARSET")}
         </span>
         <span>{stateLabel.toUpperCase()}</span>
       </div>

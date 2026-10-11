@@ -32,12 +32,37 @@ for (const locale of ["nl", "en"] as const) {
 
     await page.evaluate(() => window.scrollTo(0, 900));
     await expect(slider).toHaveValue("66");
-    await expect(assembly.locator(".assembly-parts li")).toHaveCount(4);
+    await expect(assembly.locator(".assembly-parts li")).toHaveCount(6);
     await expect(assembly.locator(".assembly-path")).toContainText(
-      locale === "en" ? "continuous output shaft" : "doorgaande uitgaande as",
+      locale === "en" ? "sun = input" : "zonnewiel = ingang",
     );
+    const sun = assembly.getByRole("button", { name: /Zonnewiel|Sun gear/ });
+    await sun.click();
+    await expect(sun).toHaveAttribute("aria-pressed", "true");
   });
 }
+
+test("retains planetary hero evidence at compact, mid and exploded views", async ({
+  page,
+}, testInfo) => {
+  const width = testInfo.project.name === "mobile" ? 320 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const assembly = page.locator(".assembly");
+  const slider = assembly.getByRole("slider");
+  await expect(assembly).toHaveAttribute("data-render-status", "ready");
+
+  for (const value of [0, 50, 100]) {
+    await slider.fill(String(value));
+    await expect(slider).toHaveValue(String(value));
+    await expect(assembly.locator("canvas")).toHaveAttribute("data-fit", "true");
+    await testInfo.attach(`planetary-${width}px-${value}pct`, {
+      body: await assembly.screenshot(),
+      contentType: "image/png",
+    });
+  }
+});
 
 test("schematic respects reduced motion and remains usable at 320 px", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -46,7 +71,7 @@ test("schematic respects reduced motion and remains usable at 320 px", async ({ 
   const assembly = page.locator(".assembly");
   await expect(assembly).toHaveAttribute("data-render-status", "ready");
   await expect(assembly.getByRole("slider")).toHaveValue("65");
-  await expect(assembly.locator(".assembly-parts li")).toHaveCount(4);
+  await expect(assembly.locator(".assembly-parts li")).toHaveCount(6);
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -67,7 +92,7 @@ test("static fallback remains and controls stay unavailable when renderer fails"
   await expect(assembly.locator(".assembly-fallback")).toBeVisible();
   await expect(assembly.locator("canvas")).toHaveAttribute("aria-hidden", "true");
   await expect(assembly.getByRole("slider")).toBeDisabled();
-  await expect(assembly.getByRole("button")).toHaveCount(3);
+  await expect(assembly.getByRole("button")).toHaveCount(9);
   for (const button of await assembly.getByRole("button").all())
     await expect(button).toBeDisabled();
   await expect(assembly.locator(".assembly-fallback-note")).toHaveText(

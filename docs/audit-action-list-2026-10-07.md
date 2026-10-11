@@ -171,6 +171,12 @@ CEO confirmed hourly continuation was re-enabled on 8 October and points at this
 
 ## 2026-10-11 continuation — PR #56 and supplementary bend overflow
 
-- PR #56 merged as `5ae136e4dc723b46f6e89114b89c7ffe78fa32f8`; CI `38128959434` passed. Exact production deployment `dpl_35SprnErL4CTAr26PeHodH7hP115` is READY; no distinct smoke verified. This supersedes pending O-ring overflow status; manual AT/zoom evidence stays open.
+- PR #56 merged as `5ae136e4dc723b46f6e89114b89c7ffe78fa32f8`; CI `38128959434` passed. Exact production deployment `dpl_35SprnErL4CTAr26PeHodH7hP115` is READY and production smoke `38133027556` passed on that SHA. This supersedes pending O-ring overflow status; manual AT/zoom evidence stays open.
 - Reproduced A09 defect: supplementary edges inputs `ba_t=1e308&ba_r=1e308` at90° pass scalar validation but yield nonfinite bend allowance/deduction and export. Pending review/release: suppress supplementary result/export unless both computed quantities are finite and show bilingual numerical-range correction. Raw shared dimensions remain preserved; normal values recover. Core formulas, tables and main supplier tool unchanged.
 - Added bilingual overflow/reload/recovery browser regressions. Homepage replacement remains awaiting user choice; no homepage changes. Relevant reviews/browser CI and external evidence gaps remain open.
+
+## 2026-10-11 continuation — PR #57 and selected homepage concept
+
+- PR #57 merged as `56298e24bd69edbb495f1a8059c2360dbae9a3fa`; CI `38151490246` and production smoke `38174680214` passed. Exact production deployment `dpl_6x47UsUmTkyqXmudYpHDcmCaZoqk` is READY on that SHA. This supersedes the pending supplementary-bend status above.
+- Damian selected a planetary gearbox for the homepage exploded-view replacement. A bounded conceptual schematic is in implementation with sun input, fixed internal ring, three planets, carrier output, conceptual bearings and split housing. Declared teeth satisfy Zr 48 = Zs 18 + 2·Zp 15 and the three-planet spacing condition; motion remains explicitly illustrative rather than kinematically solved.
+- Existing localized controls, keyboard/touch access, fallback, reduced-motion, offscreen pause, lifecycle cleanup and 0/50/100 fit gates are retained. No ratio, capacity, material, efficiency, backlash, lubrication, fit, bearing-life or production-design claim is added. Exact specialist review, rendered browser evidence, full CI and production verification remain release gates; manual AT and 200/400% zoom evidence stays open.
