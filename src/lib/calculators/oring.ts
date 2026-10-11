@@ -73,6 +73,7 @@ export function computeOringGroove(
   squeezePercent: number,
   widthFactor = 1.4,
 ): OringGroove | null {
+  if (![cord, squeezePercent, widthFactor].every(Number.isFinite)) return null;
   if (!(cord > 0) || !(squeezePercent >= 0) || !(squeezePercent < 100) || !(widthFactor > 1))
     return null;
   const depth = cord * (1 - squeezePercent / 100);
@@ -80,6 +81,8 @@ export function computeOringGroove(
   const ringArea = (Math.PI * cord ** 2) / 4;
   const grooveArea = depth * width;
   const fillPercent = (ringArea / grooveArea) * 100;
+  if (![depth, width, ringArea, grooveArea, fillPercent].every(Number.isFinite) || grooveArea <= 0)
+    return null;
   return { depth, width, fillPercent, overfilled: fillPercent > 100 };
 }
 

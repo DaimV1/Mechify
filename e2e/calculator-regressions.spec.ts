@@ -371,3 +371,46 @@ for (const locale of ["nl", "en"] as const) {
     });
   }
 }
+
+for (const locale of ["nl", "en"] as const) {
+  for (const widthValue of ["1e307", "1e308"]) {
+    test(`oring ${locale} overflowing shared width ${widthValue} suppresses nonfinite geometry`, async ({
+      page,
+    }) => {
+      await page.goto(`${locale === "en" ? "/en" : ""}/tools/o-ring-grooves?wf=${widthValue}`, {
+        waitUntil: "networkidle",
+      });
+      const width = page.locator("#oring-width");
+      await expect(width).toHaveAccessibleDescription(
+        locale === "en" ? "Enter a smaller width factor." : "Vul een kleinere breedtefactor in.",
+      );
+      await expect(width).toHaveAttribute("aria-invalid", "true");
+      await expect(
+        page.getByText(
+          locale === "en" ? "Enter a smaller width factor." : "Vul een kleinere breedtefactor in.",
+          { exact: true },
+        ),
+      ).toHaveCount(1);
+      await expect(
+        page.getByText(
+          locale === "en"
+            ? "Enter a valid cord diameter and squeeze% (0–100)."
+            : "Vul een geldige koorddiameter en squeeze% (0–100) in.",
+          { exact: true },
+        ),
+      ).toHaveCount(0);
+      await expect(page.getByText(/Infinity|∞|NaN/)).toHaveCount(0);
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      await expect(copy).toHaveCount(0);
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(width).toHaveValue(widthValue);
+      await width.fill("1.4");
+      await width.blur();
+      await expect(width).not.toHaveAttribute("aria-invalid");
+      await expect(copy).toBeVisible();
+    });
+  }
+}
