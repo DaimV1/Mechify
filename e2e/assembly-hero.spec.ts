@@ -58,12 +58,15 @@ test("retains planetary hero evidence at compact, mid and exploded views", async
       page.evaluate(() => {
         const root = document.querySelector(".assembly")?.getBoundingClientRect();
         const controls = document.querySelector(".assembly-controls")?.getBoundingClientRect();
+        const viewportWidth = Math.min(
+          document.documentElement.clientWidth,
+          window.visualViewport?.width ?? Number.POSITIVE_INFINITY,
+        );
         return {
-          documentFits: document.documentElement.scrollWidth <= window.innerWidth,
-          assemblyFits: Boolean(root && root.left >= 0 && root.right <= window.innerWidth),
-          controlsFit: Boolean(
-            controls && controls.left >= 0 && controls.right <= window.innerWidth,
-          ),
+          documentFits:
+            document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+          assemblyFits: Boolean(root && root.left >= 0 && root.right <= viewportWidth),
+          controlsFit: Boolean(controls && controls.left >= 0 && controls.right <= viewportWidth),
         };
       }),
     )

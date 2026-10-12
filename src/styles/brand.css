@@ -1724,6 +1724,12 @@ footer {
   .wrap {
     width: calc(100% - 40px);
   }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero > * {
+    min-width: 0;
+  }
   .header {
     height: 76px;
     padding-inline: 20px;
