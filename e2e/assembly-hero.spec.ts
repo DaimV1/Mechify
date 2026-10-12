@@ -53,6 +53,41 @@ test("retains planetary hero evidence at compact, mid and exploded views", async
   const assembly = page.locator(".assembly");
   const slider = assembly.getByRole("slider");
   await expect(assembly).toHaveAttribute("data-render-status", "ready");
+  if (mobile) {
+    const overflowDiagnostics = await page.evaluate(() => {
+      const viewportWidth = Math.min(
+        document.documentElement.clientWidth,
+        window.visualViewport?.width ?? Number.POSITIVE_INFINITY,
+      );
+      return {
+        documentClientWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        viewportWidth,
+        overflowers: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+          .map((element) => {
+            const bounds = element.getBoundingClientRect();
+            return {
+              element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${
+                element.classList.length ? `.${Array.from(element.classList).join(".")}` : ""
+              }`,
+              left: Math.round(bounds.left * 10) / 10,
+              right: Math.round(bounds.right * 10) / 10,
+              width: Math.round(bounds.width * 10) / 10,
+            };
+          })
+          .filter(({ left, right }) => left < -0.5 || right > viewportWidth + 0.5)
+          .slice(0, 20),
+      };
+    });
+    await testInfo.attach("planetary-320px-overflow-diagnostics", {
+      body: Buffer.from(JSON.stringify(overflowDiagnostics, null, 2)),
+      contentType: "application/json",
+    });
+    await testInfo.attach("planetary-320px-overflow-viewport", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  }
   await expect
     .poll(() =>
       page.evaluate(() => {
