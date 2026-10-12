@@ -388,6 +388,7 @@ canvas {
 }
 .assembly-slider input {
   display: block;
+  box-sizing: border-box;
   width: 100%;
   min-height: 44px;
   accent-color: var(--cyan);
@@ -2212,8 +2213,24 @@ footer {
   }
 }
 @media (max-width: 340px) {
+  .assembly,
+  .assembly-stage,
+  .assembly-controls,
+  .assembly-slider,
+  .assembly-explanation {
+    min-width: 0;
+    max-width: 100%;
+  }
   .assembly-presets {
     grid-template-columns: 1fr;
+  }
+  .assembly-path {
+    overflow-wrap: anywhere;
+  }
+  .visual-caption {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
   }
 }
 

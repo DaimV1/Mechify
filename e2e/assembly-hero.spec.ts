@@ -45,20 +45,83 @@ for (const locale of ["nl", "en"] as const) {
 test("retains planetary hero evidence at compact, mid and exploded views", async ({
   page,
 }, testInfo) => {
-  const width = testInfo.project.name === "mobile" ? 320 : 1440;
+  const mobile = testInfo.project.name === "mobile";
+  const width = mobile ? 320 : 1440;
   await page.setViewportSize({ width, height: 900 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
   const assembly = page.locator(".assembly");
   const slider = assembly.getByRole("slider");
   await expect(assembly).toHaveAttribute("data-render-status", "ready");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const root = document.querySelector(".assembly")?.getBoundingClientRect();
+        const controls = document.querySelector(".assembly-controls")?.getBoundingClientRect();
+        return {
+          documentFits: document.documentElement.scrollWidth <= window.innerWidth,
+          assemblyFits: Boolean(root && root.left >= 0 && root.right <= window.innerWidth),
+          controlsFit: Boolean(
+            controls && controls.left >= 0 && controls.right <= window.innerWidth,
+          ),
+        };
+      }),
+    )
+    .toEqual({ documentFits: true, assemblyFits: true, controlsFit: true });
 
   for (const value of [0, 50, 100]) {
     await slider.fill(String(value));
     await expect(slider).toHaveValue(String(value));
     await expect(assembly.locator("canvas")).toHaveAttribute("data-fit", "true");
-    await testInfo.attach(`planetary-${width}px-${value}pct`, {
-      body: await assembly.screenshot(),
+    await slider.evaluate((element) => (element as HTMLElement).blur());
+    if (mobile) {
+      await assembly.locator(".assembly-stage").evaluate((element) => {
+        const header = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+        const target = window.scrollY + element.getBoundingClientRect().top - header - 8;
+        window.scrollTo(0, target);
+      });
+    }
+    await testInfo.attach(`planetary-${width}px-${value}pct-${mobile ? "viewport" : "assembly"}`, {
+      body: mobile ? await page.screenshot() : await assembly.screenshot(),
+      contentType: "image/png",
+    });
+  }
+
+  if (mobile) {
+    const metrics = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const bounds = document.querySelector(selector)?.getBoundingClientRect();
+        return bounds
+          ? { left: bounds.left, right: bounds.right, width: bounds.width, top: bounds.top }
+          : null;
+      };
+      const active = document.activeElement as HTMLElement | null;
+      return {
+        innerWidth: window.innerWidth,
+        documentClientWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        visualViewport: window.visualViewport
+          ? { width: window.visualViewport.width, scale: window.visualViewport.scale }
+          : null,
+        assembly: rect(".assembly"),
+        controls: rect(".assembly-controls"),
+        slider: rect(".assembly-slider input"),
+        activeElement: active
+          ? { tag: active.tagName, id: active.id, className: active.className }
+          : null,
+      };
+    });
+    await testInfo.attach("planetary-320px-layout-metrics", {
+      body: Buffer.from(JSON.stringify(metrics, null, 2)),
+      contentType: "application/json",
+    });
+    await assembly.locator(".assembly-explanation").evaluate((element) => {
+      const header = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      const target = window.scrollY + element.getBoundingClientRect().top - header - 8;
+      window.scrollTo(0, target);
+    });
+    await testInfo.attach("planetary-320px-details-viewport", {
+      body: await page.screenshot(),
       contentType: "image/png",
     });
   }
