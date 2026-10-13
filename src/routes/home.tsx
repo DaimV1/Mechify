@@ -29,7 +29,7 @@ export function Home() {
             {tx(locale, "HET PLATFORM VOOR MACHINEBOUWERS", "THE PLATFORM FOR MACHINE BUILDERS")}
           </Eyebrow>
           <h1>
-            {tx(locale, "Van engineeringvraag", "From engineering question")}
+            {tx(locale, "Van engineering­vraag", "From engineering question")}
             <br />
             {tx(locale, "naar ", "to ")}
             <span>{tx(locale, "machine­oplossing.", "machine solution.")}</span>
