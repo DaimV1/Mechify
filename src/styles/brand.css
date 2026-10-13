@@ -388,6 +388,7 @@ canvas {
 }
 .assembly-slider input {
   display: block;
+  box-sizing: border-box;
   width: 100%;
   min-height: 44px;
   accent-color: var(--cyan);
@@ -417,6 +418,25 @@ canvas {
   gap: 7px;
   border-top: 1px solid var(--line);
   padding-top: 7px;
+}
+.assembly-parts button {
+  appearance: none;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  min-height: 44px;
+  padding: 3px 5px;
+  text-align: left;
+}
+.assembly-parts button:hover:not(:disabled),
+.assembly-parts button:focus-visible,
+.assembly-parts li[data-active="true"] button {
+  background: #48e5d012;
+  outline: 1px solid #48e5d066;
+}
+.assembly-parts button:disabled {
+  cursor: not-allowed;
 }
 .assembly-parts strong,
 .assembly-parts small {
@@ -1704,6 +1724,12 @@ footer {
   .wrap {
     width: calc(100% - 40px);
   }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero > * {
+    min-width: 0;
+  }
   .header {
     height: 76px;
     padding-inline: 20px;
@@ -2193,8 +2219,24 @@ footer {
   }
 }
 @media (max-width: 340px) {
+  .assembly,
+  .assembly-stage,
+  .assembly-controls,
+  .assembly-slider,
+  .assembly-explanation {
+    min-width: 0;
+    max-width: 100%;
+  }
   .assembly-presets {
     grid-template-columns: 1fr;
+  }
+  .assembly-path {
+    overflow-wrap: anywhere;
+  }
+  .visual-caption {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
   }
 }
 
