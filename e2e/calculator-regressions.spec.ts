@@ -268,6 +268,57 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const end of ["unknown", "", "constructor"]) {
+    test(`buckling ${locale} invalid end ${JSON.stringify(end)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(`${prefix}/calculators/buckling?end=${end}&L=1000&D=20#calculator`, {
+        waitUntil: "networkidle",
+      });
+      const select = page.locator("#knik-end");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose an end condition from the list to calculate the buckling load."
+          : "Kies een inklemming uit de lijst om de kniklast te berekenen.",
+      );
+      await expect(page.getByText(/^F_cr/)).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("end")).toBe(end);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("end")).toBe(end);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await select.selectOption("fc");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText(/^F_cr/).first()).toBeVisible();
+      await expect(page.getByText(/3[., ]392 N/, { exact: false })).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("end")).toBe("fc");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("fc");
+      await expect(page.getByText(/3[., ]392 N/, { exact: false })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe("#calculator");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const material of ["unknown", "", "constructor"]) {
     test(`pneumatic ${locale} invalid material ${JSON.stringify(material)} suppresses only buckling`, async ({
       page,

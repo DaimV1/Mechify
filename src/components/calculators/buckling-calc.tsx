@@ -1,6 +1,6 @@
 import { BucklingModes, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   columnCapacity,
   copyLine,
@@ -52,6 +52,8 @@ const T = {
       "Kritieke knikkracht F_cr = π² E I / L_eff². Rechthoek en koker rekenen met I_min (de zwakke as) — die knikt eerst.",
     lengthLabel: "Lengte L (mm)",
     endConditionLabel: "Inklemming",
+    endConditionError: "Kies een inklemming uit de lijst om de kniklast te berekenen.",
+    endConditionPlaceholder: "Kies een inklemming",
     sectionLabel: "Doorsnede",
     materialLabel: "Materiaal",
     diameterD: "Diameter D (mm)",
@@ -117,6 +119,8 @@ const T = {
       "Critical buckling load F_cr = π² E I / L_eff². Rectangle and box section use I_min (the weak axis) — that buckles first.",
     lengthLabel: "Length L (mm)",
     endConditionLabel: "End condition",
+    endConditionError: "Choose an end condition from the list to calculate the buckling load.",
+    endConditionPlaceholder: "Choose an end condition",
     sectionLabel: "Cross-section",
     materialLabel: "Material",
     diameterD: "Diameter D (mm)",
@@ -181,7 +185,9 @@ const T = {
 export function BucklingCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sectionKind, setSectionKind] = useState<SectionKind>(
     (search.get("section") as SectionKind) ?? "rond",
   );
@@ -192,9 +198,7 @@ export function BucklingCalc() {
   const [a, setA] = useState(search.get("a") ?? "10");
   const [t2, setT2] = useState(search.get("t") ?? "3");
   const [L, setL] = useState(search.get("L") ?? "1000");
-  const [endCondition, setEndCondition] = useState<EndConditionId>(
-    (search.get("end") as EndConditionId) ?? "hh",
-  );
+  const [endCondition, setEndCondition] = useState(search.get("end") ?? "hh");
   const [materialId, setMaterialId] = useState(search.get("material") ?? "rvs");
   const [F, setF] = useState(search.get("F") ?? "");
 
@@ -212,7 +216,7 @@ export function BucklingCalc() {
     next.set("end", endCondition);
     next.set("material", materialId);
     set("F", F);
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sectionKind, D, dIn, b, h, a, t2, L, endCondition, materialId, F]);
 
@@ -238,14 +242,16 @@ export function BucklingCalc() {
   const section = useMemo(() => sectionProps(sectionKind, dims), [sectionKind, dims]);
   const Lraw = parseNum(L);
   const Fraw = parseNum(F);
-  const k = kDesignFor(endCondition);
+  const validEnd = END_CONDITIONS.some((c) => c.id === endCondition);
+  const validEndCondition = validEnd ? (endCondition as EndConditionId) : null;
+  const k = validEndCondition == null ? null : kDesignFor(validEndCondition);
   const E = eFor(materialId);
   const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
   const endLabel = END_CONDITIONS.find((c) => c.id === endCondition);
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
   const result =
-    section && Lraw != null
+    section && Lraw != null && k != null
       ? columnCapacity({
           L: Lraw,
           k,
@@ -284,9 +290,17 @@ export function BucklingCalc() {
           </Field>
           <Field label={t.endConditionLabel}>
             <SelectInput
-              value={endCondition}
-              onChange={(v) => setEndCondition(v as EndConditionId)}
+              id="knik-end"
+              value={validEnd ? endCondition : ""}
+              aria-invalid={!validEnd || undefined}
+              aria-describedby={!validEnd ? "knik-end-error" : undefined}
+              onChange={setEndCondition}
             >
+              {!validEnd && (
+                <option value="" disabled>
+                  {t.endConditionPlaceholder}
+                </option>
+              )}
               {END_CONDITIONS.map((c) => (
                 <option key={c.id} value={c.id}>
                   {label(c)} (k={fmtDotComma(c.kDesign, 3).replace(/,?0+$/, "")})
@@ -358,6 +372,12 @@ export function BucklingCalc() {
           ) : null}
         </div>
 
+        {!validEnd && (
+          <p id="knik-end-error" className="mt-5 text-sm text-muted" role="status">
+            {t.endConditionError}
+          </p>
+        )}
+
         <details className="mt-6">
           <summary className="cursor-pointer text-sm font-medium text-ink">
             {t.optionalAxial}
@@ -370,7 +390,7 @@ export function BucklingCalc() {
           <Note>{t.axialNote}</Note>
         </details>
 
-        {section ? (
+        {!validEnd ? null : section ? (
           result ? (
             <>
               <p className="mt-5 text-sm text-muted">
@@ -442,7 +462,11 @@ export function BucklingCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        <BucklingModes active={endCondition} />
+        {validEndCondition ? (
+          <BucklingModes active={validEndCondition} />
+        ) : (
+          <Note>{t.endConditionError}</Note>
+        )}
       </SchemaPanel>
 
       <section className="mt-12">
