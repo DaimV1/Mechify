@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { toolHref, type Tool } from "@/lib/tools";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -55,7 +55,13 @@ export function readFavorites(): string[] {
   }
 }
 export function ToolTile({ tool, onFavorite }: { tool: Tool; onFavorite?: () => void }) {
-  const [favorite, setFavorite] = useState(() => readFavorites().includes(tool.id));
+  // The server cannot read browser-local favourites. Keep the first browser
+  // render identical to the prerendered button, then restore local state once
+  // hydration has finished.
+  const [favorite, setFavorite] = useState(false);
+  useEffect(() => {
+    setFavorite(readFavorites().includes(tool.id));
+  }, [tool.id]);
   const { locale } = useLocale();
   const t = COMMON[locale];
   return (
