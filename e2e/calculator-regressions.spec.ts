@@ -13,6 +13,74 @@ test("bearing shared blank stays invalid after reload", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Copy result", exact: true })).toHaveCount(0);
 });
 
+for (const locale of ["nl", "en"] as const) {
+  for (const alpha of ["abc", ""]) {
+    test(`motor ${locale} invalid incline angle ${JSON.stringify(alpha)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(
+        `${prefix}/calculators/motor-specification?speed=30&unit=m%2Fmin&d=100&mass=500&duty=helling&mu=0.03&alpha=${alpha}&eta=0.85&fb=1.2#calculator`,
+        { waitUntil: "networkidle" },
+      );
+      const input = page.locator("#motor-alpha");
+      await expect(input).toHaveValue(alpha);
+      await expect(input).toHaveAttribute("aria-invalid", "true");
+      await expect(input).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Enter an angle for the incline calculation."
+          : "Vul een hoek in voor de hellingberekening.",
+      );
+      await expect(page.getByText("P_motor", { exact: true })).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("alpha")).toBe(alpha);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(input).toHaveValue(alpha);
+      await expect(input).toHaveAttribute("aria-invalid", "true");
+
+      await input.fill("10");
+      await input.blur();
+      await expect(input).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText("997 N", { exact: true })).toBeVisible();
+      await expect(page.getByText("P_motor", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("alpha")).toBe("10");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(input).toHaveValue("10");
+      await expect(page.getByText("997 N", { exact: true })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe("#calculator");
+    });
+  }
+
+  test(`motor ${locale} accepts a valid zero-degree incline`, async ({ page }) => {
+    const prefix = locale === "en" ? "/en" : "";
+    await page.goto(
+      `${prefix}/calculators/motor-specification?speed=30&unit=m%2Fmin&d=100&mass=500&duty=helling&mu=0.03&alpha=0&eta=0.85&fb=1.2#calculator`,
+      { waitUntil: "networkidle" },
+    );
+    const input = page.locator("#motor-alpha");
+    await expect(input).toHaveValue("0");
+    await expect(input).not.toHaveAttribute("aria-invalid");
+    await expect(page.getByText("147 N", { exact: true })).toBeVisible();
+    await expect(page.getByText("P_motor", { exact: true })).toBeVisible();
+    expect(new URL(page.url()).searchParams.get("alpha")).toBe("0");
+    expect(new URL(page.url()).hash).toBe("#calculator");
+  });
+}
+
 test("bearing numerical result and warnings survive copy", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/en/calculators/bearing-life?C=4&P=2&n=12000&C0=1&P0=2");

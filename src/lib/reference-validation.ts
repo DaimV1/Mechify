@@ -183,7 +183,9 @@ function validate9(s: Record<string, unknown>) {
           ? s.duty
           : undefined,
       mu: num(s.mu),
-      alpha: num(s.alpha),
+      // Incline angle has associated inline validation; preserve malformed and
+      // explicitly blank shared input instead of replacing it with 0 degrees.
+      alpha: typeof s.alpha === "string" ? s.alpha : undefined,
       eta: typeof s.eta === "string" ? s.eta : undefined,
       fb: typeof s.fb === "string" ? s.fb : undefined,
       a: num(s.a),
