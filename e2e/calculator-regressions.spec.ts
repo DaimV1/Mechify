@@ -268,6 +268,59 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const material of ["unknown", "", "constructor"]) {
+    test(`buckling ${locale} invalid material ${JSON.stringify(material)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(
+        `${prefix}/calculators/buckling?end=fc&material=${material}&L=1000&D=20&F=10000#calculator`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#knik-material");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a material from the list to calculate the buckling load."
+          : "Kies een materiaal uit de lijst om de kniklast te berekenen.",
+      );
+      await expect(page.getByText(/^F_cr/)).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await expect(page.locator("figure").first()).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("material")).toBe(material);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("material")).toBe(material);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await select.selectOption("rvs");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText(/^F_cr/).first()).toBeVisible();
+      await expect(page.getByText(/3[., ]392 N/, { exact: false })).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("material")).toBe("rvs");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("rvs");
+      await expect(page.getByText(/3[., ]392 N/, { exact: false })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe("#calculator");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const end of ["unknown", "", "constructor"]) {
     test(`buckling ${locale} invalid end ${JSON.stringify(end)} suppresses dependent output`, async ({
       page,

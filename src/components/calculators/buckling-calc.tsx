@@ -5,13 +5,11 @@ import {
   columnCapacity,
   copyLine,
   END_CONDITIONS,
-  eFor,
   fmtDotComma,
   fmtN,
   kDesignFor,
   lambdaLimit,
   MATERIALS_E,
-  rp02For,
   SECTION_KINDS,
   sectionProps,
   type EndConditionId,
@@ -56,6 +54,8 @@ const T = {
     endConditionPlaceholder: "Kies een inklemming",
     sectionLabel: "Doorsnede",
     materialLabel: "Materiaal",
+    materialError: "Kies een materiaal uit de lijst om de kniklast te berekenen.",
+    materialPlaceholder: "Kies een materiaal",
     diameterD: "Diameter D (mm)",
     outerD: "Buitendiameter D (mm)",
     innerD: "Binnendiameter d (mm)",
@@ -123,6 +123,8 @@ const T = {
     endConditionPlaceholder: "Choose an end condition",
     sectionLabel: "Cross-section",
     materialLabel: "Material",
+    materialError: "Choose a material from the list to calculate the buckling load.",
+    materialPlaceholder: "Choose a material",
     diameterD: "Diameter D (mm)",
     outerD: "Outer diameter D (mm)",
     innerD: "Inner diameter d (mm)",
@@ -245,13 +247,15 @@ export function BucklingCalc() {
   const validEnd = END_CONDITIONS.some((c) => c.id === endCondition);
   const validEndCondition = validEnd ? (endCondition as EndConditionId) : null;
   const k = validEndCondition == null ? null : kDesignFor(validEndCondition);
-  const E = eFor(materialId);
-  const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
+  const validMaterial = MATERIALS_E.some((m) => m.id === materialId);
+  const material = MATERIALS_E.find((m) => m.id === materialId) ?? null;
+  const E = material?.E ?? null;
+  const rp02 = material?.Rp02 ?? null;
   const endLabel = END_CONDITIONS.find((c) => c.id === endCondition);
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
   const result =
-    section && Lraw != null && k != null
+    section && Lraw != null && k != null && E != null && rp02 != null
       ? columnCapacity({
           L: Lraw,
           k,
@@ -259,7 +263,7 @@ export function BucklingCalc() {
           I: section.I,
           A: section.A,
           F: Fraw,
-          rp02: rp02For(materialId),
+          rp02,
         })
       : null;
 
@@ -272,8 +276,8 @@ export function BucklingCalc() {
     [result, endLabel, locale],
   );
 
-  const lambdaWarn = lambdaLimit(E, rp02For(materialId));
-  const lowLambda = result != null && result.lambda < lambdaWarn;
+  const lambdaWarn = E != null && rp02 != null ? lambdaLimit(E, rp02) : null;
+  const lowLambda = result != null && lambdaWarn != null && result.lambda < lambdaWarn;
   const unsafe = result?.safety != null && result.safety < 1;
 
   return (
@@ -318,7 +322,18 @@ export function BucklingCalc() {
             </SelectInput>
           </Field>
           <Field label={t.materialLabel}>
-            <SelectInput value={materialId} onChange={setMaterialId}>
+            <SelectInput
+              id="knik-material"
+              value={validMaterial ? materialId : ""}
+              aria-invalid={!validMaterial || undefined}
+              aria-describedby={!validMaterial ? "knik-material-error" : undefined}
+              onChange={setMaterialId}
+            >
+              {!validMaterial && (
+                <option value="" disabled>
+                  {t.materialPlaceholder}
+                </option>
+              )}
               {MATERIALS_E.map((m) => (
                 <option key={m.id} value={m.id}>
                   {label(m)}
@@ -377,6 +392,11 @@ export function BucklingCalc() {
             {t.endConditionError}
           </p>
         )}
+        {!validMaterial && (
+          <p id="knik-material-error" className="mt-5 text-sm text-muted" role="status">
+            {t.materialError}
+          </p>
+        )}
 
         <details className="mt-6">
           <summary className="cursor-pointer text-sm font-medium text-ink">
@@ -390,11 +410,12 @@ export function BucklingCalc() {
           <Note>{t.axialNote}</Note>
         </details>
 
-        {!validEnd ? null : section ? (
+        {!validEnd || !validMaterial ? null : section ? (
           result ? (
             <>
               <p className="mt-5 text-sm text-muted">
-                {endLabel ? label(endLabel) : ""} · {label(material)} · E = {fmtN(E)} N/mm²
+                {endLabel ? label(endLabel) : ""} · {material ? label(material) : ""} · E ={" "}
+                {E != null ? fmtN(E) : ""} N/mm²
               </p>
               <ResultGrid
                 items={
@@ -427,7 +448,7 @@ export function BucklingCalc() {
                 <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                   {t.unsafeNote}
                 </p>
-              ) : lowLambda ? (
+              ) : lowLambda && lambdaWarn != null && material && E != null ? (
                 <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
                   {t.lowLambdaNote(
                     fmtDotComma(result.lambda, 1),
