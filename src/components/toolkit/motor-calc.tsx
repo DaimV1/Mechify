@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate, useSearch } from "@/lib/reference-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearch } from "@/lib/reference-router";
 import { driveQueryNumber } from "@/lib/calculators/drive";
 import {
   DUTY_DEFAULT_MU,
@@ -45,7 +45,9 @@ function fmtInput(n: number) {
 export function MotorCalc() {
   const { locale } = useLocale();
   const search = useSearch({ from: "/toolkit/motorspecificatie" });
-  const navigate = useNavigate({ from: "/toolkit/motorspecificatie" });
+  const [rawSearch] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [speed, setSpeed] = useState(search.speed ?? "30");
   const [speedUnit, setSpeedUnit] = useState<SpeedUnit>((search.unit as SpeedUnit) ?? "m/min");
   const [diameterMm, setDiameterMm] = useState(search.d ?? "100");
@@ -70,23 +72,23 @@ export function MotorCalc() {
   });
 
   useEffect(() => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        speed,
-        unit: speedUnit,
-        d: diameterMm,
-        mass,
-        duty,
-        mu: mu || undefined,
-        alpha: alpha || undefined,
-        eta,
-        fb,
-        a: accel || undefined,
-        rm: rollerMass || undefined,
-      }),
-      replace: true,
-    });
+    const next = new URLSearchParams(rawSearch);
+    const set = (key: string, value: string) =>
+      value === "" ? next.delete(key) : next.set(key, value);
+    next.set("speed", speed);
+    next.set("unit", speedUnit);
+    next.set("d", diameterMm);
+    next.set("mass", mass);
+    next.set("duty", duty);
+    set("mu", mu);
+    // Unlike optional fields, an explicitly blank incline angle is invalid
+    // shared state and must remain distinguishable from a missing default.
+    next.set("alpha", alpha);
+    next.set("eta", eta);
+    next.set("fb", fb);
+    set("a", accel);
+    set("rm", rollerMass);
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speed, speedUnit, diameterMm, mass, duty, mu, alpha, eta, fb, accel, rollerMass]);
 
@@ -116,12 +118,19 @@ export function MotorCalc() {
   const aRaw = parseNum(accel);
   const rollerMassRaw = parseNum(rollerMass);
   const showRollerMass = aRaw != null && aRaw !== 0;
+  const alphaInvalid = duty === "helling" && alphaRaw == null;
 
   const v_ms = vRaw != null ? toMetersPerSecond(vRaw, speedUnit) : null;
   const D_m = dRaw != null ? dRaw / 1000 : null;
 
   const result =
-    v_ms != null && D_m != null && mRaw != null && muRaw != null && etaRaw != null && fbRaw != null
+    v_ms != null &&
+    D_m != null &&
+    mRaw != null &&
+    muRaw != null &&
+    etaRaw != null &&
+    fbRaw != null &&
+    !alphaInvalid
       ? sizeMotor({
           v_ms,
           D_m,
@@ -226,9 +235,22 @@ export function MotorCalc() {
             </Field>
           ) : null}
           {showAlpha ? (
-            <Field label={tx(locale, "Helling α (°)", "Incline α (°)")}>
-              <NumInput id="motor-alpha" value={alpha} onChange={setAlpha} />
-            </Field>
+            <ValidatedNumField
+              label={tx(locale, "Helling α (°)", "Incline α (°)")}
+              id="motor-alpha"
+              validateInitially={search.alpha !== undefined}
+              value={alpha}
+              onChange={setAlpha}
+              error={
+                alphaInvalid
+                  ? tx(
+                      locale,
+                      "Vul een hoek in voor de hellingberekening.",
+                      "Enter an angle for the incline calculation.",
+                    )
+                  : undefined
+              }
+            />
           ) : null}
         </div>
 
@@ -391,7 +413,7 @@ export function MotorCalc() {
               </div>
             ) : null}
           </>
-        ) : etaRaw != null && !(etaRaw > 0 && etaRaw <= 1) ? (
+        ) : alphaInvalid ? null : etaRaw != null && !(etaRaw > 0 && etaRaw <= 1) ? (
           <p className="mt-5 text-sm text-muted">
             {tx(
               locale,
