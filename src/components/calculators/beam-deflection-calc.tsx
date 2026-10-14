@@ -12,10 +12,8 @@ import {
   type LoadKind,
 } from "@/lib/calculators/beam";
 import {
-  eFor,
   extremeFiber,
   MATERIALS_E,
-  rp02For,
   SECTION_KINDS,
   sectionProps,
   type SectionKind,
@@ -68,6 +66,8 @@ const T = {
     pointLoad: "Puntlast F (N)",
     udlLoad: "Verdeelde last w (N/mm)",
     material: "Materiaal",
+    materialPlaceholder: "Kies een materiaal",
+    materialError: "Kies een materiaal uit de lijst om de doorbuiging te berekenen.",
     diameterD: "Diameter D (mm)",
     outerD: "Buitendiameter D (mm)",
     innerD: "Binnendiameter d (mm)",
@@ -129,6 +129,8 @@ const T = {
     pointLoad: "Point load F (N)",
     udlLoad: "Distributed load w (N/mm)",
     material: "Material",
+    materialPlaceholder: "Choose a material",
+    materialError: "Choose a material from the list to calculate deflection.",
     diameterD: "Diameter D (mm)",
     outerD: "Outer diameter D (mm)",
     innerD: "Inner diameter d (mm)",
@@ -279,14 +281,17 @@ export function BeamDeflectionCalc() {
   const allowableRaw = parseNum(allowable);
   const validBeamType = BEAM_TYPES.some((type) => type.id === beamType);
   const selectedBeamType = validBeamType ? beamType : null;
-  const E = eFor(materialId);
-  const rp02 = rp02For(materialId);
-  const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
+  const validMaterial = MATERIALS_E.some((item) => item.id === materialId);
+  const material = MATERIALS_E.find((item) => item.id === materialId) ?? null;
+  const E = material?.E ?? null;
+  const rp02 = material?.Rp02 ?? null;
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
   const isUDL = loadKind === "verdeeld";
 
   const result =
     selectedBeamType != null &&
+    validMaterial &&
+    E != null &&
     section &&
     Lraw != null &&
     (isUDL ? udlRaw != null : posARaw != null && Fraw != null)
@@ -310,7 +315,7 @@ export function BeamDeflectionCalc() {
       : null;
 
   const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
-  const overYield = sigma != null && sigma >= rp02;
+  const overYield = sigma != null && rp02 != null && sigma >= rp02;
   const sameLocation =
     result != null && !isUDL && Math.abs(result.deflectionAtLoad - result.deflectionMax) < 1e-9;
   const ratio = result && result.deflectionMax > 0 && Lraw ? Lraw / result.deflectionMax : null;
@@ -322,7 +327,7 @@ export function BeamDeflectionCalc() {
   const reactionBLabel = isUDL || beamType === "opgelegd" ? t.reactionB : t.reactionFree;
 
   const copy = useMemo(() => {
-    if (!result) return "";
+    if (!result || !material || rp02 == null) return "";
     const beamLabel = BEAM_TYPES.find((bt) => bt.id === beamType);
     const beamLabelText = beamLabel ? label(beamLabel) : "";
     const loadText = isUDL ? `w=${udl} N/mm` : `a=${posA} mm, F=${force} N`;
@@ -434,7 +439,18 @@ export function BeamDeflectionCalc() {
             </>
           )}
           <Field label={t.material}>
-            <SelectInput value={materialId} onChange={setMaterialId}>
+            <SelectInput
+              id="beam-material"
+              value={validMaterial ? materialId : ""}
+              onChange={setMaterialId}
+              aria-invalid={!validMaterial || undefined}
+              aria-describedby={!validMaterial ? "beam-material-error" : undefined}
+            >
+              {!validMaterial && (
+                <option value="" disabled>
+                  {t.materialPlaceholder}
+                </option>
+              )}
               {MATERIALS_E.map((m) => (
                 <option key={m.id} value={m.id}>
                   {label(m)}
@@ -503,9 +519,14 @@ export function BeamDeflectionCalc() {
             {t.beamTypeError}
           </p>
         )}
+        {!validMaterial && (
+          <p id="beam-material-error" className="mt-5 text-sm text-muted" role="status">
+            {t.materialError}
+          </p>
+        )}
         {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
-        {!validBeamType ? null : !section ? (
+        {!validBeamType || !validMaterial ? null : !section ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDims}
           </p>
@@ -544,7 +565,11 @@ export function BeamDeflectionCalc() {
             ) : null}
             {overYield ? (
               <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
-                {t.overYieldNote(fmtBeamNum(sigma ?? 0, 1), fmtBeamNum(rp02, 0), label(material))}
+                {t.overYieldNote(
+                  fmtBeamNum(sigma ?? 0, 1),
+                  fmtBeamNum(rp02 ?? 0, 0),
+                  material ? label(material) : "",
+                )}
               </p>
             ) : null}
             {allowableOk != null ? (
@@ -577,11 +602,11 @@ export function BeamDeflectionCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        {!validBeamType ? (
+        {!validBeamType || !validMaterial ? (
           <p>{t.diagramFillPrompt}</p>
         ) : isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
-        ) : result && Lraw != null && posARaw != null && Fraw != null && section ? (
+        ) : result && Lraw != null && posARaw != null && Fraw != null && section && E != null ? (
           <BeamDeflection
             end={beamType === "opgelegd" ? "ss" : "cant"}
             L={Lraw}
