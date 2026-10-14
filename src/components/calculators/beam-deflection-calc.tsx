@@ -1,6 +1,6 @@
 import { BeamDeflection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   BEAM_TYPES,
   bendingStress,
@@ -55,6 +55,8 @@ const T = {
       "Euler-Bernoulli balktheorie: één puntlast of één gelijkmatig verdeelde last over de hele overspanning. Bij puntlast is a de afstand tot de linkeroplegging (vrij opgelegd) of tot de inklemming (uitkraging).",
     loadKind: "Soort last",
     beamType: "Balktype",
+    beamTypePlaceholder: "Kies een balktype",
+    beamTypeError: "Kies een balktype uit de lijst om de doorbuiging te berekenen.",
     section: "Doorsnede",
     axis: "Buigas",
     axisWeak: "Zwakke as (I_min)",
@@ -114,6 +116,8 @@ const T = {
       "Euler-Bernoulli beam theory: one point load or one full-span uniformly distributed load. For a point load, a is the distance to the left support (simply supported) or to the fixed end (cantilever).",
     loadKind: "Load type",
     beamType: "Beam type",
+    beamTypePlaceholder: "Choose a beam type",
+    beamTypeError: "Choose a beam type from the list to calculate deflection.",
     section: "Cross-section",
     axis: "Bending axis",
     axisWeak: "Weak axis (I_min)",
@@ -172,7 +176,9 @@ const T = {
 export function BeamDeflectionCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [beamType, setBeamType] = useState<BeamType>(
     (search.get("type") as BeamType) ?? "opgelegd",
   );
@@ -217,7 +223,7 @@ export function BeamDeflectionCalc() {
     next.set("material", materialId);
     next.set("axis", axis);
     set("allow", allowable);
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     beamType,
@@ -271,6 +277,8 @@ export function BeamDeflectionCalc() {
   const Fraw = parseNum(force);
   const udlRaw = parseNum(udl);
   const allowableRaw = parseNum(allowable);
+  const validBeamType = BEAM_TYPES.some((type) => type.id === beamType);
+  const selectedBeamType = validBeamType ? beamType : null;
   const E = eFor(materialId);
   const rp02 = rp02For(materialId);
   const material = MATERIALS_E.find((m) => m.id === materialId) ?? MATERIALS_E[0];
@@ -278,10 +286,27 @@ export function BeamDeflectionCalc() {
   const isUDL = loadKind === "verdeeld";
 
   const result =
-    section && Lraw != null && (isUDL ? udlRaw != null : posARaw != null && Fraw != null)
+    selectedBeamType != null &&
+    section &&
+    Lraw != null &&
+    (isUDL ? udlRaw != null : posARaw != null && Fraw != null)
       ? isUDL
-        ? computeBeam({ kind: "verdeeld", type: beamType, w: udlRaw!, L: Lraw, E, I: section.I })
-        : computeBeam({ type: beamType, F: Fraw!, L: Lraw, a: posARaw!, E, I: section.I })
+        ? computeBeam({
+            kind: "verdeeld",
+            type: selectedBeamType,
+            w: udlRaw!,
+            L: Lraw,
+            E,
+            I: section.I,
+          })
+        : computeBeam({
+            type: selectedBeamType,
+            F: Fraw!,
+            L: Lraw,
+            a: posARaw!,
+            E,
+            I: section.I,
+          })
       : null;
 
   const sigma = result && c != null ? bendingStress(result.momentMax, c, section!.I) : null;
@@ -363,7 +388,18 @@ export function BeamDeflectionCalc() {
             </SelectInput>
           </Field>
           <Field label={t.beamType}>
-            <SelectInput value={beamType} onChange={(v) => setBeamType(v as BeamType)}>
+            <SelectInput
+              id="beam-type"
+              value={validBeamType ? beamType : ""}
+              onChange={(v) => setBeamType(v as BeamType)}
+              aria-invalid={!validBeamType || undefined}
+              aria-describedby={!validBeamType ? "beam-type-error" : undefined}
+            >
+              {!validBeamType && (
+                <option value="" disabled>
+                  {t.beamTypePlaceholder}
+                </option>
+              )}
               {BEAM_TYPES.map((bt) => (
                 <option key={bt.id} value={bt.id}>
                   {label(bt)}
@@ -462,9 +498,14 @@ export function BeamDeflectionCalc() {
             </>
           ) : null}
         </div>
+        {!validBeamType && (
+          <p id="beam-type-error" className="mt-5 text-sm text-muted" role="status">
+            {t.beamTypeError}
+          </p>
+        )}
         {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
-        {!section ? (
+        {!validBeamType ? null : !section ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDims}
           </p>
@@ -536,7 +577,9 @@ export function BeamDeflectionCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        {isUDL ? (
+        {!validBeamType ? (
+          <p>{t.diagramFillPrompt}</p>
+        ) : isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
         ) : result && Lraw != null && posARaw != null && Fraw != null && section ? (
           <BeamDeflection
