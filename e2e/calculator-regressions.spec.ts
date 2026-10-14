@@ -337,6 +337,76 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const material of ["unknown", "", "constructor"]) {
+    test(`beam ${locale} invalid material ${JSON.stringify(material)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(
+        `${prefix}/calculators/beam-deflection?type=opgelegd&loadKind=puntlast&section=rechthoek&b=40&h=10&axis=strong&material=${material}&L=1000&posA=500&f=500#calculator`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#beam-material");
+      const maximumDeflection = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(
+            locale === "en" ? "Maximum deflection δ_max" : "Maximale doorbuiging δ_max",
+            { exact: true },
+          ),
+        })
+        .locator("dd");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a material from the list to calculate deflection."
+          : "Kies een materiaal uit de lijst om de doorbuiging te berekenen.",
+      );
+      await expect(page.locator("dl")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await expect(page.locator('a[href^="/calculators/buckling?"]')).toHaveCount(0);
+      await expect(
+        page.getByText(
+          locale === "en"
+            ? "Enter valid beam data to show the diagram."
+            : "Vul geldige balkgegevens in om het schema te tonen.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("material")).toBe(material);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("material")).toBe(material);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await select.selectOption("kunststof");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(maximumDeflection).toHaveText("65,104 mm");
+      await expect(page.getByText("125.000 N·mm", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("material")).toBe("kunststof");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("kunststof");
+      await expect(maximumDeflection).toHaveText("65,104 mm");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const reliability of ["unknown", ""]) {
     test(`bearing ${locale} invalid reliability ${JSON.stringify(reliability)} is correctable`, async ({
       page,
