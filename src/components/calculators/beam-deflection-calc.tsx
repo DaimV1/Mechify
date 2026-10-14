@@ -57,6 +57,8 @@ const T = {
     beamTypeError: "Kies een balktype uit de lijst om de doorbuiging te berekenen.",
     section: "Doorsnede",
     axis: "Buigas",
+    axisPlaceholder: "Kies een buigas",
+    axisError: "Kies een buigas uit de lijst om de doorbuiging te berekenen.",
     axisWeak: "Zwakke as (I_min)",
     axisStrong: "Sterke as (I_max)",
     axisNote:
@@ -120,6 +122,8 @@ const T = {
     beamTypeError: "Choose a beam type from the list to calculate deflection.",
     section: "Cross-section",
     axis: "Bending axis",
+    axisPlaceholder: "Choose a bending axis",
+    axisError: "Choose a bending axis from the list to calculate deflection.",
     axisWeak: "Weak axis (I_min)",
     axisStrong: "Strong axis (I_max)",
     axisNote:
@@ -282,6 +286,8 @@ export function BeamDeflectionCalc() {
   const validBeamType = BEAM_TYPES.some((type) => type.id === beamType);
   const selectedBeamType = validBeamType ? beamType : null;
   const validMaterial = MATERIALS_E.some((item) => item.id === materialId);
+  const validAxis = axis === "weak" || axis === "strong";
+  const axisSelectionValid = !axisApplies || validAxis;
   const material = MATERIALS_E.find((item) => item.id === materialId) ?? null;
   const E = material?.E ?? null;
   const rp02 = material?.Rp02 ?? null;
@@ -291,6 +297,7 @@ export function BeamDeflectionCalc() {
   const result =
     selectedBeamType != null &&
     validMaterial &&
+    axisSelectionValid &&
     E != null &&
     section &&
     Lraw != null &&
@@ -335,7 +342,7 @@ export function BeamDeflectionCalc() {
       overYield
         ? t.overYieldNote(fmtBeamNum(sigma ?? 0, 1), fmtBeamNum(rp02, 0), label(material))
         : "",
-      `${beamLabelText}, L=${L} mm, ${loadText}, ${label(material)}, ${axisApplies ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
+      `${beamLabelText}, L=${L} mm, ${loadText}, ${label(material)}, ${axisApplies && validAxis ? (axis === "strong" ? t.axisStrong : t.axisWeak) : ""}`,
       isUDL ? "" : `δ(a) = ${fmtBeamNum(result.deflectionAtLoad, 3)} mm`,
       `δ_max = ${fmtBeamNum(result.deflectionMax, 3)} mm ${locale === "en" ? "at" : "bij"} x=${fmtBeamNum(result.xMax, 0)} mm`,
       `M_max = ${fmtBeamNum(result.momentMax, 0)} N·mm`,
@@ -460,7 +467,18 @@ export function BeamDeflectionCalc() {
           </Field>
           {axisApplies ? (
             <Field label={t.axis}>
-              <SelectInput value={axis} onChange={(v) => setAxis(v as "weak" | "strong")}>
+              <SelectInput
+                id="beam-axis"
+                value={validAxis ? axis : ""}
+                onChange={(v) => setAxis(v as "weak" | "strong")}
+                aria-invalid={!validAxis || undefined}
+                aria-describedby={!validAxis ? "beam-axis-error" : undefined}
+              >
+                {!validAxis && (
+                  <option value="" disabled>
+                    {t.axisPlaceholder}
+                  </option>
+                )}
                 <option value="strong">{t.axisStrong}</option>
                 <option value="weak">{t.axisWeak}</option>
               </SelectInput>
@@ -524,9 +542,14 @@ export function BeamDeflectionCalc() {
             {t.materialError}
           </p>
         )}
+        {axisApplies && !validAxis && (
+          <p id="beam-axis-error" className="mt-5 text-sm text-muted" role="status">
+            {t.axisError}
+          </p>
+        )}
         {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
-        {!validBeamType || !validMaterial ? null : !section ? (
+        {!validBeamType || !validMaterial || !axisSelectionValid ? null : !section ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDims}
           </p>
@@ -602,7 +625,7 @@ export function BeamDeflectionCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        {!validBeamType || !validMaterial ? (
+        {!validBeamType || !validMaterial || !axisSelectionValid ? (
           <p>{t.diagramFillPrompt}</p>
         ) : isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
