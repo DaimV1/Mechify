@@ -277,6 +277,15 @@ for (const locale of ["nl", "en"] as const) {
         { waitUntil: "networkidle" },
       );
       const select = page.locator("#beam-type");
+      const maximumDeflection = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(
+            locale === "en" ? "Maximum deflection δ_max" : "Maximale doorbuiging δ_max",
+            { exact: true },
+          ),
+        })
+        .locator("dd");
       await expect(select).toHaveAttribute("aria-invalid", "true");
       await expect(select).toHaveAccessibleDescription(
         locale === "en"
@@ -308,7 +317,7 @@ for (const locale of ["nl", "en"] as const) {
 
       await select.selectOption("opgelegd");
       await expect(select).not.toHaveAttribute("aria-invalid");
-      await expect(page.getByText("0,93 mm", { exact: true })).toBeVisible();
+      await expect(maximumDeflection).toHaveText("0,93 mm");
       await expect(page.getByText("125.000 N·mm", { exact: true })).toBeVisible();
       await expect(page.getByText("250 N", { exact: true })).toHaveCount(2);
       await expect(
@@ -321,7 +330,7 @@ for (const locale of ["nl", "en"] as const) {
       expect(new URL(page.url()).hash).toBe("#calculator");
       await page.reload({ waitUntil: "networkidle" });
       await expect(select).toHaveValue("opgelegd");
-      await expect(page.getByText("0,93 mm", { exact: true })).toBeVisible();
+      await expect(maximumDeflection).toHaveText("0,93 mm");
       expect(new URL(page.url()).hash).toBe("#calculator");
     });
   }
