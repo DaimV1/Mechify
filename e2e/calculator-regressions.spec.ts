@@ -267,6 +267,78 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const loadKind of ["unknown", "", "constructor"]) {
+    test(`beam ${locale} invalid load type ${JSON.stringify(loadKind)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(
+        `${prefix}/calculators/beam-deflection?type=opgelegd&loadKind=${loadKind}&section=rechthoek&b=40&h=10&axis=strong&material=staal&L=1000&posA=500&f=500&w=10#calculator`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#beam-load-kind");
+      const maximumDeflection = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(
+            locale === "en" ? "Maximum deflection δ_max" : "Maximale doorbuiging δ_max",
+            { exact: true },
+          ),
+        })
+        .locator("dd");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a load type from the list to calculate deflection."
+          : "Kies een soort last uit de lijst om de doorbuiging te berekenen.",
+      );
+      await expect(page.locator("dl")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await expect(page.locator('a[href^="/calculators/buckling?"]')).toHaveCount(0);
+      await expect(
+        page.getByText(
+          locale === "en"
+            ? "Enter valid beam data to show the diagram."
+            : "Vul geldige balkgegevens in om het schema te tonen.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      expect(new URL(page.url()).searchParams.get("loadKind")).toBe(loadKind);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("loadKind")).toBe(loadKind);
+      expect(new URL(page.url()).hash).toBe("#calculator");
+
+      await select.selectOption("verdeeld");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(maximumDeflection).toHaveText("11,626 mm");
+      await expect(page.getByText("1.250.000 N·mm", { exact: true })).toBeVisible();
+      await expect(page.getByText("468,8 N/mm²", { exact: true })).toBeVisible();
+      await expect(page.getByText("5.000 N", { exact: true })).toHaveCount(2);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("loadKind")).toBe("verdeeld");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("verdeeld");
+      await expect(maximumDeflection).toHaveText("11,626 mm");
+      expect(new URL(page.url()).hash).toBe("#calculator");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const beamType of ["unknown", "", "constructor"]) {
     test(`beam ${locale} invalid support type ${JSON.stringify(beamType)} suppresses dependent output`, async ({
       page,
