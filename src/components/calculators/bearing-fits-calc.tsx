@@ -61,6 +61,8 @@ const T = {
     loadPlaceholder: "Kies een belastingsklasse",
     loadError: "Kies een belastingsklasse uit de lijst om de lagerpassingen te bepalen.",
     position: "Lagerpositie",
+    sidePlaceholder: "Kies een lagerpositie",
+    sideError: "Kies een lagerpositie uit de lijst om de lagerpassingen te bepalen.",
     fillDiameter: "Vul een as-Ø en lager-buitendiameter D in.",
     noData: (d: number) => `Geen gegevens voor Ø${d} mm — het bereik is 0 t/m 50 mm.`,
     noDataHousing: (D: number) =>
@@ -106,6 +108,8 @@ const T = {
     loadPlaceholder: "Choose a load class",
     loadError: "Choose a load class from the list to determine the bearing fits.",
     position: "Bearing position",
+    sidePlaceholder: "Choose a bearing position",
+    sideError: "Choose a bearing position from the list to determine the bearing fits.",
     fillDiameter: "Enter a shaft Ø and a bearing outside diameter D.",
     noData: (d: number) => `No data for Ø${d} mm — the range is 0 to 50 mm.`,
     noDataHousing: (D: number) =>
@@ -177,8 +181,11 @@ export function BearingFitsCalc() {
 
   const validLoad = LOAD_CLASSES.some((item) => item.id === load);
   const selectedLoad = validLoad ? load : null;
+  const validSide = BEARING_SIDES.some((item) => item.id === side);
+  const selectedSide = validSide ? side : null;
   const shaftClass = selectedLoad && Number.isFinite(d) ? shaftClassFor(selectedLoad, d) : null;
-  const housingClass = selectedLoad ? housingClassFor(selectedLoad, side) : null;
+  const housingClass =
+    selectedLoad && selectedSide ? housingClassFor(selectedLoad, selectedSide) : null;
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
   const housingFit = housingClass && Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
   const shaftLimits = shaftFit ? absoluteLimits(d, shaftFit.es, shaftFit.ei) : null;
@@ -263,7 +270,18 @@ export function BearingFitsCalc() {
             </SelectInput>
           </Field>
           <Field label={t.position}>
-            <SelectInput value={side} onChange={(v) => setSide(v as BearingSide)}>
+            <SelectInput
+              id="bearing-side"
+              value={validSide ? side : ""}
+              onChange={(v) => setSide(v as BearingSide)}
+              aria-invalid={!validSide || undefined}
+              aria-describedby={!validSide ? "bearing-side-error" : undefined}
+            >
+              {!validSide && (
+                <option value="" disabled>
+                  {t.sidePlaceholder}
+                </option>
+              )}
               {BEARING_SIDES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {sideLabel(s)}
@@ -278,8 +296,14 @@ export function BearingFitsCalc() {
             {t.loadError}
           </p>
         )}
+        {!validSide && (
+          <p id="bearing-side-error" className="mt-5 text-sm text-muted" role="status">
+            {t.sideError}
+          </p>
+        )}
 
-        {!validLoad ? null : parsed.status === "empty" || parsedHousing.status === "empty" ? (
+        {!validLoad || !validSide ? null : parsed.status === "empty" ||
+          parsedHousing.status === "empty" ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
           </p>
@@ -337,7 +361,7 @@ export function BearingFitsCalc() {
       >
         <BearingFitChart
           bandIndex={0}
-          shaft={shaftClass ?? undefined}
+          shaft={validSide ? (shaftClass ?? undefined) : undefined}
           hole={housingClass ?? undefined}
         />
       </SchemaPanel>

@@ -544,6 +544,77 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const side of ["unknown", "", "constructor"]) {
+    test(`bearing fits ${locale} invalid side ${JSON.stringify(side)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(`${prefix}/tools/bearing-fits?d=20&D=47&load=licht&side=${side}#calculator`, {
+        waitUntil: "networkidle",
+      });
+      const select = page.locator("#bearing-side");
+      const shaftResult = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(locale === "en" ? "Shaft — j6" : "As — j6", { exact: true }),
+        })
+        .locator("dd");
+      const housingResult = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(locale === "en" ? "Housing (D) — H7" : "Behuizing (D) — H7", {
+            exact: true,
+          }),
+        })
+        .locator("dd");
+
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a bearing position from the list to determine the bearing fits."
+          : "Kies een lagerpositie uit de lijst om de lagerpassingen te bepalen.",
+      );
+      await expect(page.locator("dl")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      const diagram = page.locator("figure").first();
+      await expect(diagram).toBeVisible();
+      await expect(diagram.getByText("j6", { exact: false })).toHaveCount(0);
+      await expect(diagram.getByText("J7", { exact: false })).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("side")).toBe(side);
+      // This calculator's established query sync normalizes away incoming fragments.
+      expect(new URL(page.url()).hash).toBe("");
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("side")).toBe(side);
+      expect(new URL(page.url()).hash).toBe("");
+
+      await select.selectOption("los");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(shaftResult).toHaveText("+0,009 / -0,004 mm");
+      await expect(housingResult).toHaveText("+0,025 / +0,000 mm");
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("side")).toBe("los");
+      expect(new URL(page.url()).hash).toBe("");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("los");
+      await expect(housingResult).toHaveText("+0,025 / +0,000 mm");
+      expect(new URL(page.url()).hash).toBe("");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const reliability of ["unknown", ""]) {
     test(`bearing ${locale} invalid reliability ${JSON.stringify(reliability)} is correctable`, async ({
       page,
