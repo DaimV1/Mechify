@@ -58,6 +58,8 @@ const T = {
     housingDiameter: "Lager-buitendiameter D (mm)",
     housingDiameterHint: "Niet de as-Ø — de buitendiameter van het gekozen lager (lagercatalogus).",
     load: "Belasting",
+    loadPlaceholder: "Kies een belastingsklasse",
+    loadError: "Kies een belastingsklasse uit de lijst om de lagerpassingen te bepalen.",
     position: "Lagerpositie",
     fillDiameter: "Vul een as-Ø en lager-buitendiameter D in.",
     noData: (d: number) => `Geen gegevens voor Ø${d} mm — het bereik is 0 t/m 50 mm.`,
@@ -101,6 +103,8 @@ const T = {
     housingDiameterHint:
       "Not the shaft Ø — the outside diameter of the selected bearing (bearing catalog).",
     load: "Load",
+    loadPlaceholder: "Choose a load class",
+    loadError: "Choose a load class from the list to determine the bearing fits.",
     position: "Bearing position",
     fillDiameter: "Enter a shaft Ø and a bearing outside diameter D.",
     noData: (d: number) => `No data for Ø${d} mm — the range is 0 to 50 mm.`,
@@ -171,10 +175,12 @@ export function BearingFitsCalc() {
   const parsedHousing = parseWholeMm(housingDiameter);
   const D = parsedHousing.status === "ok" ? parsedHousing.mm : Number.NaN;
 
-  const shaftClass = Number.isFinite(d) ? shaftClassFor(load, d) : null;
-  const housingClass = housingClassFor(load, side);
+  const validLoad = LOAD_CLASSES.some((item) => item.id === load);
+  const selectedLoad = validLoad ? load : null;
+  const shaftClass = selectedLoad && Number.isFinite(d) ? shaftClassFor(selectedLoad, d) : null;
+  const housingClass = selectedLoad ? housingClassFor(selectedLoad, side) : null;
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
-  const housingFit = Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
+  const housingFit = housingClass && Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
   const shaftLimits = shaftFit ? absoluteLimits(d, shaftFit.es, shaftFit.ei) : null;
   const housingLimits = housingFit ? absoluteLimits(D, housingFit.ES, housingFit.EI) : null;
   const loadLabel = (l: { label: string; labelEn: string }) =>
@@ -183,7 +189,8 @@ export function BearingFitsCalc() {
     locale === "nl" ? s.label : s.labelEn;
 
   const copy = useMemo(() => {
-    if (!shaftClass || !shaftFit || !housingFit || !shaftLimits || !housingLimits) return "";
+    if (!shaftClass || !housingClass || !shaftFit || !housingFit || !shaftLimits || !housingLimits)
+      return "";
     const loadObj = LOAD_CLASSES.find((l) => l.id === load);
     const sideObj = BEARING_SIDES.find((s) => s.id === side);
     return [
@@ -236,7 +243,18 @@ export function BearingFitsCalc() {
             />
           </Field>
           <Field label={t.load}>
-            <SelectInput value={load} onChange={(v) => setLoad(v as LoadClass)}>
+            <SelectInput
+              id="bearing-load"
+              value={validLoad ? load : ""}
+              onChange={(v) => setLoad(v as LoadClass)}
+              aria-invalid={!validLoad || undefined}
+              aria-describedby={!validLoad ? "bearing-load-error" : undefined}
+            >
+              {!validLoad && (
+                <option value="" disabled>
+                  {t.loadPlaceholder}
+                </option>
+              )}
               {LOAD_CLASSES.map((l) => (
                 <option key={l.id} value={l.id}>
                   {loadLabel(l)}
@@ -255,8 +273,13 @@ export function BearingFitsCalc() {
           </Field>
         </div>
         <p className="mt-2 text-xs text-subtle">{t.housingDiameterHint}</p>
+        {!validLoad && (
+          <p id="bearing-load-error" className="mt-5 text-sm text-muted" role="status">
+            {t.loadError}
+          </p>
+        )}
 
-        {parsed.status === "empty" || parsedHousing.status === "empty" ? (
+        {!validLoad ? null : parsed.status === "empty" || parsedHousing.status === "empty" ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
           </p>
@@ -312,7 +335,11 @@ export function BearingFitsCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        <BearingFitChart bandIndex={0} shaft={shaftClass ?? undefined} hole={housingClass} />
+        <BearingFitChart
+          bandIndex={0}
+          shaft={shaftClass ?? undefined}
+          hole={housingClass ?? undefined}
+        />
       </SchemaPanel>
 
       <section className="mt-12">
