@@ -10,7 +10,6 @@ import {
   STRESS_AREA,
   THREAD_SIZES,
   WRENCH_SIZES,
-  type ThreadSize,
 } from "@/lib/calculators/fasteners";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
@@ -52,6 +51,8 @@ const T = {
     intro:
       "T = K · F · d, met F = 0,75 · Rp0,2 · A_s (ISO 898-1). K ≈ 0,2 is de gangbare moerfactor voor niet-gesmeerde bevestigers — een SCHATTING, zie hieronder voor de aannames.",
     threadSize: "Draadmaat",
+    invalidSize: "Kies een ondersteunde draadmaat om de maten en het aandraaimoment te bepalen.",
+    chooseSize: "Kies een draadmaat",
     propertyClass: "Sterkteklasse",
     nutFactor: "Moerfactor K",
     holeFine: "Doorlaat fijn",
@@ -91,6 +92,8 @@ const T = {
     intro:
       "T = K · F · d, with F = 0.75 · Rp0.2 · A_s (ISO 898-1). K ≈ 0.2 is the common nut factor for non-lubricated fasteners — an ESTIMATE, see below for the assumptions.",
     threadSize: "Thread size",
+    invalidSize: "Choose a supported thread size to determine dimensions and tightening torque.",
+    chooseSize: "Choose a thread size",
     propertyClass: "Property class",
     nutFactor: "Nut factor K",
     holeFine: "Clearance fine",
@@ -133,11 +136,7 @@ export function FastenersCalc() {
   const [search] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [size, setSize] = useState<ThreadSize>(
-    (search.get("m") && THREAD_SIZES.includes(search.get("m") as ThreadSize)
-      ? search.get("m")
-      : "M8") as ThreadSize,
-  );
+  const [size, setSize] = useState(search.get("m") ?? "M8");
   const [classId, setClassId] = useState(search.get("c") ?? "8.8");
   const [k, setK] = useState(search.get("k") ?? "0.2");
 
@@ -151,6 +150,7 @@ export function FastenersCalc() {
   }, [size, classId, k]);
 
   const cls = PROPERTY_CLASSES.find((c) => c.id === classId);
+  const supportedSize = THREAD_SIZES.find((s) => s === size);
   const parsedK = parseNum(k);
   const kProducesFiniteResults =
     parsedK != null &&
@@ -167,12 +167,13 @@ export function FastenersCalc() {
         ? t.smallerNumber
         : undefined;
   const kVal = kProducesFiniteResults ? parsedK : null;
-  const torqueResult = kVal != null && cls ? computeTorque(size, cls, kVal) : null;
-  const hole = CLEARANCE_HOLES[size];
-  const wrench = WRENCH_SIZES[size];
+  const torqueResult =
+    kVal != null && cls && supportedSize ? computeTorque(supportedSize, cls, kVal) : null;
+  const hole = supportedSize ? CLEARANCE_HOLES[supportedSize] : null;
+  const wrench = supportedSize ? WRENCH_SIZES[supportedSize] : null;
 
   const copy = useMemo(() => {
-    if (!torqueResult) return "";
+    if (!torqueResult || !hole || !wrench) return "";
     return [
       t.copy(
         size,
@@ -200,7 +201,18 @@ export function FastenersCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={t.threadSize}>
-            <SelectInput value={size} onChange={(v) => setSize(v as ThreadSize)}>
+            <SelectInput
+              id="fastener-size"
+              value={supportedSize ?? ""}
+              onChange={setSize}
+              aria-invalid={!supportedSize || undefined}
+              aria-describedby={!supportedSize ? "fastener-size-error" : undefined}
+            >
+              {!supportedSize && (
+                <option value="" disabled>
+                  {t.chooseSize}
+                </option>
+              )}
               {THREAD_SIZES.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -238,21 +250,28 @@ export function FastenersCalc() {
           />
         </div>
 
-        <ResultGrid
-          items={
-            [
-              { label: t.holeFine, value: `Ø${hole.fine} mm` },
-              { label: t.holeMedium, value: `Ø${hole.medium} mm` },
-              { label: t.holeCoarse, value: `Ø${hole.coarse} mm` },
-              { label: t.wrenchHex, value: `${wrench.hex} mm` },
-              { label: t.wrenchSocket, value: `${wrench.socket} mm` },
-              torqueResult
-                ? { label: t.torque, value: `≈ ${fmtFastener(torqueResult.torque)} N·m` }
-                : null,
-            ].filter(Boolean) as { label: string; value: string }[]
-          }
-        />
-        {!torqueResult && (
+        {hole && wrench && (
+          <ResultGrid
+            items={
+              [
+                { label: t.holeFine, value: `Ø${hole.fine} mm` },
+                { label: t.holeMedium, value: `Ø${hole.medium} mm` },
+                { label: t.holeCoarse, value: `Ø${hole.coarse} mm` },
+                { label: t.wrenchHex, value: `${wrench.hex} mm` },
+                { label: t.wrenchSocket, value: `${wrench.socket} mm` },
+                torqueResult
+                  ? { label: t.torque, value: `≈ ${fmtFastener(torqueResult.torque)} N·m` }
+                  : null,
+              ].filter(Boolean) as { label: string; value: string }[]
+            }
+          />
+        )}
+        {!supportedSize && (
+          <p id="fastener-size-error" className="mt-3 text-sm text-muted" role="status">
+            {t.invalidSize}
+          </p>
+        )}
+        {(!cls || kVal == null) && (
           <p
             id={!cls ? "fastener-class-error" : undefined}
             className="mt-3 text-sm text-muted"
@@ -267,15 +286,17 @@ export function FastenersCalc() {
         </div>
         <SourceMetaBadge meta={FASTENER_META} />
       </CalcPanel>
-      <SchemaPanel
-        caption={
-          locale === "en"
-            ? "Technical diagram · dimensions in mm · schematic, not to scale"
-            : "Technisch schema · maten in mm · schematisch, niet op schaal"
-        }
-      >
-        <BoltSection row={lookupFastener(Number(size.slice(1)))} hole={hole.medium} />
-      </SchemaPanel>
+      {hole && (
+        <SchemaPanel
+          caption={
+            locale === "en"
+              ? "Technical diagram · dimensions in mm · schematic, not to scale"
+              : "Technisch schema · maten in mm · schematisch, niet op schaal"
+          }
+        >
+          <BoltSection row={lookupFastener(Number(size.slice(1)))} hole={hole.medium} />
+        </SchemaPanel>
+      )}
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">

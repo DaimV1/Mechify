@@ -253,8 +253,8 @@ for (const locale of ["nl", "en"] as const) {
       expect(new URL(page.url()).hash).toBe("#tool");
     });
   }
-  test(`fastener ${locale} prototype thread key uses supported default`, async ({ page }) => {
-    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fasteners?m=constructor`, {
+  test(`fastener ${locale} missing thread size keeps supported default`, async ({ page }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fasteners`, {
       waitUntil: "networkidle",
     });
     await expect(
@@ -264,6 +264,73 @@ for (const locale of ["nl", "en"] as const) {
     await expect.poll(() => new URL(page.url()).searchParams.get("m")).toBe("M8");
     await expect(page.getByText("≈ 28,1 N·m", { exact: true })).toBeVisible();
   });
+  test(`fastener ${locale} simultaneous invalid thread and class retain associated errors`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale === "en" ? "/en" : ""}/tools/fasteners?m=unknown&c=unknown`, {
+      waitUntil: "networkidle",
+    });
+    await expect(page.locator("#fastener-size")).toHaveAttribute(
+      "aria-describedby",
+      "fastener-size-error",
+    );
+    await expect(page.locator("#fastener-class")).toHaveAttribute(
+      "aria-describedby",
+      "fastener-class-error",
+    );
+    await expect(page.locator("#fastener-size-error")).toBeVisible();
+    await expect(page.locator("#fastener-class-error")).toBeVisible();
+    await page.locator("#fastener-size").selectOption("M3");
+    await expect(page.getByText("Ø3.4 mm", { exact: true })).toBeVisible();
+    await expect(page.locator("#fastener-class-error")).toBeVisible();
+    await expect(
+      page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      }),
+    ).toHaveCount(0);
+  });
+  for (const value of ["unknown", "", "constructor"]) {
+    test(`fastener ${locale} invalid thread ${JSON.stringify(value)} preserves URL and recovers`, async ({
+      page,
+      context,
+    }) => {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+      await page.goto(
+        `${locale === "en" ? "/en" : ""}/tools/fasteners?m=${value}&c=8.8&k=0.2#tool`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#fastener-size");
+      const copy = page.getByRole("button", {
+        name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+        exact: true,
+      });
+      for (let pass = 0; pass < 2; pass++) {
+        if (pass) await page.reload({ waitUntil: "networkidle" });
+        await expect(select).toHaveAttribute("aria-invalid", "true");
+        await expect(select).toHaveAccessibleDescription(
+          locale === "en"
+            ? "Choose a supported thread size to determine dimensions and tightening torque."
+            : "Kies een ondersteunde draadmaat om de maten en het aandraaimoment te bepalen.",
+        );
+        await expect(page.locator("dl")).toHaveCount(0);
+        await expect(copy).toHaveCount(0);
+        await expect(page.locator(".ref-table")).toBeVisible();
+        expect(new URL(page.url()).searchParams.get("m")).toBe(value);
+        expect(new URL(page.url()).hash).toBe("#tool");
+      }
+      await select.selectOption("M3");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText("≈ 1,4 N·m", { exact: true })).toBeVisible();
+      await expect(page.getByText("Ø3.4 mm", { exact: true })).toBeVisible();
+      await copy.click();
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("M3");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("M3");
+      await expect(page.getByText("≈ 1,4 N·m", { exact: true })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe("#tool");
+    });
+  }
 }
 
 for (const locale of ["nl", "en"] as const) {
