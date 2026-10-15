@@ -267,6 +267,63 @@ for (const locale of ["nl", "en"] as const) {
 }
 
 for (const locale of ["nl", "en"] as const) {
+  for (const size of ["unknown", "", "constructor"]) {
+    test(`bolted joint ${locale} invalid thread size ${JSON.stringify(size)} suppresses dependent output`, async ({
+      page,
+    }) => {
+      const prefix = locale === "en" ? "/en" : "";
+      await page.goto(
+        `${prefix}/calculators/bolted-joint?m=${size}&c=8.8&fv=20&fz=1&phi=0.25&fa=5&fkreq=10`,
+        { waitUntil: "networkidle" },
+      );
+      const select = page.locator("#bolted-joint-size");
+      const safety = page
+        .locator("dl > div")
+        .filter({
+          has: page.getByText(
+            locale === "en" ? "Static safety against yield S_F" : "Veiligheid tegen vloeien S_F",
+            { exact: true },
+          ),
+        })
+        .locator("dd");
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      await expect(select).toHaveAccessibleDescription(
+        locale === "en"
+          ? "Choose a thread size from the list to calculate bolt stress."
+          : "Kies een draadmaat uit de lijst om de boutspanning te berekenen.",
+      );
+      await expect(page.locator("dl")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      expect(new URL(page.url()).searchParams.get("m")).toBe(size);
+
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveAttribute("aria-invalid", "true");
+      expect(new URL(page.url()).searchParams.get("m")).toBe(size);
+
+      await select.selectOption("M3");
+      await expect(select).not.toHaveAttribute("aria-invalid");
+      await expect(page.getByText("4.025,8 N/mm²", { exact: true })).toBeVisible();
+      await expect(safety).toHaveText("0,16");
+      await expect(
+        page.getByRole("button", {
+          name: locale === "en" ? "Copy result" : "Kopieer resultaat",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect.poll(() => new URL(page.url()).searchParams.get("m")).toBe("M3");
+      await page.reload({ waitUntil: "networkidle" });
+      await expect(select).toHaveValue("M3");
+      await expect(safety).toHaveText("0,16");
+    });
+  }
+}
+
+for (const locale of ["nl", "en"] as const) {
   for (const loadKind of ["unknown", "", "constructor"]) {
     test(`beam ${locale} invalid load type ${JSON.stringify(loadKind)} suppresses dependent output`, async ({
       page,
