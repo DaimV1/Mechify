@@ -78,6 +78,8 @@ const T = {
     sfCaution: "S_F tussen 1,0 en 1,2 — krap, controleer belastingaannames.",
     sfOk: "S_F ≥ 1,2 — voldoende marge tegen vloeien.",
     fill: "Vul alle velden geldig in: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A en F_Kerf ≥ 0. Alleen eindige waarden.",
+    threadSizePlaceholder: "Kies een draadmaat",
+    threadSizeError: "Kies een draadmaat uit de lijst om de boutspanning te berekenen.",
     chainToFasteners: "Gebruik de bevestigingsmateriaal-tool voor aandraaimoment en A_s/Rp0,2 →",
     copy: (
       size: string,
@@ -125,6 +127,8 @@ const T = {
     sfCaution: "S_F between 1.0 and 1.2 — tight, check the load assumptions.",
     sfOk: "S_F ≥ 1.2 — adequate margin against yielding.",
     fill: "Enter every field correctly: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A and F_Kerf ≥ 0. Finite values only.",
+    threadSizePlaceholder: "Choose a thread size",
+    threadSizeError: "Choose a thread size from the list to calculate bolt stress.",
     chainToFasteners: "Use the fasteners tool for tightening torque and A_s/Rp0.2 →",
     copy: (
       size: string,
@@ -149,9 +153,7 @@ export function BoltedJointCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
-  const [size, setSize] = useState<ThreadSize>(
-    (THREAD_SIZES.includes(search.get("m") as ThreadSize) ? search.get("m") : "M10") as ThreadSize,
-  );
+  const [size, setSize] = useState(search.get("m") ?? "M10");
   const [classId, setClassId] = useState(
     PROPERTY_CLASSES.some((c) => c.id === search.get("c")) ? search.get("c")! : "8.8",
   );
@@ -176,7 +178,9 @@ export function BoltedJointCalc() {
   }, [size, classId, fv, fz, phi, fa, fkreq]);
 
   const cls = PROPERTY_CLASSES.find((c) => c.id === classId) ?? PROPERTY_CLASSES[0];
-  const As = STRESS_AREA[size];
+  const validSize = THREAD_SIZES.includes(size as ThreadSize);
+  const selectedSize = validSize ? (size as ThreadSize) : null;
+  const As = selectedSize == null ? null : STRESS_AREA[selectedSize];
   const Rp = yieldStress(cls);
 
   const fvVal = parseNum(fv);
@@ -186,7 +190,12 @@ export function BoltedJointCalc() {
   const fkreqVal = parseNum(fkreq);
 
   const result =
-    fvVal != null && fzVal != null && faVal != null && phiVal != null && fkreqVal != null
+    As != null &&
+    fvVal != null &&
+    fzVal != null &&
+    faVal != null &&
+    phiVal != null &&
+    fkreqVal != null
       ? computeBoltedJoint({
           As,
           Rp,
@@ -244,7 +253,18 @@ export function BoltedJointCalc() {
         <h3 className="mt-6 font-display text-base font-semibold text-ink">{t.inputSection}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <Field label={t.threadSize}>
-            <SelectInput value={size} onChange={(v) => setSize(v as ThreadSize)}>
+            <SelectInput
+              id="bolted-joint-size"
+              value={validSize ? size : ""}
+              onChange={setSize}
+              aria-invalid={!validSize || undefined}
+              aria-describedby={!validSize ? "bolted-joint-size-error" : undefined}
+            >
+              {!validSize && (
+                <option value="" disabled>
+                  {t.threadSizePlaceholder}
+                </option>
+              )}
               {THREAD_SIZES.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -278,8 +298,14 @@ export function BoltedJointCalc() {
           </Field>
         </div>
 
+        {!validSize && (
+          <p id="bolted-joint-size-error" className="mt-5 text-sm text-muted" role="status">
+            {t.threadSizeError}
+          </p>
+        )}
+
         <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.resultsSection}</h3>
-        {!result ? (
+        {!validSize ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fill}
           </p>
