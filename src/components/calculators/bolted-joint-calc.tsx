@@ -80,6 +80,9 @@ const T = {
     fill: "Vul alle velden geldig in: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A en F_Kerf ≥ 0. Alleen eindige waarden.",
     threadSizePlaceholder: "Kies een draadmaat",
     threadSizeError: "Kies een draadmaat uit de lijst om de boutspanning te berekenen.",
+    propertyClassPlaceholder: "Kies een sterkteklasse",
+    propertyClassError:
+      "Kies een sterkteklasse uit de lijst om de veiligheid tegen vloeien te berekenen.",
     chainToFasteners: "Gebruik de bevestigingsmateriaal-tool voor aandraaimoment en A_s/Rp0,2 →",
     copy: (
       size: string,
@@ -129,6 +132,9 @@ const T = {
     fill: "Enter every field correctly: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A and F_Kerf ≥ 0. Finite values only.",
     threadSizePlaceholder: "Choose a thread size",
     threadSizeError: "Choose a thread size from the list to calculate bolt stress.",
+    propertyClassPlaceholder: "Choose a property class",
+    propertyClassError:
+      "Choose a property class from the list to calculate safety against yielding.",
     chainToFasteners: "Use the fasteners tool for tightening torque and A_s/Rp0.2 →",
     copy: (
       size: string,
@@ -154,9 +160,7 @@ export function BoltedJointCalc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const [size, setSize] = useState(search.get("m") ?? "M10");
-  const [classId, setClassId] = useState(
-    PROPERTY_CLASSES.some((c) => c.id === search.get("c")) ? search.get("c")! : "8.8",
-  );
+  const [classId, setClassId] = useState(search.get("c") ?? "8.8");
   const [fv, setFv] = useState(search.get("fv") ?? "20");
   const [fz, setFz] = useState(search.get("fz") ?? "1");
   const [phi, setPhi] = useState(search.get("phi") ?? "0.25");
@@ -177,11 +181,11 @@ export function BoltedJointCalc() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, classId, fv, fz, phi, fa, fkreq]);
 
-  const cls = PROPERTY_CLASSES.find((c) => c.id === classId) ?? PROPERTY_CLASSES[0];
+  const cls = PROPERTY_CLASSES.find((c) => c.id === classId);
   const validSize = THREAD_SIZES.includes(size as ThreadSize);
   const selectedSize = validSize ? (size as ThreadSize) : null;
   const As = selectedSize == null ? null : STRESS_AREA[selectedSize];
-  const Rp = yieldStress(cls);
+  const Rp = cls ? yieldStress(cls) : null;
 
   const fvVal = parseNum(fv);
   const fzVal = parseNum(fz);
@@ -191,6 +195,7 @@ export function BoltedJointCalc() {
 
   const result =
     As != null &&
+    Rp != null &&
     fvVal != null &&
     fzVal != null &&
     faVal != null &&
@@ -273,7 +278,18 @@ export function BoltedJointCalc() {
             </SelectInput>
           </Field>
           <Field label={t.propertyClass}>
-            <SelectInput value={classId} onChange={setClassId}>
+            <SelectInput
+              id="bolted-joint-class"
+              value={cls ? classId : ""}
+              onChange={setClassId}
+              aria-invalid={!cls || undefined}
+              aria-describedby={!cls ? "bolted-joint-class-error" : undefined}
+            >
+              {!cls && (
+                <option value="" disabled>
+                  {t.propertyClassPlaceholder}
+                </option>
+              )}
               {PROPERTY_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.id}
@@ -305,7 +321,12 @@ export function BoltedJointCalc() {
         )}
 
         <h3 className="mt-8 font-display text-base font-semibold text-ink">{t.resultsSection}</h3>
-        {!validSize ? null : !result ? (
+        {!cls && (
+          <p id="bolted-joint-class-error" className="mt-5 text-sm text-muted" role="status">
+            {t.propertyClassError}
+          </p>
+        )}
+        {!validSize || !cls ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fill}
           </p>
