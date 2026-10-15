@@ -52,6 +52,8 @@ const T = {
     intro:
       "Euler-Bernoulli balktheorie: één puntlast of één gelijkmatig verdeelde last over de hele overspanning. Bij puntlast is a de afstand tot de linkeroplegging (vrij opgelegd) of tot de inklemming (uitkraging).",
     loadKind: "Soort last",
+    loadKindPlaceholder: "Kies een soort last",
+    loadKindError: "Kies een soort last uit de lijst om de doorbuiging te berekenen.",
     beamType: "Balktype",
     beamTypePlaceholder: "Kies een balktype",
     beamTypeError: "Kies een balktype uit de lijst om de doorbuiging te berekenen.",
@@ -117,6 +119,8 @@ const T = {
     intro:
       "Euler-Bernoulli beam theory: one point load or one full-span uniformly distributed load. For a point load, a is the distance to the left support (simply supported) or to the fixed end (cantilever).",
     loadKind: "Load type",
+    loadKindPlaceholder: "Choose a load type",
+    loadKindError: "Choose a load type from the list to calculate deflection.",
     beamType: "Beam type",
     beamTypePlaceholder: "Choose a beam type",
     beamTypeError: "Choose a beam type from the list to calculate deflection.",
@@ -285,6 +289,7 @@ export function BeamDeflectionCalc() {
   const allowableRaw = parseNum(allowable);
   const validBeamType = BEAM_TYPES.some((type) => type.id === beamType);
   const selectedBeamType = validBeamType ? beamType : null;
+  const validLoadKind = LOAD_KINDS.some((kind) => kind.id === loadKind);
   const validMaterial = MATERIALS_E.some((item) => item.id === materialId);
   const validAxis = axis === "weak" || axis === "strong";
   const axisSelectionValid = !axisApplies || validAxis;
@@ -292,10 +297,11 @@ export function BeamDeflectionCalc() {
   const E = material?.E ?? null;
   const rp02 = material?.Rp02 ?? null;
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
-  const isUDL = loadKind === "verdeeld";
+  const isUDL = validLoadKind && loadKind === "verdeeld";
 
   const result =
     selectedBeamType != null &&
+    validLoadKind &&
     validMaterial &&
     axisSelectionValid &&
     E != null &&
@@ -391,7 +397,18 @@ export function BeamDeflectionCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.loadKind}>
-            <SelectInput value={loadKind} onChange={(v) => setLoadKind(v as LoadKind)}>
+            <SelectInput
+              id="beam-load-kind"
+              value={validLoadKind ? loadKind : ""}
+              onChange={(v) => setLoadKind(v as LoadKind)}
+              aria-invalid={!validLoadKind || undefined}
+              aria-describedby={!validLoadKind ? "beam-load-kind-error" : undefined}
+            >
+              {!validLoadKind && (
+                <option value="" disabled>
+                  {t.loadKindPlaceholder}
+                </option>
+              )}
               {LOAD_KINDS.map((lk) => (
                 <option key={lk.id} value={lk.id}>
                   {label(lk)}
@@ -532,6 +549,11 @@ export function BeamDeflectionCalc() {
             </>
           ) : null}
         </div>
+        {!validLoadKind && (
+          <p id="beam-load-kind-error" className="mt-5 text-sm text-muted" role="status">
+            {t.loadKindError}
+          </p>
+        )}
         {!validBeamType && (
           <p id="beam-type-error" className="mt-5 text-sm text-muted" role="status">
             {t.beamTypeError}
@@ -549,7 +571,10 @@ export function BeamDeflectionCalc() {
         )}
         {axisApplies ? <p className="mt-2 text-xs text-subtle">{t.axisNote}</p> : null}
 
-        {!validBeamType || !validMaterial || !axisSelectionValid ? null : !section ? (
+        {!validLoadKind ||
+        !validBeamType ||
+        !validMaterial ||
+        !axisSelectionValid ? null : !section ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDims}
           </p>
@@ -625,7 +650,7 @@ export function BeamDeflectionCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        {!validBeamType || !validMaterial || !axisSelectionValid ? (
+        {!validLoadKind || !validBeamType || !validMaterial || !axisSelectionValid ? (
           <p>{t.diagramFillPrompt}</p>
         ) : isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
