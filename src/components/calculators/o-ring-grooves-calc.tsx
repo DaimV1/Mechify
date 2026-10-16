@@ -151,10 +151,15 @@ export function OringGroovesCalc() {
   const [sealType, setSealType] = useState<SealType>(
     (search.get("seal") as SealType) ?? "statisch",
   );
-  const seal = SEAL_TYPES.find((s) => s.id === sealType) ?? SEAL_TYPES[0];
+  const seal = SEAL_TYPES.find((s) => s.id === sealType);
+  const sealError = seal
+    ? undefined
+    : locale === "nl"
+      ? "Kies een ondersteunde toepassing."
+      : "Choose a supported application.";
   const sealLabel = (s: { label: string; labelEn: string }) =>
     locale === "nl" ? s.label : s.labelEn;
-  const [squeeze, setSqueeze] = useState(search.get("sq") ?? String(seal.default));
+  const [squeeze, setSqueeze] = useState(search.get("sq") ?? (seal ? String(seal.default) : ""));
   const [widthFactor, setWidthFactor] = useState(search.get("wf") ?? "1.4");
 
   useEffect(() => {
@@ -186,17 +191,20 @@ export function OringGroovesCalc() {
       ? locale === "nl"
         ? "Vul een breedtefactor groter dan 1 in."
         : "Enter a width factor greater than 1."
-      : STANDARD_CORDS.some((c) => computeOringGroove(c, seal.default, widthFactorVal) == null)
+      : seal &&
+          STANDARD_CORDS.some((c) => computeOringGroove(c, seal.default, widthFactorVal) == null)
         ? locale === "nl"
           ? "Vul een kleinere breedtefactor in."
           : "Enter a smaller width factor."
         : undefined;
-  const result = widthError ? null : resultCandidate;
+  const result = widthError || !seal ? null : resultCandidate;
   const outOfRange =
-    squeezeVal != null && (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
+    seal != null &&
+    squeezeVal != null &&
+    (squeezeVal < seal.squeezeMin || squeezeVal > seal.squeezeMax);
 
   const copy = useMemo(() => {
-    if (!result || result.overfilled) return "";
+    if (!result || result.overfilled || !seal) return "";
     const depthLabel = direction === "radiaal" ? t.depthRadial : t.depthAxial;
     return [
       t.copy(
@@ -241,15 +249,30 @@ export function OringGroovesCalc() {
             </SelectInput>
           </Field>
           <Field label={t.application}>
-            <SelectInput value={sealType} onChange={(v) => onSealType(v as SealType)}>
+            <SelectInput
+              value={seal ? sealType : ""}
+              onChange={(v) => onSealType(v as SealType)}
+              aria-invalid={Boolean(sealError)}
+              aria-describedby={sealError ? "oring-seal-error" : undefined}
+            >
+              {!seal && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies toepassing" : "Choose application"}
+                </option>
+              )}
               {SEAL_TYPES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {sealLabel(s)}
                 </option>
               ))}
             </SelectInput>
+            {sealError && (
+              <p id="oring-seal-error" role="alert" className="text-sm text-danger">
+                {sealError}
+              </p>
+            )}
           </Field>
-          <Field label={t.squeeze(seal.squeezeMin, seal.squeezeMax)}>
+          <Field label={seal ? t.squeeze(seal.squeezeMin, seal.squeezeMax) : "Squeeze %"}>
             <NumInput id="oring-squeeze" value={squeeze} onChange={setSqueeze} />
           </Field>
           <ValidatedNumField
@@ -262,7 +285,7 @@ export function OringGroovesCalc() {
           />
         </div>
 
-        {widthError ? null : !result ? (
+        {widthError || !seal ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillValid}
           </p>
@@ -320,14 +343,20 @@ export function OringGroovesCalc() {
             <thead>
               <tr>
                 <th>{t.thCord}</th>
-                <th>{t.thDepthAt(seal.default)}</th>
+                <th>
+                  {seal
+                    ? t.thDepthAt(seal.default)
+                    : locale === "nl"
+                      ? "Groefdiepte"
+                      : "Groove depth"}
+                </th>
                 <th>{t.grooveWidth}</th>
                 <th>{t.fillPercent}</th>
               </tr>
             </thead>
             <tbody>
               {STANDARD_CORDS.map((c) => {
-                const r = computeOringGroove(c, seal.default, widthFactorVal);
+                const r = seal ? computeOringGroove(c, seal.default, widthFactorVal) : null;
                 return (
                   <tr key={c} className={cordVal === c ? "is-active" : ""}>
                     <th scope="row" className="normal-case">
