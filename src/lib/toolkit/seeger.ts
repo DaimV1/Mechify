@@ -17,6 +17,8 @@ export type SeegerSource = {
   diameterMin: number;
   diameterMax: number;
   width: number;
+  /** Published W minimum; no upper width limit established by this source. */
+  widthMinimumSource?: { url: string; page: number; checkedDate: string };
 };
 
 /** Rotor Clip product specifications, mm. W is the published catalogue width;
@@ -44,6 +46,15 @@ export const SEEGER_SOURCES: Record<string, SeegerSource> = Object.fromEntries(
       diameterMin: Number(diameterMin),
       diameterMax: Number(diameterMax),
       width: Number(width),
+      ...(kind === "as" && [10, 20, 25, 30].includes(Number(d))
+        ? {
+            widthMinimumSource: {
+              url: "https://rcwebcatalog.s3.amazonaws.com/dsh.pdf",
+              page: 82,
+              checkedDate: "2026-10-22",
+            },
+          }
+        : {}),
     },
   ]),
 );

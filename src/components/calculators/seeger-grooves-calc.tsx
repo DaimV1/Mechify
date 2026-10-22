@@ -58,7 +58,8 @@ const T = {
     },
     grooveDiameter: "Groefdiameter",
     grooveWidth: "Groefbreedte",
-    grooveDepth: "Groefdiepte (nominaal)",
+    grooveDepth: "Groefdiepte (nominale referentie)",
+    widthLimit: "W is de minimumbreedte. Deze bron geeft geen bovengrens voor de groefbreedte.",
     verified: "Geverifieerd t.o.v. fabrikant-datasheet.",
     notVerified:
       "Niet geverifieerd — controleer tegen DIN 471/472 of de fabrikantcatalogus vóór productie.",
@@ -87,7 +88,9 @@ const T = {
     },
     grooveDiameter: "Groove diameter",
     grooveWidth: "Groove width",
-    grooveDepth: "Groove depth (nominal)",
+    grooveDepth: "Groove depth (nominal reference)",
+    widthLimit:
+      "W is the minimum width. This source does not establish an upper groove-width limit.",
     verified: "Verified against a manufacturer datasheet.",
     notVerified:
       "Not verified — confirm against DIN 471/472 or the manufacturer catalog before production.",
@@ -101,8 +104,12 @@ const T = {
 
 function diameterText(r: NonNullable<ReturnType<typeof computeGroove>>) {
   return r.source
-    ? `${fmtCirclip(r.source.diameterMin)}–${fmtCirclip(r.source.diameterMax)}`
+    ? `${fmtCirclip(r.source.diameterMin, 3)}–${fmtCirclip(r.source.diameterMax, 3)}`
     : fmtCirclip(r.grooveDiameter);
+}
+
+function widthText(r: NonNullable<ReturnType<typeof computeGroove>>) {
+  return `${r.source?.widthMinimumSource ? "≥" : ""}${fmtCirclip(r.grooveWidth)}`;
 }
 
 export function SeegerGroovesCalc() {
@@ -145,12 +152,18 @@ export function SeegerGroovesCalc() {
     const status = result.verified ? t.verified : t.notVerified;
     return [
       `${t.copyKind[kind]} Ø${d} mm (${standard}) — ${status}`,
-      `${t.grooveDiameter} ${diameterText(result)} mm`,
-      `${t.grooveWidth} ${fmtCirclip(result.grooveWidth)} mm (W)`,
+      `${t.grooveDiameter} Ø${diameterText(result)} mm`,
+      `${t.grooveWidth} ${widthText(result)} mm (W)`,
       `${t.grooveDepth} ${fmtCirclip(result.grooveDepth)} mm`,
       result.source
         ? `Rotor Clip ${result.source.part} | ${result.source.url} | ${result.source.checkedDate}`
         : t.notVerified,
+      ...(result.source?.widthMinimumSource
+        ? [
+            t.widthLimit,
+            `${result.source.widthMinimumSource.url} | p. ${result.source.widthMinimumSource.page} | ${result.source.widthMinimumSource.checkedDate}`,
+          ]
+        : []),
       metaCopyLine(SEEGER_META, locale),
     ].join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -224,7 +237,7 @@ export function SeegerGroovesCalc() {
                 },
                 {
                   label: t.grooveWidth,
-                  value: `${fmtCirclip(result.grooveWidth)} mm (W)`,
+                  value: `${widthText(result)} mm (W)`,
                 },
                 {
                   label: t.grooveDepth,
@@ -238,6 +251,14 @@ export function SeegerGroovesCalc() {
                   Rotor Clip {result.source.part}
                 </a>{" "}
                 · {locale === "nl" ? "Gecontroleerd" : "Reviewed"}: {result.source.checkedDate}
+              </p>
+            )}
+            {result.source?.widthMinimumSource && (
+              <p className="mt-3 text-sm text-muted">
+                {t.widthLimit}{" "}
+                <a className="underline" href={result.source.widthMinimumSource.url}>
+                  Rotor Clip DSH · p. {result.source.widthMinimumSource.page}
+                </a>
               </p>
             )}
             <div className="flex flex-wrap gap-2">
@@ -262,6 +283,8 @@ export function SeegerGroovesCalc() {
             d2={result?.grooveDiameter}
             b={result?.grooveWidth}
             t={result?.grooveDepth}
+            diameterLimits={result?.source ? diameterText(result) : undefined}
+            widthMinimum={Boolean(result?.source?.widthMinimumSource)}
           />
         </SchemaPanel>
       )}
@@ -292,7 +315,7 @@ export function SeegerGroovesCalc() {
                           {dia}
                         </th>
                         <td>{r ? `Ø${diameterText(r)}` : "—"}</td>
-                        <td>{r ? `${fmtCirclip(r.grooveWidth)} W` : "—"}</td>
+                        <td>{r ? `${widthText(r)} W` : "—"}</td>
                         <td>{r ? fmtCirclip(r.grooveDepth) : "—"}</td>
                         <td>
                           {r ? (
