@@ -1,5 +1,11 @@
 # Mechify consolidated implementation plan — 7 October 2026
 
+## 2026-10-16 continuation — PR #72 and nominal-fit selection validation
+
+- PR #72 merged as `d4ed3d379e30faa9ca39437e8726e6a138a0079b` after both critics accepted exact tree `4b19d6d51e599e77c7a15dd25d2914e0ad3db368` and full CI `38852885061` passed. Exact production deployment `dpl_8LQBenSgqx322eDiZNmfm8Cino2D` is READY and live revision matches the merge SHA. Deployed-smoke `38881818373` was in progress at this checkpoint; no success claim yet. This supersedes pending O-ring application implementation below.
+- Confirmed in shared NL/EN source and executable reproduction: unsupported, blank and `constructor` nominal-fit `fit` values silently select and rewrite H7/h6, exposing its clearance result, copied report and CAD callouts. At diameter 20 mm, existing H7 limits are 20.000–20.021 mm; h6 shaft limits 19.987–20.000 mm produce 0–34 µm clearance. Supported p6 shaft limits 20.022–20.035 mm produce −35 to −1 µm clearance (interference). Independently subtracting maximum shaft from minimum hole and minimum shaft from maximum hole confirms a 35 µm shift of both clearance bounds and a different fit classification. This compares existing data, not certification of ISO tables or a claim that invalid means p6.
+- Pending review/release: preserve invalid raw fit URL/hash/reload, show associated bilingual correction, and suppress selected result/copy/CAD callouts/handoff until supported recovery. Missing `fit` retains H7/h6. Independent preferred-fit, hole/shaft tables and reference guidance remain available. No formulas, table values, defaults, thresholds or source claims changed. Added NL/EN invalid/reload/hash/recovery/copy/default regressions. Actual browser execution and exact independent reviews remain gates; manual AT/zoom, CAD and source evidence gaps stay open.
+
 ## 2026-10-16 continuation — PR #71 and O-ring application validation
 
 - PR #71 merged as `66ace81cac17c3b2002a230c038a17b9305bbfca` after both critics accepted exact tree `7ae1dafc52bd158cfbd31d124aea821978aae75c` and full CI `38824558852` passed. Production deployment `dpl_A9UFj9bKDGThZPRfkGQtLV1E9LgW` is READY, live revision matches the merge SHA, and deployed-smoke `38833923924` succeeded. This supersedes the pending fastener thread-size checkpoint below.
