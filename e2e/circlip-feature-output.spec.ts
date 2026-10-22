@@ -4,7 +4,7 @@ for (const locale of ["nl", "en"] as const) {
   test(`circlip groove limits and minimum width agree across outputs (${locale})`, async ({
     page,
     context,
-  }) => {
+  }, testInfo) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto(`${locale === "en" ? "/en" : ""}/tools/seeger-grooves?kind=as&d=20`, {
       waitUntil: "networkidle",
@@ -19,6 +19,10 @@ for (const locale of ["nl", "en"] as const) {
     await expect(diagram).toContainText("d₂ Ø18,87–19 mm");
     await expect(diagram).toContainText("W ≥1,3");
     await expect(diagram).toContainText("t 0,5 (ref.)");
+    await testInfo.attach(`circlip-shaft-20-${locale}`, {
+      body: await diagram.screenshot({ animations: "disabled" }),
+      contentType: "image/png",
+    });
     await page
       .getByRole("button", {
         name: locale === "nl" ? "Kopieer resultaat" : "Copy result",
@@ -47,6 +51,10 @@ for (const locale of ["nl", "en"] as const) {
     });
     expect(bounds.left).toBeGreaterThanOrEqual(0);
     expect(bounds.right).toBeGreaterThanOrEqual(0);
+    await testInfo.attach(`circlip-shaft-25-${locale}`, {
+      body: await diagram.screenshot({ animations: "disabled" }),
+      contentType: "image/png",
+    });
     await page
       .getByRole("button", {
         name: locale === "nl" ? "Kopieer resultaat" : "Copy result",
@@ -59,6 +67,10 @@ for (const locale of ["nl", "en"] as const) {
     await expect(results).toContainText("Ø21–21,13 mm");
     await expect(results).not.toContainText("≥");
     await expect(diagram).not.toContainText("≥");
+    await testInfo.attach(`circlip-bore-20-${locale}`, {
+      body: await diagram.screenshot({ animations: "disabled" }),
+      contentType: "image/png",
+    });
     await page.locator("#circlip-kind").selectOption("as");
     await page.locator("#circlip-diameter").fill("40");
     await expect(results).not.toContainText("≥");
