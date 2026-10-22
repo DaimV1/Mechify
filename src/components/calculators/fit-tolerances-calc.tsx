@@ -188,10 +188,13 @@ export function FitTolerancesCalc() {
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 4, max: 3150 }),
   );
-  const [fitId, setFitId] = useState(() => {
-    const fromUrl = search.get("fit");
-    return fromUrl && FITS.some((f) => f.id === fromUrl) ? fromUrl : "H7/h6";
-  });
+  const [fitId, setFitId] = useState(() => search.get("fit") ?? "H7/h6");
+  const validFit = FITS.some((f) => f.id === fitId);
+  const fitError = validFit
+    ? undefined
+    : locale === "nl"
+      ? "Kies een ondersteunde passing."
+      : "Choose a supported fit.";
 
   useEffect(() => {
     const next = new URLSearchParams(search);
@@ -223,7 +226,11 @@ export function FitTolerancesCalc() {
   const activeBand = Number.isFinite(d) ? bandIndex(d) : -1;
   const activeBandExtended = activeBand >= 0 && isExtendedBand(activeBand);
   const fitOutOfBandRange =
-    Number.isFinite(d) && activeBand >= 0 && activeBandExtended && !fitExtendable(fitId);
+    validFit &&
+    Number.isFinite(d) &&
+    activeBand >= 0 &&
+    activeBandExtended &&
+    !fitExtendable(fitId);
   const disputedP6 = DISPUTED_P6_FIRST_BAND && activeBand === 0 && result?.fit.shaft === "p6";
 
   const copy = useMemo(() => {
@@ -256,7 +263,18 @@ export function FitTolerancesCalc() {
             error={diameterError}
           />
           <Field label={t.fitLabel}>
-            <SelectInput id="fit-select" value={fitId} onChange={setFitId}>
+            <SelectInput
+              id="fit-select"
+              value={validFit ? fitId : ""}
+              onChange={setFitId}
+              aria-invalid={Boolean(fitError)}
+              aria-describedby={fitError ? "fit-selection-error" : undefined}
+            >
+              {!validFit && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies passing" : "Choose fit"}
+                </option>
+              )}
               {FITS.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.id}
@@ -264,6 +282,11 @@ export function FitTolerancesCalc() {
                 </option>
               ))}
             </SelectInput>
+            {fitError && (
+              <p id="fit-selection-error" role="alert" className="text-sm text-danger">
+                {fitError}
+              </p>
+            )}
           </Field>
         </div>
 
@@ -275,7 +298,7 @@ export function FitTolerancesCalc() {
           <p className="mt-5 text-sm text-muted" role="status">
             {diameterError}
           </p>
-        ) : fitOutOfBandRange ? (
+        ) : fitError ? null : fitOutOfBandRange ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.noFormula(fitId, d, BANDS[activeBand] ? bandLabel(BANDS[activeBand]) : "")}
           </p>
