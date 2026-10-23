@@ -1,5 +1,5 @@
 import { KeywaySection, SchemaPanel } from "@/components/toolkit/schema";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { KEYWAYS, keyWidthTol, lookupKeyway, WIDTH_FITS } from "@/lib/calculators/keyway";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -43,7 +43,7 @@ const rangeLabelDisplay = (over: number, to: number) => `>${over} – ≤${to}`;
 
 const T = {
   nl: {
-    heading: "Spie bij as-Ø",
+    heading: "Spiebanen bij as-Ø",
     intro:
       "As-Ø in hele mm, DIN 6885-1 (bovengrens inclusief; Ø 6 mm valt net buiten de eerste rij).",
     diameterLabel: "As-Ø (mm)",
@@ -51,10 +51,12 @@ const T = {
     noRow: (d: number) =>
       `Geen rij in DIN 6885-1 voor Ø ${d} mm. De tabel begint boven 6 mm tot en met 110 mm.`,
     shaftAt: (d: number, range: string) => `As Ø ${d} mm · ${range}`,
-    keyBH: "Spie b × h",
-    t1: "t₁ as",
-    t2: "t₂ naaf",
-    depthTol: "Dieptetolerantie",
+    keyBH: "Bijpassende spie b × h (referentie)",
+    t1: "Spiebaan as · diepte t₁",
+    t2: "Spiebaan naaf · diepte t₂",
+    width: "Nominale groefbreedte b",
+    widthNote:
+      "Kies de breedtepassing voor as en naaf op basis van de toepassing; zie de klassen hieronder. De nominale breedte alleen is geen volledige maatspecificatie.",
     tableTitle: "Spie en groefdiepte (DIN 6885-1)",
     thShaft: "As Ø d (mm)",
     thKey: "Spie b × h",
@@ -79,7 +81,7 @@ const T = {
       "(hoge vorm). DIN 6885-2 is de lage vorm. H9/D10 is werkplaats-/UNI-conventie, niet de benoemde glijdpassing in DIN 6885-1:2021. Controleer kritieke maten in de actuele norm.",
   },
   en: {
-    heading: "Key at shaft Ø",
+    heading: "Keyways at shaft Ø",
     intro:
       "Shaft Ø in whole mm, DIN 6885-1 (upper bound inclusive; Ø 6 mm falls just outside the first row).",
     diameterLabel: "Shaft Ø (mm)",
@@ -87,10 +89,12 @@ const T = {
     noRow: (d: number) =>
       `No row in DIN 6885-1 for Ø ${d} mm. The table starts above 6 mm up to and including 110 mm.`,
     shaftAt: (d: number, range: string) => `Shaft Ø ${d} mm · ${range}`,
-    keyBH: "Key b × h",
-    t1: "t₁ shaft",
-    t2: "t₂ hub",
-    depthTol: "Depth tolerance",
+    keyBH: "Mating key b × h (reference)",
+    t1: "Shaft keyway · depth t₁",
+    t2: "Hub keyway · depth t₂",
+    width: "Nominal groove width b",
+    widthNote:
+      "Select the shaft and hub width fits for the application; see the classes below. Nominal width alone is not a complete dimension specification.",
     tableTitle: "Key and groove depth (DIN 6885-1)",
     thShaft: "Shaft Ø d (mm)",
     thKey: "Key b × h",
@@ -144,19 +148,23 @@ export function KeywaysCalc() {
     if (next.status === "ok") storeDiameter(String(next.mm));
   }
 
-  const copy = useMemo(() => {
-    if (!row) return "";
-    return [
-      t.shaftAt(d, rangeLabelDisplay(row.over, row.to)),
-      `${t.keyBH} ${row.b} × ${row.h} mm`,
-      `${t.t1}  ${fmtMm(row.t1)} mm`,
-      `${t.t2}  ${fmtMm(row.t2)} mm`,
-      `${t.depthTol}  0 / +${fmtMm(row.depthTol)} mm`,
-      `DIN 6885-A ${row.b}×${row.h}×L — t1 ${fmtMm(row.t1)} mm, t2 ${fmtMm(row.t2)} mm, 0/+${fmtMm(row.depthTol)} mm`,
-      metaCopyLine(KEYWAY_META, locale),
-    ].join("\n");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [d, row, locale]);
+  const depth = (value: number) => `${fmtMm(value)} +${fmtMm(row!.depthTol)}/0 mm`;
+  const featureLines = row
+    ? [
+        `${t.t1}: ${depth(row.t1)}`,
+        `${t.t2}: ${depth(row.t2)}`,
+        `${t.width}: ${row.b} mm`,
+        t.widthNote,
+      ]
+    : [];
+  const copy = row
+    ? [
+        t.shaftAt(d, rangeLabelDisplay(row.over, row.to)),
+        ...featureLines,
+        `${t.keyBH}: ${row.b} × ${row.h} mm`,
+        metaCopyLine(KEYWAY_META, locale),
+      ].join("\n")
+    : "";
 
   return (
     <>
@@ -186,16 +194,17 @@ export function KeywaysCalc() {
             </p>
             <ResultGrid
               items={[
+                { label: t.t1, value: depth(row.t1) },
+                { label: t.t2, value: depth(row.t2) },
+                { label: t.width, value: `${row.b} mm` },
                 { label: t.keyBH, value: `${row.b} × ${row.h} mm` },
-                { label: t.t1, value: `${fmtMm(row.t1)} mm` },
-                { label: t.t2, value: `${fmtMm(row.t2)} mm` },
-                { label: t.depthTol, value: `0 / +${fmtMm(row.depthTol)} mm` },
               ]}
             />
+            <Note>{t.widthNote}</Note>
             <CadCallout
-              designation={`DIN 6885-A ${row.b}×${row.h}×L`}
-              limits={`t1 ${fmtMm(row.t1)} / t2 ${fmtMm(row.t2)} mm · 0/+${fmtMm(row.depthTol)} mm`}
-              copyText={`DIN 6885-A ${row.b}×${row.h}×L — t1 ${fmtMm(row.t1)} mm, t2 ${fmtMm(row.t2)} mm, dieptetolerantie 0/+${fmtMm(row.depthTol)} mm`}
+              designation={`${t.t1}: ${depth(row.t1)}`}
+              limits={`${t.t2}: ${depth(row.t2)} · ${t.width}: ${row.b} mm`}
+              copyText={featureLines.join("\n")}
             />
             <div className="flex flex-wrap gap-2">
               <CopyResult text={copy} />
