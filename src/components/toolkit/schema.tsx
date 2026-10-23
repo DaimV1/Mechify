@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useId } from "react";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import { fmtMm } from "@/lib/utils";
+import { fmtCirclip } from "@/lib/calculators/circlip";
 import type { FastenerRow } from "@/lib/toolkit/fastener";
 import type { SeegerKind } from "@/lib/toolkit/seeger";
 import type { OringKind } from "@/lib/toolkit/oring";
@@ -375,20 +376,24 @@ export function CirclipSection({
   d2,
   b,
   t,
+  diameterLimits,
+  widthMinimum = false,
 }: {
   kind: SeegerKind;
   d1?: number;
   d2?: number;
   b?: number;
   t?: number;
+  diameterLimits?: string;
+  widthMinimum?: boolean;
 }) {
   const { locale } = useLocale();
   const uid = useId().replace(/:/g, "");
   const asShaft = kind === "as";
   const d1l = d1 != null ? `d₁ ${d1}` : "d₁";
-  const d2l = d2 != null ? `d₂ ${fmtMm(d2)}` : "d₂";
-  const bl = b != null ? `b ${fmtMm(b)}` : "b";
-  const tl = t != null ? `t ${fmtMm(t)}` : "t";
+  const d2l = diameterLimits ? "d₂" : d2 != null ? `d₂ ${fmtMm(d2)}` : "d₂";
+  const bl = b != null ? `W ${widthMinimum ? "≥" : ""}${fmtMm(b)}` : "b";
+  const tl = t != null ? `t ${fmtCirclip(t)} (ref.)` : "t";
 
   const bodyY = 70;
   const bodyH = 110;
@@ -417,6 +422,18 @@ export function CirclipSection({
             )
       }
     >
+      {diameterLimits && (
+        <text
+          x={230}
+          y={235}
+          textAnchor="middle"
+          fill="currentColor"
+          fontSize="12"
+          fontFamily={FONT}
+        >
+          {tx(locale, "Groef", "Groove")} d₂ Ø{diameterLimits} mm
+        </text>
+      )}
       <HatchDefs uid={uid} />
       <line
         x1={bodyX}
@@ -586,17 +603,17 @@ export function CirclipSection({
       <Ext
         x1={grooveX + grooveW}
         y1={asShaft ? bodyY : bodyY - grooveD}
-        x2={380}
+        x2={328}
         y2={asShaft ? bodyY : bodyY - grooveD}
       />
       <Ext
         x1={grooveX + grooveW}
         y1={asShaft ? bodyY + grooveD : bodyY}
-        x2={380}
+        x2={328}
         y2={asShaft ? bodyY + grooveD : bodyY}
       />
       <DimV
-        x={388}
+        x={336}
         y1={asShaft ? bodyY : bodyY - grooveD}
         y2={asShaft ? bodyY + grooveD : bodyY}
         label={tl}

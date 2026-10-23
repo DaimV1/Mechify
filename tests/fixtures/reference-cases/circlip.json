@@ -1,5 +1,5 @@
 {
-  "source": "Rotor Clip DSH/DHO product specifications: per-part groove geometry checked 2026-09-27; nominal radial depth derived from nominal shaft/bore and groove diameters, not a depth tolerance or load rating",
+  "source": "Rotor Clip DSH/DHO product specifications: per-part groove geometry checked 2026-09-27; nominal radial depth derived from nominal shaft/bore and groove diameters, not a depth tolerance or load rating; DSH-10/20/25/30 W minimum verified from Rotor Clip DSH catalogue printed page 82 on 2026-10-22, upper width limit unspecified",
   "externalRing20": {
     "diameter": 20,
     "grooveDiameter": 19.0,
@@ -28,7 +28,12 @@
       "diameterMax": 9.6,
       "grooveWidth": 1.1,
       "grooveDiameter": 9.6,
-      "grooveDepth": 0.2
+      "grooveDepth": 0.2,
+      "widthMinimumSource": {
+        "url": "https://rcwebcatalog.s3.amazonaws.com/dsh.pdf",
+        "page": 82,
+        "checkedDate": "2026-10-22"
+      }
     },
     {
       "kind": "as",
@@ -40,7 +45,12 @@
       "diameterMax": 19,
       "grooveWidth": 1.3,
       "grooveDiameter": 19,
-      "grooveDepth": 0.5
+      "grooveDepth": 0.5,
+      "widthMinimumSource": {
+        "url": "https://rcwebcatalog.s3.amazonaws.com/dsh.pdf",
+        "page": 82,
+        "checkedDate": "2026-10-22"
+      }
     },
     {
       "kind": "boring",
@@ -64,7 +74,12 @@
       "diameterMax": 23.9,
       "grooveWidth": 1.3,
       "grooveDiameter": 23.9,
-      "grooveDepth": 0.55
+      "grooveDepth": 0.55,
+      "widthMinimumSource": {
+        "url": "https://rcwebcatalog.s3.amazonaws.com/dsh.pdf",
+        "page": 82,
+        "checkedDate": "2026-10-22"
+      }
     },
     {
       "kind": "boring",
@@ -88,7 +103,12 @@
       "diameterMax": 28.6,
       "grooveWidth": 1.6,
       "grooveDiameter": 28.6,
-      "grooveDepth": 0.7
+      "grooveDepth": 0.7,
+      "widthMinimumSource": {
+        "url": "https://rcwebcatalog.s3.amazonaws.com/dsh.pdf",
+        "page": 82,
+        "checkedDate": "2026-10-22"
+      }
     },
     {
       "kind": "boring",

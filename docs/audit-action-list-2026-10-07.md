@@ -1,5 +1,11 @@
 # Mechify consolidated implementation plan — 7 October 2026
 
+## 2026-10-22 continuation — PR #75 and circlip groove outputs
+
+- PR #75 merged as `630c76b4ebda153c4be0eea1daee97ce98bb0e3a` after independent website and mechanical critics accepted tree `acb0a33d61104294e71b4c9db2b66d3bab36aac3` and full CI `39725936066` passed. Production deployment `dpl_Fd9qFppo4C6fzjDwtivePGkAQ5Tx` is READY, its public revision matches the merge SHA, and deployed-smoke `39754360195` succeeded. This supersedes the pending nominal-fit selection release below.
+- Pending review: DSH-10/20/25/30 groove widths are now explicitly minimum requirements, sourced to Rotor Clip DSH catalogue printed page 82. Existing groove diameter limits appear consistently in results, copied text and diagram; derived depth is labeled nominal/reference. No numerical data changed and no upper width tolerance was invented. DHO, DSH-40 and unverified-row evidence status remains unchanged. Independent reviews, browser regressions and observed visual-baseline verification remain required before release.
+- Manual assistive-technology and 200–400% zoom checks, actual CAD-runtime testing and broader source-provenance gaps remain open.
+
 ## 2026-10-16 continuation — PR #72 and nominal-fit selection validation
 
 - PR #72 merged as `d4ed3d379e30faa9ca39437e8726e6a138a0079b` after both critics accepted exact tree `4b19d6d51e599e77c7a15dd25d2914e0ad3db368` and full CI `38852885061` passed. Exact production deployment `dpl_8LQBenSgqx322eDiZNmfm8Cino2D` is READY and live revision matches the merge SHA. Deployed-smoke `38881818373` was in progress at this checkpoint; no success claim yet. This supersedes pending O-ring application implementation below.

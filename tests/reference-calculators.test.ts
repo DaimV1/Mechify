@@ -65,6 +65,7 @@ const close = (a: number, b: number, eps = 1e-6) =>
 
 type CirclipFixture = {
   verifiedRows: {
+    widthMinimumSource?: { url: string; page: number; checkedDate: string };
     kind: "as" | "boring";
     diameter: number;
     part: string;
@@ -150,6 +151,7 @@ describe("Circlip groove (active default tool)", () => {
         diameterMin: c.diameterMin,
         diameterMax: c.diameterMax,
         width: c.grooveWidth,
+        ...(c.widthMinimumSource ? { widthMinimumSource: c.widthMinimumSource } : {}),
       });
       close(r.grooveDiameter, c.grooveDiameter);
       close(r.grooveWidth, c.grooveWidth);
