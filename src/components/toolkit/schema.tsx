@@ -288,7 +288,7 @@ export function BoltSection({ row, hole }: { row: FastenerRow | null; hole: numb
 export function KeywaySection({
   row,
 }: {
-  row: { b: number; h: number; t1: number; t2: number } | null;
+  row: { b: number; h: number; t1: number; t2: number; depthTol: number } | null;
 }) {
   const { locale } = useLocale();
   const uid = useId().replace(/:/g, "");
@@ -303,34 +303,33 @@ export function KeywaySection({
   const keyBot = cy - rShaft + t1;
   const keyL = cx - bw / 2;
   const keyR = cx + bw / 2;
-  const t1l = row ? `t₁ ${fmtMm(row.t1)}` : "t₁";
-  const t2l = row ? `t₂ ${fmtMm(row.t2)}` : "t₂";
+  const t1l = row ? `t₁ ${fmtMm(row.t1)} +${fmtMm(row.depthTol)}/0` : "t₁";
+  const t2l = row ? `t₂ ${fmtMm(row.t2)} +${fmtMm(row.depthTol)}/0` : "t₂";
   const bl = row ? `b ${row.b}` : "b";
-  const hl = row ? `h ${row.h}` : "h";
 
   return (
     <svg
       className="w-full max-w-xl text-ink"
-      viewBox="0 0 420 310"
+      viewBox="0 0 460 310"
       role="img"
       aria-label={tx(
         locale,
-        "Dwarsdoorsnede as, spie en naaf met t1, t2, b en h",
-        "Cross-section of shaft, key and hub with t1, t2, b and h",
+        "Dwarsdoorsnede spiebanen in as en naaf met t1, t2 en nominale breedte b; spie weggelaten",
+        "Cross-section of shaft and hub keyways with t1, t2 and nominal width b; key omitted",
       )}
     >
       <HatchDefs uid={uid} />
       <circle cx={cx} cy={cy} r={rHub} fill={`url(#${uid}-a)`} stroke="currentColor" />
       <circle cx={cx} cy={cy} r={rShaft} fill="var(--color-paper)" stroke="none" />
       <circle cx={cx} cy={cy} r={rShaft} fill={`url(#${uid}-b)`} stroke="currentColor" />
-      {/* key sits in both grooves */}
+      {/* Empty groove envelope: the mating key is intentionally omitted. */}
       <rect
         x={keyL}
         y={keyTop}
         width={bw}
         height={t1 + t2}
-        rx="1.5"
-        fill="var(--color-accent)"
+        rx="0"
+        fill="var(--color-paper)"
         stroke="currentColor"
         strokeWidth="1"
       />
@@ -355,17 +354,17 @@ export function KeywaySection({
       <Ext x1={keyR} y1={cy - rShaft} x2={292} y2={cy - rShaft} />
       <DimV x={300} y1={keyTop} y2={cy - rShaft} label={t2l} side="right" />
 
-      <Ext x1={keyR} y1={cy - rShaft} x2={332} y2={cy - rShaft} />
-      <Ext x1={keyR} y1={keyBot} x2={332} y2={keyBot} />
-      <DimV x={340} y1={cy - rShaft} y2={keyBot} label={t1l} side="right" />
+      <Ext x1={keyR} y1={cy - rShaft} x2={292} y2={cy - rShaft} />
+      <Ext x1={keyR} y1={keyBot} x2={292} y2={keyBot} />
+      <DimV x={300} y1={cy - rShaft} y2={keyBot} label={t1l} side="right" />
 
       <Ext x1={keyL} y1={keyTop} x2={keyL} y2={36} />
       <Ext x1={keyR} y1={keyTop} x2={keyR} y2={36} />
       <DimH x1={keyL} x2={keyR} y={28} label={bl} side="up" />
 
-      <Ext x1={keyL} y1={keyTop} x2={48} y2={keyTop} />
-      <Ext x1={keyL} y1={keyBot} x2={48} y2={keyBot} />
-      <DimV x={40} y1={keyTop} y2={keyBot} label={hl} side="left" />
+      <text x={cx} y={282} textAnchor="middle" fill="currentColor" fontSize="11" fontFamily={FONT}>
+        {tx(locale, "b nominaal · kies breedtepassing", "b nominal · select width fit")}
+      </text>
     </svg>
   );
 }

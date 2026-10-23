@@ -18,7 +18,8 @@ test.describe("Copy result", () => {
     await page.getByRole("button", { name: "Kopieer resultaat" }).click();
 
     const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipboardText).toContain("Spie b × h");
+    expect(clipboardText).toContain("Spiebaan as · diepte t₁: 3,5 +0,1/0 mm");
+    expect(clipboardText).toContain("Bijpassende spie b × h (referentie): 6 × 6 mm");
     expect(clipboardText).toContain("DIN 6885-1:2021");
     expect(clipboardText).toContain("Gecontroleerd 2026-09-17");
   });
