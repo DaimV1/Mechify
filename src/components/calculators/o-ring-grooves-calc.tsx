@@ -250,8 +250,10 @@ export function OringGroovesCalc() {
               ))}
             </SelectInput>
           </Field>
-          <Field label={t.direction}>
+          <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted">
+            <label htmlFor="oring-direction">{t.direction}</label>
             <SelectInput
+              id="oring-direction"
               value={directionValid ? direction : ""}
               onChange={setDirection}
               aria-invalid={Boolean(directionError)}
@@ -270,7 +272,7 @@ export function OringGroovesCalc() {
                 {directionError}
               </p>
             )}
-          </Field>
+          </div>
           <Field label={t.application}>
             <SelectInput
               value={seal ? sealType : ""}
