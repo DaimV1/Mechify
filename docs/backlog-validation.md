@@ -27,3 +27,22 @@ from production deployment and from physical/CAD application validation.
   failure is not a failed application assertion or a browser-test pass.
 - Verify the deployed smoke workflow against the actual final deployment SHA.
   A checked-in workflow alone is not proof the production checks passed.
+
+## Manufacturing feature presentation — October follow-up
+
+- PR81 keyway presentation is released at `bd638c3a8c51cbb9e8bec7bfeca58bc1e9f5b9a0`:
+  independent website/mechanical reviews, full CI 40010157399 and deployed smoke
+  40020698320 passed. Width-fit selection remains outstanding.
+- O-ring presentation follow-up: result, diagram and copied report use the same
+  existing precision; simplified empty groove sections identify depth from the
+  surface to the floor and width between walls. Feature dimensions lead the
+  copied report, with an explicit preliminary-estimate / manufacturing-tolerances
+  not-determined notice. No model, default, numeric data or source verification
+  changes. Independent reviews, browser CI and actual screenshot review remain
+  pending for this follow-up; its visual baseline must be taken from reviewed CI.
+- O-ring production design still needs a sourced rod/piston/face gland model,
+  mating diameters and clearances, tolerance stack (including cord tolerance),
+  material/swelling/temperature, pressure/extrusion gap and surface finish.
+  Invalid direction URL handling is a separate open item. Weekly source audit,
+  manual assistive-technology/200–400% zoom and actual CAD runtime checks remain
+  open; this presentation change does not close them.
