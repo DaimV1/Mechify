@@ -27,7 +27,7 @@ for (const locale of ["nl", "en"] as const) {
         await expect(page.getByText("2,84 mm", { exact: true })).toHaveCount(0);
         await expect(page.getByText(/15–30/)).toHaveCount(0);
         await expect.poll(() => new URL(page.url()).searchParams.get("seal")).toBe(invalid);
-        await expect.poll(() => new URL(page.url()).hash).toBe("");
+        await expect.poll(() => new URL(page.url()).hash).toBe("#calculator");
         if (reload === 0) await page.reload({ waitUntil: "networkidle" });
       }
       await application.selectOption("dynamisch");

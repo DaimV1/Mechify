@@ -38,11 +38,18 @@ from production deployment and from physical/CAD application validation.
   surface to the floor and width between walls. Feature dimensions lead the
   copied report, with an explicit preliminary-estimate / manufacturing-tolerances
   not-determined notice. No model, default, numeric data or source verification
-  changes. Independent reviews, browser CI and actual screenshot review remain
-  pending for this follow-up; its visual baseline must be taken from reviewed CI.
+  changes. Released in PR82 at `f92ac407bea0fd16cc332686b00fb005ef586f1d`,
+  exact reviewed tree `991f272d30f0ec3b753cc3ffb4a350528a340f4c`; independent
+  website/mechanical code and visual reviews, full CI 40068755909, production
+  `dpl_FaBi8iWc354WFTtwWwxzY9YhAEPV` READY/live revision and deployed smoke
+  40073845371 passed.
 - O-ring production design still needs a sourced rod/piston/face gland model,
   mating diameters and clearances, tolerance stack (including cord tolerance),
   material/swelling/temperature, pressure/extrusion gap and surface finish.
-  Invalid direction URL handling is a separate open item. Weekly source audit,
+  Direction URL follow-up now preserves invalid/blank raw values with an
+  associated bilingual correction, suppresses dependent output until recovery,
+  retains the independent table and preserves query/hash state. Missing direction
+  still defaults to radial. Independent reviews and browser CI remain pending
+  for this follow-up. Weekly source audit,
   manual assistive-technology/200–400% zoom and actual CAD runtime checks remain
   open; this presentation change does not close them.

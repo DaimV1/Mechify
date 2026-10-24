@@ -1,12 +1,11 @@
 import { OringGroove, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   computeOringGroove,
   fmtOring,
   SEAL_TYPES,
   STANDARD_CORDS,
-  type GrooveDirection,
   type SealType,
 } from "@/lib/calculators/oring";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -145,11 +144,17 @@ const T = {
 export function OringGroovesCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [cord, setCord] = useState(search.get("cord") ?? "3.55");
-  const [direction, setDirection] = useState<GrooveDirection>(
-    (search.get("dir") as GrooveDirection) ?? "radiaal",
-  );
+  const [direction, setDirection] = useState(search.get("dir") ?? "radiaal");
+  const directionValid = direction === "radiaal" || direction === "axiaal";
+  const directionError = directionValid
+    ? undefined
+    : locale === "nl"
+      ? "Kies een ondersteunde richting."
+      : "Choose a supported direction.";
   const [sealType, setSealType] = useState<SealType>(
     (search.get("seal") as SealType) ?? "statisch",
   );
@@ -171,7 +176,7 @@ export function OringGroovesCalc() {
     next.set("seal", sealType);
     next.set("sq", squeeze);
     next.set("wf", widthFactor);
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cord, direction, sealType, squeeze, widthFactor]);
 
@@ -199,7 +204,7 @@ export function OringGroovesCalc() {
           ? "Vul een kleinere breedtefactor in."
           : "Enter a smaller width factor."
         : undefined;
-  const result = widthError || !seal ? null : resultCandidate;
+  const result = widthError || !seal || !directionValid ? null : resultCandidate;
   const outOfRange =
     seal != null &&
     squeezeVal != null &&
@@ -246,10 +251,25 @@ export function OringGroovesCalc() {
             </SelectInput>
           </Field>
           <Field label={t.direction}>
-            <SelectInput value={direction} onChange={(v) => setDirection(v as GrooveDirection)}>
+            <SelectInput
+              value={directionValid ? direction : ""}
+              onChange={setDirection}
+              aria-invalid={Boolean(directionError)}
+              aria-describedby={directionError ? "oring-direction-error" : undefined}
+            >
+              {!directionValid && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies richting" : "Choose direction"}
+                </option>
+              )}
               <option value="radiaal">{t.radial}</option>
               <option value="axiaal">{t.axial}</option>
             </SelectInput>
+            {directionError && (
+              <p id="oring-direction-error" role="alert" className="text-sm text-danger">
+                {directionError}
+              </p>
+            )}
           </Field>
           <Field label={t.application}>
             <SelectInput
@@ -288,7 +308,7 @@ export function OringGroovesCalc() {
           />
         </div>
 
-        {widthError || !seal ? null : !result ? (
+        {widthError || !seal || !directionValid ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillValid}
           </p>
@@ -324,19 +344,21 @@ export function OringGroovesCalc() {
         )}
         <SourceMetaBadge meta={ORING_META} />
       </CalcPanel>
-      <SchemaPanel
-        caption={
-          locale === "en"
-            ? `Empty groove section · dimensions in mm · not to scale. ${t.estimate}`
-            : `Lege groefdoorsnede · maten in mm · niet op schaal. ${t.estimate}`
-        }
-      >
-        <OringGroove
-          kind={direction === "axiaal" ? "axial" : "radial"}
-          t={result?.depth}
-          b={result?.width}
-        />
-      </SchemaPanel>
+      {directionValid && (
+        <SchemaPanel
+          caption={
+            locale === "en"
+              ? `Empty groove section · dimensions in mm · not to scale. ${t.estimate}`
+              : `Lege groefdoorsnede · maten in mm · niet op schaal. ${t.estimate}`
+          }
+        >
+          <OringGroove
+            kind={direction === "axiaal" ? "axial" : "radial"}
+            t={result?.depth}
+            b={result?.width}
+          />
+        </SchemaPanel>
+      )}
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
