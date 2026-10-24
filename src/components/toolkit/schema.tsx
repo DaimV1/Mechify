@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useId } from "react";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import { fmtMm } from "@/lib/utils";
+import { fmtOring } from "@/lib/calculators/oring";
 import { fmtCirclip } from "@/lib/calculators/circlip";
 import type { FastenerRow } from "@/lib/toolkit/fastener";
 import type { SeegerKind } from "@/lib/toolkit/seeger";
@@ -626,160 +627,39 @@ export function OringGroove({ kind, t, b }: { kind: OringKind; t?: number; b?: n
   const { locale } = useLocale();
   const uid = useId().replace(/:/g, "");
   const axial = kind === "axial";
-  const tl = t != null ? `t ${fmtMm(t)}` : "t";
-  const bl = b != null ? `b ${fmtMm(b)}` : "b";
-
-  const grooveX = 194;
-  const grooveW = 52;
-  const grooveD = 26;
-  const grooveFloorY = 150 + grooveD;
+  const tl = t != null ? `t ${fmtOring(t)}` : "t";
+  const bl = b != null ? `b ${fmtOring(b)}` : "b";
 
   return (
     <svg
       className="w-full max-w-xl text-ink"
-      viewBox="0 0 440 260"
+      viewBox="0 0 440 230"
       role="img"
-      aria-label={
-        axial
-          ? tx(
-              locale,
-              "Doorsnede flensgroef met O-ring, geklemd tussen twee vlakke platen",
-              "Section of a flange groove with O-ring, clamped between two flat faces",
-            )
-          : tx(
-              locale,
-              "Doorsnede as met radiale O-ringgroef, afdichtend tegen de boring",
-              "Section of a shaft with radial O-ring groove, sealing against the bore",
-            )
-      }
+      aria-label={tx(
+        locale,
+        `Vereenvoudigde lege ${axial ? "axiale" : "radiale"} groefdoorsnede: t van oppervlak tot groefbodem, b tussen groefwanden`,
+        `Simplified empty ${axial ? "axial" : "radial"} groove section: t from surface to groove floor, b between groove walls`,
+      )}
     >
       <HatchDefs uid={uid} />
-      {axial ? (
-        <line
-          x1="220"
-          y1="20"
-          x2="220"
-          y2="240"
-          stroke="currentColor"
-          strokeDasharray="4 5"
-          strokeWidth="0.8"
-          opacity="0.4"
-        />
-      ) : null}
-
-      {axial ? (
-        <>
-          {/* upper flange, clamped face down */}
-          <rect
-            x="40"
-            y="36"
-            width="360"
-            height="54"
-            fill={`url(#${uid}-b)`}
-            stroke="currentColor"
-          />
-          {/* lower flange with groove cut into its top face */}
-          <rect
-            x="40"
-            y={150}
-            width="360"
-            height="60"
-            fill={`url(#${uid}-a)`}
-            stroke="currentColor"
-          />
-          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--color-paper)" />
-          <line
-            x1={grooveX}
-            y1="150"
-            x2={grooveX}
-            y2={grooveFloorY}
-            stroke="currentColor"
-            strokeWidth="1.2"
-          />
-          <line
-            x1={grooveX + grooveW}
-            y1="150"
-            x2={grooveX + grooveW}
-            y2={grooveFloorY}
-            stroke="currentColor"
-            strokeWidth="1.2"
-          />
-          <circle
-            cx="220"
-            cy="133"
-            r="43"
-            fill="var(--color-accent)"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <text x="56" y="68" fill="currentColor" fontSize="12" fontFamily={FONT}>
-            {tx(locale, "flens boven", "upper flange")}
-          </text>
-          <text x="56" y="184" fill="currentColor" fontSize="12" fontFamily={FONT}>
-            {tx(locale, "flens onder", "lower flange")}
-          </text>
-        </>
-      ) : (
-        <>
-          {/* housing / bore */}
-          <rect
-            x="40"
-            y="56"
-            width="360"
-            height="54"
-            fill={`url(#${uid}-b)`}
-            stroke="currentColor"
-          />
-          {/* shaft with groove cut into its OD */}
-          <rect
-            x="40"
-            y="150"
-            width="360"
-            height="64"
-            fill={`url(#${uid}-a)`}
-            stroke="currentColor"
-          />
-          <rect x={grooveX} y="150" width={grooveW} height={grooveD} fill="var(--color-paper)" />
-          <line
-            x1={grooveX}
-            y1="150"
-            x2={grooveX}
-            y2={grooveFloorY}
-            stroke="currentColor"
-            strokeWidth="1.2"
-          />
-          <line
-            x1={grooveX + grooveW}
-            y1="150"
-            x2={grooveX + grooveW}
-            y2={grooveFloorY}
-            stroke="currentColor"
-            strokeWidth="1.2"
-          />
-          <circle
-            cx="220"
-            cy="143"
-            r="34"
-            fill="var(--color-accent)"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <text x="56" y="88" fill="currentColor" fontSize="12" fontFamily={FONT}>
-            {tx(locale, "behuizing / boring", "housing / bore")}
-          </text>
-          <text x="56" y="188" fill="currentColor" fontSize="12" fontFamily={FONT}>
-            {tx(locale, "as", "shaft")}
-          </text>
-        </>
-      )}
-
-      <Ext x1={grooveX} y1={150} x2={grooveX} y2={204} />
-      <Ext x1={grooveX + grooveW} y1={150} x2={grooveX + grooveW} y2={204} />
-      <DimH x1={grooveX} x2={grooveX + grooveW} y={210} label={bl} side="down" />
-
-      <Ext x1={grooveX + grooveW} y1={150} x2={330} y2={150} />
-      <Ext x1={grooveX + grooveW} y1={grooveFloorY} x2={330} y2={grooveFloorY} />
-      <DimV x={338} y1={150} y2={grooveFloorY} label={tl} side="right" />
+      {/* One continuous outline: no fitted seal or opposing face is implied. */}
+      <path
+        d="M40 90 H170 V150 H270 V90 H400 V195 H40 Z"
+        fill={`url(#${uid}-a)`}
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+      <Ext x1={170} y1={90} x2={170} y2={48} />
+      <Ext x1={270} y1={90} x2={270} y2={48} />
+      <DimH x1={170} x2={270} y={42} label={bl} />
+      <Ext x1={270} y1={90} x2={330} y2={90} />
+      <Ext x1={270} y1={150} x2={330} y2={150} />
+      <DimV x={338} y1={90} y2={150} label={tl} side="right" />
+      <text x="220" y="179" textAnchor="middle" fill="currentColor" fontSize="12" fontFamily={FONT}>
+        {axial
+          ? tx(locale, "axiale groef", "axial groove")
+          : tx(locale, "radiale groef", "radial groove")}
+      </text>
     </svg>
   );
 }

@@ -76,6 +76,7 @@ const T = {
     depthRadial: "Groefdiepte (radiaal)",
     depthAxial: "Groefdiepte (axiaal)",
     grooveWidth: "Groefbreedte",
+    estimate: "Voorlopige schatting — productietoleranties niet bepaald.",
     standardCords: "Standaard ISO-koorden",
     thCord: "Koord Ø (mm)",
     thDepthAt: (pct: number) => `Groefdiepte @ ${pct}% squeeze`,
@@ -91,10 +92,10 @@ const T = {
       fill: string,
     ) =>
       [
-        `Koord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
         `${depthLabel} = ${depth} mm`,
         `Groefbreedte = ${width} mm`,
         `Vulgraad = ${fill}%`,
+        `Koord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
       ].join("\n"),
   },
   en: {
@@ -117,6 +118,7 @@ const T = {
     depthRadial: "Groove depth (radial)",
     depthAxial: "Groove depth (axial)",
     grooveWidth: "Groove width",
+    estimate: "Preliminary estimate — manufacturing tolerances not determined.",
     standardCords: "Standard ISO cords",
     thCord: "Cord Ø (mm)",
     thDepthAt: (pct: number) => `Groove depth @ ${pct}% squeeze`,
@@ -132,10 +134,10 @@ const T = {
       fill: string,
     ) =>
       [
-        `Cord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
         `${depthLabel} = ${depth} mm`,
         `Groove width = ${width} mm`,
         `Fill = ${fill}%`,
+        `Cord Ø${cord} mm, ${seal}, squeeze ${squeeze}%`,
       ].join("\n"),
   },
 };
@@ -216,6 +218,7 @@ export function OringGroovesCalc() {
         fmtOring(result.width),
         fmtOring(result.fillPercent, 0),
       ),
+      t.estimate,
       ...(outOfRange
         ? [t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))]
         : []),
@@ -300,6 +303,7 @@ export function OringGroovesCalc() {
                 {t.outOfRange(squeeze, seal.squeezeMin, seal.squeezeMax, sealLabel(seal))}
               </p>
             ) : null}
+            <p className="mt-4 text-sm font-medium text-muted">{t.estimate}</p>
             <ResultGrid
               items={[
                 {
@@ -323,8 +327,8 @@ export function OringGroovesCalc() {
       <SchemaPanel
         caption={
           locale === "en"
-            ? "Technical diagram · dimensions in mm · schematic, not to scale"
-            : "Technisch schema · maten in mm · schematisch, niet op schaal"
+            ? `Empty groove section · dimensions in mm · not to scale. ${t.estimate}`
+            : `Lege groefdoorsnede · maten in mm · niet op schaal. ${t.estimate}`
         }
       >
         <OringGroove
