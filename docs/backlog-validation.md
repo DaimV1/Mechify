@@ -49,7 +49,17 @@ from production deployment and from physical/CAD application validation.
   Direction URL follow-up now preserves invalid/blank raw values with an
   associated bilingual correction, suppresses dependent output until recovery,
   retains the independent table and preserves query/hash state. Missing direction
-  still defaults to radial. Independent reviews and browser CI remain pending
-  for this follow-up. Weekly source audit,
+  still defaults to radial. Released in PR83 at
+  `d316db7b15d07f5b401d584a4459a8061de44bfe`; both independent reviews, full CI
+  40114937280 and deployed smoke 40116785628 passed. Weekly source audit,
   manual assistive-technology/200–400% zoom and actual CAD runtime checks remain
   open; this presentation change does not close them.
+
+- Keyway width selection follow-up (pending review/CI): optional explicit shaft/hub
+  fit pair uses existing P9/P9, N9/JS9 and H9/D10 reference deviations in results
+  and copy/CAD text. No pair is preselected; raw unsupported/blank URL state
+  prompts correction without selected-width output. Independent depths and
+  tables remain available. Formula/data/default/source metadata are unchanged;
+  selection is not an automatic application recommendation or full manufacturing
+  specification. The diagram remains nominal. Source, length/radius/capacity,
+  manual AT/zoom and CAD-runtime gaps remain open.

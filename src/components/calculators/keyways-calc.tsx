@@ -1,6 +1,6 @@
 import { KeywaySection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { KEYWAYS, keyWidthTol, lookupKeyway, WIDTH_FITS } from "@/lib/calculators/keyway";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { readStoredDiameter, storeDiameter } from "@/lib/tools";
@@ -17,6 +17,7 @@ import {
   parseWholeMm,
   ResultGrid,
   SourceLink,
+  SelectInput,
   WholeMmInput,
 } from "@/components/calculators/calc-ui";
 import { SourceMetaBadge } from "@/components/calculators/source-meta";
@@ -37,6 +38,12 @@ const KEYWAY_META: EngineeringSourceMeta = {
   },
 };
 
+const WIDTH_PAIRS = [
+  { value: "P9-P9", shaft: "P9", hub: "P9" },
+  { value: "N9-JS9", shaft: "N9", hub: "JS9" },
+  { value: "H9-D10", shaft: "H9", hub: "D10" },
+] as const;
+
 const rangeLabelNl = (over: number, to: number) => `boven ${over} t/m ${to}`;
 const rangeLabelEn = (over: number, to: number) => `above ${over} up to ${to}`;
 const rangeLabelDisplay = (over: number, to: number) => `>${over} – ≤${to}`;
@@ -47,6 +54,13 @@ const T = {
     intro:
       "As-Ø in hele mm, DIN 6885-1 (bovengrens inclusief; Ø 6 mm valt net buiten de eerste rij).",
     diameterLabel: "As-Ø (mm)",
+    fitLabel: "Breedtepassing as / naaf (optioneel)",
+    fitNone: "Geen passing geselecteerd",
+    fitError: "Kies een ondersteunde breedtepassing of wis de selectie.",
+    shaftWidth: "Spiebaan as · breedte b",
+    hubWidth: "Spiebaan naaf · breedte b",
+    selectedNote:
+      "Zelf gekozen passing; controleer geschiktheid voor de toepassing. Afwijkingen: bovenmaat / ondermaat. Schema toont nominale breedte.",
     fillDiameter: "Vul een as-Ø in.",
     noRow: (d: number) =>
       `Geen rij in DIN 6885-1 voor Ø ${d} mm. De tabel begint boven 6 mm tot en met 110 mm.`,
@@ -85,6 +99,13 @@ const T = {
     intro:
       "Shaft Ø in whole mm, DIN 6885-1 (upper bound inclusive; Ø 6 mm falls just outside the first row).",
     diameterLabel: "Shaft Ø (mm)",
+    fitLabel: "Shaft / hub width fit (optional)",
+    fitNone: "No fit selected",
+    fitError: "Choose a supported width fit or clear the selection.",
+    shaftWidth: "Shaft keyway · width b",
+    hubWidth: "Hub keyway · width b",
+    selectedNote:
+      "User-selected fit; check suitability for the application. Deviations: upper / lower. Diagram shows nominal width.",
     fillDiameter: "Enter a shaft Ø.",
     noRow: (d: number) =>
       `No row in DIN 6885-1 for Ø ${d} mm. The table starts above 6 mm up to and including 110 mm.`,
@@ -124,7 +145,12 @@ export function KeywaysCalc() {
   const { locale } = useLocale();
   const t = T[locale];
   const rangeLabel = locale === "nl" ? rangeLabelNl : rangeLabelEn;
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [widthFit, setWidthFit] = useState<string | null>(search.get("widthFit"));
+  const pair = WIDTH_PAIRS.find((item) => item.value === widthFit);
+  const fitError = widthFit !== null && !pair ? t.fitError : undefined;
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 7, max: 110 }),
   );
@@ -133,9 +159,11 @@ export function KeywaysCalc() {
     const next = new URLSearchParams(search);
     if (diameter) next.set("d", diameter);
     else next.delete("d");
-    setSearch(next, { replace: true });
+    if (widthFit === null) next.delete("widthFit");
+    else next.set("widthFit", widthFit);
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [diameter]);
+  }, [diameter, widthFit]);
 
   const parsed = parseWholeMm(diameter);
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
@@ -149,12 +177,34 @@ export function KeywaysCalc() {
   }
 
   const depth = (value: number) => `${fmtMm(value)} +${fmtMm(row!.depthTol)}/0 mm`;
+  const widthItems =
+    row && pair
+      ? [
+          { label: t.shaftWidth, fit: pair.shaft },
+          { label: t.hubWidth, fit: pair.hub },
+        ].map(({ label, fit }) => {
+          const tolerance = keyWidthTol(row.b, fit)!;
+          return {
+            label,
+            value: `${row.b} ${fit} (${mmFromUm(tolerance.ES)} / ${mmFromUm(tolerance.EI)} mm)`,
+          };
+        })
+      : row
+        ? [{ label: t.width, value: `${row.b} mm` }]
+        : [];
+  const widthNotice = pair
+    ? t.selectedNote
+    : fitError
+      ? `${t.fitError} ${t.widthNote}`
+      : t.widthNote;
+  const conventionNote = pair?.value === "H9-D10" ? t.h9Body : null;
   const featureLines = row
     ? [
         `${t.t1}: ${depth(row.t1)}`,
         `${t.t2}: ${depth(row.t2)}`,
-        `${t.width}: ${row.b} mm`,
-        t.widthNote,
+        ...widthItems.map(({ label, value }) => `${label}: ${value}`),
+        widthNotice,
+        ...(conventionNote ? [conventionNote] : []),
       ]
     : [];
   const copy = row
@@ -179,6 +229,33 @@ export function KeywaysCalc() {
             <WholeMmInput id="key-diameter" value={diameter} onChange={onDia} />
           </Field>
         </div>
+        <div className="mt-4 flex max-w-sm flex-col gap-2 text-sm text-muted">
+          <label htmlFor="key-width-fit">{t.fitLabel}</label>
+          <SelectInput
+            id="key-width-fit"
+            value={pair?.value ?? (widthFit === null ? "none" : "invalid")}
+            onChange={(value) => setWidthFit(value === "none" ? null : value)}
+            aria-invalid={Boolean(fitError)}
+            aria-describedby={fitError ? "key-width-fit-error" : undefined}
+          >
+            <option value="none">{t.fitNone}</option>
+            {fitError && (
+              <option value="invalid" disabled>
+                {t.fitError}
+              </option>
+            )}
+            {WIDTH_PAIRS.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.shaft} / {item.hub}
+              </option>
+            ))}
+          </SelectInput>
+          {fitError && (
+            <p id="key-width-fit-error" role="alert" className="text-sm text-danger">
+              {fitError}
+            </p>
+          )}
+        </div>
         {parsed.status === "empty" ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
@@ -196,14 +273,15 @@ export function KeywaysCalc() {
               items={[
                 { label: t.t1, value: depth(row.t1) },
                 { label: t.t2, value: depth(row.t2) },
-                { label: t.width, value: `${row.b} mm` },
+                ...widthItems,
                 { label: t.keyBH, value: `${row.b} × ${row.h} mm` },
               ]}
             />
-            <Note>{t.widthNote}</Note>
+            <Note>{widthNotice}</Note>
+            {conventionNote && <Note>{conventionNote}</Note>}
             <CadCallout
               designation={`${t.t1}: ${depth(row.t1)}`}
-              limits={`${t.t2}: ${depth(row.t2)} · ${t.width}: ${row.b} mm`}
+              limits={`${t.t2}: ${depth(row.t2)} · ${widthItems.map(({ label, value }) => `${label}: ${value}`).join(" · ")}`}
               copyText={featureLines.join("\n")}
             />
             <div className="flex flex-wrap gap-2">
