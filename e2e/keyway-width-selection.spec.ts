@@ -46,11 +46,10 @@ for (const locale of ["nl", "en"] as const) {
       await expect(page.locator("dl")).toContainText(hubValue);
       if (fit === "N9-JS9") {
         await page.evaluate(() => document.fonts.ready);
+        const calculatorPanel = select.locator("xpath=ancestor::section[1]");
+        await expect(calculatorPanel).toHaveCount(1);
         await testInfo.attach(`keyway-width-${locale}`, {
-          body: await page
-            .locator("section")
-            .filter({ has: select })
-            .screenshot({ animations: "disabled" }),
+          body: await calculatorPanel.screenshot({ animations: "disabled" }),
           contentType: "image/png",
         });
       }
