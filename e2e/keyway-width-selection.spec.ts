@@ -48,8 +48,26 @@ for (const locale of ["nl", "en"] as const) {
         await page.evaluate(() => document.fonts.ready);
         const calculatorPanel = select.locator("xpath=ancestor::section[1]");
         await expect(calculatorPanel).toHaveCount(1);
+        const mobileCapture = testInfo.project.name === "mobile";
+        if (mobileCapture) {
+          // Capture the real page at its top so sticky navigation cannot cover
+          // the middle of a calculator panel taller than the mobile viewport.
+          await page.evaluate(() => {
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+          });
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+              ),
+          );
+        }
         await testInfo.attach(`keyway-width-${locale}`, {
-          body: await calculatorPanel.screenshot({ animations: "disabled" }),
+          body: mobileCapture
+            ? await page.screenshot({ fullPage: true, animations: "disabled" })
+            : await calculatorPanel.screenshot({ animations: "disabled" }),
           contentType: "image/png",
         });
       }
