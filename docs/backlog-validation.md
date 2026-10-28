@@ -70,7 +70,10 @@ from production deployment and from physical/CAD application validation.
 
 ## ISO 2768 dimensional-class URL validation
 
-- Pending independent review/CI: unsupported, blank and prototype-key `lc`
+- Released in PR85 at `3c525444b7f3434f0026213b5d3dd3bad9c12705`: both independent
+  critics accepted the exact tree; full CI 40659461672 and deployed smoke
+  40686624680 passed, with production READY/live revision matched.
+  Unsupported, blank and prototype-key `lc`
   selections retain raw URL state and receive an associated bilingual correction.
   Class-dependent linear, radius/chamfer and angular outputs are withheld until
   recovery; copied reports explicitly flag omitted dimensional tolerances while
@@ -78,4 +81,18 @@ from production deployment and from physical/CAD application validation.
 - Existing legacy `linear` normalization and unrelated query parameters remain
   intact. Numerical tables, formulas, defaults, thresholds and source metadata
   are unchanged. Geometric-class validation is a separate follow-up.
+- This does not close source-audit, manual AT/200–400% zoom or CAD-runtime gaps.
+
+## ISO 2768 geometric-class URL validation
+
+- Pending independent review/CI: unsupported, blank and prototype-key `gc`
+  selections retain raw URL state and receive an associated bilingual correction.
+  Class-dependent geometric outputs and copied values are withheld until recovery;
+  copied reports explicitly flag omitted geometric tolerances while retaining
+  independent dimensional results. Missing `gc` still defaults to `K`.
+- Legacy `form` normalization, unrelated query parameters and all reference tables
+  remain intact. Both invalid class families can be corrected independently.
+  Numerical tables, formulas, defaults, thresholds and source metadata are unchanged.
+  Geometric values remain total zone widths, not ± deviations; existing withdrawn
+  standard caveats remain in place.
 - This does not close source-audit, manual AT/200–400% zoom or CAD-runtime gaps.

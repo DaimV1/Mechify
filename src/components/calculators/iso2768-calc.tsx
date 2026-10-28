@@ -87,6 +87,8 @@ const T = {
     intro:
       "Titelblok-tolerantieklasse voor maten zonder individuele toleranties. Kies de klasse en vul een maat in.",
     toleranceClass: "Tolerantieklasse",
+    geoClassError: "Kies een geldige geometrische tolerantieklasse (H, K of L).",
+    invalidGeoCopy: "Geometrische toleranties ontbreken: kies een geldige klasse (H, K of L).",
     classError: "Kies een geldige tolerantieklasse (f, m, c of v).",
     invalidCopy: "Dimensionele toleranties ontbreken: kies een geldige klasse (f, m, c of v).",
     nominalSize: "Nominale maat (mm)",
@@ -140,6 +142,8 @@ const T = {
     intro:
       "Title-block tolerance class for dimensions without individual tolerances. Choose the class and enter a dimension.",
     toleranceClass: "Tolerance class",
+    geoClassError: "Select a valid geometric tolerance class (H, K or L).",
+    invalidGeoCopy: "Geometric tolerances omitted: select a valid class (H, K or L).",
     classError: "Select a valid tolerance class (f, m, c or v).",
     invalidCopy: "Dimensional tolerances omitted: select a valid class (f, m, c or v).",
     nominalSize: "Nominal size (mm)",
@@ -202,9 +206,9 @@ export function Iso2768Calc() {
   const classError = validLinearClass === undefined ? t.classError : undefined;
   const [size, setSize] = useState(normalizedSearch.get("d") ?? "50");
   const [legLength, setLegLength] = useState(normalizedSearch.get("leg") ?? "50");
-  const [geoClass, setGeoClass] = useState<GeoClass>(
-    (normalizedSearch.get("gc") as GeoClass) ?? "K",
-  );
+  const [geoClass, setGeoClass] = useState(normalizedSearch.get("gc") ?? "K");
+  const validGeoClass: GeoClass | undefined = GEO_CLASSES.find((item) => item.id === geoClass)?.id;
+  const geoClassError = validGeoClass === undefined ? t.geoClassError : undefined;
   const [geoLength, setGeoLength] = useState(normalizedSearch.get("gl") ?? "100");
 
   useEffect(() => {
@@ -242,20 +246,26 @@ export function Iso2768Calc() {
     if (validLinearClass && radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
     if (validLinearClass && angularRow)
       lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
-    if (straightRow)
-      lines.push(t.copyStraight(geoLength, geoClass, fmtGeoZone(straightRow[geoClass])));
-    if (perpRow) lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[geoClass])));
-    if (symRow) lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[geoClass])));
-    if (gl != null) lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[geoClass])));
+    if (geoClassError) lines.push(t.invalidGeoCopy);
+    if (validGeoClass && straightRow)
+      lines.push(t.copyStraight(geoLength, geoClass, fmtGeoZone(straightRow[validGeoClass])));
+    if (validGeoClass && perpRow)
+      lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[validGeoClass])));
+    if (validGeoClass && symRow)
+      lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[validGeoClass])));
+    if (validGeoClass && gl != null)
+      lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[validGeoClass])));
     if (validLinearClass && (linearRow || radiusRow || angularRow))
       lines.push(metaCopyLine(DIMENSIONAL_META, locale));
-    if (straightRow || perpRow || symRow || gl != null)
+    if (validGeoClass && (straightRow || perpRow || symRow || gl != null))
       lines.push(metaCopyLine(GEOMETRIC_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     validLinearClass,
     classError,
+    validGeoClass,
+    geoClassError,
     linearRow,
     radiusRow,
     angularRow,
@@ -268,7 +278,6 @@ export function Iso2768Calc() {
     legLength,
     geoLength,
     linearClass,
-    geoClass,
     linearDev,
     radiusDev,
     angularDev,
@@ -431,33 +440,55 @@ export function Iso2768Calc() {
         <Note>{t.geoIntro}</Note>
         <Note>{t.geoZoneNote}</Note>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label={t.classLabel}>
-            <SelectInput value={geoClass} onChange={(v) => setGeoClass(v as GeoClass)}>
+          <div className="flex flex-col gap-2 text-sm text-muted">
+            <label htmlFor="iso2768-geo-class">{t.classLabel}</label>
+            <SelectInput
+              id="iso2768-geo-class"
+              value={validGeoClass ?? "invalid"}
+              onChange={setGeoClass}
+              aria-invalid={Boolean(geoClassError)}
+              aria-describedby={geoClassError ? "iso2768-geo-class-error" : undefined}
+            >
+              {geoClassError && (
+                <option value="invalid" disabled>
+                  {t.geoClassError}
+                </option>
+              )}
               {GEO_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
               ))}
             </SelectInput>
-          </Field>
+            {geoClassError && (
+              <p id="iso2768-geo-class-error" role="alert" className="text-sm text-danger">
+                {geoClassError}
+              </p>
+            )}
+          </div>
           <Field label={t.nominalLength}>
             <NumInput id="iso2768-geo-length" value={geoLength} onChange={setGeoLength} />
           </Field>
         </div>
-        <ResultGrid
-          items={[
-            {
-              label: t.straightnessFlatness,
-              value: straightRow ? `${fmtGeoZone(straightRow[geoClass])} mm` : "—",
-            },
-            {
-              label: t.perpendicularity,
-              value: perpRow ? `${fmtGeoZone(perpRow[geoClass])} mm` : "—",
-            },
-            { label: t.symmetry, value: symRow ? `${fmtGeoZone(symRow[geoClass])} mm` : "—" },
-            { label: t.runout, value: `${fmtGeoZone(RUNOUT[geoClass])} mm` },
-          ]}
-        />
+        {validGeoClass && (
+          <ResultGrid
+            items={[
+              {
+                label: t.straightnessFlatness,
+                value: straightRow ? `${fmtGeoZone(straightRow[validGeoClass])} mm` : "—",
+              },
+              {
+                label: t.perpendicularity,
+                value: perpRow ? `${fmtGeoZone(perpRow[validGeoClass])} mm` : "—",
+              },
+              {
+                label: t.symmetry,
+                value: symRow ? `${fmtGeoZone(symRow[validGeoClass])} mm` : "—",
+              },
+              { label: t.runout, value: `${fmtGeoZone(RUNOUT[validGeoClass])} mm` },
+            ]}
+          />
+        )}
         {copy ? (
           <div className="flex flex-wrap gap-2">
             <CopyResult text={copy} />
