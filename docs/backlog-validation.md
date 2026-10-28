@@ -32,7 +32,7 @@ from production deployment and from physical/CAD application validation.
 
 - PR81 keyway presentation is released at `bd638c3a8c51cbb9e8bec7bfeca58bc1e9f5b9a0`:
   independent website/mechanical reviews, full CI 40010157399 and deployed smoke
-  40020698320 passed. Width-fit selection remains outstanding.
+  40020698320 passed. Width-fit selection was released in PR84; see below.
 - O-ring presentation follow-up: result, diagram and copied report use the same
   existing precision; simplified empty groove sections identify depth from the
   surface to the floor and width between walls. Feature dimensions lead the
@@ -55,7 +55,11 @@ from production deployment and from physical/CAD application validation.
   manual assistive-technology/200–400% zoom and actual CAD runtime checks remain
   open; this presentation change does not close them.
 
-- Keyway width selection follow-up (pending review/CI): optional explicit shaft/hub
+- Keyway width selection released in PR84 at
+  `3879e9837b9c0d86e376e3e38d148043e3845375`; both independent critics accepted
+  the exact tree and desktop/mobile NL/EN screenshots. Full CI 40539976613 and
+  deployed smoke 40594090081 passed; production READY/live revision matched.
+  Optional explicit shaft/hub
   fit pair uses existing P9/P9, N9/JS9 and H9/D10 reference deviations in results
   and copy/CAD text. No pair is preselected; raw unsupported/blank URL state
   prompts correction without selected-width output. Independent depths and
@@ -63,3 +67,15 @@ from production deployment and from physical/CAD application validation.
   selection is not an automatic application recommendation or full manufacturing
   specification. The diagram remains nominal. Source, length/radius/capacity,
   manual AT/zoom and CAD-runtime gaps remain open.
+
+## ISO 2768 dimensional-class URL validation
+
+- Pending independent review/CI: unsupported, blank and prototype-key `lc`
+  selections retain raw URL state and receive an associated bilingual correction.
+  Class-dependent linear, radius/chamfer and angular outputs are withheld until
+  recovery; copied reports explicitly flag omitted dimensional tolerances while
+  retaining independent geometric results. Missing `lc` still defaults to `m`.
+- Existing legacy `linear` normalization and unrelated query parameters remain
+  intact. Numerical tables, formulas, defaults, thresholds and source metadata
+  are unchanged. Geometric-class validation is a separate follow-up.
+- This does not close source-audit, manual AT/200–400% zoom or CAD-runtime gaps.
