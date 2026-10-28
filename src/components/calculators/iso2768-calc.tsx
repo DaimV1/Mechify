@@ -87,6 +87,8 @@ const T = {
     intro:
       "Titelblok-tolerantieklasse voor maten zonder individuele toleranties. Kies de klasse en vul een maat in.",
     toleranceClass: "Tolerantieklasse",
+    classError: "Kies een geldige tolerantieklasse (f, m, c of v).",
+    invalidCopy: "Dimensionele toleranties ontbreken: kies een geldige klasse (f, m, c of v).",
     nominalSize: "Nominale maat (mm)",
     legLength: "Lengte kortste been (mm, voor hoek)",
     linearSize: "Lineaire maat",
@@ -138,6 +140,8 @@ const T = {
     intro:
       "Title-block tolerance class for dimensions without individual tolerances. Choose the class and enter a dimension.",
     toleranceClass: "Tolerance class",
+    classError: "Select a valid tolerance class (f, m, c or v).",
+    invalidCopy: "Dimensional tolerances omitted: select a valid class (f, m, c or v).",
     nominalSize: "Nominal size (mm)",
     legLength: "Shorter leg length (mm, for angle)",
     linearSize: "Linear size",
@@ -191,9 +195,11 @@ export function Iso2768Calc() {
   const t = T[locale];
   const [search, setSearch] = useSearchParams();
   const normalizedSearch = normalizeIso2768LegacyParams(search);
-  const [linearClass, setLinearClass] = useState<LinearClass>(
-    (normalizedSearch.get("lc") as LinearClass) ?? "m",
-  );
+  const [linearClass, setLinearClass] = useState(normalizedSearch.get("lc") ?? "m");
+  const validLinearClass: LinearClass | undefined = LINEAR_CLASSES.find(
+    (item) => item.id === linearClass,
+  )?.id;
+  const classError = validLinearClass === undefined ? t.classError : undefined;
   const [size, setSize] = useState(normalizedSearch.get("d") ?? "50");
   const [legLength, setLegLength] = useState(normalizedSearch.get("leg") ?? "50");
   const [geoClass, setGeoClass] = useState<GeoClass>(
@@ -216,12 +222,12 @@ export function Iso2768Calc() {
   const d = parseNum(size);
   const linearRow = d != null ? lookupLinear(d) : null;
   const radiusRow = d != null ? lookupRadiusChamfer(d) : null;
-  const linearDev = linearRow ? linearRow[linearClass] : null;
-  const radiusDev = radiusRow ? radiusRow[linearClass] : null;
+  const linearDev = linearRow && validLinearClass ? linearRow[validLinearClass] : null;
+  const radiusDev = radiusRow && validLinearClass ? radiusRow[validLinearClass] : null;
 
   const leg = parseNum(legLength);
   const angularRow = leg != null ? lookupAngular(leg) : null;
-  const angularDev = angularRow ? angularRow[linearClass] : null;
+  const angularDev = angularRow && validLinearClass ? angularRow[validLinearClass] : null;
 
   const gl = parseNum(geoLength);
   const straightRow = gl != null ? lookupStraightnessFlatness(gl) : null;
@@ -230,20 +236,26 @@ export function Iso2768Calc() {
 
   const copy = useMemo(() => {
     const lines: string[] = [];
-    if (linearRow) lines.push(t.copyLinear(size, linearClass, fmtIso2768(linearDev)));
-    if (radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
-    if (angularRow) lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
+    if (classError) lines.push(t.invalidCopy);
+    if (validLinearClass && linearRow)
+      lines.push(t.copyLinear(size, linearClass, fmtIso2768(linearDev)));
+    if (validLinearClass && radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
+    if (validLinearClass && angularRow)
+      lines.push(t.copyAngle(legLength, linearClass, fmtAngle(angularDev ?? 0)));
     if (straightRow)
       lines.push(t.copyStraight(geoLength, geoClass, fmtGeoZone(straightRow[geoClass])));
     if (perpRow) lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[geoClass])));
     if (symRow) lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[geoClass])));
     if (gl != null) lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[geoClass])));
-    if (linearRow || radiusRow || angularRow) lines.push(metaCopyLine(DIMENSIONAL_META, locale));
+    if (validLinearClass && (linearRow || radiusRow || angularRow))
+      lines.push(metaCopyLine(DIMENSIONAL_META, locale));
     if (straightRow || perpRow || symRow || gl != null)
       lines.push(metaCopyLine(GEOMETRIC_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    validLinearClass,
+    classError,
     linearRow,
     radiusRow,
     angularRow,
@@ -272,15 +284,32 @@ export function Iso2768Calc() {
         </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Field label={t.toleranceClass}>
-            <SelectInput value={linearClass} onChange={(v) => setLinearClass(v as LinearClass)}>
+          <div className="flex flex-col gap-2 text-sm text-muted">
+            <label htmlFor="iso2768-linear-class">{t.toleranceClass}</label>
+            <SelectInput
+              id="iso2768-linear-class"
+              value={validLinearClass ?? "invalid"}
+              onChange={setLinearClass}
+              aria-invalid={Boolean(classError)}
+              aria-describedby={classError ? "iso2768-linear-class-error" : undefined}
+            >
+              {classError && (
+                <option value="invalid" disabled>
+                  {t.classError}
+                </option>
+              )}
               {LINEAR_CLASSES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {locale === "nl" ? c.label : c.labelEn}
                 </option>
               ))}
             </SelectInput>
-          </Field>
+            {classError && (
+              <p id="iso2768-linear-class-error" role="alert" className="text-sm text-danger">
+                {classError}
+              </p>
+            )}
+          </div>
           <Field label={t.nominalSize}>
             <NumInput id="iso2768-size" value={size} onChange={setSize} />
           </Field>
@@ -295,13 +324,15 @@ export function Iso2768Calc() {
           </p>
         ) : null}
 
-        <ResultGrid
-          items={[
-            { label: t.linearSize, value: linearRow ? `${fmtIso2768(linearDev)} mm` : "—" },
-            { label: t.radiusChamfer, value: radiusRow ? `${fmtIso2768(radiusDev)} mm` : "—" },
-            { label: t.angularSize, value: angularRow ? fmtAngle(angularDev ?? 0) : "—" },
-          ]}
-        />
+        {validLinearClass && (
+          <ResultGrid
+            items={[
+              { label: t.linearSize, value: linearRow ? `${fmtIso2768(linearDev)} mm` : "—" },
+              { label: t.radiusChamfer, value: radiusRow ? `${fmtIso2768(radiusDev)} mm` : "—" },
+              { label: t.angularSize, value: angularRow ? fmtAngle(angularDev ?? 0) : "—" },
+            ]}
+          />
+        )}
         <div className="flex flex-wrap gap-2">
           {copy ? <CopyResult text={copy} /> : null}
           <CopyLink />
@@ -334,7 +365,7 @@ export function Iso2768Calc() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-subtle">{t.table1Note(linearClass)}</p>
+        <p className="mt-2 text-xs text-subtle">{t.table1Note(validLinearClass ?? "—")}</p>
 
         <div className="table-scroll mt-6" tabIndex={0}>
           <table className="ref-table">
