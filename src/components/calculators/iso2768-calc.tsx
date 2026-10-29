@@ -29,9 +29,8 @@ import {
   CalcPanel,
   CopyLink,
   CopyResult,
-  Field,
   Note,
-  NumInput,
+  ValidatedNumField,
   parseNum,
   ResultGrid,
   SelectInput,
@@ -87,6 +86,12 @@ const T = {
     intro:
       "Titelblok-tolerantieklasse voor maten zonder individuele toleranties. Kies de klasse en vul een maat in.",
     toleranceClass: "Tolerantieklasse",
+    positiveInput: "Vul een geldig getal groter dan 0 in.",
+    invalidSizeCopy:
+      "Lineaire en radius-/afschuiningstoleranties ontbreken: corrigeer de nominale maat.",
+    invalidLegCopy: "Hoektolerantie ontbreekt: corrigeer de lengte van het kortste been.",
+    invalidLengthCopy:
+      "Lengteafhankelijke geometrische toleranties ontbreken: corrigeer de nominale lengte.",
     geoClassError: "Kies een geldige geometrische tolerantieklasse (H, K of L).",
     invalidGeoCopy: "Geometrische toleranties ontbreken: kies een geldige klasse (H, K of L).",
     classError: "Kies een geldige tolerantieklasse (f, m, c of v).",
@@ -142,6 +147,10 @@ const T = {
     intro:
       "Title-block tolerance class for dimensions without individual tolerances. Choose the class and enter a dimension.",
     toleranceClass: "Tolerance class",
+    positiveInput: "Enter a valid number greater than 0.",
+    invalidSizeCopy: "Linear and radius/chamfer tolerances omitted: correct the nominal size.",
+    invalidLegCopy: "Angular tolerance omitted: correct the shortest leg length.",
+    invalidLengthCopy: "Length-dependent geometric tolerances omitted: correct the nominal length.",
     geoClassError: "Select a valid geometric tolerance class (H, K or L).",
     invalidGeoCopy: "Geometric tolerances omitted: select a valid class (H, K or L).",
     classError: "Select a valid tolerance class (f, m, c or v).",
@@ -213,27 +222,37 @@ export function Iso2768Calc() {
 
   useEffect(() => {
     const next = normalizeIso2768LegacyParams(search);
-    const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
     next.set("lc", linearClass);
-    set("d", size);
-    set("leg", legLength);
+    next.set("d", size);
+    next.set("leg", legLength);
     next.set("gc", geoClass);
-    set("gl", geoLength);
+    next.set("gl", geoLength);
     setSearch(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linearClass, size, legLength, geoClass, geoLength]);
 
-  const d = parseNum(size);
+  const parsedSize = parseNum(size);
+  const sizeError =
+    parsedSize == null || parsedSize <= 0
+      ? t.positiveInput
+      : parsedSize < LINEAR_SIZE_MIN
+        ? t.belowMin(LINEAR_SIZE_MIN)
+        : undefined;
+  const d = sizeError ? null : parsedSize;
   const linearRow = d != null ? lookupLinear(d) : null;
   const radiusRow = d != null ? lookupRadiusChamfer(d) : null;
   const linearDev = linearRow && validLinearClass ? linearRow[validLinearClass] : null;
   const radiusDev = radiusRow && validLinearClass ? radiusRow[validLinearClass] : null;
 
-  const leg = parseNum(legLength);
+  const parsedLeg = parseNum(legLength);
+  const legError = parsedLeg == null || parsedLeg <= 0 ? t.positiveInput : undefined;
+  const leg = legError ? null : parsedLeg;
   const angularRow = leg != null ? lookupAngular(leg) : null;
   const angularDev = angularRow && validLinearClass ? angularRow[validLinearClass] : null;
 
-  const gl = parseNum(geoLength);
+  const parsedLength = parseNum(geoLength);
+  const lengthError = parsedLength == null || parsedLength <= 0 ? t.positiveInput : undefined;
+  const gl = lengthError ? null : parsedLength;
   const straightRow = gl != null ? lookupStraightnessFlatness(gl) : null;
   const perpRow = gl != null ? lookupPerpendicularity(gl) : null;
   const symRow = gl != null ? lookupSymmetry(gl) : null;
@@ -241,6 +260,9 @@ export function Iso2768Calc() {
   const copy = useMemo(() => {
     const lines: string[] = [];
     if (classError) lines.push(t.invalidCopy);
+    if (sizeError) lines.push(t.invalidSizeCopy);
+    if (legError) lines.push(t.invalidLegCopy);
+    if (lengthError) lines.push(t.invalidLengthCopy);
     if (validLinearClass && linearRow)
       lines.push(t.copyLinear(size, linearClass, fmtIso2768(linearDev)));
     if (validLinearClass && radiusRow) lines.push(t.copyRadius(fmtIso2768(radiusDev)));
@@ -253,17 +275,18 @@ export function Iso2768Calc() {
       lines.push(t.copyPerp(geoLength, geoClass, fmtGeoZone(perpRow[validGeoClass])));
     if (validGeoClass && symRow)
       lines.push(t.copySym(geoLength, geoClass, fmtGeoZone(symRow[validGeoClass])));
-    if (validGeoClass && gl != null)
-      lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[validGeoClass])));
+    if (validGeoClass) lines.push(t.copyRunout(geoClass, fmtGeoZone(RUNOUT[validGeoClass])));
     if (validLinearClass && (linearRow || radiusRow || angularRow))
       lines.push(metaCopyLine(DIMENSIONAL_META, locale));
-    if (validGeoClass && (straightRow || perpRow || symRow || gl != null))
-      lines.push(metaCopyLine(GEOMETRIC_META, locale));
+    if (validGeoClass) lines.push(metaCopyLine(GEOMETRIC_META, locale));
     return lines.join("\n");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     validLinearClass,
     classError,
+    sizeError,
+    legError,
+    lengthError,
     validGeoClass,
     geoClassError,
     linearRow,
@@ -272,7 +295,6 @@ export function Iso2768Calc() {
     straightRow,
     perpRow,
     symRow,
-    gl,
     geoClass,
     size,
     legLength,
@@ -319,19 +341,23 @@ export function Iso2768Calc() {
               </p>
             )}
           </div>
-          <Field label={t.nominalSize}>
-            <NumInput id="iso2768-size" value={size} onChange={setSize} />
-          </Field>
-          <Field label={t.legLength}>
-            <NumInput id="iso2768-leg" value={legLength} onChange={setLegLength} />
-          </Field>
+          <ValidatedNumField
+            id="iso2768-size"
+            label={t.nominalSize}
+            value={size}
+            onChange={setSize}
+            error={sizeError}
+            validateInitially={normalizedSearch.has("d")}
+          />
+          <ValidatedNumField
+            id="iso2768-leg"
+            label={t.legLength}
+            value={legLength}
+            onChange={setLegLength}
+            error={legError}
+            validateInitially={normalizedSearch.has("leg")}
+          />
         </div>
-
-        {d != null && d < LINEAR_SIZE_MIN ? (
-          <p className="mt-3 text-sm leading-relaxed text-muted" role="status">
-            {t.belowMin(LINEAR_SIZE_MIN)}
-          </p>
-        ) : null}
 
         {validLinearClass && (
           <ResultGrid
@@ -466,9 +492,14 @@ export function Iso2768Calc() {
               </p>
             )}
           </div>
-          <Field label={t.nominalLength}>
-            <NumInput id="iso2768-geo-length" value={geoLength} onChange={setGeoLength} />
-          </Field>
+          <ValidatedNumField
+            id="iso2768-geo-length"
+            label={t.nominalLength}
+            value={geoLength}
+            onChange={setGeoLength}
+            error={lengthError}
+            validateInitially={normalizedSearch.has("gl")}
+          />
         </div>
         {validGeoClass && (
           <ResultGrid
