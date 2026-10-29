@@ -85,7 +85,10 @@ from production deployment and from physical/CAD application validation.
 
 ## ISO 2768 geometric-class URL validation
 
-- Pending independent review/CI: unsupported, blank and prototype-key `gc`
+- Released in PR86 at `1a7e0cec7cbc8e39c029291a156c6c0b92667c25`: both independent
+  critics accepted the exact tree; full CI 40737143840 (964 browser tests passed,
+  10 skipped) and deployed smoke 40781596825 passed; production READY/live revision
+  matched. Unsupported, blank and prototype-key `gc`
   selections retain raw URL state and receive an associated bilingual correction.
   Class-dependent geometric outputs and copied values are withheld until recovery;
   copied reports explicitly flag omitted geometric tolerances while retaining
@@ -96,3 +99,17 @@ from production deployment and from physical/CAD application validation.
   Geometric values remain total zone widths, not ± deviations; existing withdrawn
   standard caveats remain in place.
 - This does not close source-audit, manual AT/200–400% zoom or CAD-runtime gaps.
+
+## ISO 2768 numeric URL validation
+
+- Pending independent review/CI: blank numeric `d`, `leg` and `gl` values remain
+  explicit in shared URLs and on reload instead of restoring defaults. Missing
+  values retain the existing 50/50/100 mm defaults and legacy `len` normalization.
+- Associated bilingual field feedback covers blank, malformed, nonfinite and
+  nonpositive inputs, with the existing 0.5 mm nominal-size minimum retained.
+  Only dependent values are withheld; copied reports flag omitted families.
+  Independent dimensional/geometric results and length-independent runout remain
+  available, including runout in copied reports. Reference tables are unchanged.
+- Parsing conventions, formulas, table coverage, thresholds, defaults and source
+  metadata are unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit
+  gaps remain open.
