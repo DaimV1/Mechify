@@ -102,7 +102,10 @@ from production deployment and from physical/CAD application validation.
 
 ## ISO 2768 numeric URL validation
 
-- Pending independent review/CI: blank numeric `d`, `leg` and `gl` values remain
+- Released in PR87 at `15650bc04ed1ef0b03cf74a69efe260894898175`: both independent
+  critics accepted the exact tree; full CI 40856742851 (1032 browser tests passed,
+  10 skipped) and deployed smoke 40864400127 passed; production READY/live revision
+  matched. Blank numeric `d`, `leg` and `gl` values remain
   explicit in shared URLs and on reload instead of restoring defaults. Missing
   values retain the existing 50/50/100 mm defaults and legacy `len` normalization.
 - Associated bilingual field feedback covers blank, malformed, nonfinite and
@@ -113,3 +116,14 @@ from production deployment and from physical/CAD application validation.
 - Parsing conventions, formulas, table coverage, thresholds, defaults and source
   metadata are unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit
   gaps remain open.
+
+## Keyway diameter URL validation
+
+- Pending independent review/CI: explicit blank and invalid diameter values remain
+  in the URL on reload, instead of restoring the remembered/default diameter.
+  Missing diameter retains the existing remembered value or 20 mm fallback.
+- Associated bilingual feedback requests a whole-mm diameter or explains existing
+  table coverage. Dependent dimensions, copy/CAD output and numeric diagram values
+  remain unavailable until recovery; the independent reference table stays visible.
+- Whole-mm parsing, formulas, data, defaults, thresholds and source metadata are
+  unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.

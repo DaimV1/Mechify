@@ -61,7 +61,8 @@ const T = {
     hubWidth: "Spiebaan naaf · breedte b",
     selectedNote:
       "Zelf gekozen passing; controleer geschiktheid voor de toepassing. Afwijkingen: bovenmaat / ondermaat. Schema toont nominale breedte.",
-    fillDiameter: "Vul een as-Ø in.",
+    fillDiameter: "Vul een as-Ø in hele mm in.",
+    invalidDiameter: "Vul een geldige as-Ø in hele mm in.",
     noRow: (d: number) =>
       `Geen rij in DIN 6885-1 voor Ø ${d} mm. De tabel begint boven 6 mm tot en met 110 mm.`,
     shaftAt: (d: number, range: string) => `As Ø ${d} mm · ${range}`,
@@ -106,7 +107,8 @@ const T = {
     hubWidth: "Hub keyway · width b",
     selectedNote:
       "User-selected fit; check suitability for the application. Deviations: upper / lower. Diagram shows nominal width.",
-    fillDiameter: "Enter a shaft Ø.",
+    fillDiameter: "Enter a shaft Ø in whole mm.",
+    invalidDiameter: "Enter a valid shaft Ø in whole mm.",
     noRow: (d: number) =>
       `No row in DIN 6885-1 for Ø ${d} mm. The table starts above 6 mm up to and including 110 mm.`,
     shaftAt: (d: number, range: string) => `Shaft Ø ${d} mm · ${range}`,
@@ -157,8 +159,7 @@ export function KeywaysCalc() {
 
   useEffect(() => {
     const next = new URLSearchParams(search);
-    if (diameter) next.set("d", diameter);
-    else next.delete("d");
+    next.set("d", diameter);
     if (widthFit === null) next.delete("widthFit");
     else next.set("widthFit", widthFit);
     navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
@@ -168,6 +169,14 @@ export function KeywaysCalc() {
   const parsed = parseWholeMm(diameter);
   const d = parsed.status === "ok" ? parsed.mm : Number.NaN;
   const row = parsed.status === "ok" ? lookupKeyway(d) : null;
+  const diameterError =
+    parsed.status === "empty"
+      ? diameter.trim() === ""
+        ? t.fillDiameter
+        : t.invalidDiameter
+      : !row
+        ? t.noRow(d)
+        : undefined;
   const activeLabel = row ? rangeLabel(row.over, row.to) : "";
 
   function onDia(v: string) {
@@ -226,7 +235,13 @@ export function KeywaysCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 max-w-xs">
           <Field label={t.diameterLabel}>
-            <WholeMmInput id="key-diameter" value={diameter} onChange={onDia} />
+            <WholeMmInput
+              id="key-diameter"
+              value={diameter}
+              onChange={onDia}
+              aria-invalid={Boolean(diameterError)}
+              aria-describedby={diameterError ? "key-diameter-error" : undefined}
+            />
           </Field>
         </div>
         <div className="mt-4 flex max-w-sm flex-col gap-2 text-sm text-muted">
@@ -256,15 +271,11 @@ export function KeywaysCalc() {
             </p>
           )}
         </div>
-        {parsed.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillDiameter}
+        {diameterError ? (
+          <p id="key-diameter-error" className="mt-5 text-sm text-danger" role="alert">
+            {diameterError}
           </p>
-        ) : !row ? (
-          <p className="mt-5 text-sm text-muted" role="status">
-            {t.noRow(d)}
-          </p>
-        ) : (
+        ) : row ? (
           <>
             <p className="mt-5 text-sm text-muted">
               {t.shaftAt(d, rangeLabelDisplay(row.over, row.to))}
@@ -289,7 +300,7 @@ export function KeywaysCalc() {
               <CopyLink />
             </div>
           </>
-        )}
+        ) : null}
         <SourceMetaBadge meta={KEYWAY_META} />
       </CalcPanel>
       <SchemaPanel
