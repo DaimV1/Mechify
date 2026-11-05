@@ -1,6 +1,6 @@
 import { BearingFitChart, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   BEARING_SIDES,
   housingClassFor,
@@ -64,6 +64,8 @@ const T = {
     sidePlaceholder: "Kies een lagerpositie",
     sideError: "Kies een lagerpositie uit de lijst om de lagerpassingen te bepalen.",
     fillDiameter: "Vul een as-Ø en lager-buitendiameter D in.",
+    shaftEmpty: "Vul een as-Ø in hele mm in.",
+    shaftInvalid: "Vul een geldige as-Ø in hele mm in.",
     noData: (d: number) => `Geen gegevens voor Ø${d} mm — het bereik is 0 t/m 50 mm.`,
     noDataHousing: (D: number) =>
       `Geen behuizingsgegevens voor D=${D} mm — het bereik is 0 t/m 50 mm. Vul de werkelijke lager-buitendiameter in.`,
@@ -111,6 +113,8 @@ const T = {
     sidePlaceholder: "Choose a bearing position",
     sideError: "Choose a bearing position from the list to determine the bearing fits.",
     fillDiameter: "Enter a shaft Ø and a bearing outside diameter D.",
+    shaftEmpty: "Enter a shaft Ø in whole mm.",
+    shaftInvalid: "Enter a valid shaft Ø in whole mm.",
     noData: (d: number) => `No data for Ø${d} mm — the range is 0 to 50 mm.`,
     noDataHousing: (D: number) =>
       `No housing data for D=${D} mm — the range is 0 to 50 mm. Enter the bearing's actual outside diameter.`,
@@ -148,7 +152,9 @@ const T = {
 export function BearingFitsCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 1, max: 50 }),
   );
@@ -158,13 +164,12 @@ export function BearingFitsCalc() {
 
   useEffect(() => {
     const next = new URLSearchParams(search);
-    if (diameter) next.set("d", diameter);
-    else next.delete("d");
+    next.set("d", diameter);
     if (housingDiameter) next.set("D", housingDiameter);
     else next.delete("D");
     next.set("load", load);
     next.set("side", side);
-    setSearch(next, { replace: true });
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [diameter, housingDiameter, load, side]);
 
@@ -188,6 +193,14 @@ export function BearingFitsCalc() {
     selectedLoad && selectedSide ? housingClassFor(selectedLoad, selectedSide) : null;
   const shaftFit = shaftClass && Number.isFinite(d) ? shaftFitAt(d, shaftClass) : null;
   const housingFit = housingClass && Number.isFinite(D) ? housingFitAt(D, housingClass) : null;
+  const shaftError =
+    parsed.status === "empty"
+      ? diameter.trim() === ""
+        ? t.shaftEmpty
+        : t.shaftInvalid
+      : validLoad && !shaftFit
+        ? t.noData(d)
+        : undefined;
   const shaftLimits = shaftFit ? absoluteLimits(d, shaftFit.es, shaftFit.ei) : null;
   const housingLimits = housingFit ? absoluteLimits(D, housingFit.ES, housingFit.EI) : null;
   const loadLabel = (l: { label: string; labelEn: string }) =>
@@ -240,7 +253,13 @@ export function BearingFitsCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-4">
           <Field label={t.diameter}>
-            <WholeMmInput id="bearing-diameter" value={diameter} onChange={onDia} />
+            <WholeMmInput
+              id="bearing-diameter"
+              value={diameter}
+              onChange={onDia}
+              aria-invalid={Boolean(shaftError)}
+              aria-describedby={shaftError ? "bearing-diameter-error" : undefined}
+            />
           </Field>
           <Field label={t.housingDiameter}>
             <WholeMmInput
@@ -291,6 +310,11 @@ export function BearingFitsCalc() {
           </Field>
         </div>
         <p className="mt-2 text-xs text-subtle">{t.housingDiameterHint}</p>
+        {shaftError && (
+          <p id="bearing-diameter-error" className="mt-5 text-sm text-danger" role="alert">
+            {shaftError}
+          </p>
+        )}
         {!validLoad && (
           <p id="bearing-load-error" className="mt-5 text-sm text-muted" role="status">
             {t.loadError}
@@ -302,8 +326,7 @@ export function BearingFitsCalc() {
           </p>
         )}
 
-        {!validLoad || !validSide ? null : parsed.status === "empty" ||
-          parsedHousing.status === "empty" ? (
+        {!validLoad || !validSide || shaftError ? null : parsedHousing.status === "empty" ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDiameter}
           </p>
