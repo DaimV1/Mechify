@@ -711,13 +711,13 @@ for (const locale of ["nl", "en"] as const) {
         }),
       ).toHaveCount(0);
       expect(new URL(page.url()).searchParams.get("load")).toBe(load);
-      // This calculator's established query sync normalizes away incoming fragments.
-      expect(new URL(page.url()).hash).toBe("");
+      // Query synchronization preserves the incoming fragment.
+      expect(new URL(page.url()).hash).toBe("#calculator");
 
       await page.reload({ waitUntil: "networkidle" });
       await expect(select).toHaveAttribute("aria-invalid", "true");
       expect(new URL(page.url()).searchParams.get("load")).toBe(load);
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
 
       await select.selectOption("licht");
       await expect(select).not.toHaveAttribute("aria-invalid");
@@ -730,11 +730,11 @@ for (const locale of ["nl", "en"] as const) {
         }),
       ).toBeVisible();
       await expect.poll(() => new URL(page.url()).searchParams.get("load")).toBe("licht");
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
       await page.reload({ waitUntil: "networkidle" });
       await expect(select).toHaveValue("licht");
       await expect(shaftResult).toHaveText("+0,009 / -0,004 mm");
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
     });
   }
 }
@@ -782,13 +782,13 @@ for (const locale of ["nl", "en"] as const) {
       await expect(diagram.getByText("j6", { exact: false })).toHaveCount(0);
       await expect(diagram.getByText("J7", { exact: false })).toHaveCount(0);
       expect(new URL(page.url()).searchParams.get("side")).toBe(side);
-      // This calculator's established query sync normalizes away incoming fragments.
-      expect(new URL(page.url()).hash).toBe("");
+      // Query synchronization preserves the incoming fragment.
+      expect(new URL(page.url()).hash).toBe("#calculator");
 
       await page.reload({ waitUntil: "networkidle" });
       await expect(select).toHaveAttribute("aria-invalid", "true");
       expect(new URL(page.url()).searchParams.get("side")).toBe(side);
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
 
       await select.selectOption("los");
       await expect(select).not.toHaveAttribute("aria-invalid");
@@ -801,11 +801,11 @@ for (const locale of ["nl", "en"] as const) {
         }),
       ).toBeVisible();
       await expect.poll(() => new URL(page.url()).searchParams.get("side")).toBe("los");
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
       await page.reload({ waitUntil: "networkidle" });
       await expect(select).toHaveValue("los");
       await expect(housingResult).toHaveText("+0,025 / +0,000 mm");
-      expect(new URL(page.url()).hash).toBe("");
+      expect(new URL(page.url()).hash).toBe("#calculator");
     });
   }
 }

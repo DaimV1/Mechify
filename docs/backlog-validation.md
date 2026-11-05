@@ -119,11 +119,25 @@ from production deployment and from physical/CAD application validation.
 
 ## Keyway diameter URL validation
 
-- Pending independent review/CI: explicit blank and invalid diameter values remain
+- Released in PR89 at `3a609f39452e95411b85f061865868ed72b94713`: both independent
+  critics accepted the exact tree; full CI 41841613894 (1068 browser tests passed,
+  10 skipped) and deployed smoke 41855920382 passed; production READY/live revision
+  matched. Explicit blank and invalid diameter values remain
   in the URL on reload, instead of restoring the remembered/default diameter.
   Missing diameter retains the existing remembered value or 20 mm fallback.
 - Associated bilingual feedback requests a whole-mm diameter or explains existing
   table coverage. Dependent dimensions, copy/CAD output and numeric diagram values
   remain unavailable until recovery; the independent reference table stays visible.
 - Whole-mm parsing, formulas, data, defaults, thresholds and source metadata are
+  unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+## Bearing-fit shaft diameter URL validation
+
+- Pending independent review/CI: explicit blank and raw invalid shaft diameter `d`
+  persist through URL updates and reload. Missing `d` retains the remembered value
+  or existing 20 mm fallback. Housing diameter behavior is unchanged.
+- Associated bilingual shaft-field correction covers blank/malformed values and
+  existing table coverage. Existing result/copy/CAD gating and independent housing
+  reference content remain; unrelated query parameters and hash are retained.
+- Whole-mm parsing, formulas, tables, defaults, thresholds and source metadata are
   unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
