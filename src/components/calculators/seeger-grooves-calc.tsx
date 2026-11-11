@@ -1,6 +1,6 @@
 import { CirclipSection, SchemaPanel } from "@/components/toolkit/schema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   CIRCLIP_KINDS,
   computeGroove,
@@ -46,7 +46,8 @@ const T = {
     type: "Type",
     diameterShaft: "As-Ø (mm)",
     diameterBore: "Boring-Ø (mm)",
-    fillDiameter: "Vul een diameter in.",
+    fillDiameter: "Vul een diameter in hele mm in.",
+    invalidDiameter: "Vul een geldige diameter in hele mm in.",
     fillPositive: "Vul een diameter groter dan 0 in.",
     noRing: (d: number, lower: number | null, upper: number | null) => {
       const near = [lower, upper].filter((v): v is number => v != null);
@@ -76,7 +77,8 @@ const T = {
     type: "Type",
     diameterShaft: "Shaft Ø (mm)",
     diameterBore: "Bore Ø (mm)",
-    fillDiameter: "Enter a diameter.",
+    fillDiameter: "Enter a diameter in whole mm.",
+    invalidDiameter: "Enter a valid diameter in whole mm.",
     fillPositive: "Enter a diameter greater than 0.",
     noRing: (d: number, lower: number | null, upper: number | null) => {
       const near = [lower, upper].filter((v): v is number => v != null);
@@ -115,7 +117,9 @@ function widthText(r: NonNullable<ReturnType<typeof computeGroove>>) {
 export function SeegerGroovesCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [kind, setKind] = useState<CirclipKind>((search.get("kind") as CirclipKind) ?? "as");
   const [diameter, setDiameter] = useState(
     () => search.get("d") ?? readStoredDiameter({ min: 3, max: 100 }),
@@ -124,9 +128,8 @@ export function SeegerGroovesCalc() {
   useEffect(() => {
     const next = new URLSearchParams(search);
     next.set("kind", kind);
-    if (diameter) next.set("d", diameter);
-    else next.delete("d");
-    setSearch(next, { replace: true });
+    next.set("d", diameter);
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind, diameter]);
 
@@ -146,6 +149,17 @@ export function SeegerGroovesCalc() {
   const result = validKind && Number.isFinite(d) ? computeGroove(kind, d) : null;
   const standard = CIRCLIP_KINDS.find((k) => k.id === kind)?.standard ?? "";
   const nearest = validKind && Number.isFinite(d) && !result ? nearestStandardSizes(kind, d) : null;
+
+  const diameterError =
+    parsed.status === "empty"
+      ? diameter.trim() === ""
+        ? t.fillDiameter
+        : t.invalidDiameter
+      : d <= 0
+        ? t.fillPositive
+        : validKind && !result
+          ? t.noRing(d, nearest?.lower ?? null, nearest?.upper ?? null)
+          : undefined;
 
   const copy = useMemo(() => {
     if (!result) return "";
@@ -201,27 +215,26 @@ export function SeegerGroovesCalc() {
           <Field
             label={!validKind ? "Diameter (mm)" : kind === "as" ? t.diameterShaft : t.diameterBore}
           >
-            <WholeMmInput id="circlip-diameter" value={diameter} onChange={onDia} />
+            <WholeMmInput
+              id="circlip-diameter"
+              value={diameter}
+              onChange={onDia}
+              aria-invalid={Boolean(diameterError)}
+              aria-describedby={diameterError ? "circlip-diameter-error" : undefined}
+            />
           </Field>
         </div>
 
+        {diameterError && (
+          <p id="circlip-diameter-error" className="mt-5 text-sm text-danger" role="alert">
+            {diameterError}
+          </p>
+        )}
         {!validKind ? (
           <p id="circlip-kind-error" className="mt-5 text-sm text-muted" role="status">
             {kindError}
           </p>
-        ) : parsed.status === "empty" ? (
-          <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillDiameter}
-          </p>
-        ) : !Number.isFinite(d) || d <= 0 ? (
-          <p className="mt-5 text-sm text-muted" role="status">
-            {t.fillPositive}
-          </p>
-        ) : !result ? (
-          <p className="mt-5 text-sm text-muted" role="status">
-            {t.noRing(d, nearest?.lower ?? null, nearest?.upper ?? null)}
-          </p>
-        ) : (
+        ) : result ? (
           <>
             <p
               className={`mt-5 text-sm font-medium ${result.verified ? "text-ink" : "text-danger"}`}
@@ -266,7 +279,7 @@ export function SeegerGroovesCalc() {
               <CopyLink />
             </div>
           </>
-        )}
+        ) : null}
         <SourceMetaBadge meta={SEEGER_META} />
       </CalcPanel>
       {validKind && (
@@ -279,7 +292,7 @@ export function SeegerGroovesCalc() {
         >
           <CirclipSection
             kind={kind}
-            d1={Number.isFinite(d) ? d : undefined}
+            d1={result ? d : undefined}
             d2={result?.grooveDiameter}
             b={result?.grooveWidth}
             t={result?.grooveDepth}
