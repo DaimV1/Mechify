@@ -133,11 +133,25 @@ from production deployment and from physical/CAD application validation.
 
 ## Bearing-fit shaft diameter URL validation
 
-- Pending independent review/CI: explicit blank and raw invalid shaft diameter `d`
+- Released in PR90 at `5884599eea1801286222d83ba163dc5c61b63986`: both independent
+  critics accepted the exact tree; full CI 41991018368 (1104 browser tests passed,
+  10 skipped) and deployed smoke 42000980216 passed; production READY/live revision
+  matched. Explicit blank and raw invalid shaft diameter `d`
   persist through URL updates and reload. Missing `d` retains the remembered value
   or existing 20 mm fallback. Housing diameter behavior is unchanged.
 - Associated bilingual shaft-field correction covers blank/malformed values and
   existing table coverage. Existing result/copy/CAD gating and independent housing
   reference content remain; unrelated query parameters and hash are retained.
+- Whole-mm parsing, formulas, tables, defaults, thresholds and source metadata are
+  unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+## Circlip diameter URL validation
+
+- Pending independent review/CI: explicit blank and raw invalid diameter values
+  persist through URL updates and reload. Missing diameter retains the remembered
+  value or existing 20 mm fallback; ring-type selection and query/hash are retained.
+- Associated bilingual feedback covers blank/malformed values and existing table
+  coverage. Dependent result/copy and numeric diagram annotations remain unavailable
+  until recovery; the independent catalogue table remains visible for valid types.
 - Whole-mm parsing, formulas, tables, defaults, thresholds and source metadata are
   unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
