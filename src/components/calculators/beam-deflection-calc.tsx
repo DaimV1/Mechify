@@ -80,6 +80,11 @@ const T = {
     sideA: "Zijde a (mm)",
     wallT: "Wanddikte t (mm)",
     allowable: "Toelaatbare doorbuiging (mm, optioneel)",
+    positive: "Vul een geldig getal groter dan 0 in.",
+    nonnegative: "Vul een geldig getal van 0 of groter in.",
+    innerError: "Vul een binnendiameter in van 0 of groter en kleiner dan buitendiameter D.",
+    wallError: "Vul een wanddikte groter dan 0 en kleiner dan de helft van zowel b als h in.",
+    positionError: "Vul een lastpositie in: 0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging.",
     fillDims: "Vul geldige afmetingen in voor de gekozen doorsnede.",
     fillSpan:
       "Vul een overspanning L en een lastpositie a in (0 < a < L voor vrij opgelegd, 0 < a ≤ L voor uitkraging).",
@@ -147,6 +152,11 @@ const T = {
     sideA: "Side a (mm)",
     wallT: "Wall thickness t (mm)",
     allowable: "Allowable deflection (mm, optional)",
+    positive: "Enter a valid number greater than 0.",
+    nonnegative: "Enter a valid number of 0 or greater.",
+    innerError: "Enter an inner diameter of 0 or greater and smaller than outer diameter D.",
+    wallError: "Enter a wall thickness greater than 0 and smaller than half of both b and h.",
+    positionError: "Enter a load position: 0 < a < L for simply supported, 0 < a ≤ L for cantilever.",
     fillDims: "Enter valid dimensions for the selected cross-section.",
     fillSpan:
       "Enter a span L and a load position a (0 < a < L for simply supported, 0 < a ≤ L for cantilever).",
@@ -220,16 +230,16 @@ export function BeamDeflectionCalc() {
     next.set("type", beamType);
     next.set("loadKind", loadKind);
     next.set("section", sectionKind);
-    set("D", D);
-    set("dIn", dIn);
-    set("b", b);
-    set("h", h);
-    set("a", a);
-    set("t", t2);
-    set("L", L);
-    set("posA", posA);
-    set("f", force);
-    set("w", udl);
+    next.set("D", D);
+    next.set("dIn", dIn);
+    next.set("b", b);
+    next.set("h", h);
+    next.set("a", a);
+    next.set("t", t2);
+    next.set("L", L);
+    next.set("posA", posA);
+    next.set("f", force);
+    next.set("w", udl);
     next.set("material", materialId);
     next.set("axis", axis);
     set("allow", allowable);
@@ -298,6 +308,53 @@ export function BeamDeflectionCalc() {
   const rp02 = material?.Rp02 ?? null;
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
   const isUDL = validLoadKind && loadKind === "verdeeld";
+
+  // Validate only the fields used by the current section and load model.
+  const numericErrors: Record<string, string> = {};
+  const positive = (id: string, raw: string) => {
+    const value = parseNum(raw);
+    if (value == null || value <= 0) numericErrors[id] = t.positive;
+  };
+  positive("beam-L", L);
+  if (sectionKind === "rond" || sectionKind === "buis") positive("beam-D", D);
+  if (sectionKind === "buis") {
+    const inner = parseNum(dIn);
+    const outer = parseNum(D);
+    if (inner == null || inner < 0 || (outer != null && inner >= outer)) {
+      numericErrors["beam-d"] = t.innerError;
+    }
+  }
+  if (sectionKind === "rechthoek" || sectionKind === "koker") {
+    const prefix = sectionKind === "koker" ? "beam-koker" : "beam";
+    positive(`${prefix}-b`, b);
+    positive(`${prefix}-h`, h);
+  }
+  if (sectionKind === "vierkant") positive("beam-side", a);
+  if (sectionKind === "koker") {
+    const wall = parseNum(t2);
+    const width = parseNum(b);
+    const height = parseNum(h);
+    if (wall == null || wall <= 0 ||
+        (width != null && 2 * wall >= width) || (height != null && 2 * wall >= height)) {
+      numericErrors["beam-koker-t"] = t.wallError;
+    }
+  }
+  if (validLoadKind) {
+    if (isUDL) {
+      if (udlRaw == null || udlRaw < 0) numericErrors["beam-udl"] = t.nonnegative;
+    } else {
+      if (Fraw == null || Fraw < 0) numericErrors["beam-force"] = t.nonnegative;
+      if (posARaw == null || posARaw <= 0 ||
+          (Lraw != null && validBeamType &&
+            (beamType === "opgelegd" ? posARaw >= Lraw : posARaw > Lraw))) {
+        numericErrors["beam-a"] = t.positionError;
+      }
+    }
+  }
+  const numericFieldProps = (id: string) => ({
+    "aria-invalid": numericErrors[id] ? true : undefined,
+    "aria-describedby": numericErrors[id] ? `${id}-error` : undefined,
+  });
 
   const result =
     selectedBeamType != null &&
@@ -446,19 +503,19 @@ export function BeamDeflectionCalc() {
             </SelectInput>
           </Field>
           <Field label={t.span}>
-            <NumInput id="beam-L" value={L} onChange={setL} />
+            <NumInput {...numericFieldProps("beam-L")} id="beam-L" value={L} onChange={setL} />
           </Field>
           {isUDL ? (
             <Field label={t.udlLoad}>
-              <NumInput id="beam-udl" value={udl} onChange={setUdl} />
+              <NumInput {...numericFieldProps("beam-udl")} id="beam-udl" value={udl} onChange={setUdl} />
             </Field>
           ) : (
             <>
               <Field label={t.loadPosition}>
-                <NumInput id="beam-a" value={posA} onChange={setPosA} />
+                <NumInput {...numericFieldProps("beam-a")} id="beam-a" value={posA} onChange={setPosA} />
               </Field>
               <Field label={t.pointLoad}>
-                <NumInput id="beam-force" value={force} onChange={setForce} />
+                <NumInput {...numericFieldProps("beam-force")} id="beam-force" value={force} onChange={setForce} />
               </Field>
             </>
           )}
@@ -507,48 +564,53 @@ export function BeamDeflectionCalc() {
 
           {sectionKind === "rond" ? (
             <Field label={t.diameterD}>
-              <NumInput id="beam-D" value={D} onChange={setD} />
+              <NumInput {...numericFieldProps("beam-D")} id="beam-D" value={D} onChange={setD} />
             </Field>
           ) : null}
           {sectionKind === "buis" ? (
             <>
               <Field label={t.outerD}>
-                <NumInput id="beam-D" value={D} onChange={setD} />
+                <NumInput {...numericFieldProps("beam-D")} id="beam-D" value={D} onChange={setD} />
               </Field>
               <Field label={t.innerD}>
-                <NumInput id="beam-d" value={dIn} onChange={setDIn} />
+                <NumInput {...numericFieldProps("beam-d")} id="beam-d" value={dIn} onChange={setDIn} />
               </Field>
             </>
           ) : null}
           {sectionKind === "rechthoek" ? (
             <>
               <Field label={t.widthB}>
-                <NumInput id="beam-b" value={b} onChange={setB} />
+                <NumInput {...numericFieldProps("beam-b")} id="beam-b" value={b} onChange={setB} />
               </Field>
               <Field label={t.heightH}>
-                <NumInput id="beam-h" value={h} onChange={setH} />
+                <NumInput {...numericFieldProps("beam-h")} id="beam-h" value={h} onChange={setH} />
               </Field>
             </>
           ) : null}
           {sectionKind === "vierkant" ? (
             <Field label={t.sideA}>
-              <NumInput id="beam-side" value={a} onChange={setA} />
+              <NumInput {...numericFieldProps("beam-side")} id="beam-side" value={a} onChange={setA} />
             </Field>
           ) : null}
           {sectionKind === "koker" ? (
             <>
               <Field label={t.widthB}>
-                <NumInput id="beam-koker-b" value={b} onChange={setB} />
+                <NumInput {...numericFieldProps("beam-koker-b")} id="beam-koker-b" value={b} onChange={setB} />
               </Field>
               <Field label={t.heightH}>
-                <NumInput id="beam-koker-h" value={h} onChange={setH} />
+                <NumInput {...numericFieldProps("beam-koker-h")} id="beam-koker-h" value={h} onChange={setH} />
               </Field>
               <Field label={t.wallT}>
-                <NumInput id="beam-koker-t" value={t2} onChange={setT2} />
+                <NumInput {...numericFieldProps("beam-koker-t")} id="beam-koker-t" value={t2} onChange={setT2} />
               </Field>
             </>
           ) : null}
         </div>
+        {Object.entries(numericErrors).map(([id, message]) => (
+          <p key={id} id={`${id}-error`} className="mt-5 text-sm text-muted" role="status">
+            {message}
+          </p>
+        ))}
         {!validLoadKind && (
           <p id="beam-load-kind-error" className="mt-5 text-sm text-muted" role="status">
             {t.loadKindError}
@@ -574,7 +636,8 @@ export function BeamDeflectionCalc() {
         {!validLoadKind ||
         !validBeamType ||
         !validMaterial ||
-        !axisSelectionValid ? null : !section ? (
+        !axisSelectionValid ||
+        Object.keys(numericErrors).length > 0 ? null : !section ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillDims}
           </p>
@@ -650,7 +713,7 @@ export function BeamDeflectionCalc() {
             : "Technisch schema · maten in mm · schematisch, niet op schaal"
         }
       >
-        {!validLoadKind || !validBeamType || !validMaterial || !axisSelectionValid ? (
+        {!validLoadKind || !validBeamType || !validMaterial || !axisSelectionValid || !result ? (
           <p>{t.diagramFillPrompt}</p>
         ) : isUDL ? (
           <p>{t.diagramUnavailableUDL}</p>
