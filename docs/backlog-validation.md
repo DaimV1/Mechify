@@ -163,13 +163,31 @@ from production deployment and from physical/CAD application validation.
 
 ## O-ring cord selector URL validation
 
-- Pending independent review/CI: raw blank, malformed, nonfinite, nonpositive
-  and nonlisted positive cord values persist in the URL and on reload, with an
+- Released in PR96 at `16b8d659c8bc3eee8203adc2b2642bc80c05d901` (tree
+  `dffc67d9a736b0efcbccfcb8a2314e1b9692a736`): both independent critics accepted
+  the exact tree; full CI 43134258307 (1240 browser tests passed, 10 skipped)
+  and live exact-revision smoke 43147890483 passed. Production deployment
+  `dpl_AQZYPnQ8hJzyMK9XN54Rvvq7yDmJ` was READY and the live revision matched.
+  Raw blank, malformed, nonfinite, nonpositive and nonlisted positive cord values persist in the URL and on reload, with an
   explicit placeholder and associated bilingual correction. Dependent results,
   copy and numeric diagram annotations are withheld until a supported selection;
   the independent standard-cord table remains available.
 - Existing numeric parsing is unchanged: supported aliases such as `3.550`,
   `3,55`, `1.80` and `5.30` select the canonical numeric option while retaining
   their raw URL values. Missing cord retains the existing 3.55 mm default.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+
+## Beam numeric URL validation
+
+- Pending independent review/CI: explicit blanks and invalid raw values for the
+  ten defaulted numeric fields D, dIn, b, h, a, t, L, posA, f and w persist through
+  URL updates and reload, including unrelated query parameters and hash.
+  Missing values keep the existing 20/14/40/10/10/3/1000/500/500/1 defaults.
+- Associated NL/EN feedback identifies invalid active fields; dependent results,
+  copy, buckling handoff and numeric diagrams remain unavailable until recovery.
+  Inactive dimensions/loads do not block the active model. Zero F/w and zero tube
+  inner diameter remain valid; optional allowable deflection is outside this batch.
 - Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
   Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.

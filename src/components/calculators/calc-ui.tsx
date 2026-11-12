@@ -68,14 +68,20 @@ export function NumInput({
   value,
   onChange,
   id,
+  "aria-invalid": invalid,
+  "aria-describedby": describedBy,
 }: {
   value: string;
   onChange: (v: string) => void;
   id?: string;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }) {
   return (
     <input
       id={id}
+      aria-invalid={invalid}
+      aria-describedby={describedBy}
       type="text"
       inputMode="decimal"
       autoComplete="off"
