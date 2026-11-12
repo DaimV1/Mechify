@@ -147,11 +147,29 @@ from production deployment and from physical/CAD application validation.
 
 ## Circlip diameter URL validation
 
-- Pending independent review/CI: explicit blank and raw invalid diameter values
-  persist through URL updates and reload. Missing diameter retains the remembered
+- Released in PR95 at `722791b7ab6c79b6940d0c6bcf041508848412c3` (tree
+  `9bfd1f0a470d8aebcbda03b173359d21e5702b49`): both independent critics accepted
+  the exact tree; full CI 43041236545 (1188 browser tests passed, 10 skipped)
+  and live exact-revision smoke 43077099060 passed. Production deployment
+  `dpl_G1gpCB3DUhAxqKcM5wPwAm9g6emZ` was READY and the live revision matched.
+  Explicit blank and raw invalid diameter values persist through URL updates
+  and reload. Missing diameter retains the remembered
   value or existing 20 mm fallback; ring-type selection and query/hash are retained.
 - Associated bilingual feedback covers blank/malformed values and existing table
   coverage. Dependent result/copy and numeric diagram annotations remain unavailable
   until recovery; the independent catalogue table remains visible for valid types.
 - Whole-mm parsing, formulas, tables, defaults, thresholds and source metadata are
   unchanged. Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+## O-ring cord selector URL validation
+
+- Pending independent review/CI: raw blank, malformed, nonfinite, nonpositive
+  and nonlisted positive cord values persist in the URL and on reload, with an
+  explicit placeholder and associated bilingual correction. Dependent results,
+  copy and numeric diagram annotations are withheld until a supported selection;
+  the independent standard-cord table remains available.
+- Existing numeric parsing is unchanged: supported aliases such as `3.550`,
+  `3,55`, `1.80` and `5.30` select the canonical numeric option while retaining
+  their raw URL values. Missing cord retains the existing 3.55 mm default.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.

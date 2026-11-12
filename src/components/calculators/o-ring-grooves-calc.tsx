@@ -187,10 +187,16 @@ export function OringGroovesCalc() {
   }
 
   const cordVal = parseNum(cord);
+  const cordValid = cordVal != null && STANDARD_CORDS.includes(cordVal);
+  const cordError = cordValid
+    ? undefined
+    : locale === "nl"
+      ? "Kies een ondersteunde koorddiameter."
+      : "Choose a supported cord diameter.";
   const squeezeVal = parseNum(squeeze);
   const widthFactorVal = parseNum(widthFactor) ?? NaN;
   const resultCandidate =
-    cordVal != null && squeezeVal != null
+    cordValid && cordVal != null && squeezeVal != null
       ? computeOringGroove(cordVal, squeezeVal, widthFactorVal)
       : null;
   const widthError =
@@ -241,15 +247,32 @@ export function OringGroovesCalc() {
         </h2>
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label={t.cordDiameter}>
-            <SelectInput value={cord} onChange={setCord}>
+          <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted">
+            <label htmlFor="oring-cord">{t.cordDiameter}</label>
+            <SelectInput
+              id="oring-cord"
+              value={cordValid ? String(cordVal) : ""}
+              onChange={setCord}
+              aria-invalid={Boolean(cordError)}
+              aria-describedby={cordError ? "oring-cord-error" : undefined}
+            >
+              {!cordValid && (
+                <option value="" disabled>
+                  {locale === "nl" ? "Kies koorddiameter" : "Choose cord diameter"}
+                </option>
+              )}
               {STANDARD_CORDS.map((c) => (
                 <option key={c} value={c}>
                   {c.toFixed(2)}
                 </option>
               ))}
             </SelectInput>
-          </Field>
+            {cordError && (
+              <p id="oring-cord-error" role="alert" className="text-sm text-danger">
+                {cordError}
+              </p>
+            )}
+          </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted">
             <label htmlFor="oring-direction">{t.direction}</label>
             <SelectInput
@@ -310,7 +333,7 @@ export function OringGroovesCalc() {
           />
         </div>
 
-        {widthError || !seal || !directionValid ? null : !result ? (
+        {cordError || widthError || !seal || !directionValid ? null : !result ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {t.fillValid}
           </p>
