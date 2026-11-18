@@ -63,6 +63,9 @@ const T = {
     heightH: "Hoogte h (mm)",
     sideA: "Zijde a (mm)",
     wallT: "Wanddikte t (mm)",
+    positive: "Vul een geldig getal groter dan 0 in.",
+    innerError: "Vul een binnendiameter in van 0 of groter en kleiner dan buitendiameter D.",
+    wallError: "Vul een wanddikte groter dan 0 en kleiner dan de helft van zowel b als h in.",
     optionalAxial: "Optioneel: axiale last",
     axialForce: "Axiale last F (N)",
     axialNote: "Ingevuld: S = F_cr / F wordt getoond. Leeg: alleen F_cr en σ_cr.",
@@ -132,6 +135,9 @@ const T = {
     heightH: "Height h (mm)",
     sideA: "Side a (mm)",
     wallT: "Wall thickness t (mm)",
+    positive: "Enter a valid number greater than 0.",
+    innerError: "Enter an inner diameter of 0 or greater and smaller than outer diameter D.",
+    wallError: "Enter a wall thickness greater than 0 and smaller than half of both b and h.",
     optionalAxial: "Optional: axial load",
     axialForce: "Axial load F (N)",
     axialNote: "If filled in: S = F_cr / F is shown. Empty: only F_cr and σ_cr.",
@@ -208,13 +214,13 @@ export function BucklingCalc() {
     const next = new URLSearchParams(search);
     const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
     next.set("section", sectionKind);
-    set("D", D);
-    set("dIn", dIn);
-    set("b", b);
-    set("h", h);
-    set("a", a);
-    set("t", t2);
-    set("L", L);
+    next.set("D", D);
+    next.set("dIn", dIn);
+    next.set("b", b);
+    next.set("h", h);
+    next.set("a", a);
+    next.set("t", t2);
+    next.set("L", L);
     next.set("end", endCondition);
     next.set("material", materialId);
     set("F", F);
@@ -254,6 +260,40 @@ export function BucklingCalc() {
   const endLabel = END_CONDITIONS.find((c) => c.id === endCondition);
   const label = (x: { label: string; labelEn: string }) => (locale === "nl" ? x.label : x.labelEn);
 
+  const numericErrors: Record<string, string> = {};
+  const positive = (id: string, raw: string) => {
+    const value = parseNum(raw);
+    if (value == null || value <= 0) numericErrors[id] = t.positive;
+  };
+  positive("knik-length", L);
+  if (sectionKind === "rond" || sectionKind === "buis") positive("knik-D", D);
+  if (sectionKind === "buis") {
+    const inner = parseNum(dIn);
+    const outer = parseNum(D);
+    if (inner == null || inner < 0 || (outer != null && inner >= outer)) {
+      numericErrors["knik-d"] = t.innerError;
+    }
+  }
+  if (sectionKind === "rechthoek" || sectionKind === "koker") {
+    const prefix = sectionKind === "koker" ? "knik-koker" : "knik";
+    positive(`${prefix}-b`, b);
+    positive(`${prefix}-h`, h);
+  }
+  if (sectionKind === "vierkant") positive("knik-a", a);
+  if (sectionKind === "koker") {
+    const wall = parseNum(t2);
+    const width = parseNum(b);
+    const height = parseNum(h);
+    if (wall == null || wall <= 0 ||
+        (width != null && 2 * wall >= width) || (height != null && 2 * wall >= height)) {
+      numericErrors["knik-koker-t"] = t.wallError;
+    }
+  }
+  const numericFieldProps = (id: string) => ({
+    "aria-invalid": numericErrors[id] ? true : undefined,
+    "aria-describedby": numericErrors[id] ? `${id}-error` : undefined,
+  });
+
   const result =
     section && Lraw != null && k != null && E != null && rp02 != null
       ? columnCapacity({
@@ -290,7 +330,7 @@ export function BucklingCalc() {
         <Note>{t.intro}</Note>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <Field label={t.lengthLabel}>
-            <NumInput id="knik-length" value={L} onChange={setL} />
+            <NumInput {...numericFieldProps("knik-length")} id="knik-length" value={L} onChange={setL} />
           </Field>
           <Field label={t.endConditionLabel}>
             <SelectInput
@@ -344,49 +384,54 @@ export function BucklingCalc() {
 
           {sectionKind === "rond" ? (
             <Field label={t.diameterD}>
-              <NumInput id="knik-D" value={D} onChange={setD} />
+              <NumInput {...numericFieldProps("knik-D")} id="knik-D" value={D} onChange={setD} />
             </Field>
           ) : null}
           {sectionKind === "buis" ? (
             <>
               <Field label={t.outerD}>
-                <NumInput id="knik-D" value={D} onChange={setD} />
+                <NumInput {...numericFieldProps("knik-D")} id="knik-D" value={D} onChange={setD} />
               </Field>
               <Field label={t.innerD}>
-                <NumInput id="knik-d" value={dIn} onChange={setDIn} />
+                <NumInput {...numericFieldProps("knik-d")} id="knik-d" value={dIn} onChange={setDIn} />
               </Field>
             </>
           ) : null}
           {sectionKind === "rechthoek" ? (
             <>
               <Field label={t.widthB}>
-                <NumInput id="knik-b" value={b} onChange={setB} />
+                <NumInput {...numericFieldProps("knik-b")} id="knik-b" value={b} onChange={setB} />
               </Field>
               <Field label={t.heightH}>
-                <NumInput id="knik-h" value={h} onChange={setH} />
+                <NumInput {...numericFieldProps("knik-h")} id="knik-h" value={h} onChange={setH} />
               </Field>
             </>
           ) : null}
           {sectionKind === "vierkant" ? (
             <Field label={t.sideA}>
-              <NumInput id="knik-a" value={a} onChange={setA} />
+              <NumInput {...numericFieldProps("knik-a")} id="knik-a" value={a} onChange={setA} />
             </Field>
           ) : null}
           {sectionKind === "koker" ? (
             <>
               <Field label={t.widthB}>
-                <NumInput id="knik-koker-b" value={b} onChange={setB} />
+                <NumInput {...numericFieldProps("knik-koker-b")} id="knik-koker-b" value={b} onChange={setB} />
               </Field>
               <Field label={t.heightH}>
-                <NumInput id="knik-koker-h" value={h} onChange={setH} />
+                <NumInput {...numericFieldProps("knik-koker-h")} id="knik-koker-h" value={h} onChange={setH} />
               </Field>
               <Field label={t.wallT}>
-                <NumInput id="knik-koker-t" value={t2} onChange={setT2} />
+                <NumInput {...numericFieldProps("knik-koker-t")} id="knik-koker-t" value={t2} onChange={setT2} />
               </Field>
             </>
           ) : null}
         </div>
 
+        {Object.entries(numericErrors).map(([id, message]) => (
+          <p key={id} id={`${id}-error`} className="mt-5 text-sm text-muted" role="status">
+            {message}
+          </p>
+        ))}
         {!validEnd && (
           <p id="knik-end-error" className="mt-5 text-sm text-muted" role="status">
             {t.endConditionError}
@@ -410,7 +455,7 @@ export function BucklingCalc() {
           <Note>{t.axialNote}</Note>
         </details>
 
-        {!validEnd || !validMaterial ? null : section ? (
+        {!validEnd || !validMaterial || Object.keys(numericErrors).length > 0 ? null : section ? (
           result ? (
             <>
               <p className="mt-5 text-sm text-muted">
