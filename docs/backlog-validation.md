@@ -200,8 +200,12 @@ from production deployment and from physical/CAD application validation.
 
 ## Buckling numeric URL validation
 
-- Pending independent review/CI: explicit blanks and invalid raw values for the
-  seven defaulted numeric fields D, dIn, b, h, a, t and L persist through URL
+- Released in PR101 at `ec05038cefe1c0ff71834cbf335793d3a3c56a05` (tree
+  `02c0422f084c21203b66d3dca6ee9211f9aaa712`): both critics accepted the exact tree;
+  full CI 44346608036 (1416 browser tests passed, 10 skipped), post-merge CI
+  44403112549 and deployed smoke 44403227695 passed. Production
+  `dpl_VQBEPbShKNoxJWzBaSMbuHTV8n1C` was READY and live revision matched.
+  Explicit blanks and invalid raw values for the seven defaulted numeric fields D, dIn, b, h, a, t and L persist through URL
   updates and reload, including unrelated query parameters and hash. Missing
   values keep the existing 20/14/40/10/10/3/1000 defaults.
 - Associated NL/EN feedback identifies invalid active dimensions and length;
@@ -209,5 +213,18 @@ from production deployment and from physical/CAD application validation.
   dimensions do not block the active model. Zero tube inner diameter remains
   valid. Optional axial load F is outside this batch and retains its behavior.
   Independent end-condition diagram and reference tables remain available.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+
+## Bolted-joint numeric URL validation
+
+- Pending independent review/CI: explicit blank and invalid raw fv, fz, phi, fa
+  and fkreq values persist through URL updates, reload and language switching.
+  Unrelated query parameters and hash remain; missing values retain 20/1/0.25/5/10.
+- Associated bilingual field errors use the existing model domains. Valid zero
+  loads, both load-factor endpoints and F_Z = F_V remain supported. Separation
+  remains a diagnostic result, not an input error. Invalid inputs withhold
+  dependent results and copy; independent guidance remains available.
 - Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
   Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.

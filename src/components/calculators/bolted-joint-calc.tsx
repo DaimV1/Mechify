@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   boltSafetyStatus,
   clampStatus,
@@ -77,6 +77,10 @@ const T = {
     sfFail: "S_F < 1,0 — de bout vloeit onder de maximale bedrijfslast.",
     sfCaution: "S_F tussen 1,0 en 1,2 — krap, controleer belastingaannames.",
     sfOk: "S_F ≥ 1,2 — voldoende marge tegen vloeien.",
+    positive: "Vul een geldig getal groter dan 0 in.",
+    nonnegative: "Vul een geldig getal van 0 of groter in.",
+    lossError: "Vul een geldig zetverlies in van 0 tot en met voorspankracht F_V.",
+    factorError: "Vul een geldige lastfactor van 0 tot en met 1 in.",
     fill: "Vul alle velden geldig in: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A en F_Kerf ≥ 0. Alleen eindige waarden.",
     threadSizePlaceholder: "Kies een draadmaat",
     threadSizeError: "Kies een draadmaat uit de lijst om de boutspanning te berekenen.",
@@ -129,6 +133,10 @@ const T = {
     sfFail: "S_F < 1.0 — the bolt yields under the maximum working load.",
     sfCaution: "S_F between 1.0 and 1.2 — tight, check the load assumptions.",
     sfOk: "S_F ≥ 1.2 — adequate margin against yielding.",
+    positive: "Enter a valid number greater than 0.",
+    nonnegative: "Enter a valid number of 0 or greater.",
+    lossError: "Enter a valid embedding loss from 0 up to and including preload F_V.",
+    factorError: "Enter a valid load factor from 0 up to and including 1.",
     fill: "Enter every field correctly: F_V > 0; 0 ≤ F_Z ≤ F_V; 0 ≤ Φ ≤ 1; F_A and F_Kerf ≥ 0. Finite values only.",
     threadSizePlaceholder: "Choose a thread size",
     threadSizeError: "Choose a thread size from the list to calculate bolt stress.",
@@ -158,7 +166,9 @@ const T = {
 export function BoltedJointCalc() {
   const { locale } = useLocale();
   const t = T[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [size, setSize] = useState(search.get("m") ?? "M10");
   const [classId, setClassId] = useState(search.get("c") ?? "8.8");
   const [fv, setFv] = useState(search.get("fv") ?? "20");
@@ -171,13 +181,12 @@ export function BoltedJointCalc() {
     const next = new URLSearchParams(search);
     next.set("m", size);
     next.set("c", classId);
-    const set = (k: string, v: string) => (v ? next.set(k, v) : next.delete(k));
-    set("fv", fv);
-    set("fz", fz);
-    set("phi", phi);
-    set("fa", fa);
-    set("fkreq", fkreq);
-    setSearch(next, { replace: true });
+    next.set("fv", fv);
+    next.set("fz", fz);
+    next.set("phi", phi);
+    next.set("fa", fa);
+    next.set("fkreq", fkreq);
+    navigate({ search: `?${next}`, hash: location.hash }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, classId, fv, fz, phi, fa, fkreq]);
 
@@ -192,6 +201,17 @@ export function BoltedJointCalc() {
   const phiVal = parseNum(phi);
   const faVal = parseNum(fa);
   const fkreqVal = parseNum(fkreq);
+
+  const numericErrors: Record<string, string> = {};
+  if (fvVal == null || fvVal <= 0) numericErrors["fv"] = t.positive;
+  if (fzVal == null || fzVal < 0 || (fvVal != null && fzVal > fvVal)) numericErrors["fz"] = t.lossError;
+  if (phiVal == null || phiVal < 0 || phiVal > 1) numericErrors["phi"] = t.factorError;
+  if (faVal == null || faVal < 0) numericErrors["fa"] = t.nonnegative;
+  if (fkreqVal == null || fkreqVal < 0) numericErrors["fkreq"] = t.nonnegative;
+  const numericFieldProps = (key: string) => ({
+    "aria-invalid": numericErrors[key] ? true : undefined,
+    "aria-describedby": numericErrors[key] ? `bolted-joint-${key}-error` : undefined,
+  });
 
   const result =
     As != null &&
@@ -298,21 +318,27 @@ export function BoltedJointCalc() {
             </SelectInput>
           </Field>
           <Field label={t.preload}>
-            <NumInput id="bolted-joint-fv" value={fv} onChange={setFv} />
+            <NumInput {...numericFieldProps("fv")} id="bolted-joint-fv" value={fv} onChange={setFv} />
           </Field>
           <Field label={t.embedding}>
-            <NumInput id="bolted-joint-fz" value={fz} onChange={setFz} />
+            <NumInput {...numericFieldProps("fz")} id="bolted-joint-fz" value={fz} onChange={setFz} />
           </Field>
           <Field label={t.loadFactor}>
-            <NumInput id="bolted-joint-phi" value={phi} onChange={setPhi} />
+            <NumInput {...numericFieldProps("phi")} id="bolted-joint-phi" value={phi} onChange={setPhi} />
           </Field>
           <Field label={t.workingLoad}>
-            <NumInput id="bolted-joint-fa" value={fa} onChange={setFa} />
+            <NumInput {...numericFieldProps("fa")} id="bolted-joint-fa" value={fa} onChange={setFa} />
           </Field>
           <Field label={t.requiredClamp}>
-            <NumInput id="bolted-joint-fkreq" value={fkreq} onChange={setFkreq} />
+            <NumInput {...numericFieldProps("fkreq")} id="bolted-joint-fkreq" value={fkreq} onChange={setFkreq} />
           </Field>
         </div>
+
+        {Object.entries(numericErrors).map(([key, message]) => (
+          <p key={key} id={`bolted-joint-${key}-error`} className="mt-5 text-sm text-muted" role="status">
+            {message}
+          </p>
+        ))}
 
         {!validSize && (
           <p id="bolted-joint-size-error" className="mt-5 text-sm text-muted" role="status">
