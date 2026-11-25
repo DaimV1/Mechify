@@ -1,6 +1,7 @@
 import { BendClearance } from "./bend-clearance";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearch } from "@/lib/reference-router";
+import { useSearch } from "@/lib/reference-router";
+import { useBendingSearchParams } from "@/lib/bending-search-params";
 import {
   bendAllowance90,
   bendDeduction90,
@@ -14,7 +15,6 @@ import {
   isRiNonMonotone,
   lookupKanten,
   parseBendDimension,
-  type Kind,
   type Material,
 } from "@/lib/toolkit/kanten";
 import { tx, useLocale } from "@/lib/i18n/locale";
@@ -40,21 +40,35 @@ function parseK(raw: string): number | null {
 export function KantenCalc() {
   const { locale } = useLocale();
   const search = useSearch({ from: "/toolkit/kanten" });
-  const navigate = useNavigate({ from: "/toolkit/kanten" });
+  const [, setParams] = useBendingSearchParams();
   const [tRaw, setTRaw] = useState(search.t ?? "2");
   const [material, setMaterial] = useState<Material>((search.material as Material) ?? "staal");
-  const [kind, setKind] = useState<Kind>((search.kind as Kind) ?? "haaks");
+  const [kind, setKind] = useState(search.kind ?? "haaks");
+  const supportedKind = kind === "haaks" || kind === "scherp" ? kind : null;
+  const kindError = tx(locale, "Kies haaks of scherp.", "Choose right angle or sharp.");
   const [kRaw, setKRaw] = useState(search.k ?? String(DEFAULT_K_FACTOR).replace(".", ","));
 
   useEffect(() => {
-    navigate({
-      search: (prev) => ({ ...prev, t: tRaw || undefined, material, kind, k: kRaw || undefined }),
-      replace: true,
-    });
+    setParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        for (const [key, value] of Object.entries({
+          t: tRaw || undefined,
+          material,
+          kind,
+          k: kRaw || undefined,
+        })) {
+          if (value === undefined) next.delete(key);
+          else next.set(key, value);
+        }
+        return next;
+      },
+      { replace: true },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tRaw, material, kind, kRaw]);
   const t = Number(tRaw);
-  const row = Number.isFinite(t) ? lookupKanten(t, material, kind) : null;
+  const row = Number.isFinite(t) && supportedKind ? lookupKanten(t, material, supportedKind) : null;
   const kFactor = parseK(kRaw);
   const ri = row?.ri ?? null;
   const bendMath = useMemo(
@@ -101,7 +115,18 @@ export function KantenCalc() {
             </SelectInput>
           </Field>
           <Field label={tx(locale, "Kant", "Bend")}>
-            <SelectInput value={kind} onChange={(v) => setKind(v as Kind)}>
+            <SelectInput
+              id="kanten-kind"
+              value={supportedKind ?? ""}
+              onChange={setKind}
+              aria-invalid={!supportedKind || undefined}
+              aria-describedby={!supportedKind ? "kanten-kind-error" : undefined}
+            >
+              {!supportedKind ? (
+                <option value="" disabled>
+                  {tx(locale, "Kies een kant", "Choose a bend")}
+                </option>
+              ) : null}
               {KINDS.map((k) => (
                 <option key={k.id} value={k.id}>
                   {tx(locale, k.label, k.labelEn)}
@@ -109,6 +134,11 @@ export function KantenCalc() {
               ))}
             </SelectInput>
           </Field>
+          {!supportedKind ? (
+            <p id="kanten-kind-error" className="text-sm text-danger">
+              {kindError}
+            </p>
+          ) : null}
           {kind === "haaks" ? (
             <Field label={tx(locale, "K-factor (bend allowance)", "K-factor (bend allowance)")}>
               <NumInput id="kanten-k" value={kRaw} onChange={setKRaw} />
@@ -197,7 +227,7 @@ export function KantenCalc() {
               <CopyLink />
             </div>
           </>
-        ) : (
+        ) : supportedKind ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {tx(
               locale,
@@ -205,7 +235,7 @@ export function KantenCalc() {
               "This thickness is not in the 247 tables for this combination. Do not use a neighboring row.",
             )}
           </p>
-        )}
+        ) : null}
         <Note>
           {tx(
             locale,
@@ -230,91 +260,95 @@ export function KantenCalc() {
             "Additional check: hole or slot near the bend",
           )}
         </summary>
-        <BendClearance row={row} />
+        <BendClearance row={row} kindValid={supportedKind != null} />
       </details>
 
-      <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {tx(locale, "Naslagtabel", "Reference table")} —{" "}
-          {tx(locale, materialLabel, materialLabelEn)}, {tx(locale, kindLabel, kindLabelEn)}
-        </h2>
-        <Note>
-          {tx(
-            locale,
-            "Alle diktes uit de 247-tabellen voor deze materiaal/kant-combinatie, zodat de onderliggende data zonder de rekenhulp te bedienen te controleren is.",
-            "Every thickness from the 247 tables for this material/bend combination, so the underlying data can be checked without operating the calculator.",
-          )}
-        </Note>
-        <div className="table-scroll mt-4" tabIndex={0}>
-          <table className="ref-table">
-            <thead>
-              <tr>
-                <th>t (mm)</th>
-                <th>Ri</th>
-                <th>s</th>
-                <th>w</th>
-                <th>x</th>
-              </tr>
-            </thead>
-            <tbody>
-              {THICKNESSES.map((rt) => {
-                const r = lookupKanten(rt, material, kind);
-                return (
-                  <tr key={rt} className={rt === t ? "is-active" : ""}>
-                    <th scope="row">{dashMm(rt)}</th>
-                    <td>
-                      {dashMm(r?.ri ?? null)}
-                      {r && isRiNonMonotone(kind, material, rt) ? " *" : ""}
-                    </td>
-                    <td>{dashMm(r?.s ?? null)}</td>
-                    <td>{dashMm(r?.w ?? null)}</td>
-                    <td>{dashMm(r?.x ?? null)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-xs text-subtle">
-          {tx(
-            locale,
-            "* niet-monotoon in de 247-brontabel, geen invoerfout hier.",
-            "* not monotonic in the 247 source table, not a transcription error here.",
-          )}
-        </p>
-      </section>
+      {supportedKind ? (
+        <section className="mt-12">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+            {tx(locale, "Naslagtabel", "Reference table")} —{" "}
+            {tx(locale, materialLabel, materialLabelEn)}, {tx(locale, kindLabel, kindLabelEn)}
+          </h2>
+          <Note>
+            {tx(
+              locale,
+              "Alle diktes uit de 247-tabellen voor deze materiaal/kant-combinatie, zodat de onderliggende data zonder de rekenhulp te bedienen te controleren is.",
+              "Every thickness from the 247 tables for this material/bend combination, so the underlying data can be checked without operating the calculator.",
+            )}
+          </Note>
+          <div className="table-scroll mt-4" tabIndex={0}>
+            <table className="ref-table">
+              <thead>
+                <tr>
+                  <th>t (mm)</th>
+                  <th>Ri</th>
+                  <th>s</th>
+                  <th>w</th>
+                  <th>x</th>
+                </tr>
+              </thead>
+              <tbody>
+                {THICKNESSES.map((rt) => {
+                  const r = lookupKanten(rt, material, supportedKind);
+                  return (
+                    <tr key={rt} className={rt === t ? "is-active" : ""}>
+                      <th scope="row">{dashMm(rt)}</th>
+                      <td>
+                        {dashMm(r?.ri ?? null)}
+                        {r && isRiNonMonotone(supportedKind, material, rt) ? " *" : ""}
+                      </td>
+                      <td>{dashMm(r?.s ?? null)}</td>
+                      <td>{dashMm(r?.w ?? null)}</td>
+                      <td>{dashMm(r?.x ?? null)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-subtle">
+            {tx(
+              locale,
+              "* niet-monotoon in de 247-brontabel, geen invoerfout hier.",
+              "* not monotonic in the 247 source table, not a transcription error here.",
+            )}
+          </p>
+        </section>
+      ) : null}
 
-      <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          {tx(locale, "Doorsnede", "Section")}
-        </h2>
-        <Note>
-          {tx(
-            locale,
-            "Kant in de matrijs: w is de groefwijdte (opening bovenkant matrijs), s de minimale beenlengte, Ri de inwendige radius bij de knik. Maatlijnen volgen de gekozen rij. Geen schaal.",
-            "Bend in the die: w is the die opening width, s the minimum leg length, Ri the inner radius at the bend. Dimension lines follow the selected row. Not to scale.",
-          )}
-        </Note>
-        <SchemaPanel
-          caption={tx(
-            locale,
-            kind === "haaks"
-              ? "Dwarsdoorsnede · haaks (90°)"
-              : "Referentie 90° · waarden uit scherpe tabel",
-            kind === "haaks"
-              ? "Cross-section · right angle (90°)"
-              : "90° reference · values from sharp table",
-          )}
-        >
-          <BendSection
-            kind={kind}
-            ri={row?.ri ?? null}
-            s={row?.s ?? null}
-            w={row?.w ?? null}
-            t={Number.isFinite(t) ? t : null}
-          />
-        </SchemaPanel>
-      </section>
+      {supportedKind ? (
+        <section className="mt-12">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+            {tx(locale, "Doorsnede", "Section")}
+          </h2>
+          <Note>
+            {tx(
+              locale,
+              "Kant in de matrijs: w is de groefwijdte (opening bovenkant matrijs), s de minimale beenlengte, Ri de inwendige radius bij de knik. Maatlijnen volgen de gekozen rij. Geen schaal.",
+              "Bend in the die: w is the die opening width, s the minimum leg length, Ri the inner radius at the bend. Dimension lines follow the selected row. Not to scale.",
+            )}
+          </Note>
+          <SchemaPanel
+            caption={tx(
+              locale,
+              kind === "haaks"
+                ? "Dwarsdoorsnede · haaks (90°)"
+                : "Referentie 90° · waarden uit scherpe tabel",
+              kind === "haaks"
+                ? "Cross-section · right angle (90°)"
+                : "90° reference · values from sharp table",
+            )}
+          >
+            <BendSection
+              kind={supportedKind}
+              ri={row?.ri ?? null}
+              s={row?.s ?? null}
+              w={row?.w ?? null}
+              t={Number.isFinite(t) ? t : null}
+            />
+          </SchemaPanel>
+        </section>
+      ) : null}
 
       <p className="mt-8 text-sm leading-relaxed text-muted">
         {tx(locale, "Bron:", "Source:")}{" "}
