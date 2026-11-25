@@ -62,7 +62,7 @@ for (const locale of ["nl", "en"] as const) {
       await invalid(nextLocale);
       await page.reload();
       await invalid(nextLocale);
-      await clearance.locator("summary").click();
+      await clearance.locator(":scope > summary").click();
       await expect(
         clearance.getByText(
           nextLocale === "en"
@@ -73,7 +73,7 @@ for (const locale of ["nl", "en"] as const) {
       await expect(clearance.locator("dl")).toHaveCount(0);
       await expect(clearance.getByRole("button")).toHaveCount(0);
       await expect(clearance.getByText(/^5\.00%/)).toBeVisible();
-      await free.locator("summary").click();
+      await free.locator(":scope > summary").click();
       await expect(free.locator("#edge-t")).toHaveValue("3");
       await expect(free.locator("dl")).toBeVisible();
       await expect(
@@ -116,7 +116,7 @@ for (const locale of ["nl", "en"] as const) {
         await expect(select).toHaveValue(kind);
         await expect(main.locator("dl")).toBeVisible();
         await assertShared(kind);
-        await clearance.locator("summary").click();
+        await clearance.locator(":scope > summary").click();
       }
     });
   }
