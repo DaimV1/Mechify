@@ -219,7 +219,12 @@ from production deployment and from physical/CAD application validation.
 
 ## Bolted-joint numeric URL validation
 
-- Pending independent review/CI: explicit blank and invalid raw fv, fz, phi, fa
+- Released in PR102 at `66f1bbe6741d98214204882bcf76284de7ce287b` (tree
+  `78608238ba7fcef86c468033ea743ad490cffd82`): full CI 44486417653
+  (1516 browser tests passed, 10 skipped), post-merge CI 44535701550 and
+  live exact-revision smoke 44535828858 passed. Production deployment
+  `dpl_933GoaKh77bJp6ywyRqkdWiUct6H` was READY and live revision matched.
+  Explicit blank and invalid raw fv, fz, phi, fa
   and fkreq values persist through URL updates, reload and language switching.
   Unrelated query parameters and hash remain; missing values retain 20/1/0.25/5/10.
 - Associated bilingual field errors use the existing model domains. Valid zero
@@ -227,4 +232,19 @@ from production deployment and from physical/CAD application validation.
   remains a diagnostic result, not an input error. Invalid inputs withhold
   dependent results and copy; independent guidance remains available.
 - Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+
+## Bending-table kind URL validation
+
+- Pending independent reviews/CI: present blank or unsupported kind values remain
+  in the shared URL through reload and language switching, with unrelated query
+  values and hash retained. Missing kind keeps the existing haaks default.
+- A placeholder and associated NL/EN correction require an explicit supported
+  selection. Selected supplier results, CAD/copy, numeric section, reference
+  table and dependent clearance assessment/copy are withheld until recovery.
+  Independent interruption percentage and supplementary free-angle calculations
+  remain available, as does unrelated source/measurement guidance.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  This validates selection handling, not supplier values or source completeness.
   Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.

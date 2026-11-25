@@ -115,14 +115,23 @@ export function SelectInput({
   onChange,
   children,
   disabled,
+  id,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
 }: {
   value: string;
   onChange: (v: string) => void;
   children: ReactNode;
   disabled?: boolean;
+  id?: string;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }) {
   return (
     <select
+      id={id}
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedBy}
       value={value}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}

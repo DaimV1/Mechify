@@ -1,6 +1,6 @@
 import { KantenCalc } from "@/components/toolkit/kanten-calc";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useBendingSearchParams } from "@/lib/bending-search-params";
 import {
   bendAllowance,
   bendDeduction,
@@ -80,7 +80,7 @@ const TXT = {
 export function EdgesCalc() {
   const { locale } = useLocale();
   const t = TXT[locale];
-  const [search, setSearch] = useSearchParams();
+  const [search, setSearch] = useBendingSearchParams();
   const [thickness, setThickness] = useState(search.get("ba_t") ?? "2");
   const [radius, setRadius] = useState(search.get("ba_r") ?? "2");
   const [angle, setAngle] = useState(search.get("ba_a") ?? "90");

@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useBendingSearchParams } from "@/lib/bending-search-params";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import {
   bendInterruptionPercent,
@@ -9,9 +9,15 @@ import {
 } from "@/lib/toolkit/kanten";
 import { CalcPanel, Field, Note, NumInput, ResultGrid, CopyResult } from "./calc-ui";
 
-export function BendClearance({ row }: { row: KantenRow | null }) {
+export function BendClearance({
+  row,
+  kindValid = true,
+}: {
+  row: KantenRow | null;
+  kindValid?: boolean;
+}) {
   const { locale } = useLocale();
-  const [params, setParams] = useSearchParams();
+  const [params, setParams] = useBendingSearchParams();
   const values = {
     flange: params.get("flange") ?? "",
     hole: params.get("hole") ?? "6",
@@ -131,47 +137,59 @@ export function BendClearance({ row }: { row: KantenRow | null }) {
           </Field>
         ))}
       </div>
-      <ResultGrid
-        items={[
-          { label: tx(locale, "Minimale beenlengte s", "Minimum leg length s"), value: mm(s) },
-          {
-            label: tx(locale, "Gatrand buiten zone: a ≥", "Hole edge outside zone: a ≥"),
-            value: mm(hole?.minEdge ?? null),
-          },
-          {
-            label: tx(locale, "Gatcentrum buiten zone: c ≥", "Hole centre outside zone: c ≥"),
-            value: mm(hole?.minCenter ?? null),
-          },
-        ]}
-      />
-      <div className="mt-4 space-y-2 text-sm text-ink" aria-live="polite">
-        <p>
-          {s == null
-            ? tx(
-                locale,
-                "Geen tabelwaarde: geen beoordeling mogelijk.",
-                "No table value: assessment unavailable.",
-              )
-            : flange == null
-              ? tx(
-                  locale,
-                  "Vul de werkelijke beenlengte in om deze te vergelijken.",
-                  "Enter the actual leg length to compare.",
-                )
-              : flange < s
+      {kindValid ? (
+        <>
+          <ResultGrid
+            items={[
+              { label: tx(locale, "Minimale beenlengte s", "Minimum leg length s"), value: mm(s) },
+              {
+                label: tx(locale, "Gatrand buiten zone: a ≥", "Hole edge outside zone: a ≥"),
+                value: mm(hole?.minEdge ?? null),
+              },
+              {
+                label: tx(locale, "Gatcentrum buiten zone: c ≥", "Hole centre outside zone: c ≥"),
+                value: mm(hole?.minCenter ?? null),
+              },
+            ]}
+          />
+          <div className="mt-4 space-y-2 text-sm text-ink" aria-live="polite">
+            <p>
+              {s == null
                 ? tx(
                     locale,
-                    "Been te kort voor deze tabelcombinatie.",
-                    "Leg too short for this table combination.",
+                    "Geen tabelwaarde: geen beoordeling mogelijk.",
+                    "No table value: assessment unavailable.",
                   )
-                : tx(
-                    locale,
-                    "Beenlengte voldoet aan de tabelwaarde.",
-                    "Leg length meets the table value.",
-                  )}
+                : flange == null
+                  ? tx(
+                      locale,
+                      "Vul de werkelijke beenlengte in om deze te vergelijken.",
+                      "Enter the actual leg length to compare.",
+                    )
+                  : flange < s
+                    ? tx(
+                        locale,
+                        "Been te kort voor deze tabelcombinatie.",
+                        "Leg too short for this table combination.",
+                      )
+                    : tx(
+                        locale,
+                        "Beenlengte voldoet aan de tabelwaarde.",
+                        "Leg length meets the table value.",
+                      )}
+            </p>
+            <p>{status}</p>
+          </div>
+        </>
+      ) : (
+        <p className="mt-4 text-sm text-muted" role="status">
+          {tx(
+            locale,
+            "Kies haaks of scherp voor de afstandscontrole.",
+            "Choose right angle or sharp for the clearance check.",
+          )}
         </p>
-        <p>{status}</p>
-      </div>
+      )}
       <Note>
         {tx(
           locale,
@@ -219,9 +237,11 @@ export function BendClearance({ row }: { row: KantenRow | null }) {
           "This check covers only the selected table and distances. Allow for tolerances, tooling and collisions. Consider machining critical fit holes after bending. Hemming and special relief cuts need separate assessment.",
         )}
       </Note>
-      <CopyResult
-        text={`247TailorSteel; ${row?.material ?? "—"}; t=${mm(row?.t ?? null)}; ${row?.kind ?? "—"}; s=${mm(s)}; Ø=${values.hole}; a=${values.edge}; ${status}; interruption=${percent == null ? "—" : percent.toFixed(2) + "%"}`}
-      />
+      {kindValid ? (
+        <CopyResult
+          text={`247TailorSteel; ${row?.material ?? "—"}; t=${mm(row?.t ?? null)}; ${row?.kind ?? "—"}; s=${mm(s)}; Ø=${values.hole}; a=${values.edge}; ${status}; interruption=${percent == null ? "—" : percent.toFixed(2) + "%"}`}
+        />
+      ) : null}
     </CalcPanel>
   );
 }
