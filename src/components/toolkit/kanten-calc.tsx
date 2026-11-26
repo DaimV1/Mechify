@@ -15,7 +15,6 @@ import {
   isRiNonMonotone,
   lookupKanten,
   parseBendDimension,
-  type Material,
 } from "@/lib/toolkit/kanten";
 import { tx, useLocale } from "@/lib/i18n/locale";
 import {
@@ -42,9 +41,15 @@ export function KantenCalc() {
   const search = useSearch({ from: "/toolkit/kanten" });
   const [, setParams] = useBendingSearchParams();
   const [tRaw, setTRaw] = useState(search.t ?? "2");
-  const [material, setMaterial] = useState<Material>((search.material as Material) ?? "staal");
+  const [material, setMaterial] = useState(search.material ?? "staal");
   const [kind, setKind] = useState(search.kind ?? "haaks");
   const supportedKind = kind === "haaks" || kind === "scherp" ? kind : null;
+  const supportedMaterial = MATERIALS.find((m) => m.id === material)?.id ?? null;
+  const materialError = tx(
+    locale,
+    "Kies staal, aluminium, RVS of hoogsterkte.",
+    "Choose steel, aluminium, stainless steel or high-strength.",
+  );
   const kindError = tx(locale, "Kies haaks of scherp.", "Choose right angle or sharp.");
   const [kRaw, setKRaw] = useState(search.k ?? String(DEFAULT_K_FACTOR).replace(".", ","));
 
@@ -68,7 +73,10 @@ export function KantenCalc() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tRaw, material, kind, kRaw]);
   const t = Number(tRaw);
-  const row = Number.isFinite(t) && supportedKind ? lookupKanten(t, material, supportedKind) : null;
+  const row =
+    Number.isFinite(t) && supportedKind && supportedMaterial
+      ? lookupKanten(t, supportedMaterial, supportedKind)
+      : null;
   const kFactor = parseK(kRaw);
   const ri = row?.ri ?? null;
   const bendMath = useMemo(
@@ -106,7 +114,18 @@ export function KantenCalc() {
             </SelectInput>
           </Field>
           <Field label={tx(locale, "Materiaal", "Material")}>
-            <SelectInput value={material} onChange={(v) => setMaterial(v as Material)}>
+            <SelectInput
+              id="kanten-material"
+              value={supportedMaterial ?? ""}
+              onChange={setMaterial}
+              aria-invalid={!supportedMaterial || undefined}
+              aria-describedby={!supportedMaterial ? "kanten-material-error" : undefined}
+            >
+              {!supportedMaterial ? (
+                <option value="" disabled>
+                  {tx(locale, "Kies een materiaal", "Choose a material")}
+                </option>
+              ) : null}
               {MATERIALS.map((m) => (
                 <option key={m.id} value={m.id}>
                   {tx(locale, m.label, m.labelEn)}
@@ -114,6 +133,11 @@ export function KantenCalc() {
               ))}
             </SelectInput>
           </Field>
+          {!supportedMaterial ? (
+            <p id="kanten-material-error" className="text-sm text-danger">
+              {materialError}
+            </p>
+          ) : null}
           <Field label={tx(locale, "Kant", "Bend")}>
             <SelectInput
               id="kanten-kind"
@@ -227,7 +251,7 @@ export function KantenCalc() {
               <CopyLink />
             </div>
           </>
-        ) : supportedKind ? (
+        ) : supportedKind && supportedMaterial ? (
           <p className="mt-5 text-sm text-muted" role="status">
             {tx(
               locale,
@@ -260,10 +284,14 @@ export function KantenCalc() {
             "Additional check: hole or slot near the bend",
           )}
         </summary>
-        <BendClearance row={row} kindValid={supportedKind != null} />
+        <BendClearance
+          row={row}
+          kindValid={supportedKind != null}
+          materialValid={supportedMaterial != null}
+        />
       </details>
 
-      {supportedKind ? (
+      {supportedKind && supportedMaterial ? (
         <section className="mt-12">
           <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
             {tx(locale, "Naslagtabel", "Reference table")} —{" "}
@@ -289,13 +317,13 @@ export function KantenCalc() {
               </thead>
               <tbody>
                 {THICKNESSES.map((rt) => {
-                  const r = lookupKanten(rt, material, supportedKind);
+                  const r = lookupKanten(rt, supportedMaterial, supportedKind);
                   return (
                     <tr key={rt} className={rt === t ? "is-active" : ""}>
                       <th scope="row">{dashMm(rt)}</th>
                       <td>
                         {dashMm(r?.ri ?? null)}
-                        {r && isRiNonMonotone(supportedKind, material, rt) ? " *" : ""}
+                        {r && isRiNonMonotone(supportedKind, supportedMaterial, rt) ? " *" : ""}
                       </td>
                       <td>{dashMm(r?.s ?? null)}</td>
                       <td>{dashMm(r?.w ?? null)}</td>
@@ -316,7 +344,7 @@ export function KantenCalc() {
         </section>
       ) : null}
 
-      {supportedKind ? (
+      {supportedKind && supportedMaterial ? (
         <section className="mt-12">
           <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
             {tx(locale, "Doorsnede", "Section")}

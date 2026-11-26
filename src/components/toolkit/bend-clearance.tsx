@@ -12,9 +12,11 @@ import { CalcPanel, Field, Note, NumInput, ResultGrid, CopyResult } from "./calc
 export function BendClearance({
   row,
   kindValid = true,
+  materialValid = true,
 }: {
   row: KantenRow | null;
   kindValid?: boolean;
+  materialValid?: boolean;
 }) {
   const { locale } = useLocale();
   const [params, setParams] = useBendingSearchParams();
@@ -137,7 +139,7 @@ export function BendClearance({
           </Field>
         ))}
       </div>
-      {kindValid ? (
+      {kindValid && materialValid ? (
         <>
           <ResultGrid
             items={[
@@ -185,8 +187,12 @@ export function BendClearance({
         <p className="mt-4 text-sm text-muted" role="status">
           {tx(
             locale,
-            "Kies haaks of scherp voor de afstandscontrole.",
-            "Choose right angle or sharp for the clearance check.",
+            !materialValid
+              ? "Kies een geldig materiaal voor de afstandscontrole."
+              : "Kies haaks of scherp voor de afstandscontrole.",
+            !materialValid
+              ? "Choose a supported material for the clearance check."
+              : "Choose right angle or sharp for the clearance check.",
           )}
         </p>
       )}
@@ -237,7 +243,7 @@ export function BendClearance({
           "This check covers only the selected table and distances. Allow for tolerances, tooling and collisions. Consider machining critical fit holes after bending. Hemming and special relief cuts need separate assessment.",
         )}
       </Note>
-      {kindValid ? (
+      {kindValid && materialValid ? (
         <CopyResult
           text={`247TailorSteel; ${row?.material ?? "—"}; t=${mm(row?.t ?? null)}; ${row?.kind ?? "—"}; s=${mm(s)}; Ø=${values.hole}; a=${values.edge}; ${status}; interruption=${percent == null ? "—" : percent.toFixed(2) + "%"}`}
         />
