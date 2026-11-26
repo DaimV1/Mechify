@@ -237,7 +237,12 @@ from production deployment and from physical/CAD application validation.
 
 ## Bending-table kind URL validation
 
-- Pending independent reviews/CI: present blank or unsupported kind values remain
+- Released in PR105 at `d059933e139b20c19cb2bfa3e29a090cff60012f` (tree
+  `8227e01dee0f3c962072cd0448bc4f5e7d5f0b91`): full CI 45656449189
+  (1536 browser tests passed, 10 skipped), post-merge CI 45665088311 and
+  live exact-revision smoke 45665212937 passed. Production deployment
+  `dpl_2Drh7LYYaDm5xBXvQ6aCEsdHH9gL` was READY and live revision matched.
+  Present blank or unsupported kind values remain
   in the shared URL through reload and language switching, with unrelated query
   values and hash retained. Missing kind keeps the existing haaks default.
 - A placeholder and associated NL/EN correction require an explicit supported
@@ -248,3 +253,18 @@ from production deployment and from physical/CAD application validation.
 - Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
   This validates selection handling, not supplier values or source completeness.
   Manual AT/200–400% zoom, CAD runtime and source-audit gaps remain open.
+
+
+## Bending-table material URL validation
+
+- Pending independent reviews/CI: present blank or unsupported material strings
+  persist with a placeholder and unique associated NL/EN correction; missing
+  material retains staal. Query values and hash survive reload, locale changes
+  and independent panel edits. All four supported materials remain available.
+- Both material and kind must be supported before supplier lookups, selected
+  results/math, CAD/copy, reference table, numeric section and dependent clearance
+  assessment/copy. Each invalid selection can be corrected independently.
+  Interruption percentage and supplementary free-angle calculations remain available.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  Selection sensitivity is not supplier certification. Manual AT/200–400% zoom,
+  CAD runtime and source-audit gaps remain open.
