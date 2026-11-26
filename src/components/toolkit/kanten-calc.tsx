@@ -58,7 +58,7 @@ export function KantenCalc() {
       (previous) => {
         const next = new URLSearchParams(previous);
         for (const [key, value] of Object.entries({
-          t: tRaw || undefined,
+          t: tRaw,
           material,
           kind,
           k: kRaw || undefined,
@@ -73,8 +73,15 @@ export function KantenCalc() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tRaw, material, kind, kRaw]);
   const t = Number(tRaw);
+  const supportedThickness =
+    /^\d{1,2}(\.\d{1,2})?$/.test(tRaw) && THICKNESSES.some((value) => value === t);
+  const thicknessError = tx(
+    locale,
+    "Kies een dikte uit de lijst.",
+    "Choose a thickness from the list.",
+  );
   const row =
-    Number.isFinite(t) && supportedKind && supportedMaterial
+    supportedThickness && supportedKind && supportedMaterial
       ? lookupKanten(t, supportedMaterial, supportedKind)
       : null;
   const kFactor = parseK(kRaw);
@@ -105,7 +112,18 @@ export function KantenCalc() {
         </h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label={tx(locale, "Dikte (mm)", "Thickness (mm)")}>
-            <SelectInput value={tRaw} onChange={setTRaw}>
+            <SelectInput
+              id="kanten-thickness"
+              value={supportedThickness ? String(t) : ""}
+              onChange={setTRaw}
+              aria-invalid={!supportedThickness || undefined}
+              aria-describedby={!supportedThickness ? "kanten-thickness-error" : undefined}
+            >
+              {!supportedThickness ? (
+                <option value="" disabled>
+                  {tx(locale, "Kies een dikte", "Choose a thickness")}
+                </option>
+              ) : null}
               {THICKNESSES.map((d) => (
                 <option key={d} value={String(d)}>
                   {dashMm(d)}
@@ -113,6 +131,11 @@ export function KantenCalc() {
               ))}
             </SelectInput>
           </Field>
+          {!supportedThickness ? (
+            <p id="kanten-thickness-error" className="text-sm text-muted" role="status">
+              {thicknessError}
+            </p>
+          ) : null}
           <Field label={tx(locale, "Materiaal", "Material")}>
             <SelectInput
               id="kanten-material"
@@ -288,6 +311,7 @@ export function KantenCalc() {
           row={row}
           kindValid={supportedKind != null}
           materialValid={supportedMaterial != null}
+          thicknessValid={supportedThickness}
         />
       </details>
 
@@ -319,7 +343,7 @@ export function KantenCalc() {
                 {THICKNESSES.map((rt) => {
                   const r = lookupKanten(rt, supportedMaterial, supportedKind);
                   return (
-                    <tr key={rt} className={rt === t ? "is-active" : ""}>
+                    <tr key={rt} className={supportedThickness && rt === t ? "is-active" : ""}>
                       <th scope="row">{dashMm(rt)}</th>
                       <td>
                         {dashMm(r?.ri ?? null)}
@@ -344,7 +368,7 @@ export function KantenCalc() {
         </section>
       ) : null}
 
-      {supportedKind && supportedMaterial ? (
+      {supportedThickness && supportedKind && supportedMaterial ? (
         <section className="mt-12">
           <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
             {tx(locale, "Doorsnede", "Section")}

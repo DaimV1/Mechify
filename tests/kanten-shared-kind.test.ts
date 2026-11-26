@@ -11,7 +11,7 @@ test("bending kind preserves present strings for explicit UI validation", () => 
   assert.equal(validate({ kind: 1 }).kind, undefined);
   assert.deepEqual(validate({ material: "bogus", t: "", k: "bad" }), {
     material: "bogus",
-    t: undefined,
+    t: "",
     k: undefined,
     kind: undefined,
   });
@@ -33,4 +33,13 @@ test("bending material preserves present strings without changing the missing de
   }
   assert.equal(validate({}).material, undefined);
   assert.equal(validate({ material: 1 }).material, undefined);
+});
+
+test("bending thickness retains raw strings for explicit supported-row selection", () => {
+  const validate = validators["/toolkit/kanten"];
+  for (const t of ["", "bogus", "constructor", "-1", "Infinity", "2", "2.00", "99"]) {
+    assert.equal(validate({ t }).t, t);
+  }
+  assert.equal(validate({}).t, undefined);
+  assert.equal(validate({ t: 2 }).t, undefined);
 });

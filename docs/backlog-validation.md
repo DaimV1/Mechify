@@ -257,7 +257,12 @@ from production deployment and from physical/CAD application validation.
 
 ## Bending-table material URL validation
 
-- Pending independent reviews/CI: present blank or unsupported material strings
+- Released in PR106 at `7bf23c49d5b7bd276399920acb1a6f9782e434ae` (tree
+  `2733e72fb76439c38242f3c978324c8e75ff306b`): both critics accepted the exact tree;
+  full CI 45753975891 (1560 browser tests passed, 10 skipped), post-merge CI
+  45762501254 and deployed smoke 45762581731 passed. Production deployment
+  `dpl_8RkuwcU7W21u5qWLvkVhJGhRi1wC` was READY and live revision matched.
+  Present blank or unsupported material strings
   persist with a placeholder and unique associated NL/EN correction; missing
   material retains staal. Query values and hash survive reload, locale changes
   and independent panel edits. All four supported materials remain available.
@@ -268,3 +273,17 @@ from production deployment and from physical/CAD application validation.
 - Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
   Selection sensitivity is not supplier certification. Manual AT/200–400% zoom,
   CAD runtime and source-audit gaps remain open.
+
+
+## Bending-table thickness URL validation
+
+- Pending independent reviews/CI: present blank and unsupported thickness values
+  persist through reload, locale changes and independent panel edits. Missing
+  thickness retains 2 mm; existing supported decimal aliases retain their raw URL.
+- A placeholder and associated NL/EN correction withhold thickness-dependent
+  selected results, math, copy/CAD, numeric section and clearance output until
+  recovery. The all-thickness table remains available for valid material/kind;
+  interruption percentage and supplementary free-angle calculations stay independent.
+- Formulas, data, defaults, tables, thresholds and source metadata are unchanged.
+  K-factor handling is separate. Manual AT/200–400% zoom, CAD runtime and source
+  audit gaps remain open; selection validation does not certify supplier data.
